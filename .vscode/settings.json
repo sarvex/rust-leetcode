@@ -1,0 +1,14 @@
+{
+  "workbench.colorCustomizations": {
+    "sash.hoverBorder": "#a7b3df",
+    "statusBar.background": "#8292d1",
+    "statusBar.border": "#8292d1",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#5d71c3",
+    "statusBarItem.remoteBackground": "#8292d1",
+    "statusBarItem.remoteForeground": "#15202b",
+    "tab.activeBorder": "#a7b3df"
+  },
+  "peacock.color": "#8292d1",
+  "cSpell.words": ["nums"]
+}
