@@ -29,7 +29,7 @@ impl Solution {
 
         let mut left = 0;
         let mut right = bytes.len() - 1;
-        
+
         // Local lambda function to check if a byte is a consonant (not a vowel)
         let is_consonant = |c: u8| -> bool {
             !matches!(c.to_ascii_lowercase(), b'a' | b'e' | b'i' | b'o' | b'u')
