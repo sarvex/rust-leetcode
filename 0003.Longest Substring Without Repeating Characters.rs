@@ -31,21 +31,21 @@ impl Solution {
         let mut window_start = 0;
         let chars: Vec<char> = s.chars().collect();
         let string_length = chars.len();
-        
+
         for (window_end, &current_char) in chars.iter().enumerate() {
             char_frequency[current_char as usize] += 1;
-            
+
             // Shrink window while we have a duplicate character
             while char_frequency[current_char as usize] > 1 {
                 let start_char = chars[window_start];
                 char_frequency[start_char as usize] -= 1;
                 window_start += 1;
             }
-            
+
             // Update maximum length found so far
             max_length = max_length.max((window_end - window_start + 1) as i32);
         }
-        
+
         max_length
     }
 }
