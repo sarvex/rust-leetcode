@@ -1,91 +1,58 @@
-/// Maximum Number of Robots Within Budget
-///
-/// # Intuition
-/// We need to find the longest consecutive sequence of robots whose total cost
-/// doesn't exceed the budget. The cost formula involves both max(chargeTimes)
-/// and sum(runningCosts), suggesting a sliding window approach with efficient
-/// maximum tracking.
-///
-/// # Approach
-/// Use a sliding window with a monotonic deque to efficiently track the maximum
-/// charge time within the current window:
-/// 1. Maintain a decreasing monotonic deque storing indices of charge times
-/// 2. The front of the deque always contains the index of the maximum element
-/// 3. Expand the window by adding elements from the right
-/// 4. Shrink the window from the left when cost exceeds budget
-/// 5. Track the maximum valid window size
-///
-/// # Complexity
-/// - Time: O(n) - each element is added and removed from deque at most once
-/// - Space: O(n) - for the monotonic deque in worst case
 use std::collections::VecDeque;
 
 impl Solution {
+    /// Maximum Number of Robots Within Budget
+    ///
+    /// # Intuition
+    /// Use sliding window where the window size is monotonically non-decreasing.
+    /// Instead of shrinking until valid, shrink by at most 1 per iteration.
+    /// The maximum valid window size is simply `n - left` at the end.
+    ///
+    /// # Approach
+    /// 1. Expand window by adding elements to the right
+    /// 2. Maintain monotonic decreasing deque for maximum charge_time
+    /// 3. If cost exceeds budget, shrink window by exactly 1 from left
+    /// 4. Window size never decreases, final answer is `n - left`
+    ///
+    /// # Complexity
+    /// - Time: O(n) - single pass, each element enters/leaves deque once
+    /// - Space: O(n) - for monotonic deque
     pub fn maximum_robots(charge_times: Vec<i32>, running_costs: Vec<i32>, budget: i64) -> i32 {
-        let n = charge_times.len();
-        let mut max_robots = 0;
-        let mut running_sum: i64 = 0;
-        let mut left = 0;
-
-        // Monotonic deque storing indices, maintains decreasing order of charge_times
-        let mut deque: VecDeque<usize> = VecDeque::new();
+        let n = running_costs.len();
+        let mut sum: i64 = 0;
+        let mut left = 0usize;
+        let mut deque = VecDeque::new();
 
         for right in 0..n {
-            // Add current running cost to sum
-            running_sum += running_costs[right] as i64;
+            sum += running_costs[right] as i64;
 
-            // Maintain monotonic decreasing deque for charge_times
-            while let Some(&back_idx) = deque.back() {
-                if charge_times[back_idx] <= charge_times[right] {
-                    deque.pop_back();
-                } else {
-                    break;
-                }
+            // Maintain monotonic decreasing deque for maximum
+            while !deque.is_empty() && charge_times[*deque.back().unwrap()] <= charge_times[right] {
+                deque.pop_back();
             }
             deque.push_back(right);
 
-            // Calculate current window cost
-            // cost = max(charge_times) + k * sum(running_costs)
-            let window_size = (right - left + 1) as i64;
+            // If cost exceeds budget, shrink window by 1
             let max_charge = charge_times[*deque.front().unwrap()] as i64;
-            let mut total_cost = max_charge + window_size * running_sum;
-
-            // Shrink window from left while cost exceeds budget
-            while total_cost > budget && left <= right {
-                // Remove left element from running sum
-                running_sum -= running_costs[left] as i64;
-
-                // Remove left index from deque if it's the front
-                if let Some(&front_idx) = deque.front() {
-                    if front_idx == left {
-                        deque.pop_front();
-                    }
+            let k = (right - left + 1) as i64;
+            if max_charge + k * sum > budget {
+                if deque.front() == Some(&left) {
+                    deque.pop_front();
                 }
-
+                sum -= running_costs[left] as i64;
                 left += 1;
-
-                // Recalculate cost if window is non-empty
-                if left <= right {
-                    let window_size = (right - left + 1) as i64;
-                    let max_charge = charge_times[*deque.front().unwrap()] as i64;
-                    total_cost = max_charge + window_size * running_sum;
-                }
-            }
-
-            // Update maximum robots if window is valid
-            if left <= right {
-                let current_size = right - left + 1;
-                max_robots = max_robots.max(current_size);
             }
         }
 
-        max_robots as i32
+        (n - left) as i32
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    struct Solution;
 
     #[test]
     fn test_example_1() {
@@ -174,6 +141,26 @@ mod tests {
             3
         );
     }
-}
 
-struct Solution;
+    #[test]
+    fn test_empty_input() {
+        let charge_times: Vec<i32> = vec![];
+        let running_costs: Vec<i32> = vec![];
+        let budget = 100;
+        assert_eq!(
+            Solution::maximum_robots(charge_times, running_costs, budget),
+            0
+        );
+    }
+
+    #[test]
+    fn test_tight_budget() {
+        let charge_times = vec![1, 2, 3, 4, 5];
+        let running_costs = vec![1, 2, 3, 4, 5];
+        let budget = 7;
+        assert_eq!(
+            Solution::maximum_robots(charge_times, running_costs, budget),
+            2
+        );
+    }
+}
