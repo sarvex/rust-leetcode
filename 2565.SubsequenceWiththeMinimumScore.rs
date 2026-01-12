@@ -1,21 +1,21 @@
-/// Subsequence With the Minimum Score
-///
-/// # Intuition
-/// When removing a contiguous segment from t, we keep a prefix and suffix.
-/// The key is finding which prefix of t matches a prefix of s, and which
-/// suffix of t matches a suffix of s, without overlap in s.
-///
-/// # Approach
-/// 1. Precompute suffix array: for each j, find minimum index in s from which
-///    t[j..] can be matched as a subsequence (greedy right-to-left matching)
-/// 2. Two-pointer technique: for each prefix length i, find minimum j >= i
-///    such that the prefix ends in s before the suffix starts
-/// 3. Track minimum score (j - i) across all valid combinations
-///
-/// # Complexity
-/// - Time: O(n + m) - single pass for suffix, two-pointer for main logic
-/// - Space: O(n + m) - character vectors and suffix array
 impl Solution {
+    /// Subsequence With the Minimum Score
+    ///
+    /// # Intuition
+    /// When removing a contiguous segment from t, we keep a prefix and suffix.
+    /// The key is finding which prefix of t matches a prefix of s, and which
+    /// suffix of t matches a suffix of s, without overlap in s.
+    ///
+    /// # Approach
+    /// 1. Precompute suffix array: for each j, find minimum index in s from which
+    ///    t[j..] can be matched as a subsequence (greedy right-to-left matching)
+    /// 2. Two-pointer technique: for each prefix length i, find minimum j >= i
+    ///    such that the prefix ends in s before the suffix starts
+    /// 3. Track minimum score (j - i) across all valid combinations
+    ///
+    /// # Complexity
+    /// - Time: O(n + m) - single pass for suffix, two-pointer for main logic
+    /// - Space: O(n + m) - character vectors and suffix array
     pub fn minimum_score(s: String, t: String) -> i32 {
         let s: Vec<char> = s.chars().collect();
         let t: Vec<char> = t.chars().collect();
