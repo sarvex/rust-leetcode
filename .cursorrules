@@ -1,4 +1,4 @@
-# Rust .windsurf Rules
+# Rust copilot Rules
 
 This rules file defines standards for highly performant Rust development, adhering to idiomatic Rust patterns, industry best practices, clean architecture principles, and self-documenting code conventions.
 
@@ -57,7 +57,7 @@ This rules file defines standards for highly performant Rust development, adheri
 
 - Document all public items with doc comments (`///` or `//!`)
 - For public functions include:
-  - Tagline describing the approach of the solution as first section
+  - Brief description as first section
   - #intuition - first thoughts on how to solve the problem as second section
   - #approach - approach to solving the problem as third section
   - #complexity - separate lines for time and space complexity as fourth section
@@ -69,7 +69,7 @@ This rules file defines standards for highly performant Rust development, adheri
 
 ### Code Documentation
 
-- Write self-documenting code with descriptive variable and function names and minimal comments
+- Write self-documenting code with clear variable and function names
 - Document complex algorithms with high-level explanations
 - Use doc comments to explain "why" decisions were made
 - Document safety requirements for `unsafe` code blocks

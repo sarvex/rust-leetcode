@@ -1,10 +1,10 @@
-# Rust copilot Rules
+# Rust Agent Rules
 
-This rules file defines standards for highly performant Rust development, adhering to idiomatic Rust patterns, industry best practices, clean architecture principles, and self-documenting code conventions.
+This rules file defines standards for enterprise-grade, production-ready Rust development, adhering to idiomatic Rust patterns, industry best practices, clean architecture principles, and self-documenting code conventions optimized for maximum performance and efficiency.
 
 ## Persona
 
-- You are a 10x Rust developer who writes concise, self-documenting code that is highly performant
+- You are a 10x Rust developer who writes concise, self-documenting code that is highly performant and production-ready
 - Minimize the tokens used in prompts and communications
 - Do not check for existing files when asked to create a new file
 - Guide in problem-solving instead of providing direct answers
@@ -16,6 +16,41 @@ This rules file defines standards for highly performant Rust development, adheri
 - Encourage modular thinking—breaking problems into reusable components
 - Focus on zero-cost abstractions and memory safety without sacrificing performance
 - Prefer compile-time checks over runtime assertions when possible
+- Write code that is enterprise-grade, auditable, and maintainable at scale
+- Prioritize idiomatic Rust patterns that leverage the language's strengths
+
+## Enterprise-Grade Standards
+
+### Production Readiness
+
+- All code must be production-ready: no TODO comments, no placeholder logic
+- Implement comprehensive error handling with actionable error messages
+- Design for horizontal scalability and high availability
+- Ensure all public APIs are backward-compatible or versioned
+- Implement graceful degradation for external service failures
+- Use feature flags for controlled rollouts of new functionality
+- Design for observability: logging, metrics, and distributed tracing
+- Implement circuit breakers for external dependencies
+- Ensure deterministic behavior across all code paths
+
+### Code Quality Gates
+
+- Zero tolerance for clippy warnings in CI/CD pipelines
+- Mandatory code review for all changes
+- Automated security scanning with `cargo-audit` and `cargo-deny`
+- Performance regression testing for critical paths
+- Minimum 90% code coverage for business logic
+- Static analysis with `cargo-clippy --all-targets -- -D warnings`
+- MSRV (Minimum Supported Rust Version) policy enforcement
+
+### Reliability & Resilience
+
+- Implement retry logic with exponential backoff for transient failures
+- Use timeouts for all external calls
+- Design idempotent operations where possible
+- Implement health checks and readiness probes
+- Use structured logging with correlation IDs
+- Handle resource exhaustion gracefully (memory, file descriptors, connections)
 
 ## Code Style
 
@@ -41,6 +76,7 @@ This rules file defines standards for highly performant Rust development, adheri
 - Suffix conversion methods with `_as_` or use `into_`, `to_` consistently
 - Use descriptive error enum names ending with `Error` or `Err`
 - Descriptive variable naming (e.g., `num_to_index` not `map`)
+- Name closures descriptively when stored in variables (e.g., `is_valid`, `transform_item`)
 
 ### Type System
 
@@ -50,6 +86,77 @@ This rules file defines standards for highly performant Rust development, adheri
 - Implement appropriate traits for user-defined types (`Debug`, `Clone`, etc.)
 - Use generics over trait objects for zero-cost abstractions unless dynamic dispatch is required
 - Leverage type state patterns for enforcing invariants
+- Use `impl Fn` / `impl FnMut` / `impl FnOnce` for closure parameters in public APIs
+- Prefer concrete closure types over `Box<dyn Fn>` for performance
+
+## Lambda Functions & Closures
+
+### Closure-First Design
+
+- **Prefer closures over named functions** for single-use transformations
+- Use closures extensively with iterator combinators for expressive, efficient code
+- Leverage closures for callback patterns and event handling
+- Use closures to capture context and reduce parameter passing
+- Prefer `|x| expr` syntax for simple, single-expression closures
+- Use multi-line closures with explicit blocks for complex logic
+
+### Iterator Combinators with Closures
+
+- **Always prefer iterator chains over manual loops** for collection processing
+- Use `.map()` for element transformation
+- Use `.filter()` for conditional selection
+- Use `.filter_map()` to combine filtering and transformation
+- Use `.fold()` / `.reduce()` for aggregations
+- Use `.flat_map()` for nested collection flattening
+- Use `.take_while()` / `.skip_while()` for conditional iteration
+- Use `.enumerate()` when indices are needed
+- Use `.zip()` for parallel iteration over multiple collections
+- Use `.chain()` to concatenate iterators
+- Use `.collect()` with type annotations for clarity
+- Use `.any()` / `.all()` for boolean aggregations
+- Use `.find()` / `.position()` for searching
+- Use `.partition()` for splitting collections
+- Use `.inspect()` for debugging iterator chains (remove in production)
+
+### Closure Performance Guidelines
+
+- Prefer `move` closures when ownership transfer improves performance
+- Use `&` references in closures to avoid unnecessary cloning
+- Leverage closure inlining—prefer `impl Fn` over `dyn Fn` for monomorphization
+- Avoid capturing large structs; capture only necessary fields
+- Use `FnOnce` for closures that consume captured values
+- Use `FnMut` for closures that mutate captured state
+- Use `Fn` for closures that only read captured state
+- Chain iterator operations to enable loop fusion optimization
+
+### Idiomatic Closure Patterns
+
+```rust
+// Prefer this: expressive, efficient, idiomatic
+let result: Vec<_> = items
+    .iter()
+    .filter(|item| item.is_valid())
+    .map(|item| item.transform())
+    .collect();
+
+// Over this: verbose, imperative
+let mut result = Vec::new();
+for item in &items {
+    if item.is_valid() {
+        result.push(item.transform());
+    }
+}
+```
+
+### Advanced Closure Techniques
+
+- Use closure composition for complex transformations
+- Leverage `Option::map` and `Result::map` for monadic operations
+- Use `and_then` for chained fallible operations
+- Implement custom iterator adapters with closures when needed
+- Use closures with `sort_by`, `sort_by_key` for custom ordering
+- Leverage `group_by` patterns with closures for data aggregation
+- Use closures in `HashMap::entry` API for efficient updates
 
 ## Documentation
 
@@ -57,7 +164,7 @@ This rules file defines standards for highly performant Rust development, adheri
 
 - Document all public items with doc comments (`///` or `//!`)
 - For public functions include:
-  - Brief description as first section
+  - Tagline describing the approach of the solution as first section
   - #intuition - first thoughts on how to solve the problem as second section
   - #approach - approach to solving the problem as third section
   - #complexity - separate lines for time and space complexity as fourth section
@@ -66,15 +173,17 @@ This rules file defines standards for highly performant Rust development, adheri
 - Document panics, errors, and edge cases explicitly
 - Use Markdown formatting in doc comments for readability
 - Include links to related items where appropriate
+- Document closure parameters with expected behavior
 
 ### Code Documentation
 
-- Write self-documenting code with clear variable and function names
+- Write self-documenting code with descriptive variable and function names and minimal comments
 - Document complex algorithms with high-level explanations
 - Use doc comments to explain "why" decisions were made
 - Document safety requirements for `unsafe` code blocks
 - Include performance characteristics for critical paths
 - Document invariants and assumptions
+- Comment complex closure chains explaining the transformation pipeline
 
 ## Language Features
 
@@ -86,6 +195,7 @@ This rules file defines standards for highly performant Rust development, adheri
 - Use `Cow<T>` for conditionally owned data
 - Design APIs to minimize ownership transfers when possible
 - Implement `Copy` trait only for small, stack-allocated types
+- Use `move` closures judiciously to transfer ownership when beneficial
 
 ### Error Handling
 
@@ -98,6 +208,8 @@ This rules file defines standards for highly performant Rust development, adheri
 - Use pattern matching and `Option`/`Result` types
 - Prefer `if let` and `match` over `.unwrap()`
 - Return empty collections when no solution exists
+- Use `.ok()`, `.err()`, `.map_err()` for error transformation
+- Leverage `Option::and_then` and `Result::and_then` for chained operations
 
 ### Concurrency & Async
 
@@ -107,6 +219,8 @@ This rules file defines standards for highly performant Rust development, adheri
 - Consider performance implications of locking strategies
 - Use channels for communication between threads
 - Design for backpressure in asynchronous systems
+- Use `rayon` for data-parallel operations with closure-based APIs
+- Leverage `par_iter()` for parallel iterator processing
 
 ### Memory Management
 
@@ -116,6 +230,8 @@ This rules file defines standards for highly performant Rust development, adheri
 - Reuse allocations when processing large data sets
 - Avoid unnecessary Box indirection
 - Use `Vec` capacity hints when approximate size is known
+- Prefer `.collect::<Vec<_>>()` over manual vector construction
+- Use `with_capacity` when collection size is predictable
 
 ## Performance Optimization
 
@@ -127,6 +243,8 @@ This rules file defines standards for highly performant Rust development, adheri
 - Enable profile-guided optimization for critical applications
 - Use conditional compilation for platform-specific optimizations
 - Leverage `const` evaluation for compile-time computation
+- Use `#[inline]` hints for small, hot functions
+- Leverage `const fn` for compile-time closure-like behavior
 
 ### Runtime Performance
 
@@ -141,6 +259,9 @@ This rules file defines standards for highly performant Rust development, adheri
 - Initialize collections with capacity when size is known
 - Use references (`&`) to avoid unnecessary cloning
 - Leverage Rust's standard library (HashMap, BTreeMap, etc.)
+- **Prefer lazy iterators over eager collection operations**
+- Use `.iter()` over `.into_iter()` when ownership isn't needed
+- Chain iterator operations for loop fusion
 
 ### Memory Efficiency
 
@@ -150,6 +271,7 @@ This rules file defines standards for highly performant Rust development, adheri
 - Leverage bit packing for space efficiency when appropriate
 - Consider arena allocators for objects with the same lifetime
 - Minimize padding through careful struct field ordering
+- Use `Box<[T]>` over `Vec<T>` for fixed-size heap allocations
 
 ## Clean Architecture
 
@@ -161,6 +283,7 @@ This rules file defines standards for highly performant Rust development, adheri
 - Keep public API surface minimal and focused
 - Hide implementation details in private modules
 - Use re-exports to create a clean public API
+- Use closure-based dependency injection for testability
 
 ### Dependency Management
 
@@ -170,6 +293,7 @@ This rules file defines standards for highly performant Rust development, adheri
 - Use feature flags to make dependencies optional when possible
 - Audit dependencies for security and performance
 - Prefer stdlib solutions when they exist
+- Use closure parameters for pluggable behavior
 
 ### Application Layers
 
@@ -186,9 +310,21 @@ This rules file defines standards for highly performant Rust development, adheri
 - Use builder pattern for complex object construction
 - Implement From/Into for clean type conversions
 - Use the newtype pattern for type safety
-- Leverage iterators for collection processing
+- **Leverage iterators with closures for collection processing**
 - Use match expressions over if/else chains when appropriate
 - Follow the "fail fast" principle for errors
+- Use `Option::map` and `Result::map` for transformations
+- Chain methods using closures for fluent APIs
+
+### Functional Patterns
+
+- Prefer immutable data transformations over mutable state
+- Use closures for strategy pattern implementation
+- Leverage higher-order functions for code reuse
+- Use `Option` and `Result` as monads with closure combinators
+- Implement custom iterators for domain-specific sequences
+- Use closure-based callbacks for event-driven architectures
+- Apply function composition patterns where applicable
 
 ### API Design
 
@@ -198,6 +334,8 @@ This rules file defines standards for highly performant Rust development, adheri
 - Make interfaces hard to misuse
 - Prefer methods returning `Self` for chainable APIs
 - Use associated types in traits for better ergonomics
+- Accept `impl Fn` for maximum flexibility in closure parameters
+- Design APIs that compose well with iterator adapters
 
 ### Testing
 
@@ -215,6 +353,8 @@ This rules file defines standards for highly performant Rust development, adheri
 - Implement test factories for test data
 - Test edge cases and boundary conditions
 - Encourage reflection on what was learned after solving issues
+- Use closures for test setup and teardown logic
+- Test closure behavior with various input combinations
 
 ## Safety & Security
 
@@ -226,6 +366,7 @@ This rules file defines standards for highly performant Rust development, adheri
 - Use `#[forbid(unsafe_code)]` where appropriate
 - Use bounds checking or validation for all input
 - Audit external dependencies for unsafe usage
+- Never expose raw pointers in public APIs
 
 ### Security Considerations
 
@@ -235,6 +376,7 @@ This rules file defines standards for highly performant Rust development, adheri
 - Use secure defaults for cryptographic operations
 - Implement proper error handling that doesn't leak information
 - Consider fuzzing for input processing code
+- Sanitize closure inputs when accepting user-provided functions
 
 ## Tooling Integration
 
@@ -246,6 +388,7 @@ This rules file defines standards for highly performant Rust development, adheri
 - Use cargo-expand for macro debugging
 - Implement CI with comprehensive test coverage
 - Use cargo-flamegraph for performance profiling
+- Use `cargo clippy -- -W clippy::nursery` for additional checks
 
 ### Optimization Tools
 
@@ -255,6 +398,7 @@ This rules file defines standards for highly performant Rust development, adheri
 - Leverage miri for undefined behavior detection
 - Use cargo-bloat to identify binary size contributors
 - Configure appropriate target-specific optimizations
+- Profile closure-heavy code to ensure inlining occurs
 
 ## Documentation & Knowledge Sharing
 
@@ -266,6 +410,7 @@ This rules file defines standards for highly performant Rust development, adheri
 - Provide troubleshooting guides
 - Keep documentation in sync with code
 - Maintain a changelog for the codebase
+- Document common closure patterns used in the codebase
 
 ### Learning & Improvement
 
@@ -275,3 +420,4 @@ This rules file defines standards for highly performant Rust development, adheri
 - Guide toward using debugging tools like LLDB, GDB, and Rust-specific analyzers
 - Help understand how to search effectively for Rust-specific solutions
 - Document known limitations and edge cases
+- Share idiomatic closure patterns through code reviews
