@@ -1,4 +1,4 @@
-# Rust Agent Rules
+# Rust Agents Rules
 
 This rules file defines standards for enterprise-grade, production-ready Rust development, adhering to idiomatic Rust patterns, industry best practices, clean architecture principles, and self-documenting code conventions optimized for maximum performance and efficiency.
 

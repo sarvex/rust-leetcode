@@ -1,4 +1,4 @@
-# Rust Cursor Rules
+# Rust Agent Rules
 
 This rules file defines standards for highly performant Rust development, adhering to idiomatic Rust patterns, industry best practices, clean architecture principles, and self-documenting code conventions.
 
