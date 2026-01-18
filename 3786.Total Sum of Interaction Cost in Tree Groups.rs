@@ -14,7 +14,7 @@ impl Solution {
     /// # Complexity
     /// - Time: O(n + sum of group sizes) amortized
     /// - Space: O(n) for tree structure and counts
-    pub fn interaction_costs(n: i32, edges: Vec<Vec<i32>>, group: Vec<i32>) -> i64 {
+    pub fn max_subgraph_score(n: i32, edges: Vec<Vec<i32>>, group: Vec<i32>) -> i64 {
         let n = n as usize;
 
         if n <= 1 {
