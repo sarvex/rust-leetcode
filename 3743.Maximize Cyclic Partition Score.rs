@@ -1,165 +1,87 @@
 struct Solution;
 
 impl Solution {
-    /// Dynamic programming solution for maximizing cyclic partition score
+    /// Linear DP with array rotation for maximizing cyclic partition score
     ///
     /// # Intuition
-    /// Handle cyclic partitioning by separating into two cases: linear partition
-    /// (first/last in different partitions) and wrap-around (first/last in same partition).
+    /// Rotate the array starting from the maximum element to handle cyclic nature.
+    /// Solve both forward and backward rotations, taking the best result.
     ///
     /// # Approach
-    /// 1. Precompute ranges for all linear subarrays in O(n²)
-    /// 2. Use segment-based DP with efficient memory reuse
-    /// 3. Track best scores incrementally to avoid redundant computation
-    /// 4. Case 2: Use precomputed interval best scores with O(1) lookup
+    /// 1. Find max element index and create forward/backward rotations
+    /// 2. For each rotation, use linear DP tracking (max - min) ranges per segment
+    /// 3. Track best score using first j elements, incrementally add segments
     ///
     /// # Complexity
-    /// - Time complexity: O(n² × k)
-    /// - Space complexity: O(n² + nk) for range cache and DP
+    /// - Time complexity: O(n × k)
+    /// - Space complexity: O(n)
     pub fn maximum_score(nums: Vec<i32>, k: i32) -> i64 {
-        let n = nums.len();
-        let k = k.min(n as i32) as usize;
+        let length = nums.len();
+        let partition_count = (k as usize).min(length);
 
-        if n == 1 {
-            return 0;
-        }
+        let max_element_index = (0..length)
+            .max_by_key(|&index| nums[index])
+            .unwrap_or(0);
 
-        // Precompute: range_val[i][j] = max - min of nums[i..=j]
-        let mut range_val = vec![vec![0i64; n]; n];
-        for i in 0..n {
-            let mut min_val = nums[i] as i64;
-            let mut max_val = min_val;
-            for j in i..n {
-                let val = nums[j] as i64;
-                min_val = min_val.min(val);
-                max_val = max_val.max(val);
-                range_val[i][j] = max_val - min_val;
+        let forward_rotation: Vec<i64> = (0..length)
+            .map(|index| nums[(max_element_index + index) % length] as i64)
+            .collect();
+
+        let backward_rotation: Vec<i64> = (0..length)
+            .map(|index| nums[(max_element_index + 1 + index) % length] as i64)
+            .rev()
+            .collect();
+
+        fn solve_linear(arr: &[i64], partition_count: usize) -> i64 {
+            const NEG_INFINITY: i64 = i64::MIN / 4;
+            let length = arr.len();
+
+            let mut current_dp = vec![NEG_INFINITY; length + 1];
+            let mut next_dp = vec![NEG_INFINITY; length + 1];
+
+            let mut running_min = i64::MAX;
+            let mut running_max = i64::MIN;
+            for index in 0..length {
+                let value = arr[index];
+                running_min = running_min.min(value);
+                running_max = running_max.max(value);
+                current_dp[index + 1] = running_max - running_min;
             }
-        }
 
-        // best_km1[l][r] = max score for [l,r] with at most k-1 partitions
-        let mut best_km1 = vec![vec![0i64; n]; n];
+            let mut result = current_dp[length];
 
-        // For Case 1: Linear DP for [0, n-1]
-        // dp[i][p] = max score for nums[0..i] with exactly p partitions
-        let mut dp_linear = vec![vec![i64::MIN; k + 1]; n + 1];
-        dp_linear[0][0] = 0;
+            for segment in 1..partition_count {
+                next_dp.fill(NEG_INFINITY);
 
-        for i in 1..=n {
-            for p in 1..=k.min(i) {
-                for m in (p - 1)..i {
-                    if dp_linear[m][p - 1] != i64::MIN {
-                        let score = dp_linear[m][p - 1] + range_val[m][i - 1];
-                        if score > dp_linear[i][p] {
-                            dp_linear[i][p] = score;
-                        }
-                    }
-                }
-            }
-        }
+                let mut best_minus_value = NEG_INFINITY;
+                let mut best_plus_value = NEG_INFINITY;
+                let mut best_score = NEG_INFINITY;
 
-        let mut best = 0i64;
-        for p in 1..=k {
-            if dp_linear[n][p] > best {
-                best = dp_linear[n][p];
-            }
-        }
+                for position in segment..length {
+                    let current_value = arr[position];
+                    let previous_score = current_dp[position];
 
-        // For Case 2: Compute best_km1 for all intervals [l, r] where 1 <= l <= n-2
-        // These are the possible middle segments in wrap-around configurations
-        if k >= 2 {
-            let km1 = k - 1;
+                    best_minus_value = best_minus_value.max(previous_score - current_value);
+                    best_plus_value = best_plus_value.max(previous_score + current_value);
 
-            for l in 1..n - 1 {
-                let max_len = n - 1 - l; // Maximum right endpoint is n-2
-                if max_len == 0 {
-                    continue;
+                    let candidate_score = (best_minus_value + current_value)
+                        .max(best_plus_value - current_value)
+                        .max(best_score);
+
+                    next_dp[position + 1] = candidate_score;
+                    best_score = candidate_score;
                 }
 
-                let max_p = km1.min(max_len + 1);
-                if max_p == 0 {
-                    continue;
-                }
-
-                // dp[r_offset][p] = max score for [l, l+r_offset] with p partitions
-                let mut dp = vec![vec![i64::MIN; max_p + 1]; max_len + 1];
-                dp[0][1] = 0;
-                best_km1[l][l] = 0;
-
-                for r_offset in 1..=max_len {
-                    let r = l + r_offset;
-                    let len = r_offset + 1;
-                    let curr_max_p = max_p.min(len);
-
-                    dp[r_offset][1] = range_val[l][r];
-
-                    for p in 2..=curr_max_p {
-                        for m_offset in (p - 2)..r_offset {
-                            if dp[m_offset][p - 1] != i64::MIN {
-                                let score = dp[m_offset][p - 1] + range_val[l + m_offset + 1][r];
-                                if score > dp[r_offset][p] {
-                                    dp[r_offset][p] = score;
-                                }
-                            }
-                        }
-                    }
-
-                    let mut best_score = 0i64;
-                    for p in 1..=curr_max_p {
-                        if dp[r_offset][p] > best_score {
-                            best_score = dp[r_offset][p];
-                        }
-                    }
-                    best_km1[l][r] = best_score;
-                }
+                std::mem::swap(&mut current_dp, &mut next_dp);
+                result = result.max(current_dp[length]);
             }
 
-            // Precompute prefix/suffix min/max for wrap-around range computation
-            let mut prefix_min = vec![0i64; n];
-            let mut prefix_max = vec![0i64; n];
-            prefix_min[0] = nums[0] as i64;
-            prefix_max[0] = nums[0] as i64;
-            for i in 1..n {
-                prefix_min[i] = prefix_min[i - 1].min(nums[i] as i64);
-                prefix_max[i] = prefix_max[i - 1].max(nums[i] as i64);
-            }
-
-            let mut suffix_min = vec![0i64; n];
-            let mut suffix_max = vec![0i64; n];
-            suffix_min[n - 1] = nums[n - 1] as i64;
-            suffix_max[n - 1] = nums[n - 1] as i64;
-            for i in (0..n - 1).rev() {
-                suffix_min[i] = suffix_min[i + 1].min(nums[i] as i64);
-                suffix_max[i] = suffix_max[i + 1].max(nums[i] as i64);
-            }
-
-            // Try all wrap-around configurations
-            for wrap_end in 0..n - 1 {
-                let p_min = prefix_min[wrap_end];
-                let p_max = prefix_max[wrap_end];
-
-                for wrap_start in wrap_end + 2..n {
-                    let wrap_min = p_min.min(suffix_min[wrap_start]);
-                    let wrap_max = p_max.max(suffix_max[wrap_start]);
-                    let wrap_range = wrap_max - wrap_min;
-
-                    let mid_l = wrap_end + 1;
-                    let mid_r = wrap_start - 1;
-
-                    let score = if mid_l <= mid_r {
-                        wrap_range + best_km1[mid_l][mid_r]
-                    } else {
-                        wrap_range
-                    };
-
-                    if score > best {
-                        best = score;
-                    }
-                }
-            }
+            result
         }
 
-        best
+        let forward_score = solve_linear(&forward_rotation, partition_count);
+        let backward_score = solve_linear(&backward_rotation, partition_count);
+        forward_score.max(backward_score)
     }
 }
 
@@ -255,5 +177,24 @@ mod tests {
         let k = 95;
         let result = Solution::maximum_score(nums, k);
         assert_eq!(result, 5848);
+    }
+
+    #[test]
+    fn test_large_case_2() {
+        let nums = vec![
+            135, 195, 110, 67, 87, 168, 145, 5, 105, 9, 74, 152, 117, 177, 107, 184, 61, 34, 30,
+            192, 63, 193, 102, 34, 67, 145, 136, 180, 122, 190, 49, 69, 80, 54, 58, 129, 93, 167,
+            200, 61, 12, 188, 158, 78, 80, 154, 126, 138, 76, 141, 102, 108, 91, 32, 1, 190, 33, 89,
+            25, 171, 24, 56, 69, 186, 111, 153, 126, 10, 164, 105, 4, 188, 96, 24, 118, 179, 73, 50,
+            86, 119, 102, 127, 4, 66, 94, 32, 123, 84, 155, 75, 193, 159, 52, 147, 57, 155, 17, 49,
+            87, 67, 3, 57, 122, 106, 112, 87, 134, 188, 35, 127, 195, 36, 20, 164, 133, 178, 149,
+            65, 177, 51, 189, 90, 84, 73, 22, 106, 137, 23, 129, 165, 105, 60, 65, 42, 35, 61, 48,
+            25, 60, 73, 66, 10, 144, 26, 105, 73, 158, 158, 84, 200, 27, 17, 102, 186, 20, 138, 43,
+            170, 6, 171, 124, 158, 57, 48, 110, 109, 74, 153, 100, 112, 125, 22, 36, 73, 18, 30,
+            116, 113,
+        ];
+        let k = 108;
+        let result = Solution::maximum_score(nums, k);
+        assert!(result > 0);
     }
 }
