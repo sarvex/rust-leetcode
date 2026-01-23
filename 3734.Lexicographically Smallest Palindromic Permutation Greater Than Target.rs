@@ -2,25 +2,22 @@ impl Solution {
     /// Lexicographically Smallest Palindromic Permutation Greater Than Target
     ///
     /// # Intuition
-    /// A palindrome is determined by its first half. We need to find the smallest
-    /// palindromic permutation of s that is strictly greater than target. We work
-    /// with the first half of the palindrome and find the next permutation.
+    /// A palindrome is fully determined by its first half (plus optional middle).
+    /// We need the smallest half permutation that yields a palindrome > target.
     ///
     /// # Approach
-    /// 1. Count character frequencies in s. For a palindrome, at most one char can
-    ///    have odd frequency (for odd-length strings).
-    /// 2. If more than one char has odd frequency, no palindrome exists.
-    /// 3. Build the first half using half of each character's count (sorted).
-    /// 4. Extract the first half of target.
-    /// 5. Find the next permutation of our half that is greater than target's half.
-    /// 6. Reconstruct the full palindrome from the resulting half.
+    /// 1. Count frequencies, extract half chars and optional middle char.
+    /// 2. Use recursive search: at each position, try chars in order.
+    /// 3. If we place a char > target[pos], fill rest with smallest chars.
+    /// 4. If we place target[pos], recurse to find valid continuation.
+    /// 5. After recursion fails, try larger chars at current position.
     ///
     /// # Complexity
-    /// - Time: O(n)
+    /// - Time: O(n * 26)
     /// - Space: O(n)
     pub fn lex_palindromic_permutation(s: String, target: String) -> String {
         let n = s.len();
-        let mut freq = [0u32; 26];
+        let mut freq = [0i32; 26];
 
         for b in s.bytes() {
             freq[(b - b'a') as usize] += 1;
@@ -32,22 +29,20 @@ impl Solution {
         }
 
         let mut mid_char: Option<u8> = None;
-        let mut half: Vec<u8> = Vec::with_capacity(n / 2);
+        let mut half_freq = [0i32; 26];
 
-        for (i, &count) in freq.iter().enumerate() {
-            let ch = b'a' + i as u8;
-            if count % 2 == 1 {
-                mid_char = Some(ch);
+        for i in 0..26 {
+            if freq[i] % 2 == 1 {
+                mid_char = Some(b'a' + i as u8);
             }
-            for _ in 0..count / 2 {
-                half.push(ch);
-            }
+            half_freq[i] = freq[i] / 2;
         }
 
+        let half_len = n / 2;
         let target_bytes: Vec<u8> = target.bytes().collect();
 
-        if let Some(result) = Self::find_next(&half, mid_char, &target_bytes) {
-            return String::from_utf8(result).unwrap();
+        if let Some(half) = Self::find_next_half(&half_freq, half_len, &target_bytes, mid_char) {
+            return String::from_utf8(Self::build_palindrome(&half, mid_char)).unwrap();
         }
 
         String::new()
@@ -62,90 +57,72 @@ impl Solution {
         result
     }
 
-    fn find_next(half: &[u8], mid: Option<u8>, target: &[u8]) -> Option<Vec<u8>> {
-        let len = half.len();
+    fn find_next_half(
+        half_freq: &[i32; 26],
+        half_len: usize,
+        target: &[u8],
+        mid: Option<u8>,
+    ) -> Option<Vec<u8>> {
+        let mut current = vec![0u8; half_len];
+        let mut freq = *half_freq;
 
-        // Build smallest palindrome and check if it's already greater
-        let smallest = Self::build_palindrome(half, mid);
-        if smallest.as_slice() > target {
-            return Some(smallest);
+        Self::solve(&mut current, 0, &mut freq, target, mid)
+    }
+
+    fn solve(
+        current: &mut Vec<u8>,
+        pos: usize,
+        freq: &mut [i32; 26],
+        target: &[u8],
+        mid: Option<u8>,
+    ) -> Option<Vec<u8>> {
+        let half_len = current.len();
+
+        if pos == half_len {
+            let palindrome = Self::build_palindrome(current, mid);
+            if palindrome.as_slice() > target {
+                return Some(current.clone());
+            }
+            return None;
         }
 
-        // Try to find next permutation of half that makes palindrome > target
-        let mut current = half.to_vec();
+        let target_char = target[pos];
 
-        // For odd length, check if matching first half but with mid char makes it greater
-        if len == 0 {
-            // Single character palindrome - only option is the mid char
-            return None; // Already checked above with smallest
+        // First, try placing target[pos] and recurse (to find smallest valid)
+        let target_idx = (target_char - b'a') as usize;
+        if freq[target_idx] > 0 {
+            freq[target_idx] -= 1;
+            current[pos] = target_char;
+
+            if let Some(result) = Self::solve(current, pos + 1, freq, target, mid) {
+                freq[target_idx] += 1;
+                return Some(result);
+            }
+
+            freq[target_idx] += 1;
         }
 
-        let target_half = &target[..len];
+        // Then, try chars greater than target[pos], filling rest with smallest
+        for c in (target_char + 1)..=b'z' {
+            let idx = (c - b'a') as usize;
+            if freq[idx] > 0 {
+                freq[idx] -= 1;
+                current[pos] = c;
 
-        // Try positions from right to left
-        for i in (0..len).rev() {
-            // Collect available chars from position i onwards
-            let mut avail = [0u32; 26];
-            for j in i..len {
-                avail[(current[j] - b'a') as usize] += 1;
-            }
-
-            let target_ch = target_half[i];
-
-            // Try each char greater than target[i]
-            for c in (target_ch + 1)..=b'z' {
-                let idx = (c - b'a') as usize;
-                if avail[idx] > 0 {
-                    avail[idx] -= 1;
-                    current[i] = c;
-
-                    // Fill remaining with smallest available
-                    let mut pos = i + 1;
-                    for ch_idx in 0..26 {
-                        let ch = b'a' + ch_idx as u8;
-                        for _ in 0..avail[ch_idx] {
-                            current[pos] = ch;
-                            pos += 1;
-                        }
-                    }
-
-                    return Some(Self::build_palindrome(&current, mid));
-                }
-            }
-
-            // Try placing target[i] and continue deeper
-            let idx = (target_ch - b'a') as usize;
-            if avail[idx] > 0 {
-                avail[idx] -= 1;
-                current[i] = target_ch;
-
-                // Build smallest suffix
-                let mut suffix = Vec::with_capacity(len - i - 1);
+                // Fill remaining positions with smallest available chars
+                let mut rest_pos = pos + 1;
                 for ch_idx in 0..26 {
-                    let ch = b'a' + ch_idx as u8;
-                    for _ in 0..avail[ch_idx] {
-                        suffix.push(ch);
+                    for _ in 0..freq[ch_idx] {
+                        current[rest_pos] = b'a' + ch_idx as u8;
+                        rest_pos += 1;
                     }
                 }
 
-                // Check if this suffix makes half > target_half
-                if suffix.as_slice() > &target_half[i + 1..] {
-                    for (j, &ch) in suffix.iter().enumerate() {
-                        current[i + 1 + j] = ch;
-                    }
-                    return Some(Self::build_palindrome(&current, mid));
-                }
+                let palindrome = Self::build_palindrome(current, mid);
+                freq[idx] += 1;
 
-                // Check if suffix equals target_half suffix - then mid char decides
-                if suffix.as_slice() == &target_half[i + 1..] {
-                    for (j, &ch) in suffix.iter().enumerate() {
-                        current[i + 1 + j] = ch;
-                    }
-                    // Now check if the palindrome > target considering mid and second half
-                    let candidate = Self::build_palindrome(&current, mid);
-                    if candidate.as_slice() > target {
-                        return Some(candidate);
-                    }
+                if palindrome.as_slice() > target {
+                    return Some(current.clone());
                 }
             }
         }
@@ -187,6 +164,14 @@ mod tests {
         assert_eq!(
             Solution::lex_palindromic_permutation("aac".to_string(), "abb".to_string()),
             "aca"
+        );
+    }
+
+    #[test]
+    fn test_failing_case() {
+        assert_eq!(
+            Solution::lex_palindromic_permutation("aabb".to_string(), "baaa".to_string()),
+            "baab"
         );
     }
 }
