@@ -1,91 +1,90 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 impl Solution {
-    /// Prefix Sum with Optimized Counting
+    /// Chunk-Based Prefix Sum Counting (Optimized)
     ///
     /// # Intuition
-    /// Use prefix sums for divisibility. For distinct counting, observe that
-    /// signatures (start_val, cfs, length) where cfs = min(remaining, length).
-    ///
-    /// For a given (start_val, remaining) with valid lengths L1, L2, ...:
-    /// - Lengths < remaining contribute signatures (start_val, Li, Li)
-    /// - Lengths >= remaining contribute signatures (start_val, remaining, Li)
+    /// For a sorted array, process runs of identical values. For each run,
+    /// count subarrays ending at each position using prefix sum remainders.
     ///
     /// # Complexity
-    /// - Time: O(n × k) worst case, typically much better
-    /// - Space: O(n + k)
-    pub fn num_good_subarrays(nums: Vec<i32>, k: i32) -> i32 {
+    /// - Time: O(n)
+    /// - Space: O(min(n, k))
+    pub fn num_good_subarrays(nums: Vec<i32>, k: i32) -> i64 {
         let n = nums.len();
-        if n == 0 {
-            return 0;
+
+        // Use Vec for small k, HashMap for large k
+        if k <= 100_000 {
+            Self::solve_with_vec(&nums, k as usize)
+        } else {
+            Self::solve_with_map(&nums, k)
         }
+    }
 
-        let k_val = k as i64;
+    fn solve_with_vec(nums: &[i32], k: usize) -> i64 {
+        let mut sums = vec![0i64; k];
+        sums[0] = 1;
 
-        // Build run_remaining
-        let mut run_remaining: Vec<usize> = vec![1; n];
-        for i in (0..n - 1).rev() {
-            if nums[i] == nums[i + 1] {
-                run_remaining[i] = run_remaining[i + 1] + 1;
+        let mut result = 0i64;
+        let mut sum = 0usize;
+
+        let n = nums.len();
+        let mut i = 0;
+
+        while i < n {
+            let x = (nums[i] as usize) % k;
+            let start = i;
+            while i < n && nums[i] == nums[start] {
+                i += 1;
+            }
+            let cnt = i - start;
+
+            let mut s = sum;
+            for _ in 0..cnt {
+                s = (s + x) % k;
+                result += sums[s];
+            }
+
+            for _ in 0..cnt {
+                sum = (sum + x) % k;
+                sums[sum] += 1;
             }
         }
 
-        // Compute prefix remainders
-        let mut prefix_rem: Vec<i64> = vec![0; n + 1];
-        let mut prefix_sum = 0i64;
-        for (i, &num) in nums.iter().enumerate() {
-            prefix_sum += num as i64;
-            prefix_rem[i + 1] = ((prefix_sum % k_val) + k_val) % k_val;
-        }
+        result
+    }
 
-        // Group indices by remainder using HashMap (more memory efficient for large k)
-        let mut rem_to_indices: HashMap<i64, Vec<usize>> = HashMap::new();
-        for (i, &rem) in prefix_rem.iter().enumerate() {
-            rem_to_indices.entry(rem).or_default().push(i);
-        }
+    fn solve_with_map(nums: &[i32], k: i32) -> i64 {
+        let mut sums: HashMap<i32, i64> = HashMap::new();
+        sums.insert(0, 1);
 
-        // Final distinct signatures
-        let mut distinct: HashSet<(i32, usize, usize)> = HashSet::new();
+        let mut result = 0i64;
+        let mut sum = 0i32;
 
-        for indices in rem_to_indices.values() {
-            let m = indices.len();
-            if m < 2 {
-                continue;
+        let n = nums.len();
+        let mut i = 0;
+
+        while i < n {
+            let x = ((nums[i] % k) + k) % k;
+            let start = i;
+            while i < n && nums[i] == nums[start] {
+                i += 1;
+            }
+            let cnt = i - start;
+
+            let mut s = sum;
+            for _ in 0..cnt {
+                s = (s + x) % k;
+                result += sums.get(&s).copied().unwrap_or(0);
             }
 
-            // Group by (start_val, remaining) -> min_start_index
-            let mut sig_to_min: HashMap<(i32, usize), usize> = HashMap::new();
-
-            for &idx in indices {
-                if idx < n {
-                    let key = (nums[idx], run_remaining[idx]);
-                    sig_to_min
-                        .entry(key)
-                        .and_modify(|min| *min = (*min).min(idx))
-                        .or_insert(idx);
-                }
-            }
-
-            // Precompute: for this remainder group, what are all the end indices?
-            // ends[i] - min_start gives valid lengths for signature with min_start
-
-            // Process each signature group
-            for (&(start_val, remaining), &min_start) in &sig_to_min {
-                let pos = indices.partition_point(|&x| x <= min_start);
-
-                // Optimization: instead of iterating all ends, count efficiently
-                // Short lengths (< remaining): each length L gives signature (sv, L, L)
-                // Long lengths (>= remaining): each length L gives signature (sv, remaining, L)
-
-                for &end in &indices[pos..] {
-                    let length = end - min_start;
-                    let cfs = remaining.min(length);
-                    distinct.insert((start_val, cfs, length));
-                }
+            for _ in 0..cnt {
+                sum = (sum + x) % k;
+                *sums.entry(sum).or_insert(0) += 1;
             }
         }
 
-        distinct.len() as i32
+        result
     }
 }
 
