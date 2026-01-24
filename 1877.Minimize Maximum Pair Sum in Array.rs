@@ -7,24 +7,26 @@ impl Solution {
     /// having an excessively large sum.
     ///
     /// # Approach
-    /// Sort the array, split at the midpoint, then pair elements from the left half with elements from
-    /// the reversed right half using iterator combinators for efficient pairing.
+    /// Sort the array, split at midpoint, then pair elements from the left half with elements
+    /// from the reversed right half using iterator combinators for efficient pairing.
     ///
     /// # Complexity
     /// Time: O(n log n) - dominated by sorting
     /// Space: O(1) - only uses a constant amount of extra space
     pub fn min_pair_sum(nums: Vec<i32>) -> i32 {
-        let mut nums = nums;
-        nums.sort_unstable();
+        let mut sorted = nums;
+        sorted.sort_unstable();
 
-        let mid = nums.len() / 2;
-        let (left, right) = nums.split_at(mid);
+        let mid = sorted.len() / 2;
+        let (left, right) = sorted.split_at(mid);
 
-        let mut max = 0;
-        for (&a, &b) in left.iter().zip(right.iter().rev()) {
-            max = max.max(a + b);
+        let mut max_pair_sum = 0;
+
+        for (&small, &large) in left.iter().zip(right.iter().rev()) {
+            max_pair_sum = max_pair_sum.max(small + large);
         }
-        max
+
+        max_pair_sum
     }
 }
 
