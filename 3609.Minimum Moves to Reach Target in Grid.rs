@@ -1,38 +1,26 @@
-use std::collections::HashMap;
-
 impl Solution {
     /// Find minimum moves by working backwards from target to source.
     ///
     /// # Intuition
     /// Forward search is exponential. Instead, work backwards from (tx, ty) to (sx, sy).
     /// At each step, determine which coordinate was increased in the previous move by
-    /// comparing tx and ty. If tx > ty, the last move increased x; if ty > tx, it increased y.
+    /// comparing tx and ty. When one coordinate is much larger, use modulo to skip steps.
     ///
     /// # Approach
     /// 1. Base case: if (tx, ty) == (sx, sy), return 0
     /// 2. If tx < sx or ty < sy, target is unreachable, return -1
-    /// 3. If tx == ty, check if we can reach (sx, sy) from this state
-    /// 4. If tx > ty, the last move increased x, so previous position was (tx - m, ty) where m = max(prev_x, prev_y)
-    ///    - If prev_x >= prev_y: m = prev_x, so prev_x = tx/2
-    ///    - If prev_x < prev_y: m = prev_y = ty, so prev_x = tx - ty
-    /// 5. Similarly for ty > tx
-    /// 6. Use memoization to avoid recomputing states
+    /// 3. If tx == ty and tx > 0, we can only have come from (0, tx) or (tx, 0)
+    /// 4. If tx > ty, the last move increased x. Use modulo when tx >> ty to reduce quickly
+    /// 5. If ty > tx, the last move increased y. Use modulo when ty >> tx to reduce quickly
     ///
     /// # Complexity
     /// - Time: O(log(max(tx, ty))) - each step reduces coordinates significantly
-    /// - Space: O(log(max(tx, ty))) - memoization depth
+    /// - Space: O(log(max(tx, ty))) - recursion depth
     pub fn min_moves(sx: i32, sy: i32, tx: i32, ty: i32) -> i32 {
-        let mut memo = HashMap::new();
-        Self::dfs(sx, sy, tx, ty, &mut memo)
+        Self::dfs(sx as i64, sy as i64, tx as i64, ty as i64)
     }
 
-    fn dfs(
-        sx: i32,
-        sy: i32,
-        tx: i32,
-        ty: i32,
-        memo: &mut HashMap<(i32, i32), i32>,
-    ) -> i32 {
+    fn dfs(sx: i64, sy: i64, tx: i64, ty: i64) -> i32 {
         // Base case: reached source
         if tx == sx && ty == sy {
             return 0;
@@ -43,83 +31,66 @@ impl Solution {
             return -1;
         }
 
-        // Check memoization
-        if let Some(&result) = memo.get(&(tx, ty)) {
-            return result;
-        }
-
-        let result = if tx == ty {
-            // Special case: both coordinates equal
-            // From (x, x) where x > 0, we can only have come from (0, x) or (x, 0) in one move
-            // Because: (0, x) -> (0 + max(0, x), x) = (x, x) or (x, 0) -> (x, 0 + max(x, 0)) = (x, x)
+        if tx == ty {
+            // From (x, x) where x > 0, we can only have come from (0, x) or (x, 0)
             if tx == 0 {
-                -1
-            } else {
-                let mut best = i32::MAX;
-                
-                // Try (0, tx) -> (tx, tx)
-                let sub1 = Self::dfs(sx, sy, 0, ty, memo);
-                if sub1 != -1 {
-                    best = best.min(sub1 + 1);
-                }
-                
-                // Try (tx, 0) -> (tx, tx)
-                let sub2 = Self::dfs(sx, sy, tx, 0, memo);
-                if sub2 != -1 {
-                    best = best.min(sub2 + 1);
-                }
-                
-                if best == i32::MAX {
-                    -1
-                } else {
-                    best
-                }
-            }
-        } else if tx > ty {
-            // Last move increased x
-            // Optimization: if tx >= 2*ty, we can use modulo to skip steps
-            if tx >= 2 * ty {
-                // We must have come from (tx/2, ty) repeatedly
-                // Count how many times we can divide by 2
-                let mut count = 0;
-                let mut curr_tx = tx;
-                while curr_tx >= 2 * ty && curr_tx % 2 == 0 {
-                    curr_tx /= 2;
-                    count += 1;
-                }
-                // Now try from (curr_tx, ty)
-                let sub = Self::dfs(sx, sy, curr_tx, ty, memo);
-                if sub != -1 {
-                    return sub + count;
-                }
                 return -1;
             }
-            
-            // Regular case: try both possibilities
+            // Try both possibilities
+            let from_zero_x = Self::dfs(sx, sy, 0, ty);
+            let from_zero_y = Self::dfs(sx, sy, tx, 0);
+            if from_zero_x != -1 && from_zero_y != -1 {
+                return 1 + from_zero_x.min(from_zero_y);
+            }
+            if from_zero_x != -1 {
+                return 1 + from_zero_x;
+            }
+            if from_zero_y != -1 {
+                return 1 + from_zero_y;
+            }
+            return -1;
+        }
+
+        if tx > ty {
+            // Last move increased x
+            // Try both possibilities for previous position
             let mut best = i32::MAX;
-            
-            // Case 1: previous position had prev_x >= prev_y, so m = prev_x
-            // prev_x + prev_x = tx, so prev_x = tx / 2, prev_y = ty
+
+            // Optimization: when tx >> ty, use modulo to reduce tx quickly
+            // Only use modulo when remainder >= sx, otherwise it might skip unreachable states
+            if tx > ty && ty > 0 && tx >= 2 * ty {
+                let remainder = tx % ty;
+                if remainder >= sx {
+                    // We can reduce directly to remainder
+                    let steps = (tx - remainder) / ty;
+                    let sub = Self::dfs(sx, sy, remainder, ty);
+                    if sub != -1 {
+                        best = best.min(steps as i32 + sub);
+                    }
+                }
+                // If remainder < sx, don't use modulo - let regular cases handle it
+            }
+
+            // Case 1: prev_x >= prev_y, so m = prev_x, prev_x = tx/2
             if tx % 2 == 0 {
                 let prev_x = tx / 2;
-                if prev_x >= ty {
-                    let sub = Self::dfs(sx, sy, prev_x, ty, memo);
+                if prev_x >= ty && prev_x >= sx {
+                    let sub = Self::dfs(sx, sy, prev_x, ty);
                     if sub != -1 {
                         best = best.min(sub + 1);
                     }
                 }
             }
-            
-            // Case 2: previous position had prev_x < prev_y, so m = prev_y = ty
-            // prev_x + ty = tx, so prev_x = tx - ty, prev_y = ty
+
+            // Case 2: prev_x < prev_y, so m = ty, prev_x = tx - ty
             let prev_x = tx - ty;
             if prev_x < ty && prev_x >= sx {
-                let sub = Self::dfs(sx, sy, prev_x, ty, memo);
+                let sub = Self::dfs(sx, sy, prev_x, ty);
                 if sub != -1 {
                     best = best.min(sub + 1);
                 }
             }
-            
+
             if best == i32::MAX {
                 -1
             } else {
@@ -127,58 +98,50 @@ impl Solution {
             }
         } else {
             // ty > tx: last move increased y
-            // Optimization: if ty >= 2*tx, we can use modulo to skip steps
-            if ty >= 2 * tx {
-                // We must have come from (tx, ty/2) repeatedly
-                // Count how many times we can divide by 2
-                let mut count = 0;
-                let mut curr_ty = ty;
-                while curr_ty >= 2 * tx && curr_ty % 2 == 0 {
-                    curr_ty /= 2;
-                    count += 1;
-                }
-                // Now try from (tx, curr_ty)
-                let sub = Self::dfs(sx, sy, tx, curr_ty, memo);
-                if sub != -1 {
-                    return sub + count;
-                }
-                return -1;
-            }
-            
-            // Regular case: try both possibilities
+            // Try both possibilities for previous position
             let mut best = i32::MAX;
-            
-            // Case 1: previous position had prev_y >= prev_x, so m = prev_y
-            // prev_y + prev_y = ty, so prev_y = ty / 2, prev_x = tx
+
+            // Optimization: when ty >> tx, use modulo to reduce ty quickly
+            // Only use modulo when remainder >= sy, otherwise it might skip unreachable states
+            if ty > tx && tx > 0 && ty >= 2 * tx {
+                let remainder = ty % tx;
+                if remainder >= sy {
+                    // We can reduce directly to remainder
+                    let steps = (ty - remainder) / tx;
+                    let sub = Self::dfs(sx, sy, tx, remainder);
+                    if sub != -1 {
+                        best = best.min(steps as i32 + sub);
+                    }
+                }
+                // If remainder < sy, don't use modulo - let regular cases handle it
+            }
+
+            // Case 1: prev_y >= prev_x, so m = prev_y, prev_y = ty/2
             if ty % 2 == 0 {
                 let prev_y = ty / 2;
-                if prev_y >= tx {
-                    let sub = Self::dfs(sx, sy, tx, prev_y, memo);
+                if prev_y >= tx && prev_y >= sy {
+                    let sub = Self::dfs(sx, sy, tx, prev_y);
                     if sub != -1 {
                         best = best.min(sub + 1);
                     }
                 }
             }
-            
-            // Case 2: previous position had prev_y < prev_x, so m = prev_x = tx
-            // prev_y + tx = ty, so prev_y = ty - tx, prev_x = tx
+
+            // Case 2: prev_y < prev_x, so m = tx, prev_y = ty - tx
             let prev_y = ty - tx;
             if prev_y < tx && prev_y >= sy {
-                let sub = Self::dfs(sx, sy, tx, prev_y, memo);
+                let sub = Self::dfs(sx, sy, tx, prev_y);
                 if sub != -1 {
                     best = best.min(sub + 1);
                 }
             }
-            
+
             if best == i32::MAX {
                 -1
             } else {
                 best
             }
-        };
-
-        memo.insert((tx, ty), result);
-        result
+        }
     }
 }
 
