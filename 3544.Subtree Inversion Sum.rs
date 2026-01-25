@@ -1,25 +1,28 @@
+/// Subtree Inversion Sum - Optimized Bottom-Up Tree DP
+///
+/// # Intuition
+/// Track two states per node: `f[d]` for normal parity and `g[d]` for inverted parity,
+/// where `d` is the distance from the nearest inverted ancestor. When `d >= k`, we can
+/// choose to invert; otherwise we cannot.
+///
+/// # Approach
+/// Use bottom-up tree DP with iterative post-order traversal:
+/// - `f[node][d]` = max sum of subtree with parity=0 (normal), distance=d
+/// - `g[node][d]` = max sum of subtree with parity=1 (inverted), distance=d
+///
+/// For distance d < k (cannot invert):
+/// - `f[node][d] = nums[node] + sum(f[child][d+1])`
+/// - `g[node][d] = -nums[node] + sum(g[child][d+1])`
+///
+/// For distance d = k (can invert):
+/// - `f[node][k] = max(nums[node] + sum(f[child][k]), -nums[node] + sum(g[child][1]))`
+/// - `g[node][k] = max(-nums[node] + sum(g[child][k]), nums[node] + sum(f[child][1]))`
+///
+/// # Complexity
+/// - Time: O(n * k)
+/// - Space: O(n * k)
+
 impl Solution {
-    /// Subtree Inversion Sum - Tree DP with Distance Constraint
-    ///
-    /// # Intuition
-    /// When we invert a subtree, all values in that subtree get multiplied by -1. The key insight
-    /// is that each node's final value depends on how many times it's been "inverted" by ancestor
-    /// inversions (parity). The constraint requires inverted ancestor-descendant pairs to be at
-    /// least k edges apart.
-    ///
-    /// # Approach
-    /// Use tree DP with memoization tracking two state variables:
-    /// - `dist`: Distance from the nearest inverted ancestor (capped at k, since dist >= k means
-    ///   we're free to invert)
-    /// - `parity`: Current sign multiplier (0 = positive, 1 = negative) based on ancestor inversions
-    ///
-    /// For each node, we have two choices:
-    /// 1. Don't invert: Keep current parity, increment distance for children
-    /// 2. Invert (if dist >= k): Flip parity, set distance to 1 for children
-    ///
-    /// # Complexity
-    /// - Time: O(n * k) where n is number of nodes and k is the distance constraint
-    /// - Space: O(n * k) for memoization table
     pub fn subtree_inversion_sum(edges: Vec<Vec<i32>>, nums: Vec<i32>, k: i32) -> i64 {
         let n = nums.len();
         let k = k as usize;
@@ -31,48 +34,55 @@ impl Solution {
             adj[v].push(u);
         }
 
-        let mut memo = vec![vec![vec![None; 2]; k + 1]; n];
-        Self::dfs(0, n, k, 0, &adj, &nums, k, &mut memo)
-    }
+        let mut f = vec![vec![0i64; k + 1]; n];
+        let mut g = vec![vec![0i64; k + 1]; n];
 
-    fn dfs(
-        node: usize,
-        parent: usize,
-        dist: usize,
-        parity: usize,
-        adj: &[Vec<usize>],
-        nums: &[i32],
-        k: usize,
-        memo: &mut [Vec<Vec<Option<i64>>>],
-    ) -> i64 {
-        if let Some(val) = memo[node][dist][parity] {
-            return val;
+        // Iterative post-order traversal
+        let mut stack = vec![(0usize, n, false)];
+        let mut order = Vec::with_capacity(n);
+
+        while let Some((node, parent, visited)) = stack.pop() {
+            if visited {
+                order.push((node, parent));
+            } else {
+                stack.push((node, parent, true));
+                for &child in &adj[node] {
+                    if child != parent {
+                        stack.push((child, node, false));
+                    }
+                }
+            }
         }
 
-        let sign = if parity == 0 { 1i64 } else { -1i64 };
-        let next_dist = (dist + 1).min(k);
+        // Process nodes in post-order (children before parents)
+        for (node, parent) in order {
+            let val = nums[node] as i64;
 
-        let no_invert = nums[node] as i64 * sign
-            + adj[node]
-                .iter()
-                .filter(|&&child| child != parent)
-                .map(|&child| Self::dfs(child, node, next_dist, parity, adj, nums, k, memo))
-                .sum::<i64>();
+            // Compute sums from children for all distance values
+            let mut sf = vec![0i64; k + 1];
+            let mut sg = vec![0i64; k + 1];
 
-        let result = if dist >= k {
-            let invert = nums[node] as i64 * (-sign)
-                + adj[node]
-                    .iter()
-                    .filter(|&&child| child != parent)
-                    .map(|&child| Self::dfs(child, node, 1, 1 - parity, adj, nums, k, memo))
-                    .sum::<i64>();
-            no_invert.max(invert)
-        } else {
-            no_invert
-        };
+            for &child in &adj[node] {
+                if child != parent {
+                    for d in 1..=k {
+                        sf[d] += f[child][d];
+                        sg[d] += g[child][d];
+                    }
+                }
+            }
 
-        memo[node][dist][parity] = Some(result);
-        result
+            // Distance k: can choose to invert or not
+            f[node][k] = (val + sf[k]).max(-val + sg[1]);
+            g[node][k] = (-val + sg[k]).max(val + sf[1]);
+
+            // Distance 1 to k-1: cannot invert
+            for d in (1..k).rev() {
+                f[node][d] = val + sf[d + 1];
+                g[node][d] = -val + sg[d + 1];
+            }
+        }
+
+        f[0][k]
     }
 }
 
@@ -91,47 +101,48 @@ mod tests {
             vec![2, 6],
         ];
         let nums = vec![4, -8, -6, 3, 7, -2, 5];
-        let k = 2;
-        assert_eq!(Solution::subtree_inversion_sum(edges, nums, k), 27);
+        assert_eq!(Solution::subtree_inversion_sum(edges, nums, 2), 27);
     }
 
     #[test]
     fn test_example_2() {
         let edges = vec![vec![0, 1], vec![1, 2], vec![2, 3], vec![3, 4]];
         let nums = vec![-1, 3, -2, 4, -5];
-        let k = 2;
-        assert_eq!(Solution::subtree_inversion_sum(edges, nums, k), 9);
+        assert_eq!(Solution::subtree_inversion_sum(edges, nums, 2), 9);
     }
 
     #[test]
     fn test_example_3() {
         let edges = vec![vec![0, 1], vec![0, 2]];
         let nums = vec![0, -1, -2];
-        let k = 3;
-        assert_eq!(Solution::subtree_inversion_sum(edges, nums, k), 3);
+        assert_eq!(Solution::subtree_inversion_sum(edges, nums, 3), 3);
     }
 
     #[test]
     fn test_single_edge() {
         let edges = vec![vec![0, 1]];
         let nums = vec![-5, -10];
-        let k = 1;
-        assert_eq!(Solution::subtree_inversion_sum(edges, nums, k), 15);
+        assert_eq!(Solution::subtree_inversion_sum(edges, nums, 1), 15);
     }
 
     #[test]
     fn test_all_positive() {
         let edges = vec![vec![0, 1], vec![0, 2]];
         let nums = vec![1, 2, 3];
-        let k = 1;
-        assert_eq!(Solution::subtree_inversion_sum(edges, nums, k), 6);
+        assert_eq!(Solution::subtree_inversion_sum(edges, nums, 1), 6);
     }
 
     #[test]
     fn test_k_equals_one() {
         let edges = vec![vec![0, 1], vec![1, 2]];
         let nums = vec![-1, -2, -3];
-        let k = 1;
-        assert_eq!(Solution::subtree_inversion_sum(edges, nums, k), 6);
+        assert_eq!(Solution::subtree_inversion_sum(edges, nums, 1), 6);
+    }
+
+    #[test]
+    fn test_large_k() {
+        let edges = vec![vec![0, 1], vec![1, 2], vec![2, 3]];
+        let nums = vec![-1, -2, -3, -4];
+        assert_eq!(Solution::subtree_inversion_sum(edges, nums, 50), 10);
     }
 }
