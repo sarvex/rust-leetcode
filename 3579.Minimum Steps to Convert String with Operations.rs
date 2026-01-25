@@ -7,58 +7,78 @@ impl Solution {
     /// partitioning of the string, computing the cost for each possible segment.
     ///
     /// # Approach
-    /// 1. Define dp[i] as minimum operations to transform word1[0..i] to word2[0..i]
-    /// 2. For each position i, try all possible last partition boundaries j
-    /// 3. For each partition [j..i], compute the minimum cost:
-    ///    - Without reverse: count mismatches minus beneficial swaps
-    ///    - With reverse: 1 + (count mismatches after reverse minus beneficial swaps)
-    /// 4. A beneficial swap exists when source[i]=target[j] and source[j]=target[i]
-    ///    for positions i,j - one swap fixes two mismatches
-    /// 5. Count beneficial swaps by tracking character pairs and taking min of
-    ///    forward and reverse transition counts
+    /// 1. Precompute no-reverse costs incrementally: for each starting position j,
+    ///    extend right while maintaining mismatch count and swap count in O(1) per step
+    /// 2. Precompute reversed costs for each segment without allocation
+    /// 3. DP: dp[i] = min over j of (dp[j] + min(cost_no_rev[j][i], 1 + cost_rev[j][i]))
+    /// 4. Swap counting optimization: when adding mismatch (s,t), swaps increase by 1
+    ///    only if count[t][s] > count[s][t] (greedy pairing)
     ///
     /// # Complexity
-    /// - Time: O(n³) where n is the string length
-    /// - Space: O(n) for DP array plus O(26²) for character pair counting
+    /// - Time: O(n²) for no-reverse precomputation + O(n³) for reversed = O(n³)
+    /// - Space: O(n²) for cost matrices
     pub fn min_operations(word1: String, word2: String) -> i32 {
-        let w1: Vec<char> = word1.chars().collect();
-        let w2: Vec<char> = word2.chars().collect();
+        let w1 = word1.into_bytes();
+        let w2 = word2.into_bytes();
         let n = w1.len();
 
-        let compute_cost = |s: &[char], t: &[char]| -> i32 {
-            let mut count = [[0i32; 26]; 26];
-            let mut mismatches = 0;
+        // Precompute costs for all segments
+        let mut cost_no_rev = vec![vec![0i32; n + 1]; n];
+        let mut cost_rev = vec![vec![0i32; n + 1]; n];
 
-            for (&sc, &tc) in s.iter().zip(t.iter()) {
-                if sc != tc {
+        for j in 0..n {
+            // No-reverse: incremental O(n) total for all segments starting at j
+            let mut count = [[0i32; 26]; 26];
+            let mut mismatches = 0i32;
+            let mut swaps = 0i32;
+
+            for i in (j + 1)..=n {
+                let s = (w1[i - 1] - b'a') as usize;
+                let t = (w2[i - 1] - b'a') as usize;
+
+                if s != t {
                     mismatches += 1;
-                    let a = (sc as u8 - b'a') as usize;
-                    let b = (tc as u8 - b'a') as usize;
-                    count[a][b] += 1;
+                    // Swap count increases only when adding creates a beneficial pair
+                    if count[t][s] > count[s][t] {
+                        swaps += 1;
+                    }
+                    count[s][t] += 1;
                 }
+
+                cost_no_rev[j][i] = mismatches - swaps;
             }
 
-            let swaps = (0..26)
-                .flat_map(|a| ((a + 1)..26).map(move |b| count[a][b].min(count[b][a])))
-                .sum::<i32>();
+            // Reversed: compute directly for each segment, no allocation
+            for i in (j + 1)..=n {
+                let mut cnt = [[0i32; 26]; 26];
+                let mut mismatch = 0i32;
+                let len = i - j;
 
-            mismatches - swaps
-        };
+                for k in 0..len {
+                    let s = (w1[i - 1 - k] - b'a') as usize;
+                    let t = (w2[j + k] - b'a') as usize;
+                    if s != t {
+                        mismatch += 1;
+                        cnt[s][t] += 1;
+                    }
+                }
 
+                let swap_count: i32 = (0..26)
+                    .flat_map(|a| ((a + 1)..26).map(move |b| cnt[a][b].min(cnt[b][a])))
+                    .sum();
+
+                cost_rev[j][i] = mismatch - swap_count;
+            }
+        }
+
+        // DP with O(1) cost lookup per segment
         let mut dp = vec![i32::MAX; n + 1];
         dp[0] = 0;
 
         for i in 1..=n {
             for j in 0..i {
-                let s1 = &w1[j..i];
-                let t = &w2[j..i];
-
-                let cost_no_reverse = compute_cost(s1, t);
-
-                let s_reversed: Vec<char> = s1.iter().rev().copied().collect();
-                let cost_with_reverse = 1 + compute_cost(&s_reversed, t);
-
-                dp[i] = dp[i].min(dp[j] + cost_no_reverse.min(cost_with_reverse));
+                let cost = cost_no_rev[j][i].min(1 + cost_rev[j][i]);
+                dp[i] = dp[i].min(dp[j] + cost);
             }
         }
 
@@ -72,7 +92,6 @@ mod tests {
 
     #[test]
     fn test_example_1() {
-        // "ab" -> reverse "ba" -> replace "da"; "c" unchanged; "df" -> "bf" -> "be"
         assert_eq!(
             Solution::min_operations("abcdf".to_string(), "dacbe".to_string()),
             4
@@ -81,7 +100,6 @@ mod tests {
 
     #[test]
     fn test_example_2() {
-        // "ab" -> swap "ba"; "ce" -> swap "ec"; "ded" -> replace twice "fef"
         assert_eq!(
             Solution::min_operations("abceded".to_string(), "baecfef".to_string()),
             4
@@ -90,7 +108,6 @@ mod tests {
 
     #[test]
     fn test_example_3() {
-        // "abcdef" -> reverse "fedcba" -> swap "fedabc"
         assert_eq!(
             Solution::min_operations("abcdef".to_string(), "fedabc".to_string()),
             2
@@ -123,7 +140,6 @@ mod tests {
 
     #[test]
     fn test_simple_swap() {
-        // One swap suffices
         assert_eq!(
             Solution::min_operations("ab".to_string(), "ba".to_string()),
             1
@@ -132,7 +148,6 @@ mod tests {
 
     #[test]
     fn test_simple_reverse() {
-        // Reverse entire string
         assert_eq!(
             Solution::min_operations("abc".to_string(), "cba".to_string()),
             1
@@ -141,7 +156,6 @@ mod tests {
 
     #[test]
     fn test_all_different() {
-        // No swaps beneficial, all replaces
         assert_eq!(
             Solution::min_operations("aaa".to_string(), "bbb".to_string()),
             3
