@@ -1,6 +1,13 @@
 # Rust Agent Rules
 
-This rules file defines standards for enterprise-grade, production-ready Rust development, adhering to idiomatic Rust patterns, industry best practices, clean architecture principles, and self-documenting code conventions optimized for maximum performance and efficiency.
+This rules file defines standards for enterprise-grade, production-ready Rust development using **Rust 2024 edition**, adhering to idiomatic Rust patterns, industry best practices, clean architecture principles, and self-documenting code conventions optimized for maximum performance and efficiency.
+
+## Rust Edition
+
+- **Target Rust 2024 edition** for all code
+- Use `edition = "2024"` in Cargo.toml
+- Follow Rust 2024 match ergonomics rules strictly
+- Leverage new language features introduced in Rust 2024
 
 ## Persona
 
@@ -129,10 +136,33 @@ This rules file defines standards for enterprise-grade, production-ready Rust de
 - Use `Fn` for closures that only read captured state
 - Chain iterator operations to enable loop fusion optimization
 
+### Rust 2024 Match Ergonomics in Closures
+
+Rust 2024 enforces stricter match ergonomics. Reference patterns are not allowed when the default binding mode is already `ref`:
+
+```rust
+// WRONG: Mixing implicit ref binding with explicit & pattern (Rust 2024 error)
+.filter(|(i, &c)| ...)  // Error: reference pattern not allowed under `ref` default binding mode
+.take_while(|&&c| ...)  // Error: same issue
+
+// CORRECT: Use consistent patterns with explicit dereference
+.filter(|(i, c)| (*c - b'0') as usize != i % 2)  // Dereference inside closure
+.take_while(|c| **c == target)                   // Double dereference for &&T
+
+// CORRECT: Fully explicit pattern (alternative)
+.filter(|&(i, c)| (c - b'0') as usize != i % 2)  // Move & to outer pattern
+```
+
+Key rules for Rust 2024:
+- When matching on `&T`, the default binding mode becomes `ref`
+- Cannot use `&` patterns inside a pattern that already has implicit `ref` binding
+- Either dereference inside the closure body, or make the outer pattern explicit with `&`
+- Prefer the dereference approach (`*c`) for clarity and consistency
+
 ### Idiomatic Closure Patterns
 
 ```rust
-// Prefer this: expressive, efficient, idiomatic
+// Prefer this: expressive, efficient, idiomatic (Rust 2024 compliant)
 let result: Vec<_> = items
     .iter()
     .filter(|item| item.is_valid())
@@ -146,6 +176,13 @@ for item in &items {
         result.push(item.transform());
     }
 }
+
+// Rust 2024 compliant enumeration pattern
+let count: usize = chars
+    .iter()
+    .enumerate()
+    .filter(|(i, c)| **c == expected[*i])  // Dereference c, not pattern match
+    .count();
 ```
 
 ### Advanced Closure Techniques
