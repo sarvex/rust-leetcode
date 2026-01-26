@@ -9,132 +9,52 @@ impl Solution {
     /// Characters with 0 frequency don't need to match target.
     ///
     /// # Approach
-    /// Key optimization: candidate targets include original frequencies and their
-    /// neighbors (±1), as optimal targets arise from combining adjacent chars.
-    /// For each target, use DP with suffix minimums for efficient range updates.
+    /// For each possible target frequency, use O(1) state DP per letter:
+    /// Track (free_chars, cost) for both "set to target" and "set to zero" options.
+    /// Free chars can be forwarded to help the next letter meet its target.
     ///
     /// # Complexity
-    /// - Time: O(T * 26 * n) where T = O(26^2) candidate targets
-    /// - Space: O(n)
+    /// - Time: O(n * 26) where n is string length
+    /// - Space: O(1)
     pub fn make_string_good(s: String) -> i32 {
-        let mut freq = [0i32; 26];
+        let mut counts = [0i32; 26];
         for b in s.bytes() {
-            freq[(b - b'a') as usize] += 1;
+            counts[(b - b'a') as usize] += 1;
         }
 
-        // Comprehensive candidate targets - all values that could be optimal
-        let mut targets: Vec<i32> = Vec::with_capacity(1000);
-        targets.push(0);
-        targets.push(1);
-
-        // All individual frequencies ± 1
-        for &f in &freq {
-            Self::add_with_neighbors(&mut targets, f);
-        }
-
-        // All pairwise sums, differences, and averages
-        for i in 0..26 {
-            for j in i..26 {
-                let a = freq[i];
-                let b = freq[j];
-                Self::add_with_neighbors(&mut targets, a + b);
-                Self::add_with_neighbors(&mut targets, (a - b).abs());
-                Self::add_with_neighbors(&mut targets, (a + b) / 2);
-                Self::add_with_neighbors(&mut targets, (a + b + 1) / 2);
-            }
-        }
-
-        // Adjacent triple sums
-        for i in 0..24 {
-            let sum = freq[i] + freq[i + 1] + freq[i + 2];
-            Self::add_with_neighbors(&mut targets, sum);
-            Self::add_with_neighbors(&mut targets, sum / 2);
-            Self::add_with_neighbors(&mut targets, sum / 3);
-        }
-
-        targets.sort_unstable();
-        targets.dedup();
-
-        targets
-            .iter()
-            .map(|&target| Self::compute_cost(&freq, target))
+        (0..=s.len() as i32)
+            .map(|target| Self::ops_needed(&counts, target))
             .min()
             .unwrap_or(0)
     }
 
-    #[inline]
-    fn add_with_neighbors(targets: &mut Vec<i32>, val: i32) {
-        if val > 1 {
-            targets.push(val - 1);
-        }
-        if val > 0 {
-            targets.push(val);
-        }
-        targets.push(val + 1);
-    }
+    fn ops_needed(counts: &[i32; 26], target: i32) -> i32 {
+        // Track (free chars to forward, cost) for each option
+        let mut prev_to_target = (0, 0); // previous letter set to target
+        let mut prev_to_zero = (0, 0); // previous letter set to zero
 
-    fn compute_cost(freq: &[i32; 26], target: i32) -> i32 {
-        let total_chars: i32 = freq.iter().sum();
-        let max_forward = total_chars as usize + 1;
-        let inf = i32::MAX / 2;
+        for &count in counts {
+            // Option 1: Set this letter's frequency to 0
+            // Cost = count (delete/forward all) + min of previous costs
+            let to_zero = (count, count + prev_to_target.1.min(prev_to_zero.1));
 
-        // dp[f] = min cost where f chars will be forwarded to next position
-        let mut dp = vec![inf; max_forward];
-        dp[0] = 0;
+            // Option 2: Set this letter's frequency to target
+            let to_target = if count < target {
+                // Deficit: need more chars, can receive from previous letter's free chars
+                let from_target = (target - count - prev_to_target.0).max(0) + prev_to_target.1;
+                let from_zero = (target - count - prev_to_zero.0).max(0) + prev_to_zero.1;
+                (0, from_target.min(from_zero))
+            } else {
+                // Excess: delete or forward extra chars
+                let excess = count - target;
+                (excess, prev_to_target.1.min(prev_to_zero.1) + excess)
+            };
 
-        for i in 0..26 {
-            let c = freq[i];
-            // range_min[j] = min cost where we can forward any amount from 0 to j
-            let mut range_min = vec![inf; max_forward];
-
-            for received in 0..max_forward {
-                if dp[received] >= inf {
-                    continue;
-                }
-
-                let total = c + received as i32;
-                let prev_cost = dp[received];
-
-                // === Option 1: Set frequency to 0 ===
-                // Cost = total (each char either deleted or changed)
-                // Can forward any amount from 0 to total
-                let cost_zero = prev_cost + total;
-                let max_fwd = if i < 25 {
-                    (total as usize).min(max_forward - 1)
-                } else {
-                    0
-                };
-                range_min[max_fwd] = range_min[max_fwd].min(cost_zero);
-
-                // === Option 2: Set frequency to target ===
-                if total >= target {
-                    // Excess: can forward any amount from 0 to excess
-                    let excess = (total - target) as usize;
-                    let cost_target = prev_cost + excess as i32;
-                    let max_fwd = if i < 25 {
-                        excess.min(max_forward - 1)
-                    } else {
-                        0
-                    };
-                    range_min[max_fwd] = range_min[max_fwd].min(cost_target);
-                } else {
-                    // Deficit: must insert, can only forward 0
-                    let needed = target - total;
-                    let cost_deficit = prev_cost + needed;
-                    range_min[0] = range_min[0].min(cost_deficit);
-                }
-            }
-
-            // Compute suffix minimums: if we can forward up to j at cost c,
-            // we can also forward any smaller amount at the same cost
-            let mut suffix_min = inf;
-            for j in (0..max_forward).rev() {
-                suffix_min = suffix_min.min(range_min[j]);
-                dp[j] = suffix_min;
-            }
+            prev_to_target = to_target;
+            prev_to_zero = to_zero;
         }
 
-        dp[0]
+        prev_to_target.1.min(prev_to_zero.1)
     }
 }
 
@@ -179,9 +99,4 @@ mod tests {
     fn test_consecutive_change() {
         assert_eq!(Solution::make_string_good("ab".to_string()), 0);
     }
-
-    // TODO: Failing test case from LeetCode (input truncated in output)
-    // Expected: 5569, Got: 5570 (off by 1)
-    // Partial input (truncated): "qrodwqxkjrzoprdusiajwziyagjqosqkrewjntvroofpzuirvppruzqfjwubhvoouwyqpqevvkvghtotifbnwsuuqsznjvmzjujspwtpjjrjjtuptwsjvuoqkiogggpkapffgkvsaryqwsvadzsosagwtpwgxkvddvyyvqofqgvuyaakuvgjxuwfkujwwpiaaavvgixbsgywyvjaxpxchifoooqvawjwgfvkvwjhrdavtpgtniiboupywpokwhiwgiwpiayhgpqyugpeadxvqxzpqizuvdjowgwnipukrjakvbvjepwgbowgjwkxtjpkkqvfrovwfjgggjgwxuiegputugpgmutpatptdqtipoiuktppyuhowzadrewuqvguzqtyxwjjuejwwwvigabpqbsyopqqkforbhnxqwfkyqaayihrsqfaswuwjuqrputwknvykwgvfvivhjpgjjofkbsbiwikwdyyggieknrvrpfjhwjiuqktjwwjgkkjjwjunvhgjvkxvwvjxgwajkxwgawvanjrszdtppwiwoaojvgvgxwttpjbipamxbhqhzqskjjhioswzarwgaousmpquwgzawgwpqgprmktwjkofxrupgwwaruswviduigaivwnkprwyjvggwqvjvhjwvkgfkoppjyiuuwyousvvykokkzpjyvrspiswtppirikirrpuuvwvupafdaursngxozggnpiiahopdjvwhuxtbjgkpwbyrrkmjymajjowujdvqgbjwwnpavutivpiqpguodihnwxaubqawsoaowpsaosoiqujhzpivhawpfsuaojwkhafkutaqggjdujposkgphowhhjpkupphzwjkuarrfiopwoftkhqqzvsvpukwrywfappiwwrigpfxafiwwvnpuvrhqwrgqqrcagvroiipndfkjrajqqdvkqghiapdvppzofdggvfwwoojmpviofaugnyotxedvgghhthhphpag..."
-    // Full input needed to add as proper test case
 }
