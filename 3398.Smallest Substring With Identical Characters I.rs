@@ -1,17 +1,19 @@
 impl Solution {
-    /// Finds minimum length of longest identical substring after at most num_ops flips
+    /// Binary search on answer with greedy validation
     ///
     /// # Intuition
-    /// Binary search on the answer - for each candidate max length, check if achievable
-    /// with the given operations by counting required flips.
+    /// The minimum achievable max-length is monotonic: if we can achieve length k,
+    /// we can also achieve any length > k. This suggests binary search.
     ///
     /// # Approach
-    /// 1. Binary search on possible answer from 1 to n
-    /// 2. For max_len = 1: need alternating pattern, count mismatches for both "010..." and "101..."
-    /// 3. For max_len > 1: for each run of length L, need floor(L / (max_len + 1)) flips
+    /// Binary search on the answer. For each candidate length `mid`:
+    /// - If `mid == 1`: we need an alternating pattern "010101..." or "101010..."
+    ///   Count mismatches for both patterns and take minimum.
+    /// - If `mid > 1`: for each run of identical characters of length `len`,
+    ///   we need `len / (mid + 1)` flips to break it into segments of at most `mid`.
     ///
     /// # Complexity
-    /// - Time: O(n log n)
+    /// - Time: O(n log n) - binary search with O(n) validation
     /// - Space: O(n)
     pub fn min_length(s: String, num_ops: i32) -> i32 {
         let chars: Vec<u8> = s.bytes().collect();
