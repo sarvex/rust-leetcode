@@ -1,64 +1,53 @@
-struct Solution;
-
 impl Solution {
     /// Counts integers in [l, r] with non-decreasing digits in base b.
     ///
     /// # Intuition
     /// Use digit DP on base-b representation. Count(r) - Count(l-1) gives
-    /// the range answer. Handle large numbers via string subtraction.
+    /// the range answer. Precompute counts for non-tight states.
     ///
     /// # Approach
-    /// 1. Convert decimal string to base-b digits
-    /// 2. Apply digit DP with memoization tracking position, last digit, tight bound, and started flag
-    /// 3. Use Count(r) - Count(l-1) formula
+    /// 1. Convert decimal string to base-b digits via repeated division
+    /// 2. Precompute dp[len][last_digit] = count of len-digit non-decreasing numbers starting with last_digit
+    /// 3. For tight bound, iterate digits and accumulate valid counts
     ///
     /// # Complexity
-    /// - Time: O(n² × b) where n is the number of base-b digits
-    /// - Space: O(n² × b) for memoization
+    /// - Time: O(n × b²) where n is the number of base-b digits
+    /// - Space: O(n × b)
     pub fn count_numbers(l: String, r: String, b: i32) -> i32 {
-        const MOD: i64 = 1_000_000_007;
+        const MOD: u64 = 1_000_000_007;
+        let b = b as usize;
 
-        fn subtract_one(s: &str) -> String {
-            let mut chars: Vec<char> = s.chars().collect();
-            let mut i = chars.len() - 1;
-            loop {
-                if chars[i] > '0' {
-                    chars[i] = (chars[i] as u8 - 1) as char;
-                    break;
-                }
-                chars[i] = '9';
+        fn subtract_one(s: &[u8]) -> Vec<u8> {
+            let mut result: Vec<u8> = s.to_vec();
+            let mut i = result.len() - 1;
+            while result[i] == 0 {
+                result[i] = 9;
                 i -= 1;
             }
-            let result: String = chars.into_iter().collect();
-            let trimmed = result.trim_start_matches('0');
-            if trimmed.is_empty() {
-                "0".to_string()
-            } else {
-                trimmed.to_string()
-            }
+            result[i] -= 1;
+            let start = result
+                .iter()
+                .position(|&x| x != 0)
+                .unwrap_or(result.len() - 1);
+            result[start..].to_vec()
         }
 
-        fn to_base(s: &str, base: i32) -> Vec<i32> {
-            if s == "0" {
-                return vec![0];
-            }
-            let mut digits: Vec<i32> = s.chars().map(|c| (c as i32) - ('0' as i32)).collect();
+        fn to_base(s: &[u8], base: usize) -> Vec<usize> {
+            let mut digits = s.to_vec();
             let mut result = Vec::new();
-            let base = base as i32;
-
-            while !digits.is_empty() && !(digits.len() == 1 && digits[0] == 0) {
-                let mut remainder = 0i32;
-                let mut new_digits = Vec::new();
+            while !digits.is_empty() {
+                let mut rem = 0u32;
+                let mut next = Vec::new();
                 for &d in &digits {
-                    let cur = remainder * 10 + d;
-                    let quotient = cur / base;
-                    remainder = cur % base;
-                    if !new_digits.is_empty() || quotient > 0 {
-                        new_digits.push(quotient);
+                    let cur = rem * 10 + d as u32;
+                    let q = cur / base as u32;
+                    rem = cur % base as u32;
+                    if !next.is_empty() || q > 0 {
+                        next.push(q as u8);
                     }
                 }
-                result.push(remainder);
-                digits = new_digits;
+                result.push(rem as usize);
+                digits = next;
             }
             result.reverse();
             if result.is_empty() {
@@ -68,83 +57,76 @@ impl Solution {
             }
         }
 
-        fn count(digits: &[i32], base: i32, memo: &mut Vec<Vec<Vec<Vec<i64>>>>) -> i64 {
+        // dp[i][d] = count of i-digit non-decreasing numbers where first digit is d
+        fn build_dp(max_len: usize, base: usize) -> Vec<Vec<u64>> {
+            let mut dp = vec![vec![0u64; base + 1]; max_len + 1];
+            for d in 0..=base {
+                dp[0][d] = 1;
+            }
+            for len in 1..=max_len {
+                dp[len][base] = 0;
+                for d in (0..base).rev() {
+                    dp[len][d] = (dp[len][d + 1] + dp[len - 1][d]) % MOD;
+                }
+            }
+            dp
+        }
+
+        // Count non-decreasing numbers <= digits (in base b)
+        fn count(digits: &[usize], base: usize, dp: &[Vec<u64>]) -> u64 {
             let n = digits.len();
             if n == 0 {
                 return 0;
             }
+            let mut result = 0u64;
 
-            fn dp(
-                pos: usize,
-                last: usize,
-                tight: bool,
-                started: bool,
-                digits: &[i32],
-                base: usize,
-                memo: &mut Vec<Vec<Vec<Vec<i64>>>>,
-            ) -> i64 {
-                const MOD: i64 = 1_000_000_007;
-                if pos == digits.len() {
-                    return if started { 1 } else { 0 };
+            // Count numbers with fewer digits (1 to n-1 digits)
+            for len in 1..n {
+                for d in 1..base {
+                    result = (result + dp[len - 1][d]) % MOD;
                 }
-
-                let tight_idx = if tight { 1 } else { 0 };
-                let started_idx = if started { 1 } else { 0 };
-
-                if memo[pos][last][tight_idx][started_idx] != -1 {
-                    return memo[pos][last][tight_idx][started_idx];
-                }
-
-                let limit = if tight {
-                    digits[pos] as usize
-                } else {
-                    base - 1
-                };
-                let mut result = 0i64;
-
-                for d in 0..=limit {
-                    if !started {
-                        if d == 0 {
-                            result +=
-                                dp(pos + 1, 0, tight && d == limit, false, digits, base, memo);
-                        } else {
-                            result += dp(pos + 1, d, tight && d == limit, true, digits, base, memo);
-                        }
-                    } else if d >= last {
-                        result += dp(pos + 1, d, tight && d == limit, true, digits, base, memo);
-                    }
-                    result %= MOD;
-                }
-
-                memo[pos][last][tight_idx][started_idx] = result;
-                result
             }
 
-            let base = base as usize;
-            dp(0, 0, true, false, digits, base, memo)
+            // Count n-digit numbers <= digits
+            let mut last = 0;
+            for (i, &d) in digits.iter().enumerate() {
+                let remaining = n - 1 - i;
+                let start = if i == 0 { 1.max(last) } else { last };
+                for digit in start..d {
+                    result = (result + dp[remaining][digit]) % MOD;
+                }
+                if d < last {
+                    return result;
+                }
+                last = d;
+            }
+            result + 1 // Include the number itself
         }
 
-        let r_digits = to_base(&r, b);
-        let l_minus_1 = subtract_one(&l);
+        let l_bytes: Vec<u8> = l.bytes().map(|c| c - b'0').collect();
+        let r_bytes: Vec<u8> = r.bytes().map(|c| c - b'0').collect();
+
+        let r_digits = to_base(&r_bytes, b);
+        let l_minus_1 = subtract_one(&l_bytes);
         let l_digits = to_base(&l_minus_1, b);
 
-        let mut memo_r = vec![vec![vec![vec![-1i64; 2]; 2]; b as usize]; r_digits.len()];
-        let count_r = count(&r_digits, b, &mut memo_r);
+        let max_len = r_digits.len();
+        let dp = build_dp(max_len, b);
 
-        let count_l = if l_minus_1 == "0" && l != "0" {
+        let count_r = count(&r_digits, b, &dp);
+        let count_l = if l_minus_1.is_empty() || (l_minus_1.len() == 1 && l_minus_1[0] == 0) {
             0
         } else {
-            let mut memo_l = vec![vec![vec![vec![-1i64; 2]; 2]; b as usize]; l_digits.len()];
-            count(&l_digits, b, &mut memo_l)
+            count(&l_digits, b, &dp)
         };
 
-        ((count_r - count_l % MOD + MOD) % MOD) as i32
+        ((count_r + MOD - count_l) % MOD) as i32
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::Solution;
 
     #[test]
     fn test_example_1() {

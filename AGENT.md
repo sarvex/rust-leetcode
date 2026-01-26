@@ -1,4 +1,3 @@
-
 # Rust Agent Rules
 
 This rules file defines standards for enterprise-grade, production-ready Rust development, adhering to idiomatic Rust patterns, industry best practices, clean architecture principles, and self-documenting code conventions optimized for maximum performance and efficiency.
@@ -181,7 +180,6 @@ for item in &items {
 - Write self-documenting code with descriptive variable and function names and minimal comments
 - Document complex algorithms with high-level explanations
 - Use doc comments to explain "why" decisions were made
-- Document safety requirements for `unsafe` code blocks
 - Include performance characteristics for critical paths
 - Document invariants and assumptions
 - Comment complex closure chains explaining the transformation pipeline
@@ -361,13 +359,12 @@ for item in &items {
 
 ### Safety Practices
 
-- Minimize use of `unsafe` code
-- Document and encapsulate all `unsafe` blocks
-- Provide safe abstractions over unsafe code
-- Use `#[forbid(unsafe_code)]` where appropriate
+- **Never use `unsafe` code** - always find safe alternatives
+- Use `#[forbid(unsafe_code)]` at the crate level
 - Use bounds checking or validation for all input
 - Audit external dependencies for unsafe usage
 - Never expose raw pointers in public APIs
+- Prefer safe abstractions from std library over manual memory management
 
 ### Security Considerations
 
