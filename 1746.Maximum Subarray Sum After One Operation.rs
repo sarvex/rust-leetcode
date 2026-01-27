@@ -1,25 +1,53 @@
 impl Solution {
-    #[allow(dead_code)]
+    /// DP tracking max subarray with optional single-element squaring.
+    ///
+    /// # Intuition
+    /// Maintain two DP states: `f` for the best subarray ending here with no
+    /// squaring, and `g` for the best subarray ending here with exactly one
+    /// element squared. At each step we can either start fresh or extend.
+    ///
+    /// # Approach
+    /// 1. `f = max(f, 0) + nums[i]` — standard Kadane's.
+    /// 2. `g = max(max(f_prev, 0) + nums[i]², g_prev + nums[i])` — either
+    ///    square the current element or extend a subarray that already used its square.
+    /// 3. Track the global maximum of `g`.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(1)
     pub fn max_sum_after_operation(nums: Vec<i32>) -> i32 {
-        // Here f[i] represents the value of max sub-array that ends with nums[i] with no substitution
-        let mut f = 0;
-        // g[i] represents the case with exact one substitution
-        let mut g = 0;
-        let mut ret = 1 << 31;
-
-        // Begin the actual dp process
-        for e in &nums {
-            // f[i] = MAX(f[i - 1], 0) + nums[i]
-            let new_f = std::cmp::max(f, 0) + *e;
-            // g[i] = MAX(MAX(f[i - 1], 0) + nums[i] * nums[i], g[i - 1] + nums[i])
-            let new_g = std::cmp::max(std::cmp::max(f, 0) + *e * *e, g + *e);
-            // Update f[i] & g[i]
+        let (mut f, mut g, mut result) = (0i64, 0i64, i64::MIN);
+        for &e in &nums {
+            let e = e as i64;
+            let new_f = f.max(0) + e;
+            let new_g = (f.max(0) + e * e).max(g + e);
             f = new_f;
             g = new_g;
-            // Since we start at 0, update answer after updating f[i] & g[i]
-            ret = std::cmp::max(ret, g);
+            result = result.max(g);
         }
+        result as i32
+    }
+}
 
-        ret
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_example_one() {
+        assert_eq!(Solution::max_sum_after_operation(vec![2, -1, -4, -3]), 17);
+    }
+
+    #[test]
+    fn test_example_two() {
+        assert_eq!(
+            Solution::max_sum_after_operation(vec![1, -1, 1, 1, -1, -1, 1]),
+            4
+        );
+    }
+
+    #[test]
+    fn test_single_element() {
+        assert_eq!(Solution::max_sum_after_operation(vec![5]), 25);
     }
 }
