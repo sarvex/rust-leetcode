@@ -46,7 +46,7 @@ impl Solution {
 
             let mut result = current_dp[length];
 
-            for _segment in 1..partition_count {
+            for _ in 1..partition_count {
                 next_dp.fill(NEG_INFINITY);
 
                 let mut best_minus_value = NEG_INFINITY;

@@ -1,5 +1,5 @@
 impl Solution {
-    /// Minimum cost to merge sorted lists using bitmask DP.
+    /// Bitmask DP with coordinate-compressed median computation
     ///
     /// # Intuition
     /// With at most 12 lists, bitmask DP explores all merge orders. Computing medians via
@@ -75,10 +75,9 @@ impl Solution {
         };
 
         let median: Vec<i32> = (0..nmask)
-            .map(|mask| {
-                if mask == 0 {
-                    0
-                } else {
+            .map(|mask| match mask {
+                0 => 0,
+                _ => {
                     let idx =
                         median_for_mask(&members_base[mask], mcount[mask] as usize, k_mask[mask]);
                     values[idx]
@@ -88,9 +87,7 @@ impl Solution {
 
         let inf: i64 = i64::MAX / 4;
         let mut dp = vec![inf; nmask];
-        for i in 0..n {
-            dp[1usize << i] = 0;
-        }
+        (0..n).for_each(|i| dp[1usize << i] = 0);
 
         for mask in 1..nmask {
             if mask & (mask - 1) == 0 {
@@ -104,7 +101,6 @@ impl Solution {
             while sub != 0 {
                 if (sub & fixed) != 0 {
                     let other = mask ^ sub;
-
                     let diff = (median[sub] as i64 - median[other] as i64).abs();
                     let cost = dp[sub] + dp[other] + lenm + diff;
                     best = best.min(cost);

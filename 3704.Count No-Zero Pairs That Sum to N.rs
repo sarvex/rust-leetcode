@@ -74,7 +74,7 @@ impl Solution {
         }
 
         // Sum states with no remaining carry
-        dp[0][0][0] + dp[0][0][1] + dp[0][1][0] + dp[0][1][1]
+        dp[0].iter().flatten().sum()
     }
 }
 

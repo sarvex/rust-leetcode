@@ -3,7 +3,7 @@ use std::cmp::min;
 const MOD: u32 = 1_000_000_007;
 
 impl Solution {
-    /// Count Routes to Climb a Rectangular Grid using Optimized DP
+    /// Optimized DP with prefix sums for counting grid climbing routes
     ///
     /// # Intuition
     /// Use two DP states: dp0 (arrived from below) and dp1 (arrived via horizontal move).
@@ -24,7 +24,10 @@ impl Solution {
         let grid: Vec<&[u8]> = grid.iter().map(|s| s.as_bytes()).collect();
 
         let d_sq = d * d;
-        let du = if d_sq >= 1 { Self::isqrt(d_sq - 1) } else { 0 };
+        let du = match d_sq >= 1 {
+            true => Self::isqrt(d_sq - 1),
+            false => 0,
+        };
 
         let rd = min(d, m - 1);
         let rdu = min(du, m - 1);
@@ -40,54 +43,49 @@ impl Solution {
         let mut pref = vec![0u64; m + 1];
 
         let bottom = grid[n - 1];
-        for j in 0..m {
+        (0..m).for_each(|j| {
             if bottom[j] == b'.' {
                 dp0[j] = 1;
             }
-        }
+        });
 
         Self::build_prefix(&dp0, &mut pref);
-        for j in 0..m {
+        (0..m).for_each(|j| {
             if bottom[j] == b'.' {
                 let sum = Self::range_sum(&pref, ld[j], rd1[j]);
                 dp1[j] = Self::sub_mod(sum, dp0[j]);
             }
-        }
+        });
 
         for row in (0..n - 1).rev() {
             let cur_row = grid[row];
 
             Self::build_prefix_combined(&dp0, &dp1, &mut pref);
-            for j in 0..m {
-                new0[j] = if cur_row[j] == b'.' {
-                    Self::range_sum(&pref, lu[j], ru1[j])
-                } else {
-                    0
+            (0..m).for_each(|j| {
+                new0[j] = match cur_row[j] == b'.' {
+                    true => Self::range_sum(&pref, lu[j], ru1[j]),
+                    false => 0,
                 };
-            }
+            });
 
             std::mem::swap(&mut dp0, &mut new0);
 
             Self::build_prefix(&dp0, &mut pref);
-            for j in 0..m {
-                if cur_row[j] == b'.' {
-                    let sum = Self::range_sum(&pref, ld[j], rd1[j]);
-                    dp1[j] = Self::sub_mod(sum, dp0[j]);
-                } else {
-                    dp1[j] = 0;
-                }
-            }
+            (0..m).for_each(|j| {
+                dp1[j] = match cur_row[j] == b'.' {
+                    true => {
+                        let sum = Self::range_sum(&pref, ld[j], rd1[j]);
+                        Self::sub_mod(sum, dp0[j])
+                    }
+                    false => 0,
+                };
+            });
         }
 
         let top = grid[0];
-        let mut ans = 0u32;
-        for j in 0..m {
-            if top[j] == b'.' {
-                ans = Self::add_mod(ans, Self::add_mod(dp0[j], dp1[j]));
-            }
-        }
-
-        ans as i32
+        (0..m).filter(|&j| top[j] == b'.').fold(0u32, |ans, j| {
+            Self::add_mod(ans, Self::add_mod(dp0[j], dp1[j]))
+        }) as i32
     }
 
     #[inline(always)]
@@ -124,17 +122,20 @@ impl Solution {
     #[inline(always)]
     fn build_prefix(arr: &[u32], pref: &mut [u64]) {
         pref[0] = 0;
-        for j in 0..arr.len() {
-            pref[j + 1] = pref[j] + arr[j] as u64;
-        }
+        arr.iter().enumerate().for_each(|(j, &val)| {
+            pref[j + 1] = pref[j] + val as u64;
+        });
     }
 
     #[inline(always)]
     fn build_prefix_combined(a: &[u32], b: &[u32], pref: &mut [u64]) {
         pref[0] = 0;
-        for j in 0..a.len() {
-            pref[j + 1] = pref[j] + a[j] as u64 + b[j] as u64;
-        }
+        a.iter()
+            .zip(b.iter())
+            .enumerate()
+            .for_each(|(j, (&av, &bv))| {
+                pref[j + 1] = pref[j] + av as u64 + bv as u64;
+            });
     }
 
     #[inline(always)]
@@ -148,25 +149,25 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn test_small_grid_distance_one() {
         let grid = vec!["..".to_string(), "#.".to_string()];
         assert_eq!(Solution::number_of_routes(grid, 1), 2);
     }
 
     #[test]
-    fn test_example_2() {
+    fn test_small_grid_distance_two() {
         let grid = vec!["..".to_string(), "#.".to_string()];
         assert_eq!(Solution::number_of_routes(grid, 2), 4);
     }
 
     #[test]
-    fn test_example_3() {
+    fn test_single_blocked_cell() {
         let grid = vec!["#".to_string()];
         assert_eq!(Solution::number_of_routes(grid, 750), 0);
     }
 
     #[test]
-    fn test_example_4() {
+    fn test_single_row_two_columns() {
         let grid = vec!["..".to_string()];
         assert_eq!(Solution::number_of_routes(grid, 1), 4);
     }
@@ -178,7 +179,7 @@ mod tests {
     }
 
     #[test]
-    fn test_single_cell() {
+    fn test_single_open_cell() {
         let grid = vec![".".to_string()];
         assert_eq!(Solution::number_of_routes(grid, 1), 1);
     }

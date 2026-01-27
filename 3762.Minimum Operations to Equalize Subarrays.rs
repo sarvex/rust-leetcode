@@ -29,15 +29,12 @@ impl Solution {
         let remainders: Vec<i32> = nums.iter().map(|&x| x % k).collect();
         let quotients: Vec<i64> = nums.iter().map(|&x| (x / k) as i64).collect();
 
-        let mut remainder_changes = vec![0i32; num_elements];
-        for i in 1..num_elements {
-            remainder_changes[i] = remainder_changes[i - 1]
-                + if remainders[i] != remainders[i - 1] {
-                    1
-                } else {
-                    0
-                };
-        }
+        let remainder_changes: Vec<i32> = std::iter::once(0i32)
+            .chain(remainders.windows(2).scan(0i32, |acc, w| {
+                *acc += i32::from(w[0] != w[1]);
+                Some(*acc)
+            }))
+            .collect();
 
         let mut compressed_values: Vec<i64> = quotients.clone();
         compressed_values.sort_unstable();
@@ -214,5 +211,45 @@ impl Solution {
         }
 
         results
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_single_element_subarray() {
+        let nums = vec![3, 6, 9];
+        let queries = vec![vec![0, 0], vec![1, 1], vec![2, 2]];
+        assert_eq!(Solution::min_operations(nums, 3, queries), vec![0, 0, 0]);
+    }
+
+    #[test]
+    fn test_same_remainder_subarray() {
+        let nums = vec![1, 4, 7];
+        let queries = vec![vec![0, 2]];
+        assert_eq!(Solution::min_operations(nums, 3, queries), vec![2]);
+    }
+
+    #[test]
+    fn test_different_remainders_returns_negative_one() {
+        let nums = vec![1, 2, 4];
+        let queries = vec![vec![0, 1]];
+        assert_eq!(Solution::min_operations(nums, 3, queries), vec![-1]);
+    }
+
+    #[test]
+    fn test_all_equal_elements() {
+        let nums = vec![5, 5, 5];
+        let queries = vec![vec![0, 2]];
+        assert_eq!(Solution::min_operations(nums, 1, queries), vec![0]);
+    }
+
+    #[test]
+    fn test_two_element_subarray() {
+        let nums = vec![2, 8];
+        let queries = vec![vec![0, 1]];
+        assert_eq!(Solution::min_operations(nums, 3, queries), vec![2]);
     }
 }

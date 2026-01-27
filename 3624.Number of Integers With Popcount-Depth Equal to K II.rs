@@ -41,28 +41,27 @@ struct PopcountDepthCache {
 
 impl PopcountDepthCache {
     fn new() -> Self {
-        let mut depth_cache = Vec::with_capacity(65);
-        for value in 0..=64 {
-            depth_cache.push(Self::compute_depth(value as i32) - 1);
-        }
+        let depth_cache = (0..=64)
+            .map(|value| Self::compute_depth(value as i32) - 1)
+            .collect();
         Self { depth_cache }
     }
 
     fn get_depth(&self, number: i64) -> i32 {
         let number = number as usize;
-        if number < self.depth_cache.len() {
-            self.depth_cache[number]
-        } else {
-            let popcount = number.count_ones() as usize;
-            self.depth_cache[popcount] + 1
+        match number < self.depth_cache.len() {
+            true => self.depth_cache[number],
+            false => {
+                let popcount = number.count_ones() as usize;
+                self.depth_cache[popcount] + 1
+            }
         }
     }
 
     fn compute_depth(value: i32) -> i32 {
-        if value <= 1 {
-            value
-        } else {
-            1 + Self::compute_depth(value.count_ones() as i32)
+        match value {
+            0 | 1 => value,
+            _ => 1 + Self::compute_depth(value.count_ones() as i32),
         }
     }
 }
@@ -87,39 +86,39 @@ impl Solution {
     pub fn popcount_depth(mut nums: Vec<i64>, queries: Vec<Vec<i64>>) -> Vec<i32> {
         let array_size = nums.len();
         let depth_cache = PopcountDepthCache::new();
-        let mut depth_trees = (0..5).map(|_| BinaryIndexedTree::new(array_size)).collect::<Vec<_>>();
+        let mut depth_trees: Vec<_> = (0..5).map(|_| BinaryIndexedTree::new(array_size)).collect();
 
-        for (index, &number) in nums.iter().enumerate() {
+        nums.iter().enumerate().for_each(|(index, &number)| {
             let depth = depth_cache.get_depth(number) as usize;
             if depth < depth_trees.len() {
                 depth_trees[depth].update(index, 1);
             }
-        }
+        });
 
-        let mut result = Vec::new();
-        for query in queries {
-            if query[0] == 1 {
-                let left = query[1] as usize;
-                let right = query[2] as usize;
-                let target_depth = query[3] as usize;
-                if target_depth < depth_trees.len() {
-                    result.push(depth_trees[target_depth].range_sum(left, right) as i32);
-                } else {
-                    result.push(0);
+        let mut result = Vec::with_capacity(queries.len());
+        for query in &queries {
+            match query[0] {
+                1 => {
+                    let (left, right, target_depth) =
+                        (query[1] as usize, query[2] as usize, query[3] as usize);
+                    result.push(match target_depth < depth_trees.len() {
+                        true => depth_trees[target_depth].range_sum(left, right) as i32,
+                        false => 0,
+                    });
                 }
-            } else {
-                let index = query[1] as usize;
-                let new_value = query[2];
-                let old_depth = depth_cache.get_depth(nums[index]) as usize;
-                let new_depth = depth_cache.get_depth(new_value) as usize;
+                _ => {
+                    let (index, new_value) = (query[1] as usize, query[2]);
+                    let old_depth = depth_cache.get_depth(nums[index]) as usize;
+                    let new_depth = depth_cache.get_depth(new_value) as usize;
 
-                nums[index] = new_value;
-                if old_depth != new_depth {
-                    if old_depth < depth_trees.len() {
-                        depth_trees[old_depth].update(index, -1);
-                    }
-                    if new_depth < depth_trees.len() {
-                        depth_trees[new_depth].update(index, 1);
+                    nums[index] = new_value;
+                    if old_depth != new_depth {
+                        if old_depth < depth_trees.len() {
+                            depth_trees[old_depth].update(index, -1);
+                        }
+                        if new_depth < depth_trees.len() {
+                            depth_trees[new_depth].update(index, 1);
+                        }
                     }
                 }
             }
@@ -133,14 +132,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example1() {
+    fn popcount_depth_basic_query_and_update() {
         let nums = vec![2, 4];
         let queries = vec![vec![1, 0, 1, 1], vec![2, 1, 1], vec![1, 0, 1, 0]];
         assert_eq!(Solution::popcount_depth(nums, queries), vec![2, 1]);
     }
 
     #[test]
-    fn test_example2() {
+    fn popcount_depth_multiple_depths() {
         let nums = vec![3, 5, 6];
         let queries = vec![
             vec![1, 0, 2, 2],
@@ -152,7 +151,7 @@ mod tests {
     }
 
     #[test]
-    fn test_example3() {
+    fn popcount_depth_update_changes_depth() {
         let nums = vec![1, 2];
         let queries = vec![
             vec![1, 0, 1, 1],

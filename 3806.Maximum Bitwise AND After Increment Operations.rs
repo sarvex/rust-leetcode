@@ -1,17 +1,18 @@
 impl Solution {
-    /// Maximum Bitwise AND After Increment Operations
+    /// Greedy bit-by-bit construction with sorted array and prefix sums
     ///
     /// # Intuition
     /// Process bits high to low. Mask values to current window and use prefix sums
-    /// on sorted array for O(1) cost queries.
+    /// on sorted array for O(1) cost queries to determine if a bit can be set.
     ///
     /// # Approach
-    /// 1. Sort array once
+    /// 1. Sort array once and process bits from MSB to LSB
     /// 2. For each bit, clamp high values and maintain sorted order via merge
     /// 3. Use prefix sums: cost = target * count - sum(elements below target)
+    /// 4. Set the bit if total increment cost for top m elements does not exceed k
     ///
     /// # Complexity
-    /// - Time: O(n log n + n * B) amortized
+    /// - Time: O(n log n + n * B) amortized where B is the number of bits
     /// - Space: O(n)
     pub fn maximum_and(nums: Vec<i32>, k: i32, m: i32) -> i32 {
         let n = nums.len();
@@ -41,40 +42,33 @@ impl Solution {
             let target = result | (1i64 << bit);
             let mask = result | ((1i64 << (bit + 1)) - 1);
 
-            // Clamp values above mask
             let clamp_idx = a.partition_point(|&x| x <= mask);
             if clamp_idx < n {
-                for v in &mut a[clamp_idx..] {
-                    *v &= mask;
-                }
+                a[clamp_idx..].iter_mut().for_each(|v| *v &= mask);
 
-                // Sort suffix and merge with prefix
                 let suffix_len = n - clamp_idx;
-                if suffix_len <= 64 || suffix_len * 4 <= n {
-                    // Small suffix: sort and merge
-                    a[clamp_idx..].sort_unstable();
-                    Self::merge(&a[..clamp_idx], &a[clamp_idx..], &mut buf);
-                    a.copy_from_slice(&buf);
-                } else {
-                    // Large suffix: full sort is simpler
-                    a.sort_unstable();
+                match suffix_len <= 64 || suffix_len * 4 <= n {
+                    true => {
+                        a[clamp_idx..].sort_unstable();
+                        Self::merge(&a[..clamp_idx], &a[clamp_idx..], &mut buf);
+                        a.copy_from_slice(&buf);
+                    }
+                    false => a.sort_unstable(),
                 }
                 psum_valid = false;
             }
 
             if !psum_valid {
                 psum[0] = 0;
-                for i in 0..n {
-                    psum[i + 1] = psum[i] + a[i];
-                }
+                a.iter().enumerate().for_each(|(i, &val)| {
+                    psum[i + 1] = psum[i] + val;
+                });
                 psum_valid = true;
             }
 
-            // Cost for top m elements to reach target
             let start = n - m;
             let target_idx = start + a[start..].partition_point(|&x| x < target);
             let below_count = (target_idx - start) as i64;
-
             let cost = target * below_count - (psum[target_idx] - psum[start]);
 
             if cost <= k {
@@ -89,12 +83,15 @@ impl Solution {
     fn merge(left: &[i64], right: &[i64], out: &mut [i64]) {
         let (mut i, mut j, mut k) = (0, 0, 0);
         while i < left.len() && j < right.len() {
-            if left[i] <= right[j] {
-                out[k] = left[i];
-                i += 1;
-            } else {
-                out[k] = right[j];
-                j += 1;
+            match left[i] <= right[j] {
+                true => {
+                    out[k] = left[i];
+                    i += 1;
+                }
+                false => {
+                    out[k] = right[j];
+                    j += 1;
+                }
             }
             k += 1;
         }
@@ -109,17 +106,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn test_basic_three_elements() {
         assert_eq!(Solution::maximum_and(vec![3, 1, 2], 8, 2), 6);
     }
 
     #[test]
-    fn test_example_2() {
+    fn test_four_elements_select_three() {
         assert_eq!(Solution::maximum_and(vec![1, 2, 8, 4], 7, 3), 4);
     }
 
     #[test]
-    fn test_example_3() {
+    fn test_two_ones_with_budget() {
         assert_eq!(Solution::maximum_and(vec![1, 1], 3, 2), 2);
     }
 
@@ -134,7 +131,7 @@ mod tests {
     }
 
     #[test]
-    fn test_all_same() {
+    fn test_all_same_values() {
         assert_eq!(Solution::maximum_and(vec![4, 4, 4], 0, 3), 4);
     }
 

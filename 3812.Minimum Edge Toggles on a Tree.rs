@@ -1,5 +1,5 @@
 impl Solution {
-    /// Determines minimum edge toggles to transform start to target colors.
+    /// Leaf-peeling approach to determine minimum edge toggles on a tree
     ///
     /// # Intuition
     /// A leaf node has only one edge. If a leaf needs flipping, we must toggle that edge.
@@ -10,7 +10,7 @@ impl Solution {
     /// 2. Initialize stack with all leaves (degree == 1)
     /// 3. For each leaf: if mismatched, toggle its edge (flipping both endpoints)
     /// 4. Remove leaf by decrementing neighbor degrees, push new leaves
-    /// 5. Use boolean toggle array to avoid sorting
+    /// 5. Collect toggled edge indices as the result
     ///
     /// # Complexity
     /// - Time: O(n)
@@ -43,8 +43,7 @@ impl Solution {
 
         while let Some(v) = stack.pop() {
             if mismatch[v] {
-                let neighbor = graph[v].iter().find(|&&(_, u)| degree[u] > 0);
-                match neighbor {
+                match graph[v].iter().find(|(_, u)| degree[*u] > 0) {
                     Some(&(edge_idx, u)) => {
                         mismatch[u] = !mismatch[u];
                         toggle[edge_idx] = true;
@@ -77,7 +76,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn test_simple_three_node_flip() {
         let result = Solution::minimum_flips(
             3,
             vec![vec![0, 1], vec![1, 2]],
@@ -88,7 +87,7 @@ mod tests {
     }
 
     #[test]
-    fn test_example_2() {
+    fn test_seven_node_multiple_flips() {
         let result = Solution::minimum_flips(
             7,
             vec![
@@ -106,13 +105,9 @@ mod tests {
     }
 
     #[test]
-    fn test_example_3_impossible() {
-        let result = Solution::minimum_flips(
-            2,
-            vec![vec![0, 1]],
-            "00".to_string(),
-            "01".to_string(),
-        );
+    fn test_impossible_two_nodes() {
+        let result =
+            Solution::minimum_flips(2, vec![vec![0, 1]], "00".to_string(), "01".to_string());
         assert_eq!(result, vec![-1]);
     }
 
@@ -141,12 +136,8 @@ mod tests {
 
     #[test]
     fn test_two_nodes_both_flip() {
-        let result = Solution::minimum_flips(
-            2,
-            vec![vec![0, 1]],
-            "00".to_string(),
-            "11".to_string(),
-        );
+        let result =
+            Solution::minimum_flips(2, vec![vec![0, 1]], "00".to_string(), "11".to_string());
         assert_eq!(result, vec![0]);
     }
 }

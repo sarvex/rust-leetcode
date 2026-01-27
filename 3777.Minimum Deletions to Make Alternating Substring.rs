@@ -67,26 +67,27 @@ impl Solution {
     pub fn min_deletions(s: String, queries: Vec<Vec<i32>>) -> Vec<i32> {
         let len = s.len();
         let mut bytes = s.as_bytes().to_vec();
-        let mut values = vec![0];
-        for win in bytes.windows(2) {
-            values.push(i32::from(win[0] == win[1]));
-        }
+        let values: Vec<i32> = std::iter::once(0)
+            .chain(bytes.windows(2).map(|w| i32::from(w[0] == w[1])))
+            .collect();
         let mut tree = Fenwick::from_slice(&values);
-        let mut ans = vec![];
+        let mut ans = Vec::with_capacity(queries.len());
         for query in &queries {
-            if query[0] == 1 {
-                let idx = query[1] as usize;
-                bytes[idx] = if bytes[idx] == b'A' { b'B' } else { b'A' };
-                if idx > 0 {
-                    tree.update(idx, i32::from(bytes[idx - 1] == bytes[idx]));
+            match query[0] {
+                1 => {
+                    let idx = query[1] as usize;
+                    bytes[idx] = if bytes[idx] == b'A' { b'B' } else { b'A' };
+                    if idx > 0 {
+                        tree.update(idx, i32::from(bytes[idx - 1] == bytes[idx]));
+                    }
+                    if idx + 1 < len {
+                        tree.update(idx + 1, i32::from(bytes[idx] == bytes[idx + 1]));
+                    }
                 }
-                if idx + 1 < len {
-                    tree.update(idx + 1, i32::from(bytes[idx] == bytes[idx + 1]));
+                _ => {
+                    let (left, right) = (query[1] as usize, query[2] as usize);
+                    ans.push(tree.query_range(left + 1, right));
                 }
-            } else {
-                let left = query[1] as usize;
-                let right = query[2] as usize;
-                ans.push(tree.query_range(left + 1, right));
             }
         }
         ans

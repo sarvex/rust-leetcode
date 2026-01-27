@@ -54,11 +54,13 @@ impl Solution {
                 while let Some(u) = stack.pop() {
                     for v in 0..n {
                         if v != u && dist_matrix[u][v] < threshold {
-                            if color[v] == -1 {
-                                color[v] = 1 - color[u];
-                                stack.push(v);
-                            } else if color[v] == color[u] {
-                                return false;
+                            match color[v] {
+                                -1 => {
+                                    color[v] = 1 - color[u];
+                                    stack.push(v);
+                                }
+                                c if c == color[u] => return false,
+                                _ => {}
                             }
                         }
                     }

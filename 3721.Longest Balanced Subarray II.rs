@@ -163,11 +163,11 @@ impl Solution {
         let mut next_occurrence: Vec<u32> = vec![num_elements_u32; num_elements];
         let mut last_position: Vec<u32> = vec![num_elements_u32; MAXV + 1];
 
-        for index in (0..num_elements).rev() {
+        (0..num_elements).rev().for_each(|index| {
             let value = nums[index] as usize;
             next_occurrence[index] = last_position[value];
             last_position[value] = index as u32;
-        }
+        });
 
         // Build difference array: diff[r] = (#odd - #even) for subarray [0, r]
         let mut seen_values: Vec<u8> = vec![0; MAXV + 1];
@@ -176,19 +176,23 @@ impl Solution {
         let mut distinct_odd_count = 0;
         let mut distinct_even_count = 0;
 
-        for index in 0..num_elements {
+        (0..num_elements).for_each(|index| {
             let value = nums[index] as usize;
             if seen_values[value] == 0 {
                 seen_values[value] = 1;
-                balance += if (value & 1) == 1 { 1 } else { -1 };
-                if (value & 1) == 1 {
-                    distinct_odd_count += 1;
-                } else {
-                    distinct_even_count += 1;
+                match value & 1 {
+                    1 => {
+                        balance += 1;
+                        distinct_odd_count += 1;
+                    }
+                    _ => {
+                        balance -= 1;
+                        distinct_even_count += 1;
+                    }
                 }
             }
             difference[index] = balance;
-        }
+        });
 
         // Early exits
         if distinct_odd_count == 0 || distinct_even_count == 0 {

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 impl Solution {
-    /// Finds majority element meeting threshold frequency in subarrays.
+    /// Finds majority element meeting threshold frequency in subarrays via Mo's algorithm
     ///
     /// # Intuition
     /// Use Mo's algorithm with lazy max tracking. Maintain sliding window over
@@ -21,17 +21,19 @@ impl Solution {
     pub fn subarray_majority(nums: Vec<i32>, queries: Vec<Vec<i32>>) -> Vec<i32> {
         let n = nums.len();
 
-        let mut compressed = vec![0usize; n];
-        let mut val_to_idx = HashMap::new();
+        let mut val_to_idx: HashMap<i32, usize> = HashMap::new();
         let mut idx_to_val = Vec::with_capacity(n / 4);
 
-        for (i, &val) in nums.iter().enumerate() {
-            compressed[i] = *val_to_idx.entry(val).or_insert_with(|| {
-                let idx = idx_to_val.len();
-                idx_to_val.push(val);
-                idx
-            });
-        }
+        let compressed: Vec<usize> = nums
+            .iter()
+            .map(|&val| {
+                *val_to_idx.entry(val).or_insert_with(|| {
+                    let idx = idx_to_val.len();
+                    idx_to_val.push(val);
+                    idx
+                })
+            })
+            .collect();
 
         let num_distinct = idx_to_val.len();
         let block_size = 1 + n.isqrt() / 2;
@@ -52,7 +54,6 @@ impl Solution {
         let mut max_count = -1i32;
 
         for (target_left, target_right, threshold, query_idx) in sorted_queries {
-            // Contract left
             while window_left < target_left {
                 let idx = compressed[window_left];
                 freq[idx] -= 1;
@@ -63,7 +64,6 @@ impl Solution {
                 window_left += 1;
             }
 
-            // Contract right
             while window_right > target_right {
                 window_right -= 1;
                 let idx = compressed[window_right];
@@ -74,7 +74,6 @@ impl Solution {
                 }
             }
 
-            // Expand left
             while window_left > target_left {
                 window_left -= 1;
                 let idx = compressed[window_left];
@@ -88,7 +87,6 @@ impl Solution {
                 }
             }
 
-            // Expand right
             while window_right < target_right {
                 let idx = compressed[window_right];
                 freq[idx] += 1;
@@ -102,7 +100,6 @@ impl Solution {
                 window_right += 1;
             }
 
-            // Lazy recomputation when max invalidated
             if max_idx == num_distinct {
                 for i in 0..num_distinct {
                     if freq[i] > max_count
@@ -130,28 +127,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example_1() {
+    fn majority_with_clear_winner() {
         let nums = vec![1, 1, 2, 2, 1, 1];
         let queries = vec![vec![0, 5, 4], vec![0, 3, 3], vec![2, 3, 2]];
         assert_eq!(Solution::subarray_majority(nums, queries), vec![1, -1, 2]);
     }
 
     #[test]
-    fn example_2() {
+    fn alternating_elements_tie_breaking() {
         let nums = vec![3, 2, 3, 2, 3, 2, 3];
         let queries = vec![vec![0, 6, 4], vec![1, 5, 2], vec![2, 4, 1], vec![3, 3, 1]];
         assert_eq!(Solution::subarray_majority(nums, queries), vec![3, 2, 3, 2]);
     }
 
     #[test]
-    fn single_element_query() {
+    fn single_element_meets_threshold() {
         let nums = vec![5];
         let queries = vec![vec![0, 0, 1]];
         assert_eq!(Solution::subarray_majority(nums, queries), vec![5]);
     }
 
     #[test]
-    fn tie_breaking_smallest_value() {
+    fn tie_selects_smallest_value() {
         let nums = vec![1, 2, 1, 2];
         let queries = vec![vec![0, 3, 2]];
         assert_eq!(Solution::subarray_majority(nums, queries), vec![1]);
@@ -165,14 +162,14 @@ mod tests {
     }
 
     #[test]
-    fn higher_frequency_wins() {
+    fn higher_frequency_wins_over_smaller_value() {
         let nums = vec![1, 1, 1, 2, 2];
         let queries = vec![vec![0, 4, 2]];
         assert_eq!(Solution::subarray_majority(nums, queries), vec![1]);
     }
 
     #[test]
-    fn all_same_elements() {
+    fn all_same_elements_multiple_queries() {
         let nums = vec![8, 8];
         let queries = vec![
             vec![0, 0, 1],

@@ -1,5 +1,5 @@
 impl Solution {
-    /// Finds the smallest special palindrome number strictly greater than n.
+    /// Finds the smallest special palindrome number strictly greater than n
     ///
     /// # Intuition
     /// A special number is a palindrome where each digit k appears exactly k times.
@@ -28,22 +28,28 @@ impl Solution {
                     total += odd;
                 }
 
-                for (i, &d) in [2usize, 4, 6, 8].iter().enumerate() {
-                    if mask & (1 << i) != 0 {
+                [2usize, 4, 6, 8]
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, _)| mask & (1 << i) != 0)
+                    .for_each(|(_, &d)| {
                         counts[d] = d;
                         total += d;
-                    }
-                }
+                    });
 
                 if total == 0 || total > 18 || total < n_len {
                     continue;
                 }
 
-                if total > n_len {
-                    let candidate = Self::smallest_palindrome(&counts, total);
-                    best = best.min(candidate);
-                } else {
-                    Self::find_smallest_greater(&counts, total, n, &mut best);
+                match total.cmp(&n_len) {
+                    std::cmp::Ordering::Greater => {
+                        let candidate = Self::smallest_palindrome(&counts, total);
+                        best = best.min(candidate);
+                    }
+                    std::cmp::Ordering::Equal => {
+                        Self::find_smallest_greater(&counts, total, n, &mut best);
+                    }
+                    std::cmp::Ordering::Less => {}
                 }
             }
         }
@@ -52,10 +58,10 @@ impl Solution {
     }
 
     fn digit_count(n: i64) -> usize {
-        if n == 0 {
-            return 1;
+        match n {
+            0 => 1,
+            _ => ((n as f64).log10().floor() as usize) + 1,
         }
-        ((n as f64).log10().floor() as usize) + 1
     }
 
     fn smallest_palindrome(counts: &[usize; 10], total: usize) -> i64 {
@@ -65,14 +71,12 @@ impl Solution {
         let mut first_half = Vec::with_capacity(half_len);
         let mut middle = 0u8;
 
-        for d in 1..=9 {
-            for _ in 0..counts[d] / 2 {
-                first_half.push(d as u8);
-            }
+        (1..=9).for_each(|d| {
+            (0..counts[d] / 2).for_each(|_| first_half.push(d as u8));
             if counts[d] % 2 == 1 {
                 middle = d as u8;
             }
-        }
+        });
 
         Self::build_palindrome(&first_half, is_odd, middle)
     }
@@ -84,15 +88,23 @@ impl Solution {
         let mut half_counts = [0usize; 10];
         let mut middle = 0u8;
 
-        for d in 1..=9 {
+        (1..=9).for_each(|d| {
             half_counts[d] = counts[d] / 2;
             if counts[d] % 2 == 1 {
                 middle = d as u8;
             }
-        }
+        });
 
         let mut current = Vec::with_capacity(half_len);
-        Self::generate(&mut half_counts, &mut current, half_len, is_odd, middle, n, best);
+        Self::generate(
+            &mut half_counts,
+            &mut current,
+            half_len,
+            is_odd,
+            middle,
+            n,
+            best,
+        );
     }
 
     fn generate(
@@ -124,21 +136,16 @@ impl Solution {
     }
 
     fn build_palindrome(first_half: &[u8], is_odd: bool, middle: u8) -> i64 {
-        let mut num: i64 = 0;
-
-        for &d in first_half {
-            num = num * 10 + d as i64;
-        }
+        let mut num = first_half.iter().fold(0i64, |acc, &d| acc * 10 + d as i64);
 
         if is_odd {
             num = num * 10 + middle as i64;
         }
 
-        for &d in first_half.iter().rev() {
-            num = num * 10 + d as i64;
-        }
-
-        num
+        first_half
+            .iter()
+            .rev()
+            .fold(num, |acc, &d| acc * 10 + d as i64)
     }
 }
 
@@ -147,43 +154,43 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn special_palindrome_single_digit_to_double() {
         assert_eq!(Solution::special_palindrome(2), 22);
     }
 
     #[test]
-    fn test_example_2() {
+    fn special_palindrome_requires_odd_center() {
         assert_eq!(Solution::special_palindrome(33), 212);
     }
 
     #[test]
-    fn test_zero() {
+    fn special_palindrome_from_zero() {
         assert_eq!(Solution::special_palindrome(0), 1);
     }
 
     #[test]
-    fn test_one() {
+    fn special_palindrome_from_one() {
         assert_eq!(Solution::special_palindrome(1), 22);
     }
 
     #[test]
-    fn test_after_212() {
+    fn special_palindrome_after_212() {
         assert_eq!(Solution::special_palindrome(212), 333);
     }
 
     #[test]
-    fn test_large() {
+    fn special_palindrome_large_input() {
         assert_eq!(Solution::special_palindrome(1000000), 2441442);
     }
 
     #[test]
-    fn test_very_large() {
+    fn special_palindrome_very_large_exceeds_input() {
         let result = Solution::special_palindrome(999_999_999_999_999);
         assert!(result > 999_999_999_999_999);
     }
 
     #[test]
-    fn test_boundary_values() {
+    fn special_palindrome_boundary_transitions() {
         assert_eq!(Solution::special_palindrome(333), 4444);
         assert_eq!(Solution::special_palindrome(4444), 23332);
     }

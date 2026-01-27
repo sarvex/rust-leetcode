@@ -16,11 +16,11 @@ impl Solution {
     pub fn sum_of_ancestors(n: i32, edges: Vec<Vec<i32>>, mut nums: Vec<i32>) -> i64 {
         let n = n as usize;
         let mut adjacency = vec![Vec::new(); n];
-        for edge in edges {
-            let (u, v) = (edge[0], edge[1]);
-            adjacency[u as usize].push(v);
-            adjacency[v as usize].push(u);
-        }
+        edges.iter().for_each(|edge| {
+            let (u, v) = (edge[0] as usize, edge[1] as usize);
+            adjacency[u].push(edge[1]);
+            adjacency[v].push(edge[0]);
+        });
 
         let max_value = *nums.iter().max().unwrap() as usize;
         let mut largest_square = vec![1_i32; max_value + 1];
@@ -38,9 +38,8 @@ impl Solution {
             base += 1;
         }
 
-        for value in &mut nums {
-            *value /= largest_square[*value as usize];
-        }
+        nums.iter_mut()
+            .for_each(|value| *value /= largest_square[*value as usize]);
 
         let mut result = 0_i64;
         let mut count = vec![0_i32; max_value + 1];

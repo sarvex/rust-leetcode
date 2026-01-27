@@ -1,11 +1,17 @@
 use std::collections::HashMap;
 
 impl Solution {
-    /// Chunk-Based Prefix Sum Counting (Optimized)
+    /// Chunk-based prefix sum counting for divisible subarrays in sorted arrays.
     ///
     /// # Intuition
     /// For a sorted array, process runs of identical values. For each run,
     /// count subarrays ending at each position using prefix sum remainders.
+    ///
+    /// # Approach
+    /// 1. Group consecutive identical elements into chunks
+    /// 2. Track prefix sum remainders mod k in a frequency table
+    /// 3. For each chunk, accumulate matching remainder counts before updating
+    /// 4. Use Vec for small k, HashMap for large k to optimize space
     ///
     /// # Complexity
     /// - Time: O(n)

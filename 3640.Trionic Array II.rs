@@ -1,5 +1,5 @@
 impl Solution {
-    /// Finds the maximum sum of any trionic subarray.
+    /// Finds the maximum sum of any trionic subarray using three-state DP
     ///
     /// # Intuition
     /// A trionic subarray follows an "up-down-up" pattern: strictly increasing,
@@ -25,33 +25,18 @@ impl Solution {
 
         const NEG_INF: i64 = i64::MIN / 2;
 
-        let mut s0 = NEG_INF; // increasing with len >= 2
-        let mut s1 = NEG_INF; // up-down with up >= 2, down >= 2
-        let mut s2 = NEG_INF; // trionic with all phases >= 2
+        let mut s0 = NEG_INF;
+        let mut s1 = NEG_INF;
+        let mut s2 = NEG_INF;
         let mut ans = NEG_INF;
 
         (1..n).for_each(|i| {
             let (new_s0, new_s1, new_s2) = match nums[i].cmp(&nums[i - 1]) {
                 std::cmp::Ordering::Greater => {
-                    // Increasing step
-                    (
-                        nums[i - 1].max(s0) + nums[i], // start new or extend increasing
-                        NEG_INF,                       // can't continue down with increase
-                        s1.max(s2) + nums[i],          // start final_up from s1 or extend s2
-                    )
+                    (nums[i - 1].max(s0) + nums[i], NEG_INF, s1.max(s2) + nums[i])
                 }
-                std::cmp::Ordering::Less => {
-                    // Decreasing step
-                    (
-                        NEG_INF,              // can't continue up with decrease
-                        s0.max(s1) + nums[i], // start down from s0 or extend s1
-                        NEG_INF,              // can't continue final_up with decrease
-                    )
-                }
-                std::cmp::Ordering::Equal => {
-                    // Equal breaks all patterns
-                    (NEG_INF, NEG_INF, NEG_INF)
-                }
+                std::cmp::Ordering::Less => (NEG_INF, s0.max(s1) + nums[i], NEG_INF),
+                std::cmp::Ordering::Equal => (NEG_INF, NEG_INF, NEG_INF),
             };
 
             s0 = new_s0;
@@ -69,21 +54,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example_1() {
-        assert_eq!(
-            Solution::max_sum_trionic(vec![0, -2, -1, -3, 0, 2, -1]),
-            -4
-        );
+    fn trionic_with_negatives() {
+        assert_eq!(Solution::max_sum_trionic(vec![0, -2, -1, -3, 0, 2, -1]), -4);
     }
 
     #[test]
-    fn example_2() {
+    fn trionic_simple_up_down_up() {
         assert_eq!(Solution::max_sum_trionic(vec![1, 4, 2, 7]), 14);
     }
 
     #[test]
-    fn longer_trionic() {
-        // [1, 3, 5, 2, 1, 4, 6] - up: [1,3,5], down: [5,2,1], up: [1,4,6]
+    fn trionic_longer_sequence() {
         assert_eq!(
             Solution::max_sum_trionic(vec![1, 3, 5, 2, 1, 4, 6]),
             1 + 3 + 5 + 2 + 1 + 4 + 6
@@ -91,13 +72,12 @@ mod tests {
     }
 
     #[test]
-    fn minimal_trionic() {
-        // Minimum 4 elements: up=[a,b], down=[b,c], up=[c,d]
+    fn trionic_minimal_four_elements() {
         assert_eq!(Solution::max_sum_trionic(vec![1, 2, 1, 2]), 6);
     }
 
     #[test]
-    fn negative_values() {
+    fn trionic_all_negative_values() {
         assert_eq!(
             Solution::max_sum_trionic(vec![-5, -3, -4, -2]),
             -5 + -3 + -4 + -2
@@ -105,8 +85,7 @@ mod tests {
     }
 
     #[test]
-    fn multiple_trionics() {
-        // Multiple valid trionics, should find the maximum sum
+    fn trionic_multiple_candidates_selects_max() {
         assert_eq!(
             Solution::max_sum_trionic(vec![1, 5, 3, 10, 2, 8, 4, 20]),
             3 + 10 + 2 + 8 + 4 + 20

@@ -27,13 +27,8 @@ impl Solution {
         let mut from_left = true;
 
         while count > 1 {
-            match from_left {
-                true => {}
-                false => {
-                    if count % 2 == 0 {
-                        left += step;
-                    }
-                }
+            if !from_left && count % 2 == 0 {
+                left += step;
             }
             step *= 2;
             count = (count + 1) / 2;

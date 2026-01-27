@@ -22,15 +22,17 @@ impl Solution {
         }
 
         let mut degree = vec![0u32; n];
-        for edge in &edges {
-            degree[edge[0] as usize] += 1;
-            degree[edge[1] as usize] += 1;
-        }
+        edges.iter().for_each(|e| {
+            degree[e[0] as usize] += 1;
+            degree[e[1] as usize] += 1;
+        });
 
-        let mut adj_start = vec![0u32; n + 1];
-        for i in 0..n {
-            adj_start[i + 1] = adj_start[i] + degree[i];
-        }
+        let adj_start: Vec<u32> = std::iter::once(0u32)
+            .chain(degree.iter().scan(0u32, |acc, &d| {
+                *acc += d;
+                Some(*acc)
+            }))
+            .collect();
 
         let mut adj = vec![0u32; 2 * (n - 1)];
         let mut adj_pos = adj_start[..n].to_vec();
@@ -69,9 +71,7 @@ impl Solution {
         order.reverse();
 
         let mut group_size = [0i32; 21];
-        for &g in &group {
-            group_size[g as usize] += 1;
-        }
+        group.iter().for_each(|&g| group_size[g as usize] += 1);
 
         let mut group_nodes: [Vec<u32>; 21] = Default::default();
         for (i, &g) in group.iter().enumerate() {

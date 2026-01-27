@@ -28,18 +28,20 @@ impl Solution {
 
         count[(prefix + offset) as usize] = 1;
 
-        for &num in &nums {
-            if num == target {
-                left_count += count[(prefix + offset) as usize];
-                prefix += 1;
-            } else {
-                prefix -= 1;
-                left_count -= count[(prefix + offset) as usize];
+        nums.iter().for_each(|&num| {
+            match num == target {
+                true => {
+                    left_count += count[(prefix + offset) as usize];
+                    prefix += 1;
+                }
+                false => {
+                    prefix -= 1;
+                    left_count -= count[(prefix + offset) as usize];
+                }
             }
-
             result += left_count;
             count[(prefix + offset) as usize] += 1;
-        }
+        });
 
         result
     }
@@ -86,6 +88,9 @@ mod tests {
 
     #[test]
     fn test_alternating() {
-        assert_eq!(Solution::count_majority_subarrays(vec![1, 2, 1, 2, 1], 2), 3);
+        assert_eq!(
+            Solution::count_majority_subarrays(vec![1, 2, 1, 2, 1], 2),
+            3
+        );
     }
 }

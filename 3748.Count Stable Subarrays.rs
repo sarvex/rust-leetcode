@@ -18,22 +18,18 @@ impl Solution {
     pub fn count_stable_subarrays(nums: Vec<i32>, queries: Vec<Vec<i32>>) -> Vec<i64> {
         let num_elements = nums.len();
 
-        let mut run_start = vec![0usize; num_elements];
-        if num_elements > 0 {
-            run_start[0] = 0;
-            for index in 1..num_elements {
-                run_start[index] = if nums[index - 1] <= nums[index] {
-                    run_start[index - 1]
-                } else {
-                    index
-                };
-            }
-        }
+        let run_start: Vec<usize> = nums.windows(2).fold(vec![0usize], |mut acc, w| {
+            let prev = *acc.last().unwrap();
+            acc.push(if w[0] <= w[1] { prev } else { acc.len() });
+            acc
+        });
 
-        let mut prefix_sum = vec![0i64; num_elements + 1];
-        for index in 0..num_elements {
-            prefix_sum[index + 1] = prefix_sum[index] + run_start[index] as i64;
-        }
+        let prefix_sum: Vec<i64> = std::iter::once(0i64)
+            .chain(run_start.iter().scan(0i64, |sum, &r| {
+                *sum += r as i64;
+                Some(*sum)
+            }))
+            .collect();
 
         let mut first_greater = vec![num_elements; num_elements];
         let mut pointer = 0usize;

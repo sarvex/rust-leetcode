@@ -2,7 +2,7 @@ use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
 impl Solution {
-    /// Minimum cost path with edge reversals using transformed graph approach
+    /// Minimum cost path with edge reversals using transformed Dijkstra
     ///
     /// # Intuition
     /// Transform the directed graph into an undirected graph where reversed edges have
@@ -27,8 +27,7 @@ impl Solution {
             graph[v].push((u, 2 * w));
         });
 
-        const INF: i32 = i32::MAX;
-        let mut dist = vec![INF; n];
+        let mut dist = vec![i32::MAX; n];
         dist[0] = 0;
 
         let mut heap = BinaryHeap::new();
@@ -38,7 +37,6 @@ impl Solution {
             if cost > dist[u] {
                 continue;
             }
-
             if u == n - 1 {
                 return cost;
             }
@@ -52,10 +50,9 @@ impl Solution {
             });
         }
 
-        if dist[n - 1] == INF {
-            -1
-        } else {
-            dist[n - 1]
+        match dist[n - 1] {
+            i32::MAX => -1,
+            d => d,
         }
     }
 }
@@ -65,13 +62,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example_1() {
+    fn path_with_reversal_cheaper() {
         let edges = vec![vec![0, 1, 3], vec![3, 1, 1], vec![2, 3, 4], vec![0, 2, 2]];
         assert_eq!(Solution::min_cost(4, edges), 5);
     }
 
     #[test]
-    fn example_2() {
+    fn direct_path_optimal() {
         let edges = vec![vec![0, 2, 1], vec![2, 1, 1], vec![1, 3, 1], vec![2, 3, 3]];
         assert_eq!(Solution::min_cost(4, edges), 3);
     }

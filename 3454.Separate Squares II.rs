@@ -64,22 +64,22 @@ struct Event {
 }
 
 impl Solution {
-    /// # Segment Tree with Sweep Line Algorithm
+    /// Finds the y-coordinate that splits total square area in half via sweep line.
     ///
     /// # Intuition
-    /// Use a segment tree to efficiently track occupied x-intervals as we sweep through y-coordinates.
-    /// This allows O(log n) updates and queries for interval coverage, making the overall algorithm much faster.
+    /// A segment tree tracks occupied x-intervals as we sweep upward through
+    /// y-events. Cumulative area grows in strips; binary search within the
+    /// crossing strip locates the exact split line.
     ///
     /// # Approach
-    /// 1. Compress x-coordinates and build a segment tree over them
-    /// 2. Create events for square start/end at each y-coordinate
-    /// 3. Process events in sorted order, updating the segment tree
-    /// 4. Track cumulative area and find where it equals half the total
-    /// 5. Use lazy propagation in segment tree for efficient range updates
+    /// 1. Compress x-coordinates and build a segment tree over them.
+    /// 2. Create open/close events for each square at its bottom/top y.
+    /// 3. Process events in y-order, accumulating area per horizontal strip.
+    /// 4. Walk the strip history to find where cumulative area reaches half.
     ///
     /// # Complexity
-    /// - Time: O(n log n) where n is the number of squares
-    /// - Space: O(n) for segment tree and events
+    /// - Time: O(n log n)
+    /// - Space: O(n)
     pub fn separate_squares(squares: Vec<Vec<i32>>) -> f64 {
         if squares.is_empty() {
             return 0.0;
@@ -100,10 +100,8 @@ impl Solution {
 
         let mut events = Vec::with_capacity(n_sq * 2);
         for s in &squares {
-            let x1 = s[0];
-            let x2 = s[0] + s[2];
-            let y1 = s[1];
-            let y2 = s[1] + s[2];
+            let (x1, x2) = (s[0], s[0] + s[2]);
+            let (y1, y2) = (s[1], s[1] + s[2]);
 
             let l = xs.binary_search(&x1).unwrap();
             let r = xs.binary_search(&x2).unwrap();
@@ -124,7 +122,7 @@ impl Solution {
             }
         }
 
-        events.sort_unstable_by(|a, b| a.y.cmp(&b.y));
+        events.sort_unstable_by_key(|e| e.y);
 
         let mut st = SegmentTree::new(&xs);
         let mut total_area: f64 = 0.0;
@@ -164,8 +162,8 @@ impl Solution {
 
         let target = total_area / 2.0;
 
-        for (prev_area, y1, _y2, width) in history {
-            let strip_max_area = width as f64 * (_y2 - y1) as f64;
+        for (prev_area, y1, y2, width) in history {
+            let strip_max_area = width as f64 * (y2 - y1) as f64;
             if prev_area + strip_max_area >= target {
                 let needed = target - prev_area;
                 return y1 as f64 + needed / width as f64;
@@ -181,47 +179,40 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn two_separated_squares_split_between() {
         let squares = vec![vec![0, 0, 1], vec![2, 2, 1]];
-        let result = Solution::separate_squares(squares);
-        assert!((result - 1.0).abs() < 1e-5);
+        assert!((Solution::separate_squares(squares) - 1.0).abs() < 1e-5);
     }
 
     #[test]
-    fn test_example_2() {
+    fn overlapping_squares() {
         let squares = vec![vec![0, 0, 2], vec![1, 1, 1]];
-        let result = Solution::separate_squares(squares);
-        assert!((result - 1.0).abs() < 1e-5);
+        assert!((Solution::separate_squares(squares) - 1.0).abs() < 1e-5);
     }
 
     #[test]
-    fn test_single_square() {
+    fn single_square_splits_at_midpoint() {
         let squares = vec![vec![0, 0, 2]];
-        let result = Solution::separate_squares(squares);
-        assert!((result - 1.0).abs() < 1e-5);
+        assert!((Solution::separate_squares(squares) - 1.0).abs() < 1e-5);
     }
 
     #[test]
-    fn test_non_overlapping() {
+    fn vertically_stacked_non_overlapping() {
         let squares = vec![vec![0, 0, 1], vec![0, 2, 1]];
         let result = Solution::separate_squares(squares);
         assert!((result - 1.0).abs() < 1e-5 || (result - 2.0).abs() < 1e-5);
     }
 
     #[test]
-    fn test_large_input() {
-        let mut squares = Vec::new();
-        for i in 0..5000 {
-            squares.push(vec![i * 2, i * 2, 1]);
-        }
+    fn large_input_runs_efficiently() {
+        let squares: Vec<Vec<i32>> = (0..5000).map(|i| vec![i * 2, i * 2, 1]).collect();
         let result = Solution::separate_squares(squares);
         assert!(result > 0.0);
     }
 
     #[test]
-    fn test_overlapping_complex() {
+    fn triple_overlapping_squares() {
         let squares = vec![vec![0, 0, 3], vec![1, 1, 3], vec![2, 2, 3]];
-        let result = Solution::separate_squares(squares);
-        assert!(result > 0.0);
+        assert!(Solution::separate_squares(squares) > 0.0);
     }
 }

@@ -88,15 +88,19 @@ impl Solution {
             if x < 10 {
                 return 0;
             }
-            let mut a = [0i32; 16];
+            let mut digits = Vec::with_capacity(16);
             let mut v = x;
-            let mut n = 0;
             while v > 0 {
-                a[n] = (v % 10) as i32;
+                digits.push((v % 10) as i32);
                 v /= 10;
-                n += 1;
             }
-            a[..n].reverse();
+            digits.reverse();
+            let n = digits.len();
+            let a = {
+                let mut a = [0i32; 16];
+                a[..n].copy_from_slice(&digits);
+                a
+            };
 
             let mut ans: i64 = (2..n).map(|i| f[i]).sum();
             let mut cur = OFF as i32;

@@ -81,14 +81,12 @@ impl Solution {
             ten *= 10;
         }
 
+        let mut num = Vec::with_capacity(16);
         let mut temp = n;
-        let mut num = Vec::new();
-
         while temp > 0 {
             num.push(temp % 10);
             temp /= 10;
         }
-
         num.reverse();
         let size = num.len();
 

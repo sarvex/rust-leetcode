@@ -25,17 +25,19 @@ impl Solution {
             freq[(b - b'a') as usize] += 1;
         }
 
-        let mut odd_char: Option<u8> = None;
-        let odd_count = freq
+        let odd_indices: Vec<usize> = freq
             .iter()
             .enumerate()
             .filter(|(_, &c)| c % 2 == 1)
-            .inspect(|(i, _)| odd_char = Some(b'a' + *i as u8))
-            .count();
+            .map(|(i, _)| i)
+            .collect();
 
-        if odd_count > 1 || (odd_count == 1 && n % 2 == 0) || (n % 2 == 1 && odd_char.is_none()) {
-            return String::new();
+        match (n % 2, odd_indices.len()) {
+            (0, 0) | (1, 1) => {}
+            _ => return String::new(),
         }
+
+        let odd_char = odd_indices.first().map(|&i| b'a' + i as u8);
 
         let mut half_freq = [0i32; 26];
         (0..26).for_each(|i| half_freq[i] = freq[i] / 2);
@@ -82,67 +84,65 @@ impl Solution {
             mid: Option<u8>,
             must_be_greater: bool,
         ) -> bool {
-            if pos == half_len {
-                if must_be_greater {
-                    return true;
-                }
-                if let Some(m) = mid {
-                    match m.cmp(&target[half_len]) {
-                        std::cmp::Ordering::Greater => return true,
-                        std::cmp::Ordering::Less => return false,
-                        std::cmp::Ordering::Equal => {}
+            match (pos == half_len, must_be_greater) {
+                (true, true) => true,
+                (true, false) => {
+                    if let Some(m) = mid {
+                        match m.cmp(&target[half_len]) {
+                            std::cmp::Ordering::Greater => return true,
+                            std::cmp::Ordering::Less => return false,
+                            std::cmp::Ordering::Equal => {}
+                        }
                     }
-                }
-                let offset = if mid.is_some() {
-                    half_len + 1
-                } else {
-                    half_len
-                };
-                for i in 0..half_len {
-                    let palindrome_char = half[half_len - 1 - i];
-                    let target_char = target[offset + i];
-                    match palindrome_char.cmp(&target_char) {
-                        std::cmp::Ordering::Greater => return true,
-                        std::cmp::Ordering::Less => return false,
-                        std::cmp::Ordering::Equal => {}
+                    let offset = match mid {
+                        Some(_) => half_len + 1,
+                        None => half_len,
+                    };
+                    for i in 0..half_len {
+                        match half[half_len - 1 - i].cmp(&target[offset + i]) {
+                            std::cmp::Ordering::Greater => return true,
+                            std::cmp::Ordering::Less => return false,
+                            std::cmp::Ordering::Equal => {}
+                        }
                     }
+                    false
                 }
-                false
-            } else if must_be_greater {
-                for c in 0..26 {
+                (false, true) => (0..26).any(|c| {
                     if avail[c] > 0 {
                         half[pos] = b'a' + c as u8;
                         avail[c] -= 1;
-                        if solve(pos + 1, half, avail, target, half_len, mid, true) {
+                        let found = solve(pos + 1, half, avail, target, half_len, mid, true);
+                        avail[c] += 1;
+                        found
+                    } else {
+                        false
+                    }
+                }),
+                (false, false) => {
+                    let min_char = (target[pos] - b'a') as usize;
+
+                    if avail[min_char] > 0 {
+                        half[pos] = target[pos];
+                        avail[min_char] -= 1;
+                        if solve(pos + 1, half, avail, target, half_len, mid, false) {
+                            avail[min_char] += 1;
                             return true;
                         }
-                        avail[c] += 1;
+                        avail[min_char] += 1;
                     }
-                }
-                false
-            } else {
-                let min_char = (target[pos] - b'a') as usize;
 
-                if avail[min_char] > 0 {
-                    half[pos] = target[pos];
-                    avail[min_char] -= 1;
-                    if solve(pos + 1, half, avail, target, half_len, mid, false) {
-                        return true;
-                    }
-                    avail[min_char] += 1;
-                }
-
-                for c in (min_char + 1)..26 {
-                    if avail[c] > 0 {
-                        half[pos] = b'a' + c as u8;
-                        avail[c] -= 1;
-                        if solve(pos + 1, half, avail, target, half_len, mid, true) {
-                            return true;
+                    ((min_char + 1)..26).any(|c| {
+                        if avail[c] > 0 {
+                            half[pos] = b'a' + c as u8;
+                            avail[c] -= 1;
+                            let found = solve(pos + 1, half, avail, target, half_len, mid, true);
+                            avail[c] += 1;
+                            found
+                        } else {
+                            false
                         }
-                        avail[c] += 1;
-                    }
+                    })
                 }
-                false
             }
         }
 

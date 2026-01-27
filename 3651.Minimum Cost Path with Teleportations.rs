@@ -1,5 +1,5 @@
 impl Solution {
-    /// Minimum Cost Path with Teleportations using optimized Dijkstra
+    /// Minimum cost path with teleportations using optimized Dijkstra
     ///
     /// # Intuition
     /// Since Dijkstra processes states in cost order, when we first unlock a threshold,
@@ -28,17 +28,14 @@ impl Solution {
             .max()
             .unwrap_or(0) as usize;
 
-        // Group cells by their value
         let mut cells_by_val: Vec<Vec<(usize, usize)>> = vec![vec![]; max_val + 1];
-        for i in 0..m {
-            for j in 0..n {
+        (0..m).for_each(|i| {
+            (0..n).for_each(|j| {
                 cells_by_val[grid[i][j] as usize].push((i, j));
-            }
-        }
+            });
+        });
 
-        // dist[t][i][j] = min cost to reach (i,j) with t teleports
         let mut dist = vec![vec![vec![i32::MAX; n]; m]; k + 1];
-        // max_expanded[t] = highest threshold that has been expanded for t teleports
         let mut max_expanded: Vec<i32> = vec![-1; k + 1];
 
         dist[0][0][0] = 0;
@@ -56,20 +53,16 @@ impl Solution {
             }
 
             // Normal moves: down and right
-            if i + 1 < m {
-                let new_cost = cost + grid[i + 1][j];
-                if new_cost < dist[t][i + 1][j] {
-                    dist[t][i + 1][j] = new_cost;
-                    pq.push(Reverse((new_cost, i + 1, j, t)));
-                }
-            }
-            if j + 1 < n {
-                let new_cost = cost + grid[i][j + 1];
-                if new_cost < dist[t][i][j + 1] {
-                    dist[t][i][j + 1] = new_cost;
-                    pq.push(Reverse((new_cost, i, j + 1, t)));
-                }
-            }
+            [(i + 1, j), (i, j + 1)]
+                .iter()
+                .filter(|&&(ni, nj)| ni < m && nj < n)
+                .for_each(|&(ni, nj)| {
+                    let new_cost = cost + grid[ni][nj];
+                    if new_cost < dist[t][ni][nj] {
+                        dist[t][ni][nj] = new_cost;
+                        pq.push(Reverse((new_cost, ni, nj, t)));
+                    }
+                });
 
             // Teleportation: unlock threshold = current cell's value
             if t < k {
@@ -77,30 +70,25 @@ impl Solution {
                 let prev = max_expanded[t + 1];
 
                 if threshold > prev {
-                    // Only expand values in range (prev, threshold] - each value expanded once
                     let start = (prev + 1).max(0) as usize;
                     let end = threshold as usize;
-                    for v in start..=end {
-                        for &(ni, nj) in &cells_by_val[v] {
+                    (start..=end).for_each(|v| {
+                        cells_by_val[v].iter().for_each(|&(ni, nj)| {
                             if cost < dist[t + 1][ni][nj] {
                                 dist[t + 1][ni][nj] = cost;
                                 pq.push(Reverse((cost, ni, nj, t + 1)));
                             }
-                        }
-                    }
+                        });
+                    });
                     max_expanded[t + 1] = threshold;
                 }
             }
         }
 
         (0..=k)
-            .filter_map(|t| {
-                let d = dist[t][m - 1][n - 1];
-                if d == i32::MAX {
-                    None
-                } else {
-                    Some(d)
-                }
+            .filter_map(|t| match dist[t][m - 1][n - 1] {
+                i32::MAX => None,
+                d => Some(d),
             })
             .min()
             .unwrap_or(-1)
@@ -112,31 +100,31 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example_1() {
+    fn teleportation_shortcut_reduces_cost() {
         let grid = vec![vec![1, 3, 3], vec![2, 5, 4], vec![4, 3, 5]];
         assert_eq!(Solution::min_cost(grid, 2), 7);
     }
 
     #[test]
-    fn example_2() {
+    fn single_teleport_insufficient_for_full_skip() {
         let grid = vec![vec![1, 2], vec![2, 3], vec![3, 4]];
         assert_eq!(Solution::min_cost(grid, 1), 9);
     }
 
     #[test]
-    fn no_teleports() {
+    fn no_teleports_forces_normal_path() {
         let grid = vec![vec![1, 2], vec![3, 4]];
         assert_eq!(Solution::min_cost(grid, 0), 6);
     }
 
     #[test]
-    fn teleport_to_destination() {
+    fn teleport_directly_to_destination() {
         let grid = vec![vec![5, 3, 3], vec![2, 5, 4], vec![4, 3, 1]];
         assert_eq!(Solution::min_cost(grid, 1), 0);
     }
 
     #[test]
-    fn large_k() {
+    fn excess_teleports_zero_cost_path() {
         let grid = vec![vec![1, 100], vec![100, 1]];
         assert_eq!(Solution::min_cost(grid, 10), 0);
     }

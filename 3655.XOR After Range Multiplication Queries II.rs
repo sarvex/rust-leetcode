@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 impl Solution {
-    /// Computes XOR of array after applying range multiplication queries with step increments.
+    /// Computes XOR of array after range multiplication queries with sqrt decomposition
     ///
     /// # Intuition
     /// Direct simulation is O(n*q) which TLEs. Use sqrt decomposition: for small step
@@ -9,13 +9,13 @@ impl Solution {
     /// For large step sizes, direct simulation is efficient (few elements per query).
     ///
     /// # Approach
-    /// 1. Split queries by step size k using threshold √n
-    /// 2. For k ≤ √n: Group by (k, residue), use difference arrays with mod inverse
-    /// 3. For k > √n: Direct simulation (O(√n) elements per query)
+    /// 1. Split queries by step size k using threshold sqrt(n)
+    /// 2. For k <= sqrt(n): Group by (k, residue), use difference arrays with mod inverse
+    /// 3. For k > sqrt(n): Direct simulation (O(sqrt(n)) elements per query)
     /// 4. Combine multipliers and compute final XOR
     ///
     /// # Complexity
-    /// - Time: O((n + q) * √n) amortized
+    /// - Time: O((n + q) * sqrt(n)) amortized
     /// - Space: O(n) for multiplier arrays
     pub fn xor_after_queries(nums: Vec<i32>, queries: Vec<Vec<i32>>) -> i32 {
         const MOD: i64 = 1_000_000_007;
@@ -49,19 +49,22 @@ impl Solution {
                 query[3] as i64,
             );
 
-            if k <= threshold {
-                let residue = l % k;
-                let start_pos = l / k;
-                let last_idx = l + (r - l) / k * k;
-                let end_pos = last_idx / k;
-                small_k_queries
-                    .entry((k, residue))
-                    .or_default()
-                    .push((start_pos, end_pos, v));
-            } else {
-                (l..=r)
-                    .step_by(k)
-                    .for_each(|idx| mult[idx] = mult[idx] * v % MOD);
+            match k <= threshold {
+                true => {
+                    let residue = l % k;
+                    let start_pos = l / k;
+                    let last_idx = l + (r - l) / k * k;
+                    let end_pos = last_idx / k;
+                    small_k_queries
+                        .entry((k, residue))
+                        .or_default()
+                        .push((start_pos, end_pos, v));
+                }
+                false => {
+                    (l..=r)
+                        .step_by(k)
+                        .for_each(|idx| mult[idx] = mult[idx] * v % MOD);
+                }
             }
         });
 
@@ -97,28 +100,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_single_query_all_elements() {
+    fn single_query_multiplies_all_elements() {
         let nums = vec![1, 1, 1];
         let queries = vec![vec![0, 2, 1, 4]];
         assert_eq!(Solution::xor_after_queries(nums, queries), 4);
     }
 
     #[test]
-    fn test_multiple_queries_with_step() {
+    fn multiple_queries_with_step_gaps() {
         let nums = vec![2, 3, 1, 5, 4];
         let queries = vec![vec![1, 4, 2, 3], vec![0, 2, 1, 2]];
         assert_eq!(Solution::xor_after_queries(nums, queries), 31);
     }
 
     #[test]
-    fn test_step_exceeds_range() {
+    fn step_exceeds_range_single_application() {
         let nums = vec![5, 10, 15];
         let queries = vec![vec![0, 2, 5, 2]];
         assert_eq!(Solution::xor_after_queries(nums, queries), 10 ^ 15 ^ 10);
     }
 
     #[test]
-    fn test_large_multiplier_with_modulo() {
+    fn large_multiplier_with_modulo_arithmetic() {
         let nums = vec![1_000_000_000];
         let queries = vec![vec![0, 0, 1, 100_000]];
         let expected = ((1_000_000_000i64 * 100_000) % 1_000_000_007) as i32;
@@ -126,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn test_empty_queries_returns_original_xor() {
+    fn empty_queries_returns_original_xor() {
         let nums = vec![1, 2, 3, 4, 5];
         let queries: Vec<Vec<i32>> = vec![];
         assert_eq!(

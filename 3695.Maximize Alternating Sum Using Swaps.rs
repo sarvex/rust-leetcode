@@ -35,7 +35,10 @@ impl Solution {
         }
 
         for swap in &swaps {
-            let (mut px, mut py) = (find(&mut parent, swap[0] as usize), find(&mut parent, swap[1] as usize));
+            let (mut px, mut py) = (
+                find(&mut parent, swap[0] as usize),
+                find(&mut parent, swap[1] as usize),
+            );
             if px != py {
                 if rank[px] < rank[py] {
                     std::mem::swap(&mut px, &mut py);
@@ -48,9 +51,7 @@ impl Solution {
         }
 
         let mut groups: Vec<Vec<usize>> = vec![Vec::new(); n];
-        for i in 0..n {
-            groups[find(&mut parent, i)].push(i);
-        }
+        (0..n).for_each(|i| groups[find(&mut parent, i)].push(i));
 
         groups
             .into_iter()

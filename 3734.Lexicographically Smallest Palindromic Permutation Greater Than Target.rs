@@ -18,25 +18,22 @@ impl Solution {
     pub fn lex_palindromic_permutation(s: String, target: String) -> String {
         let n = s.len();
         let mut freq = [0i32; 26];
-
-        for b in s.bytes() {
-            freq[(b - b'a') as usize] += 1;
-        }
+        s.bytes().for_each(|b| freq[(b - b'a') as usize] += 1);
 
         let odd_count = freq.iter().filter(|&&c| c % 2 == 1).count();
-        if (n % 2 == 0 && odd_count > 0) || (n % 2 == 1 && odd_count != 1) {
-            return String::new();
+        match (n % 2, odd_count) {
+            (0, 0) | (1, 1) => {}
+            _ => return String::new(),
         }
 
-        let mut mid_char: Option<u8> = None;
+        let mid_char = freq
+            .iter()
+            .enumerate()
+            .find(|(_, &c)| c % 2 == 1)
+            .map(|(i, _)| b'a' + i as u8);
+
         let mut half_freq = [0i32; 26];
-
-        for i in 0..26 {
-            if freq[i] % 2 == 1 {
-                mid_char = Some(b'a' + i as u8);
-            }
-            half_freq[i] = freq[i] / 2;
-        }
+        (0..26).for_each(|i| half_freq[i] = freq[i] / 2);
 
         let half_len = n / 2;
         let target_bytes: Vec<u8> = target.bytes().collect();
