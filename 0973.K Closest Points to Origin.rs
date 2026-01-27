@@ -1,10 +1,38 @@
 impl Solution {
+    /// Finds the k closest points to the origin by sorting on distance.
+    ///
+    /// # Intuition
+    /// Sort points by squared distance (avoids sqrt) and take the first k.
+    ///
+    /// # Approach
+    /// Sort by `x^2 + y^2` using `sort_unstable_by_key`, then truncate.
+    ///
+    /// # Complexity
+    /// - Time: O(n log n)
+    /// - Space: O(log n) for sorting
     pub fn k_closest(mut points: Vec<Vec<i32>>, k: i32) -> Vec<Vec<i32>> {
-        points.sort_by(|a, b| {
-            let dist_a = f64::hypot(a[0] as f64, a[1] as f64);
-            let dist_b = f64::hypot(b[0] as f64, b[1] as f64);
-            dist_a.partial_cmp(&dist_b).unwrap()
-        });
-        points.into_iter().take(k as usize).collect()
+        points.sort_unstable_by_key(|p| p[0] * p[0] + p[1] * p[1]);
+        points.truncate(k as usize);
+        points
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic() {
+        let result = Solution::k_closest(vec![vec![1, 3], vec![-2, 2]], 1);
+        assert_eq!(result, vec![vec![-2, 2]]);
+    }
+
+    #[test]
+    fn test_two_closest() {
+        let mut result = Solution::k_closest(vec![vec![3, 3], vec![5, -1], vec![-2, 4]], 2);
+        result.sort();
+        let mut expected = vec![vec![-2, 4], vec![3, 3]];
+        expected.sort();
+        assert_eq!(result, expected);
     }
 }

@@ -18,29 +18,50 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
+
 impl Solution {
+    /// Constructs a BST from preorder traversal using binary search partitioning.
+    ///
+    /// # Intuition
+    /// The first element is the root. Elements smaller go left, larger go right.
+    /// Binary search finds the partition point efficiently.
+    ///
+    /// # Approach
+    /// Recursively take the first element as root, binary search for the split
+    /// between left and right subtree elements, then recurse on both halves.
+    ///
+    /// # Complexity
+    /// - Time: O(n log n) average with binary search
+    /// - Space: O(n) recursion stack
     pub fn bst_from_preorder(preorder: Vec<i32>) -> Option<Rc<RefCell<TreeNode>>> {
-        fn dfs(preorder: &Vec<i32>, i: usize, j: usize) -> Option<Rc<RefCell<TreeNode>>> {
-            if i > j {
+        fn build(preorder: &[i32], lo: usize, hi: usize) -> Option<Rc<RefCell<TreeNode>>> {
+            if lo > hi {
                 return None;
             }
-            let root = Rc::new(RefCell::new(TreeNode::new(preorder[i])));
-            let mut l = i + 1;
-            let mut r = j + 1;
+            let root = Rc::new(RefCell::new(TreeNode::new(preorder[lo])));
+            let mut l = lo + 1;
+            let mut r = hi + 1;
             while l < r {
-                let mid = (l + r) >> 1;
-                if preorder[mid] > preorder[i] {
+                let mid = l + (r - l) / 2;
+                if preorder[mid] > preorder[lo] {
                     r = mid;
                 } else {
                     l = mid + 1;
                 }
             }
-            let mut root_ref = root.borrow_mut();
-            root_ref.left = dfs(preorder, i + 1, l - 1);
-            root_ref.right = dfs(preorder, l, j);
-            Some(root.clone())
+            let mut node = root.borrow_mut();
+            if lo + 1 <= l.saturating_sub(1) {
+                node.left = build(preorder, lo + 1, l - 1);
+            }
+            if l <= hi {
+                node.right = build(preorder, l, hi);
+            }
+            drop(node);
+            Some(root)
         }
-
-        dfs(&preorder, 0, preorder.len() - 1)
+        if preorder.is_empty() {
+            return None;
+        }
+        build(&preorder, 0, preorder.len() - 1)
     }
 }
