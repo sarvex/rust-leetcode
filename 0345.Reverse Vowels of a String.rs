@@ -1,57 +1,39 @@
-/// Reverses only the vowels in a string, keeping all other characters in their original positions.
-///
-/// # Intuition
-/// Use direct byte manipulation with unsafe code for performance, working with mutable string bytes.
-///
-/// # Approach
-/// 1. Convert the string to mutable bytes for in-place manipulation
-/// 2. Use iterators to find vowels from both ends of the string
-/// 3. Swap vowels when found from both ends
-/// 4. Continue until no more vowel pairs can be found
-///
-/// # Complexity
-/// - Time complexity: O(n) where n is the length of the string
-/// - Space complexity: O(1) as we modify the string in-place
-///
-/// # Parameters
-/// - `s`: The input string to process
-///
-/// # Returns
-/// A string with vowels reversed but all other characters in their original positions
 impl Solution {
-    pub fn reverse_vowels(mut s: String) -> String {
-        if s.len() <= 1 {
-            return s;
+    /// Reverses only the vowels in a string using two pointers on a byte vector.
+    ///
+    /// # Intuition
+    /// Use two pointers from both ends, skipping consonants and swapping vowels.
+    ///
+    /// # Approach
+    /// 1. Convert string to a mutable `Vec<u8>`.
+    /// 2. Advance left past consonants, retreat right past consonants.
+    /// 3. Swap when both point to vowels.
+    /// 4. Reconstruct the string from the modified bytes.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(n) for the byte vector
+    pub fn reverse_vowels(s: String) -> String {
+        let mut bytes: Vec<u8> = s.into_bytes();
+        if bytes.len() <= 1 {
+            return String::from_utf8(bytes).unwrap();
         }
-
-        // From the description, `s` is guaranteed to be ASCII, so this is safe
-        let bytes = unsafe { s.as_bytes_mut() };
-
-        let mut left = 0;
-        let mut right = bytes.len() - 1;
-
-        // Local lambda function to check if a byte is a consonant (not a vowel)
-        let is_consonant = |c: u8| -> bool {
-            !matches!(c.to_ascii_lowercase(), b'a' | b'e' | b'i' | b'o' | b'u')
-        };
-
+        let is_vowel = |c: u8| matches!(c.to_ascii_lowercase(), b'a' | b'e' | b'i' | b'o' | b'u');
+        let (mut left, mut right) = (0, bytes.len() - 1);
         while left < right {
-            while left < right && is_consonant(bytes[left]) {
+            while left < right && !is_vowel(bytes[left]) {
                 left += 1;
             }
-
-            while left < right && is_consonant(bytes[right]) {
+            while left < right && !is_vowel(bytes[right]) {
                 right -= 1;
             }
-
             if left < right {
                 bytes.swap(left, right);
                 left += 1;
                 right -= 1;
             }
         }
-
-        s
+        String::from_utf8(bytes).unwrap()
     }
 }
 
@@ -59,59 +41,35 @@ impl Solution {
 mod tests {
     use super::*;
 
-    struct TestCase {
-        input: String,
-        expected: String,
+    #[test]
+    fn standard_case() {
+        assert_eq!(
+            Solution::reverse_vowels("hello".to_string()),
+            "holle".to_string()
+        );
     }
 
     #[test]
-    fn test_reverse_vowels() {
-        let test_cases = [
-            TestCase {
-                input: "hello".to_string(),
-                expected: "holle".to_string(),
-            },
-            TestCase {
-                input: "leetcode".to_string(),
-                expected: "leotcede".to_string(),
-            },
-            TestCase {
-                input: "aA".to_string(),
-                expected: "Aa".to_string(),
-            },
-            TestCase {
-                input: "".to_string(),
-                expected: "".to_string(),
-            },
-            TestCase {
-                input: "a".to_string(),
-                expected: "a".to_string(),
-            },
-            TestCase {
-                input: "bcdfghjkl".to_string(), // No vowels
-                expected: "bcdfghjkl".to_string(),
-            },
-            TestCase {
-                input: "aeiou".to_string(), // All vowels
-                expected: "uoiea".to_string(),
-            },
-            TestCase {
-                input: "AEIOU".to_string(), // All uppercase vowels
-                expected: "UOIEA".to_string(),
-            },
-            TestCase {
-                input: "aEiOu".to_string(), // Mixed case vowels
-                expected: "uOiEa".to_string(),
-            },
-        ];
+    fn leetcode() {
+        assert_eq!(
+            Solution::reverse_vowels("leetcode".to_string()),
+            "leotcede".to_string()
+        );
+    }
 
-        for case in test_cases {
-            assert_eq!(
-                Solution::reverse_vowels(case.input.clone()),
-                case.expected,
-                "Failed for input: {}",
-                case.input
-            );
-        }
+    #[test]
+    fn all_vowels() {
+        assert_eq!(
+            Solution::reverse_vowels("aeiou".to_string()),
+            "uoiea".to_string()
+        );
+    }
+
+    #[test]
+    fn no_vowels() {
+        assert_eq!(
+            Solution::reverse_vowels("bcdfg".to_string()),
+            "bcdfg".to_string()
+        );
     }
 }

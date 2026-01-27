@@ -1,37 +1,54 @@
 impl Solution {
-    #[allow(dead_code)]
+    /// Finds the best meeting point minimizing total Manhattan distance using medians.
+    ///
+    /// # Intuition
+    /// The optimal 1D meeting point minimizing total distance is the median.
+    /// Separate the 2D problem into independent row and column medians.
+    ///
+    /// # Approach
+    /// 1. Collect row indices and column indices of all people.
+    /// 2. Rows are naturally sorted; sort columns.
+    /// 3. Compute total Manhattan distance to the median for each dimension.
+    ///
+    /// # Complexity
+    /// - Time: O(m * n + k log k) where k is the number of people
+    /// - Space: O(k)
     pub fn min_total_distance(grid: Vec<Vec<i32>>) -> i32 {
-        let n = grid.len();
-        let m = grid[0].len();
-
-        let mut row_vec = Vec::new();
-        let mut col_vec = Vec::new();
-
-        // Initialize the two vector
-        for i in 0..n {
-            for j in 0..m {
+        let (m, n) = (grid.len(), grid[0].len());
+        let mut rows = Vec::new();
+        let mut cols = Vec::new();
+        for i in 0..m {
+            for j in 0..n {
                 if grid[i][j] == 1 {
-                    row_vec.push(i as i32);
-                    col_vec.push(j as i32);
+                    rows.push(i as i32);
+                    cols.push(j as i32);
                 }
             }
         }
+        cols.sort_unstable();
+        let row_median = rows[rows.len() / 2];
+        let col_median = cols[cols.len() / 2];
+        rows.iter().map(|r| (r - row_median).abs()).sum::<i32>()
+            + cols.iter().map(|c| (c - col_median).abs()).sum::<i32>()
+    }
+}
 
-        // Since the row vector is originally sorted, we only need to sort the col vector here
-        col_vec.sort();
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-        Self::compute_manhattan_dis(&row_vec, row_vec[row_vec.len() / 2])
-            + Self::compute_manhattan_dis(&col_vec, col_vec[col_vec.len() / 2])
+    #[test]
+    fn standard_grid() {
+        let grid = vec![
+            vec![1, 0, 0, 0, 1],
+            vec![0, 0, 0, 0, 0],
+            vec![0, 0, 1, 0, 0],
+        ];
+        assert_eq!(Solution::min_total_distance(grid), 6);
     }
 
-    #[allow(dead_code)]
-    fn compute_manhattan_dis(v: &Vec<i32>, e: i32) -> i32 {
-        let mut ret = 0;
-
-        for num in v {
-            ret += (num - e).abs();
-        }
-
-        ret
+    #[test]
+    fn single_person() {
+        assert_eq!(Solution::min_total_distance(vec![vec![1]]), 0);
     }
 }

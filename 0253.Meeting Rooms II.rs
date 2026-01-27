@@ -1,35 +1,58 @@
-use std::{cmp::Reverse, collections::BinaryHeap};
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
 
 impl Solution {
-    #[allow(dead_code)]
-    pub fn min_meeting_rooms(intervals: Vec<Vec<i32>>) -> i32 {
-        // The min heap that stores the earliest ending time among all meeting rooms
-        let mut pq = BinaryHeap::new();
-        let mut intervals = intervals;
-        let n = intervals.len();
+    /// Finds the minimum number of meeting rooms required using a min-heap.
+    ///
+    /// # Intuition
+    /// Sort meetings by start time. Use a min-heap to track the earliest ending
+    /// meeting. If a new meeting starts after the earliest ends, reuse that room.
+    ///
+    /// # Approach
+    /// 1. Sort intervals by start time.
+    /// 2. Push the first meeting's end time into a min-heap.
+    /// 3. For each subsequent meeting, if it starts after the heap's min end time,
+    ///    pop that room and push the new end time. Otherwise, add a new room.
+    /// 4. The heap size is the answer.
+    ///
+    /// # Complexity
+    /// - Time: O(n log n)
+    /// - Space: O(n) for the heap
+    pub fn min_meeting_rooms(mut intervals: Vec<Vec<i32>>) -> i32 {
+        intervals.sort_unstable_by_key(|i| i[0]);
+        let mut heap = BinaryHeap::new();
+        heap.push(Reverse(intervals[0][1]));
 
-        // Let's first sort the intervals vector
-        intervals.sort_by(|lhs, rhs| lhs[0].cmp(&rhs[0]));
-
-        // Push the first end time to the heap
-        pq.push(Reverse(intervals[0][1]));
-
-        // Traverse the intervals vector
-        for i in 1..n {
-            // Get the current top element from the heap
-            if let Some(Reverse(end_time)) = pq.pop() {
-                if end_time <= intervals[i][0] {
-                    // If the end time is early than the current begin time
-                    let new_end_time = intervals[i][1];
-                    pq.push(Reverse(new_end_time));
-                } else {
-                    // Otherwise, push the end time back and we also need a new room
-                    pq.push(Reverse(end_time));
-                    pq.push(Reverse(intervals[i][1]));
+        for interval in intervals.iter().skip(1) {
+            if let Some(&Reverse(earliest_end)) = heap.peek() {
+                if earliest_end <= interval[0] {
+                    heap.pop();
                 }
             }
+            heap.push(Reverse(interval[1]));
         }
 
-        pq.len() as i32
+        heap.len() as i32
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn two_rooms_needed() {
+        assert_eq!(
+            Solution::min_meeting_rooms(vec![vec![0, 30], vec![5, 10], vec![15, 20]]),
+            2
+        );
+    }
+
+    #[test]
+    fn one_room_sufficient() {
+        assert_eq!(
+            Solution::min_meeting_rooms(vec![vec![7, 10], vec![2, 4]]),
+            1
+        );
     }
 }

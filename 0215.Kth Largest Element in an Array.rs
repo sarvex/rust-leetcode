@@ -1,39 +1,71 @@
 impl Solution {
+    /// Finds the kth largest element using quickselect partitioning.
+    ///
+    /// # Intuition
+    /// Quickselect narrows the search to one partition at each step, achieving
+    /// average O(n) time by only recursing into the relevant half.
+    ///
+    /// # Approach
+    /// 1. Convert kth largest to index `n - k`.
+    /// 2. Partition around the midpoint element using Hoare's scheme.
+    /// 3. Recurse into the half containing the target index.
+    ///
+    /// # Complexity
+    /// - Time: O(n) average, O(n^2) worst case
+    /// - Space: O(log n) recursion stack
     pub fn find_kth_largest(mut nums: Vec<i32>, k: i32) -> i32 {
         let len = nums.len();
-        let k = len - k as usize;
-        Self::quick_sort(&mut nums, 0, len - 1, k)
+        let target = len - k as usize;
+        Self::quickselect(&mut nums, 0, len - 1, target)
     }
 
-    fn quick_sort(nums: &mut Vec<i32>, l: usize, r: usize, k: usize) -> i32 {
-        if l == r {
-            return nums[l];
+    fn quickselect(nums: &mut [i32], left: usize, right: usize, target: usize) -> i32 {
+        if left == right {
+            return nums[left];
         }
-
-        let (mut i, mut j) = (l as isize - 1, r as isize + 1);
-        let x = nums[(l + r) / 2];
-
+        let pivot = nums[(left + right) / 2];
+        let (mut i, mut j) = (left as isize - 1, right as isize + 1);
         while i < j {
             i += 1;
-            while nums[i as usize] < x {
+            while nums[i as usize] < pivot {
                 i += 1;
             }
-
             j -= 1;
-            while nums[j as usize] > x {
+            while nums[j as usize] > pivot {
                 j -= 1;
             }
-
             if i < j {
                 nums.swap(i as usize, j as usize);
             }
         }
-
         let j = j as usize;
-        if j < k {
-            Self::quick_sort(nums, j + 1, r, k)
+        if target <= j {
+            Self::quickselect(nums, left, j, target)
         } else {
-            Self::quick_sort(nums, l, j, k)
+            Self::quickselect(nums, j + 1, right, target)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn standard_case() {
+        assert_eq!(Solution::find_kth_largest(vec![3, 2, 1, 5, 6, 4], 2), 5);
+    }
+
+    #[test]
+    fn with_duplicates() {
+        assert_eq!(
+            Solution::find_kth_largest(vec![3, 2, 3, 1, 2, 4, 5, 5, 6], 4),
+            4
+        );
+    }
+
+    #[test]
+    fn single_element() {
+        assert_eq!(Solution::find_kth_largest(vec![1], 1), 1);
     }
 }

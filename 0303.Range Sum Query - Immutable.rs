@@ -1,22 +1,43 @@
+/// Immutable range sum query using prefix sums.
+///
+/// # Intuition
+/// Precompute prefix sums so that any range sum is a constant-time subtraction.
+///
+/// # Approach
+/// 1. Build a prefix sum array of length n + 1.
+/// 2. `sum_range(left, right) = prefix[right + 1] - prefix[left]`.
+///
+/// # Complexity
+/// - Time: O(n) construction, O(1) per query
+/// - Space: O(n)
 struct NumArray {
-    s: Vec<i32>,
+    prefix: Vec<i32>,
 }
 
-/**
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl NumArray {
-    fn new(mut nums: Vec<i32>) -> Self {
+    fn new(nums: Vec<i32>) -> Self {
         let n = nums.len();
-        let mut s = vec![0; n + 1];
+        let mut prefix = vec![0; n + 1];
         for i in 0..n {
-            s[i + 1] = s[i] + nums[i];
+            prefix[i + 1] = prefix[i] + nums[i];
         }
-        Self { s }
+        Self { prefix }
     }
 
     fn sum_range(&self, left: i32, right: i32) -> i32 {
-        self.s[(right + 1) as usize] - self.s[left as usize]
+        self.prefix[(right + 1) as usize] - self.prefix[left as usize]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn range_queries() {
+        let arr = NumArray::new(vec![-2, 0, 3, -5, 2, -1]);
+        assert_eq!(arr.sum_range(0, 2), 1);
+        assert_eq!(arr.sum_range(2, 5), -1);
+        assert_eq!(arr.sum_range(0, 5), -3);
     }
 }

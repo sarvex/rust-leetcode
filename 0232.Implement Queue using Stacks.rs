@@ -1,41 +1,69 @@
-use std::collections::VecDeque;
-
+/// Queue implemented using two stacks with lazy transfer.
+///
+/// # Intuition
+/// Elements pushed to one stack are in LIFO order. Transferring to a second
+/// stack reverses them to FIFO order. Transfer lazily only when needed.
+///
+/// # Approach
+/// Push to `input` stack. On pop/peek, if `output` is empty, transfer all
+/// elements from `input` to `output`. This amortizes the cost.
+///
+/// # Complexity
+/// - Time: O(1) amortized per operation
+/// - Space: O(n)
 struct MyQueue {
-    stk1: Vec<i32>,
-    stk2: Vec<i32>,
+    input: Vec<i32>,
+    output: Vec<i32>,
 }
 
 impl MyQueue {
     fn new() -> Self {
-        MyQueue {
-            stk1: Vec::new(),
-            stk2: Vec::new(),
+        Self {
+            input: Vec::new(),
+            output: Vec::new(),
         }
     }
 
     fn push(&mut self, x: i32) {
-        self.stk1.push(x);
+        self.input.push(x);
     }
 
     fn pop(&mut self) -> i32 {
-        self.move_elements();
-        self.stk2.pop().unwrap()
+        self.transfer();
+        self.output.pop().unwrap()
     }
 
     fn peek(&mut self) -> i32 {
-        self.move_elements();
-        *self.stk2.last().unwrap()
+        self.transfer();
+        *self.output.last().unwrap()
     }
 
     fn empty(&self) -> bool {
-        self.stk1.is_empty() && self.stk2.is_empty()
+        self.input.is_empty() && self.output.is_empty()
     }
 
-    fn move_elements(&mut self) {
-        if self.stk2.is_empty() {
-            while let Some(element) = self.stk1.pop() {
-                self.stk2.push(element);
+    fn transfer(&mut self) {
+        if self.output.is_empty() {
+            while let Some(val) = self.input.pop() {
+                self.output.push(val);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_operations() {
+        let mut queue = MyQueue::new();
+        queue.push(1);
+        queue.push(2);
+        assert_eq!(queue.peek(), 1);
+        assert_eq!(queue.pop(), 1);
+        assert!(!queue.empty());
+        assert_eq!(queue.pop(), 2);
+        assert!(queue.empty());
     }
 }

@@ -1,37 +1,66 @@
 impl Solution {
-    #[allow(dead_code)]
+    /// Summarizes consecutive number ranges from a sorted array.
+    ///
+    /// # Intuition
+    /// Track the start of each range. When a gap is found, close the current
+    /// range and start a new one.
+    ///
+    /// # Approach
+    /// 1. Track the start of the current range.
+    /// 2. When `nums[i] != nums[i-1] + 1`, output the range `[start, nums[i-1]]`.
+    /// 3. Handle the final range after the loop.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(1) excluding output
     pub fn summary_ranges(nums: Vec<i32>) -> Vec<String> {
         if nums.is_empty() {
-            return vec![];
+            return Vec::new();
         }
-
-        let mut ret = Vec::new();
+        let mut result = Vec::new();
         let mut start = nums[0];
-        let mut prev = nums[0];
-        let mut current = 0;
-        let n = nums.len();
 
-        for i in 1..n {
-            current = nums[i];
-            if current != prev + 1 {
-                if start == prev {
-                    ret.push(start.to_string());
-                } else {
-                    ret.push(start.to_string() + "->" + &prev.to_string());
-                }
-                start = current;
-                prev = current;
-            } else {
-                prev = current;
+        for i in 1..nums.len() {
+            if nums[i] != nums[i - 1] + 1 {
+                Self::push_range(&mut result, start, nums[i - 1]);
+                start = nums[i];
             }
         }
+        Self::push_range(&mut result, start, *nums.last().unwrap());
+        result
+    }
 
-        if start == prev {
-            ret.push(start.to_string());
+    fn push_range(result: &mut Vec<String>, start: i32, end: i32) {
+        if start == end {
+            result.push(start.to_string());
         } else {
-            ret.push(start.to_string() + "->" + &prev.to_string());
+            result.push(format!("{}->{}", start, end));
         }
+    }
+}
 
-        ret
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mixed_ranges() {
+        assert_eq!(
+            Solution::summary_ranges(vec![0, 1, 2, 4, 5, 7]),
+            vec!["0->2", "4->5", "7"]
+        );
+    }
+
+    #[test]
+    fn single_elements() {
+        assert_eq!(
+            Solution::summary_ranges(vec![0, 2, 3, 4, 6, 8, 9]),
+            vec!["0", "2->4", "6", "8->9"]
+        );
+    }
+
+    #[test]
+    fn empty_input() {
+        assert!(Solution::summary_ranges(vec![]).is_empty());
     }
 }

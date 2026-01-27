@@ -3,37 +3,48 @@
 //   Int(i32),
 //   List(Vec<NestedInteger>)
 // }
+
+/// Flattens a nested list structure using pre-computation via DFS.
+///
+/// # Intuition
+/// Recursively flatten the entire structure at construction time into a
+/// plain vector, then serve elements sequentially.
+///
+/// # Approach
+/// 1. DFS through the nested list, collecting all integers into a vector.
+/// 2. `next()` returns the current element and advances the index.
+/// 3. `has_next()` checks if the index is within bounds.
+///
+/// # Complexity
+/// - Time: O(n) construction, O(1) per next/has_next
+/// - Space: O(n) for the flattened vector
 struct NestedIterator {
     nums: Vec<i32>,
-    i: usize,
+    index: usize,
 }
 
-/**
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl NestedIterator {
     fn new(nested_list: Vec<NestedInteger>) -> Self {
         let mut nums = Vec::new();
-        Self::dfs(&nested_list, &mut nums);
-        NestedIterator { nums, i: 0 }
+        Self::flatten(&nested_list, &mut nums);
+        Self { nums, index: 0 }
     }
 
     fn next(&mut self) -> i32 {
-        let result = self.nums[self.i];
-        self.i += 1;
-        result
+        let val = self.nums[self.index];
+        self.index += 1;
+        val
     }
 
     fn has_next(&self) -> bool {
-        self.i < self.nums.len()
+        self.index < self.nums.len()
     }
 
-    fn dfs(nested_list: &Vec<NestedInteger>, nums: &mut Vec<i32>) {
-        for ni in nested_list {
-            match ni {
-                NestedInteger::Int(x) => nums.push(*x),
-                NestedInteger::List(list) => Self::dfs(list, nums),
+    fn flatten(list: &[NestedInteger], result: &mut Vec<i32>) {
+        for item in list {
+            match item {
+                NestedInteger::Int(x) => result.push(*x),
+                NestedInteger::List(inner) => Self::flatten(inner, result),
             }
         }
     }

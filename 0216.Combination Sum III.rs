@@ -1,44 +1,66 @@
 impl Solution {
-    #[allow(dead_code)]
+    /// Finds all combinations of k numbers from 1-9 that sum to n using backtracking.
+    ///
+    /// # Intuition
+    /// Explore combinations in ascending order to avoid duplicates. Prune when
+    /// the running sum exceeds the target or the combination grows too large.
+    ///
+    /// # Approach
+    /// 1. Backtrack from digit `start` through 9.
+    /// 2. Add the current digit and recurse with the next start.
+    /// 3. If the combination has k elements summing to n, record it.
+    /// 4. Prune if sum exceeds target or path exceeds k elements.
+    ///
+    /// # Complexity
+    /// - Time: O(C(9, k)) — bounded by choosing k from 9
+    /// - Space: O(k) recursion depth
     pub fn combination_sum3(k: i32, n: i32) -> Vec<Vec<i32>> {
-        let mut ret = Vec::new();
-        let mut candidates = (1..=9).collect();
-        let mut cur_vec = Vec::new();
-        Self::dfs(n, k, 0, 0, &mut cur_vec, &mut candidates, &mut ret);
-        ret
+        let mut result = Vec::new();
+        let mut path = Vec::new();
+        Self::backtrack(1, n, k as usize, &mut path, &mut result);
+        result
     }
 
-    #[allow(dead_code)]
-    fn dfs(
-        target: i32,
-        length: i32,
-        cur_index: usize,
-        cur_sum: i32,
-        cur_vec: &mut Vec<i32>,
-        candidates: &Vec<i32>,
-        ans: &mut Vec<Vec<i32>>,
+    fn backtrack(
+        start: i32,
+        remaining: i32,
+        k: usize,
+        path: &mut Vec<i32>,
+        result: &mut Vec<Vec<i32>>,
     ) {
-        if cur_sum > target || cur_vec.len() > (length as usize) {
-            // No answer for this
+        if remaining < 0 || path.len() > k {
             return;
         }
-        if cur_sum == target && cur_vec.len() == (length as usize) {
-            // We get an answer
-            ans.push(cur_vec.clone());
+        if remaining == 0 && path.len() == k {
+            result.push(path.clone());
             return;
         }
-        for i in cur_index..candidates.len() {
-            cur_vec.push(candidates[i]);
-            Self::dfs(
-                target,
-                length,
-                i + 1,
-                cur_sum + candidates[i],
-                cur_vec,
-                candidates,
-                ans,
-            );
-            cur_vec.pop().unwrap();
+        for digit in start..=9 {
+            path.push(digit);
+            Self::backtrack(digit + 1, remaining - digit, k, path, result);
+            path.pop();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn three_numbers_sum_seven() {
+        assert_eq!(Solution::combination_sum3(3, 7), vec![vec![1, 2, 4]]);
+    }
+
+    #[test]
+    fn three_numbers_sum_nine() {
+        let mut result = Solution::combination_sum3(3, 9);
+        result.sort();
+        assert_eq!(result, vec![vec![1, 2, 6], vec![1, 3, 5], vec![2, 3, 4]]);
+    }
+
+    #[test]
+    fn impossible_combination() {
+        assert!(Solution::combination_sum3(4, 1).is_empty());
     }
 }

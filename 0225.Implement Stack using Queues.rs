@@ -1,49 +1,64 @@
 use std::collections::VecDeque;
 
+/// Stack implemented using a single queue with push-time reordering.
+///
+/// # Intuition
+/// After each push, rotate all previous elements behind the new one,
+/// making the most recently pushed element always at the front.
+///
+/// # Approach
+/// Use one VecDeque. On push, add to back then rotate `len - 1` elements
+/// from front to back, ensuring LIFO order at the front.
+///
+/// # Complexity
+/// - Time: O(n) push, O(1) pop/top/empty
+/// - Space: O(n)
 struct MyStack {
-    /// There could only be two status at all time
-    /// 1. One contains N elements, the other is empty
-    /// 2. One contains N - 1 elements, the other contains exactly 1 element
-    q_1: VecDeque<i32>,
-    q_2: VecDeque<i32>,
-    // Either 1 or 2, originally begins from 1
-    index: i32,
+    queue: VecDeque<i32>,
 }
 
 impl MyStack {
     fn new() -> Self {
         Self {
-            q_1: VecDeque::new(),
-            q_2: VecDeque::new(),
-            index: 1,
+            queue: VecDeque::new(),
         }
-    }
-
-    fn move_data(&mut self) {
-        // Always move from q1 to q2
-        assert!(self.q_2.len() == 1);
-        while !self.q_1.is_empty() {
-            self.q_2.push_back(self.q_1.pop_front().unwrap());
-        }
-        let tmp = self.q_1.clone();
-        self.q_1 = self.q_2.clone();
-        self.q_2 = tmp;
     }
 
     fn push(&mut self, x: i32) {
-        self.q_2.push_back(x);
-        self.move_data();
+        self.queue.push_back(x);
+        let rotations = self.queue.len() - 1;
+        for _ in 0..rotations {
+            let val = self.queue.pop_front().unwrap();
+            self.queue.push_back(val);
+        }
     }
 
     fn pop(&mut self) -> i32 {
-        self.q_1.pop_front().unwrap()
+        self.queue.pop_front().unwrap()
     }
 
-    fn top(&mut self) -> i32 {
-        *self.q_1.front().unwrap()
+    fn top(&self) -> i32 {
+        *self.queue.front().unwrap()
     }
 
     fn empty(&self) -> bool {
-        self.q_1.is_empty()
+        self.queue.is_empty()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_operations() {
+        let mut stack = MyStack::new();
+        stack.push(1);
+        stack.push(2);
+        assert_eq!(stack.top(), 2);
+        assert_eq!(stack.pop(), 2);
+        assert!(!stack.empty());
+        assert_eq!(stack.pop(), 1);
+        assert!(stack.empty());
     }
 }

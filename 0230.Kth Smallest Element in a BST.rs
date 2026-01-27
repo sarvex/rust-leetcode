@@ -18,22 +18,41 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
+
 impl Solution {
-    fn dfs(root: Option<Rc<RefCell<TreeNode>>>, res: &mut Vec<i32>, k: usize) {
-        if let Some(node) = root {
-            let mut node = node.borrow_mut();
-            Self::dfs(node.left.take(), res, k);
-            res.push(node.val);
-            if res.len() >= k {
-                return;
-            }
-            Self::dfs(node.right.take(), res, k);
-        }
-    }
+    /// Finds the kth smallest element in a BST using early-terminating inorder DFS.
+    ///
+    /// # Intuition
+    /// Inorder traversal of a BST yields elements in sorted order. Stop
+    /// as soon as k elements have been collected.
+    ///
+    /// # Approach
+    /// 1. Perform inorder DFS, collecting values into a vector.
+    /// 2. Early-terminate once k elements are collected.
+    /// 3. Return the kth element.
+    ///
+    /// # Complexity
+    /// - Time: O(k) on average, O(n) worst case
+    /// - Space: O(k) for collected values plus O(h) recursion stack
     pub fn kth_smallest(root: Option<Rc<RefCell<TreeNode>>>, k: i32) -> i32 {
         let k = k as usize;
-        let mut res: Vec<i32> = Vec::with_capacity(k);
-        Self::dfs(root, &mut res, k);
-        res[k - 1]
+        let mut values = Vec::with_capacity(k);
+        Self::inorder(root, &mut values, k);
+        values[k - 1]
+    }
+
+    fn inorder(root: Option<Rc<RefCell<TreeNode>>>, values: &mut Vec<i32>, k: usize) {
+        if let Some(node) = root {
+            let mut node = node.borrow_mut();
+            Self::inorder(node.left.take(), values, k);
+            if values.len() >= k {
+                return;
+            }
+            values.push(node.val);
+            if values.len() >= k {
+                return;
+            }
+            Self::inorder(node.right.take(), values, k);
+        }
     }
 }

@@ -1,28 +1,28 @@
-/**
- * Forward declaration of guess API.
- * @param  num   your guess
- * @return 	     -1 if num is lower than the guess number
- *			      1 if num is higher than the guess number
- *               otherwise return 0
- * unsafe fn guess(num: i32) -> i32 {}
- */
+// Forward declaration of guess API.
+// unsafe fn guess(num: i32) -> i32 {}
 
 impl Solution {
+    /// Finds the guessed number using binary search.
+    ///
+    /// # Intuition
+    /// The guess API provides comparison feedback, enabling binary search
+    /// to converge in O(log n) calls.
+    ///
+    /// # Approach
+    /// 1. Binary search between 1 and n.
+    /// 2. Use the guess API to determine which half to search.
+    ///
+    /// # Complexity
+    /// - Time: O(log n)
+    /// - Space: O(1)
     unsafe fn guessNumber(n: i32) -> i32 {
-        let mut l = 1;
-        let mut r = n;
+        let (mut left, mut right) = (1, n);
         loop {
-            let mid = l + (r - l) / 2;
+            let mid = left + (right - left) / 2;
             match guess(mid) {
-                -1 => {
-                    r = mid - 1;
-                }
-                1 => {
-                    l = mid + 1;
-                }
-                _ => {
-                    break mid;
-                }
+                -1 => right = mid - 1,
+                1 => left = mid + 1,
+                _ => break mid,
             }
         }
     }

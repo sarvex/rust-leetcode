@@ -18,7 +18,21 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
+
 impl Solution {
+    /// Inverts a binary tree by recursively swapping left and right children.
+    ///
+    /// # Intuition
+    /// Swap children at every node. Recursion handles the entire subtree.
+    ///
+    /// # Approach
+    /// 1. If the node exists, take left and right children.
+    /// 2. Recursively invert both.
+    /// 3. Assign the inverted right to left and inverted left to right.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(h) recursion stack
     pub fn invert_tree(root: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {
         if let Some(node) = root.clone() {
             let mut node = node.borrow_mut();
