@@ -18,19 +18,34 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
-impl Solution {
-    fn dfs(root: &mut Option<Rc<RefCell<TreeNode>>>, mut sum: i32) -> i32 {
-        if let Some(node) = root {
-            let mut node = node.as_ref().borrow_mut();
-            sum = Self::dfs(&mut node.right, sum) + node.val;
-            node.val = sum;
-            sum = Self::dfs(&mut node.left, sum);
-        }
-        sum
-    }
 
+impl Solution {
+    /// Converts BST to Greater Sum Tree using reverse in-order traversal.
+    ///
+    /// # Intuition
+    /// Reverse in-order (right → node → left) visits nodes in descending order.
+    /// Accumulate the running sum and assign it to each node.
+    ///
+    /// # Approach
+    /// DFS right subtree first, accumulating the sum. Update the current node's
+    /// value with the running sum, then recurse into the left subtree.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(h) recursion stack
     pub fn bst_to_gst(mut root: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {
-        Self::dfs(&mut root, 0);
+        fn dfs(node: &mut Option<Rc<RefCell<TreeNode>>>, sum: i32) -> i32 {
+            match node {
+                None => sum,
+                Some(n) => {
+                    let mut n = n.borrow_mut();
+                    let right_sum = dfs(&mut n.right, sum);
+                    n.val += right_sum;
+                    dfs(&mut n.left, n.val)
+                }
+            }
+        }
+        dfs(&mut root, 0);
         root
     }
 }

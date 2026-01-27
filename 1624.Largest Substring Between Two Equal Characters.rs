@@ -1,18 +1,69 @@
 impl Solution {
+    /// First-occurrence tracking for maximum substring length.
+    ///
+    /// # Intuition
+    /// Record the first occurrence of each character. For subsequent
+    /// occurrences, the distance minus one gives the substring length.
+    /// Track the maximum across all characters.
+    ///
+    /// # Approach
+    /// 1. Maintain first-seen index per character
+    /// 2. For each character, compute distance from first occurrence
+    /// 3. Track global maximum
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(1) — 26-element array
     pub fn max_length_between_equal_characters(s: String) -> i32 {
-        let s = s.as_bytes();
-        let n = s.len();
-        let mut pos = [-1; 26];
-        let mut res = -1;
-        for i in 0..n {
-            let j = (s[i] - b'a') as usize;
-            let i = i as i32;
-            if pos[j] == -1 {
-                pos[j] = i;
+        let mut first = [-1i32; 26];
+        let mut best = -1;
+
+        for (i, b) in s.bytes().enumerate() {
+            let idx = (b - b'a') as usize;
+            if first[idx] == -1 {
+                first[idx] = i as i32;
             } else {
-                res = res.max(i - pos[j] - 1);
+                best = best.max(i as i32 - first[idx] - 1);
             }
         }
-        res
+
+        best
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn has_equal_chars() {
+        assert_eq!(
+            Solution::max_length_between_equal_characters("abca".to_string()),
+            2
+        );
+    }
+
+    #[test]
+    fn no_equal_chars() {
+        assert_eq!(
+            Solution::max_length_between_equal_characters("abc".to_string()),
+            -1
+        );
+    }
+
+    #[test]
+    fn adjacent_equal() {
+        assert_eq!(
+            Solution::max_length_between_equal_characters("aa".to_string()),
+            0
+        );
+    }
+
+    #[test]
+    fn multiple_chars() {
+        assert_eq!(
+            Solution::max_length_between_equal_characters("cbzxy".to_string()),
+            -1
+        );
     }
 }

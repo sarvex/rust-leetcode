@@ -1,53 +1,64 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 
-#[allow(dead_code)]
+/// Hash map leaderboard with on-demand sorting for top-K queries.
+///
+/// # Intuition
+/// A HashMap provides O(1) score updates and resets. For top-K queries,
+/// collecting and partially sorting scores is sufficient since K is
+/// typically small relative to the total player count.
+///
+/// # Approach
+/// - `add_score`: accumulate scores per player using entry API
+/// - `top`: collect all scores, sort descending, sum the first K
+/// - `reset`: remove the player entirely from the map
+///
+/// # Complexity
+/// - add_score: O(1) amortized
+/// - top: O(n log n) for sorting
+/// - reset: O(1)
+/// - Space: O(n) for the player map
 struct Leaderboard {
-    /// This also keeps track of the top K players since it's implicitly sorted
-    record_map: BTreeMap<i32, i32>,
+    scores: HashMap<i32, i32>,
 }
 
 impl Leaderboard {
-    #[allow(dead_code)]
     fn new() -> Self {
         Self {
-            record_map: BTreeMap::new(),
+            scores: HashMap::new(),
         }
     }
 
-    #[allow(dead_code)]
     fn add_score(&mut self, player_id: i32, score: i32) {
-        if self.record_map.contains_key(&player_id) {
-            // The player exists, just add the score
-            self.record_map
-                .insert(player_id, self.record_map.get(&player_id).unwrap() + score);
-        } else {
-            // Add the new player to the map
-            self.record_map.insert(player_id, score);
-        }
+        *self.scores.entry(player_id).or_insert(0) += score;
     }
 
-    #[allow(dead_code)]
     fn top(&self, k: i32) -> i32 {
-        let mut cur_vec: Vec<(i32, i32)> = self.record_map.iter().map(|(k, v)| (*k, *v)).collect();
-        cur_vec.sort_by(|lhs, rhs| rhs.1.cmp(&lhs.1));
-        // Iterate reversely for K
-        let mut sum = 0;
-        let mut i = 0;
-        for (_, value) in &cur_vec {
-            if i == k {
-                break;
-            }
-            sum += value;
-            i += 1;
-        }
-
-        sum
+        let mut vals: Vec<i32> = self.scores.values().copied().collect();
+        vals.sort_unstable_by(|a, b| b.cmp(a));
+        vals.iter().take(k as usize).sum()
     }
 
-    #[allow(dead_code)]
     fn reset(&mut self, player_id: i32) {
-        // The player is ensured to exist in the board
-        // Just set the score to 0
-        self.record_map.insert(player_id, 0);
+        self.scores.remove(&player_id);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn leaderboard_operations() {
+        let mut lb = Leaderboard::new();
+        lb.add_score(1, 73);
+        lb.add_score(2, 56);
+        lb.add_score(3, 39);
+        lb.add_score(4, 51);
+        lb.add_score(5, 4);
+        assert_eq!(lb.top(1), 73);
+        lb.reset(1);
+        lb.reset(2);
+        lb.add_score(2, 51);
+        assert_eq!(lb.top(3), 141);
     }
 }

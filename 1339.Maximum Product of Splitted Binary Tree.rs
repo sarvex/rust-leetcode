@@ -2,59 +2,52 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 impl Solution {
-    /// Maximum Product of Splitted Binary Tree
+    /// Two-pass DFS to maximize the product of split subtree sums.
     ///
     /// # Intuition
-    /// When removing an edge, we split the tree into two subtrees with sums S and (total - S).
-    /// The product S * (total - S) is maximized when S is as close to total/2 as possible.
+    /// Removing any edge splits the tree into two parts with sums `s` and
+    /// `total - s`. The product `s * (total - s)` is maximized when `s`
+    /// is closest to `total / 2`. A first DFS computes the total, and a
+    /// second DFS evaluates every possible split.
     ///
     /// # Approach
-    /// 1. First DFS pass: Calculate the total sum of all nodes
-    /// 2. Second DFS pass: Compute each subtree sum and track the maximum product
-    ///    - For each subtree with sum S, the product would be S * (total - S)
-    ///    - Update max_product whenever we find a larger product
+    /// 1. First DFS: compute total sum of all nodes
+    /// 2. Second DFS: for each subtree sum `s`, update max product
+    /// 3. Return `max_product % 10^9+7`
     ///
     /// # Complexity
-    /// - Time: O(n) where n is the number of nodes (two tree traversals)
-    /// - Space: O(h) where h is the height of the tree (recursion stack)
+    /// - Time: O(n) two tree traversals
+    /// - Space: O(h) recursion stack depth
     pub fn max_product(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
         const MOD: i64 = 1_000_000_007;
 
-        let subtree_sum = |node: &Option<Rc<RefCell<TreeNode>>>| -> i64 {
-            fn dfs(node: &Option<Rc<RefCell<TreeNode>>>) -> i64 {
-                match node {
-                    Some(n) => {
-                        let n = n.borrow();
-                        n.val as i64 + dfs(&n.left) + dfs(&n.right)
-                    }
-                    None => 0,
+        fn subtree_sum(node: &Option<Rc<RefCell<TreeNode>>>) -> i64 {
+            match node {
+                Some(n) => {
+                    let n = n.borrow();
+                    n.val as i64 + subtree_sum(&n.left) + subtree_sum(&n.right)
                 }
+                None => 0,
             }
-            dfs(node)
-        };
+        }
+
+        fn find_max(node: &Option<Rc<RefCell<TreeNode>>>, total: i64, best: &mut i64) -> i64 {
+            match node {
+                Some(n) => {
+                    let n = n.borrow();
+                    let sum = n.val as i64
+                        + find_max(&n.left, total, best)
+                        + find_max(&n.right, total, best);
+                    *best = (*best).max(sum * (total - sum));
+                    sum
+                }
+                None => 0,
+            }
+        }
 
         let total = subtree_sum(&root);
-        let mut max_product: i64 = 0;
-
-        let mut find_max = |node: &Option<Rc<RefCell<TreeNode>>>| -> i64 {
-            fn dfs(node: &Option<Rc<RefCell<TreeNode>>>, total: i64, max_product: &mut i64) -> i64 {
-                match node {
-                    Some(n) => {
-                        let n = n.borrow();
-                        let sum = n.val as i64
-                            + dfs(&n.left, total, max_product)
-                            + dfs(&n.right, total, max_product);
-                        *max_product = (*max_product).max(sum * (total - sum));
-                        sum
-                    }
-                    None => 0,
-                }
-            }
-            dfs(node, total, &mut max_product)
-        };
-
-        find_max(&root);
-
-        (max_product % MOD) as i32
+        let mut best = 0i64;
+        find_max(&root, total, &mut best);
+        (best % MOD) as i32
     }
 }

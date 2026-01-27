@@ -1,34 +1,32 @@
 impl Solution {
     /// Finds the greatest common divisor of two strings.
     ///
-    /// # intuition
-    /// If two strings have a common divisor, then concatenating them in either order should yield the same result.
-    /// Once we confirm this property, we can find the GCD of their lengths to determine the length of the common divisor.
+    /// # Intuition
+    /// If two strings have a common divisor, concatenating them in either
+    /// order yields the same result. The GCD length determines the divisor.
     ///
-    /// # approach
-    /// 1. Check if str1 + str2 equals str2 + str1. If not, return an empty string.
-    /// 2. Find the GCD of the lengths of the two strings using Euclidean algorithm.
-    /// 3. Return the substring of length GCD from either string.
+    /// # Approach
+    /// Verify `str1 + str2 == str2 + str1`. Compute GCD of their lengths
+    /// using the Euclidean algorithm. Return the prefix of that length.
     ///
-    /// # complexity
-    /// - Time: O(m + n) where m and n are the lengths of the strings
-    /// - Space: O(1) as we only use constant extra space
+    /// # Complexity
+    /// - Time: O(m + n)
+    /// - Space: O(m + n) for concatenation check
     pub fn gcd_of_strings(str1: String, str2: String) -> String {
-        if str1.clone() + &str2 != str2.clone() + &str1 {
+        if format!("{str1}{str2}") != format!("{str2}{str1}") {
             return String::new();
         }
-        
-        let gcd = |mut a: usize, mut b: usize| -> usize {
+
+        fn gcd(mut a: usize, mut b: usize) -> usize {
             while b != 0 {
-                let temp = b;
+                let t = b;
                 b = a % b;
-                a = temp;
+                a = t;
             }
             a
-        };
-        
-        let len_gcd = gcd(str1.len(), str2.len());
-        str1[..len_gcd].to_string()
+        }
+
+        str1[..gcd(str1.len(), str2.len())].to_string()
     }
 }
 
@@ -37,22 +35,26 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_gcd_of_strings() {
-        let solution = Solution {};
-        
+    fn test_basic() {
         assert_eq!(
-            solution.gcd_of_strings("ABCABC".to_string(), "ABC".to_string()),
-            "ABC".to_string()
+            Solution::gcd_of_strings("ABCABC".to_string(), "ABC".to_string()),
+            "ABC"
         );
-        
+    }
+
+    #[test]
+    fn test_partial() {
         assert_eq!(
-            solution.gcd_of_strings("ABABAB".to_string(), "ABAB".to_string()),
-            "AB".to_string()
+            Solution::gcd_of_strings("ABABAB".to_string(), "ABAB".to_string()),
+            "AB"
         );
-        
+    }
+
+    #[test]
+    fn test_no_gcd() {
         assert_eq!(
-            solution.gcd_of_strings("LEET".to_string(), "CODE".to_string()),
-            "".to_string()
+            Solution::gcd_of_strings("LEET".to_string(), "CODE".to_string()),
+            ""
         );
     }
 }

@@ -34,33 +34,50 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
+
 impl Solution {
-    fn dfs(head: &Option<Box<ListNode>>, root: &Option<Rc<RefCell<TreeNode>>>) -> bool {
-        if head.is_none() {
-            return true;
-        }
-        if root.is_none() {
-            return false;
-        }
-        let node = head.as_ref().unwrap();
-        let root = root.as_ref().unwrap().borrow();
-        if node.val != root.val {
-            return false;
-        }
-        Self::dfs(&node.next, &root.left) || Self::dfs(&node.next, &root.right)
-    }
-
-    fn my_is_sub_path(head: &Option<Box<ListNode>>, root: &Option<Rc<RefCell<TreeNode>>>) -> bool {
-        if root.is_none() {
-            return false;
-        }
-        let node = root.as_ref().unwrap().borrow();
-        Self::dfs(head, root)
-            || Self::my_is_sub_path(head, &node.left)
-            || Self::my_is_sub_path(head, &node.right)
-    }
-
+    /// DFS matching linked list as a downward path in the binary tree.
+    ///
+    /// # Intuition
+    /// For each tree node, attempt to match the linked list starting from that
+    /// node downward. If the current node matches, continue matching the rest
+    /// of the list in both subtrees. If not, try starting fresh from children.
+    ///
+    /// # Approach
+    /// 1. `dfs`: check if list starting at `head` matches a downward path from `root`
+    /// 2. `is_sub_path`: try `dfs` at every tree node via recursive traversal
+    ///
+    /// # Complexity
+    /// - Time: O(n · m) where n = tree nodes, m = list length
+    /// - Space: O(n + m) recursion depth
     pub fn is_sub_path(head: Option<Box<ListNode>>, root: Option<Rc<RefCell<TreeNode>>>) -> bool {
-        Self::my_is_sub_path(&head, &root)
+        Self::check(&head, &root)
+    }
+
+    fn check(head: &Option<Box<ListNode>>, root: &Option<Rc<RefCell<TreeNode>>>) -> bool {
+        match root {
+            None => false,
+            Some(node) => {
+                let node = node.borrow();
+                Self::matches(head, &Some(Rc::clone(&root.as_ref().unwrap())))
+                    || Self::check(head, &node.left)
+                    || Self::check(head, &node.right)
+            }
+        }
+    }
+
+    fn matches(head: &Option<Box<ListNode>>, root: &Option<Rc<RefCell<TreeNode>>>) -> bool {
+        match head {
+            None => true,
+            Some(list_node) => match root {
+                None => false,
+                Some(tree_node) => {
+                    let tree_node = tree_node.borrow();
+                    list_node.val == tree_node.val
+                        && (Self::matches(&list_node.next, &tree_node.left)
+                            || Self::matches(&list_node.next, &tree_node.right))
+                }
+            },
+        }
     }
 }

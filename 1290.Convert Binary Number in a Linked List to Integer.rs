@@ -15,13 +15,28 @@
 //   }
 // }
 impl Solution {
+    /// Bit-shift accumulation traversing the linked list.
+    ///
+    /// # Intuition
+    /// The linked list represents a binary number from MSB to LSB. Shifting
+    /// the accumulator left by one and OR-ing each node's value builds the
+    /// integer in a single traversal.
+    ///
+    /// # Approach
+    /// 1. Traverse the list from head to tail
+    /// 2. At each node, shift accumulator left by 1 and OR with node value
+    /// 3. Return the final accumulator
+    ///
+    /// # Complexity
+    /// - Time: O(n) single traversal
+    /// - Space: O(1)
     pub fn get_decimal_value(head: Option<Box<ListNode>>) -> i32 {
-        let mut ans = 0;
-        let mut cur = &head;
-        while let Some(node) = cur {
-            ans = (ans << 1) | node.val;
-            cur = &node.next;
+        let mut result = 0;
+        let mut current = &head;
+        while let Some(node) = current {
+            result = (result << 1) | node.val;
+            current = &node.next;
         }
-        ans
+        result
     }
 }

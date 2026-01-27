@@ -1,72 +1,91 @@
 impl Solution {
-    #[allow(dead_code)]
+    /// Offline Union-Find with sorted queries for edge-limited paths.
+    ///
+    /// # Intuition
+    /// Process queries in increasing limit order. For each query, union all
+    /// edges with weight below the limit. Two nodes are connected by a valid
+    /// path if they share the same Union-Find root at query time.
+    ///
+    /// # Approach
+    /// 1. Sort queries by limit, sort edges by weight
+    /// 2. Process queries in order: union edges below current limit
+    /// 3. Check connectivity for each query
+    /// 4. Place results back in original query order
+    ///
+    /// # Complexity
+    /// - Time: O((n + m + q) · α(n)) where m = edges, q = queries
+    /// - Space: O(n + q)
     pub fn distance_limited_paths_exist(
         n: i32,
         edge_list: Vec<Vec<i32>>,
         queries: Vec<Vec<i32>>,
     ) -> Vec<bool> {
-        let mut disjoint_set: Vec<usize> = vec![0; n as usize];
-        let mut ans_vec: Vec<bool> = vec![false; queries.len()];
-        let mut q_vec: Vec<usize> = vec![0; queries.len()];
+        let mut parent: Vec<usize> = (0..n as usize).collect();
+        let mut result = vec![false; queries.len()];
 
-        // Initialize the set
-        for i in 0..n {
-            disjoint_set[i as usize] = i as usize;
-        }
+        let mut query_order: Vec<usize> = (0..queries.len()).collect();
+        query_order.sort_unstable_by_key(|&i| queries[i][2]);
 
-        // Initialize the q_vec
-        for i in 0..queries.len() {
-            q_vec[i] = i;
-        }
+        let mut edges = edge_list;
+        edges.sort_unstable_by_key(|e| e[2]);
 
-        // Sort the q_vec based on the query limit, from the lowest to highest
-        q_vec.sort_by(|i, j| queries[*i][2].cmp(&queries[*j][2]));
-
-        // Sort the edge_list based on the edge weight, from the lowest to highest
-        let mut edge_list = edge_list.clone();
-        edge_list.sort_by(|i, j| i[2].cmp(&j[2]));
-
-        let mut edge_idx: usize = 0;
-        for q_idx in &q_vec {
-            let s = queries[*q_idx][0] as usize;
-            let d = queries[*q_idx][1] as usize;
-            let limit = queries[*q_idx][2];
-            // Construct the disjoint set
-            while edge_idx < edge_list.len() && edge_list[edge_idx][2] < limit {
-                Solution::union(
-                    edge_list[edge_idx][0] as usize,
-                    edge_list[edge_idx][1] as usize,
-                    &mut disjoint_set,
+        let mut edge_idx = 0;
+        for &qi in &query_order {
+            let limit = queries[qi][2];
+            while edge_idx < edges.len() && edges[edge_idx][2] < limit {
+                Self::union(
+                    edges[edge_idx][0] as usize,
+                    edges[edge_idx][1] as usize,
+                    &mut parent,
                 );
                 edge_idx += 1;
             }
-            // If the parents of s & d are the same, this query should be `true`
-            // Otherwise, the current query is `false`
-            ans_vec[*q_idx] = Solution::check_valid(s, d, &mut disjoint_set);
+            result[qi] = Self::find(queries[qi][0] as usize, &mut parent)
+                == Self::find(queries[qi][1] as usize, &mut parent);
         }
 
-        ans_vec
+        result
     }
 
-    #[allow(dead_code)]
-    pub fn find(x: usize, d_set: &mut Vec<usize>) -> usize {
-        if d_set[x] != x {
-            d_set[x] = Solution::find(d_set[x], d_set);
+    fn find(x: usize, parent: &mut Vec<usize>) -> usize {
+        if parent[x] != x {
+            parent[x] = Self::find(parent[x], parent);
         }
-        return d_set[x];
+        parent[x]
     }
 
-    #[allow(dead_code)]
-    pub fn union(s: usize, d: usize, d_set: &mut Vec<usize>) {
-        let p_s = Solution::find(s, d_set);
-        let p_d = Solution::find(d, d_set);
-        d_set[p_s] = p_d;
+    fn union(a: usize, b: usize, parent: &mut Vec<usize>) {
+        let pa = Self::find(a, parent);
+        let pb = Self::find(b, parent);
+        parent[pa] = pb;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_queries() {
+        assert_eq!(
+            Solution::distance_limited_paths_exist(
+                3,
+                vec![vec![0, 1, 2], vec![1, 2, 4], vec![2, 0, 8], vec![1, 0, 16]],
+                vec![vec![0, 1, 2], vec![0, 2, 5]],
+            ),
+            vec![false, true]
+        );
     }
 
-    #[allow(dead_code)]
-    pub fn check_valid(s: usize, d: usize, d_set: &mut Vec<usize>) -> bool {
-        let p_s = Solution::find(s, d_set);
-        let p_d = Solution::find(d, d_set);
-        p_s == p_d
+    #[test]
+    fn disconnected() {
+        assert_eq!(
+            Solution::distance_limited_paths_exist(
+                5,
+                vec![vec![0, 1, 10], vec![1, 2, 5], vec![2, 3, 9], vec![3, 4, 13]],
+                vec![vec![0, 4, 14], vec![1, 4, 13]],
+            ),
+            vec![true, false]
+        );
     }
 }

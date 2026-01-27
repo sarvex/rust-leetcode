@@ -21,8 +21,8 @@ impl Solution {
         let mut prefix = vec![vec![0; n + 1]; m + 1];
         for i in 1..=m {
             for j in 1..=n {
-                prefix[i][j] = prefix[i - 1][j] + prefix[i][j - 1]
-                    - prefix[i - 1][j - 1] + mat[i - 1][j - 1];
+                prefix[i][j] =
+                    prefix[i - 1][j] + prefix[i][j - 1] - prefix[i - 1][j - 1] + mat[i - 1][j - 1];
             }
         }
 
@@ -36,8 +36,8 @@ impl Solution {
                     if x2 > m || y2 > n {
                         break;
                     }
-                    let sum = prefix[x2][y2] - prefix[i - 1][y2]
-                        - prefix[x2][j - 1] + prefix[i - 1][j - 1];
+                    let sum = prefix[x2][y2] - prefix[i - 1][y2] - prefix[x2][j - 1]
+                        + prefix[i - 1][j - 1];
                     if sum <= threshold {
                         result = k;
                     } else {
@@ -56,7 +56,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn standard_matrix() {
         let mat = vec![
             vec![1, 1, 3, 2, 4, 3, 2],
             vec![1, 1, 3, 2, 4, 3, 2],
@@ -66,7 +66,7 @@ mod tests {
     }
 
     #[test]
-    fn test_example_2() {
+    fn all_twos_threshold_one() {
         let mat = vec![
             vec![2, 2, 2, 2, 2],
             vec![2, 2, 2, 2, 2],
@@ -91,20 +91,13 @@ mod tests {
 
     #[test]
     fn test_entire_matrix() {
-        let mat = vec![
-            vec![1, 1, 1],
-            vec![1, 1, 1],
-            vec![1, 1, 1],
-        ];
+        let mat = vec![vec![1, 1, 1], vec![1, 1, 1], vec![1, 1, 1]];
         assert_eq!(Solution::max_side_length(mat, 9), 3);
     }
 
     #[test]
     fn test_large_threshold() {
-        let mat = vec![
-            vec![1, 2],
-            vec![3, 4],
-        ];
+        let mat = vec![vec![1, 2], vec![3, 4]];
         assert_eq!(Solution::max_side_length(mat, 100000), 2);
     }
 }

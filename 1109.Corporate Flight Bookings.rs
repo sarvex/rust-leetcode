@@ -1,22 +1,51 @@
 impl Solution {
-    #[allow(dead_code)]
+    /// Computes total seats booked per flight using a difference array.
+    ///
+    /// # Intuition
+    /// A difference array efficiently handles range updates. Each booking
+    /// adds seats to a range. The prefix sum gives the actual seat count.
+    ///
+    /// # Approach
+    /// For each booking `[first, last, seats]`, increment `diff[first-1]`
+    /// and decrement `diff[last]`. Compute prefix sums for the result.
+    ///
+    /// # Complexity
+    /// - Time: O(n + m) where m is booking count
+    /// - Space: O(n) for the result
     pub fn corp_flight_bookings(bookings: Vec<Vec<i32>>, n: i32) -> Vec<i32> {
-        let mut ans = vec![0; n as usize];
-
-        // Build the difference vector first
+        let n = n as usize;
+        let mut diff = vec![0i32; n + 1];
         for b in &bookings {
-            let (l, r) = ((b[0] as usize) - 1, (b[1] as usize) - 1);
-            ans[l] += b[2];
-            if r < (n as usize) - 1 {
-                ans[r + 1] -= b[2];
-            }
+            diff[(b[0] - 1) as usize] += b[2];
+            diff[b[1] as usize] -= b[2];
         }
-
-        // Build the prefix sum vector based on the difference vector
-        for i in 1..n as usize {
-            ans[i] += ans[i - 1];
+        let mut result = Vec::with_capacity(n);
+        let mut acc = 0;
+        for i in 0..n {
+            acc += diff[i];
+            result.push(acc);
         }
+        result
+    }
+}
 
-        ans
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic() {
+        assert_eq!(
+            Solution::corp_flight_bookings(vec![vec![1, 2, 10], vec![2, 3, 20], vec![2, 5, 25]], 5),
+            vec![10, 55, 45, 25, 25]
+        );
+    }
+
+    #[test]
+    fn test_single_booking() {
+        assert_eq!(
+            Solution::corp_flight_bookings(vec![vec![1, 2, 10]], 2),
+            vec![10, 10]
+        );
     }
 }

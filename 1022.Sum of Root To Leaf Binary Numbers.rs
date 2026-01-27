@@ -18,20 +18,36 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
-impl Solution {
-    fn dfs(root: &Option<Rc<RefCell<TreeNode>>>, mut num: i32) -> i32 {
-        if root.is_none() {
-            return 0;
-        }
-        let root = root.as_ref().unwrap().borrow();
-        num = (num << 1) | root.val;
-        if root.left.is_none() && root.right.is_none() {
-            return num;
-        }
-        Self::dfs(&root.left, num) + Self::dfs(&root.right, num)
-    }
 
+impl Solution {
+    /// Sums all root-to-leaf binary numbers via DFS.
+    ///
+    /// # Intuition
+    /// Each path from root to leaf represents a binary number built by
+    /// shifting left and OR-ing the current node's bit.
+    ///
+    /// # Approach
+    /// DFS passing the accumulated binary value. At each node, shift left
+    /// and OR the value. At leaves, return the accumulated number.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(h) recursion stack
     pub fn sum_root_to_leaf(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
-        Self::dfs(&root, 0)
+        fn dfs(node: &Option<Rc<RefCell<TreeNode>>>, num: i32) -> i32 {
+            match node {
+                None => 0,
+                Some(n) => {
+                    let n = n.borrow();
+                    let val = (num << 1) | n.val;
+                    if n.left.is_none() && n.right.is_none() {
+                        val
+                    } else {
+                        dfs(&n.left, val) + dfs(&n.right, val)
+                    }
+                }
+            }
+        }
+        dfs(&root, 0)
     }
 }

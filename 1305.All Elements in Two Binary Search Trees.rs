@@ -18,49 +18,55 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
+
 impl Solution {
+    /// In-order traversal of both BSTs with two-pointer merge.
+    ///
+    /// # Intuition
+    /// In-order traversal of a BST yields sorted elements. Merging two sorted
+    /// arrays with a two-pointer technique produces the final sorted result
+    /// in linear time.
+    ///
+    /// # Approach
+    /// 1. In-order DFS both trees into sorted vectors
+    /// 2. Merge the two sorted vectors using a two-pointer scan
+    ///
+    /// # Complexity
+    /// - Time: O(m + n) for traversal and merge
+    /// - Space: O(m + n) for the sorted vectors and result
     pub fn get_all_elements(
         root1: Option<Rc<RefCell<TreeNode>>>,
         root2: Option<Rc<RefCell<TreeNode>>>,
     ) -> Vec<i32> {
+        fn inorder(node: &Option<Rc<RefCell<TreeNode>>>, out: &mut Vec<i32>) {
+            if let Some(n) = node {
+                let n = n.borrow();
+                inorder(&n.left, out);
+                out.push(n.val);
+                inorder(&n.right, out);
+            }
+        }
+
         let mut a = Vec::new();
         let mut b = Vec::new();
+        inorder(&root1, &mut a);
+        inorder(&root2, &mut b);
 
-        Solution::dfs(&root1, &mut a);
-        Solution::dfs(&root2, &mut b);
-
-        let mut ans = Vec::new();
+        let mut result = Vec::with_capacity(a.len() + b.len());
         let (mut i, mut j) = (0, 0);
 
         while i < a.len() && j < b.len() {
             if a[i] <= b[j] {
-                ans.push(a[i]);
+                result.push(a[i]);
                 i += 1;
             } else {
-                ans.push(b[j]);
+                result.push(b[j]);
                 j += 1;
             }
         }
 
-        while i < a.len() {
-            ans.push(a[i]);
-            i += 1;
-        }
-
-        while j < b.len() {
-            ans.push(b[j]);
-            j += 1;
-        }
-
-        ans
-    }
-
-    fn dfs(root: &Option<Rc<RefCell<TreeNode>>>, nums: &mut Vec<i32>) {
-        if let Some(node) = root {
-            let node = node.borrow();
-            Solution::dfs(&node.left, nums);
-            nums.push(node.val);
-            Solution::dfs(&node.right, nums);
-        }
+        result.extend_from_slice(&a[i..]);
+        result.extend_from_slice(&b[j..]);
+        result
     }
 }
