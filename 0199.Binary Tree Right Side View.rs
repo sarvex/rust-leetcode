@@ -19,29 +19,45 @@
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
+
 impl Solution {
+    /// Returns the right side view of a binary tree using BFS level-order traversal.
+    ///
+    /// # Intuition
+    /// The rightmost node at each level is visible from the right side.
+    /// BFS processes levels; the first node dequeued when processing right-to-left
+    /// is the rightmost.
+    ///
+    /// # Approach
+    /// 1. BFS with a queue, processing right children before left.
+    /// 2. At each level, the first node in the queue is the rightmost.
+    /// 3. Collect these values as the right side view.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(w) where w is the maximum tree width
     pub fn right_side_view(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {
-        let mut ans = vec![];
+        let mut result = Vec::new();
         if root.is_none() {
-            return ans;
+            return result;
         }
-        let mut q = VecDeque::new();
-        q.push_back(root);
-        while !q.is_empty() {
-            let k = q.len();
-            ans.push(q[0].as_ref().unwrap().borrow().val);
-            for _ in 0..k {
-                if let Some(node) = q.pop_front().unwrap() {
+        let mut queue = VecDeque::new();
+        queue.push_back(root);
+        while !queue.is_empty() {
+            let level_size = queue.len();
+            result.push(queue[0].as_ref().unwrap().borrow().val);
+            for _ in 0..level_size {
+                if let Some(Some(node)) = queue.pop_front() {
                     let mut node = node.borrow_mut();
                     if node.right.is_some() {
-                        q.push_back(node.right.take());
+                        queue.push_back(node.right.take());
                     }
                     if node.left.is_some() {
-                        q.push_back(node.left.take());
+                        queue.push_back(node.left.take());
                     }
                 }
             }
         }
-        ans
+        result
     }
 }

@@ -1,26 +1,22 @@
-/// Finds the majority element using Boyer-Moore Voting Algorithm
-/// 
-/// # intuition
-/// The majority element appears more than n/2 times, so its count will always be positive
-/// after canceling out with other elements.
-/// 
-/// # approach
-/// 1. Initialize a candidate element and its count
-/// 2. Iterate through the array:
-///    - If count is 0, set the current element as the new candidate
-///    - If current element matches candidate, increment count
-///    - Otherwise, decrement count
-/// 3. Return the final candidate (guaranteed to be the majority element)
-/// 
-/// # complexity
-/// - Time complexity: O(n) where n is the length of the array
-/// - Space complexity: O(1) as we only use two variables
 impl Solution {
+    /// Finds the majority element using Boyer-Moore Voting Algorithm.
+    ///
+    /// # Intuition
+    /// The majority element appears more than n/2 times, so its count will always
+    /// be positive after canceling out with other elements.
+    ///
+    /// # Approach
+    /// 1. Initialize a candidate and count.
+    /// 2. When count reaches 0, adopt the current element as the new candidate.
+    /// 3. Increment count for matches, decrement for mismatches.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(1)
     pub fn majority_element(nums: Vec<i32>) -> i32 {
-        let mut candidate: i32 = 0;
-        let mut count: i32 = 0;
-        
-        for &num in nums.iter() {
+        let mut candidate = 0;
+        let mut count = 0;
+        for &num in &nums {
             if count == 0 {
                 candidate = num;
                 count = 1;
@@ -30,7 +26,6 @@ impl Solution {
                 count -= 1;
             }
         }
-        
         candidate
     }
 }
@@ -38,11 +33,19 @@ impl Solution {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
-    fn test_majority_element() {
+    fn odd_length_array() {
         assert_eq!(Solution::majority_element(vec![3, 2, 3]), 3);
+    }
+
+    #[test]
+    fn even_length_array() {
         assert_eq!(Solution::majority_element(vec![2, 2, 1, 1, 1, 2, 2]), 2);
+    }
+
+    #[test]
+    fn single_element() {
         assert_eq!(Solution::majority_element(vec![1]), 1);
     }
 }

@@ -9,32 +9,42 @@
 // impl TreeNode {
 //   #[inline]
 //   pub fn new(val: i32) -> Self {
-//     TreeNode {
-//       val,
-//       left: None,
-//       right: None
-//     }
+//     TreeNode { val, left: None, right: None }
 //   }
 // }
+
 use std::cell::RefCell;
 use std::rc::Rc;
-impl Solution {
-    fn dfs(p: &Option<Rc<RefCell<TreeNode>>>, q: &Option<Rc<RefCell<TreeNode>>>) -> bool {
-        if p.is_none() && q.is_none() {
-            return true;
-        }
-        if p.is_none() || q.is_none() {
-            return false;
-        }
-        let r1 = p.as_ref().unwrap().borrow();
-        let r2 = q.as_ref().unwrap().borrow();
-        r1.val == r2.val && Self::dfs(&r1.left, &r2.left) && Self::dfs(&r1.right, &r2.right)
-    }
 
+impl Solution {
+    /// Recursive structural and value comparison for tree equality.
+    ///
+    /// # Intuition
+    /// Two trees are identical when both are empty, or both have the same
+    /// root value with recursively identical left and right subtrees.
+    ///
+    /// # Approach
+    /// Pattern match on both nodes. If both present, compare values and
+    /// recurse on children. If both absent, return true. Mixed cases return false.
+    ///
+    /// # Complexity
+    /// - Time: O(min(n, m)) — visits each node until a mismatch
+    /// - Space: O(min(h1, h2)) — recursion depth is the shorter tree height
     pub fn is_same_tree(
         p: Option<Rc<RefCell<TreeNode>>>,
         q: Option<Rc<RefCell<TreeNode>>>,
     ) -> bool {
-        Self::dfs(&p, &q)
+        fn dfs(a: &Option<Rc<RefCell<TreeNode>>>, b: &Option<Rc<RefCell<TreeNode>>>) -> bool {
+            match (a, b) {
+                (None, None) => true,
+                (Some(a), Some(b)) => {
+                    let (a, b) = (a.borrow(), b.borrow());
+                    a.val == b.val && dfs(&a.left, &b.left) && dfs(&a.right, &b.right)
+                }
+                _ => false,
+            }
+        }
+
+        dfs(&p, &q)
     }
 }

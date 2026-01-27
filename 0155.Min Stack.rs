@@ -1,40 +1,75 @@
-use std::collections::VecDeque;
+/// A stack that supports push, pop, top, and retrieving the minimum in O(1).
+///
+/// # Intuition
+/// Maintain a secondary stack that tracks the current minimum. When pushing,
+/// also push to the min stack if the value is <= the current minimum.
+///
+/// # Approach
+/// Use two `Vec<i32>` stacks: one for values and one for minimums.
+/// The min stack only grows when a new minimum (or equal) is pushed.
+///
+/// # Complexity
+/// - Time: O(1) per operation
+/// - Space: O(n) for both stacks
 struct MinStack {
-    stk1: VecDeque<i32>,
-    stk2: VecDeque<i32>,
+    stack: Vec<i32>,
+    min_stack: Vec<i32>,
 }
 
-/**
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl MinStack {
     fn new() -> Self {
         Self {
-            stk1: VecDeque::new(),
-            stk2: VecDeque::new(),
+            stack: Vec::new(),
+            min_stack: Vec::new(),
         }
     }
 
-    fn push(&mut self, x: i32) {
-        self.stk1.push_back(x);
-        if self.stk2.is_empty() || *self.stk2.back().unwrap() >= x {
-            self.stk2.push_back(x);
+    fn push(&mut self, val: i32) {
+        self.stack.push(val);
+        if self.min_stack.is_empty() || val <= *self.min_stack.last().unwrap() {
+            self.min_stack.push(val);
         }
     }
 
     fn pop(&mut self) {
-        let val = self.stk1.pop_back().unwrap();
-        if *self.stk2.back().unwrap() == val {
-            self.stk2.pop_back();
+        let val = self.stack.pop().unwrap();
+        if *self.min_stack.last().unwrap() == val {
+            self.min_stack.pop();
         }
     }
 
     fn top(&self) -> i32 {
-        *self.stk1.back().unwrap()
+        *self.stack.last().unwrap()
     }
 
     fn get_min(&self) -> i32 {
-        *self.stk2.back().unwrap()
+        *self.min_stack.last().unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_operations() {
+        let mut stack = MinStack::new();
+        stack.push(-2);
+        stack.push(0);
+        stack.push(-3);
+        assert_eq!(stack.get_min(), -3);
+        stack.pop();
+        assert_eq!(stack.top(), 0);
+        assert_eq!(stack.get_min(), -2);
+    }
+
+    #[test]
+    fn duplicate_minimums() {
+        let mut stack = MinStack::new();
+        stack.push(1);
+        stack.push(1);
+        assert_eq!(stack.get_min(), 1);
+        stack.pop();
+        assert_eq!(stack.get_min(), 1);
     }
 }

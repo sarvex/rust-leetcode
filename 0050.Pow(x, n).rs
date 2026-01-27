@@ -1,26 +1,66 @@
 impl Solution {
-    #[allow(dead_code)]
+    /// Binary exponentiation (fast power) for computing x^n.
+    ///
+    /// # Intuition
+    /// Exponentiation by squaring reduces the number of multiplications
+    /// from O(n) to O(log n) by halving the exponent at each step and
+    /// squaring the base.
+    ///
+    /// # Approach
+    /// Convert `n` to `i64` to handle `i32::MIN`. If negative, compute
+    /// the reciprocal. Iteratively square the base and multiply into the
+    /// result when the current bit of the exponent is set.
+    ///
+    /// # Complexity
+    /// - Time: O(log n) — halving the exponent each iteration
+    /// - Space: O(1) — scalar variables only
     pub fn my_pow(x: f64, n: i32) -> f64 {
-        let mut x = x;
-        let n = n as i64;
-        if n >= 0 {
-            Self::quick_pow(&mut x, n)
+        let mut base = x;
+        let mut exp = (n as i64).abs();
+        let mut result = 1.0;
+
+        while exp > 0 {
+            if exp & 1 == 1 {
+                result *= base;
+            }
+            base *= base;
+            exp >>= 1;
+        }
+
+        if n < 0 {
+            1.0 / result
         } else {
-            1.0 / Self::quick_pow(&mut x, -n)
+            result
         }
     }
+}
 
-    #[allow(dead_code)]
-    fn quick_pow(x: &mut f64, mut n: i64) -> f64 {
-        // `n` should greater or equal to zero
-        let mut ret = 1.0;
-        while n != 0 {
-            if (n & 0x1) == 1 {
-                ret *= *x;
-            }
-            *x *= *x;
-            n >>= 1;
-        }
-        ret
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn positive_exponent() {
+        assert!((Solution::my_pow(2.0, 10) - 1024.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn negative_exponent() {
+        assert!((Solution::my_pow(2.0, -2) - 0.25).abs() < 1e-5);
+    }
+
+    #[test]
+    fn zero_exponent() {
+        assert!((Solution::my_pow(2.0, 0) - 1.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn fractional_base() {
+        assert!((Solution::my_pow(2.1, 3) - 9.261).abs() < 1e-3);
+    }
+
+    #[test]
+    fn min_exponent() {
+        assert!((Solution::my_pow(1.0, i32::MIN) - 1.0).abs() < 1e-5);
     }
 }

@@ -18,20 +18,31 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
+
 impl Solution {
-    fn dfs(root: &Option<Rc<RefCell<TreeNode>>>, ans: &mut Vec<i32>) {
-        if root.is_none() {
-            return;
-        }
-        let node = root.as_ref().unwrap().borrow();
-        Self::dfs(&node.left, ans);
-        Self::dfs(&node.right, ans);
-        ans.push(node.val);
+    /// Returns postorder traversal of a binary tree using recursive DFS.
+    ///
+    /// # Intuition
+    /// Postorder visits left subtree, then right subtree, then root.
+    ///
+    /// # Approach
+    /// Recursively collect node values in left-right-root order.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(h) recursion stack where h is tree height
+    pub fn postorder_traversal(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {
+        let mut result = Vec::new();
+        Self::dfs(&root, &mut result);
+        result
     }
 
-    pub fn postorder_traversal(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {
-        let mut ans = vec![];
-        Self::dfs(&root, &mut ans);
-        ans
+    fn dfs(root: &Option<Rc<RefCell<TreeNode>>>, result: &mut Vec<i32>) {
+        if let Some(node) = root {
+            let node = node.borrow();
+            Self::dfs(&node.left, result);
+            Self::dfs(&node.right, result);
+            result.push(node.val);
+        }
     }
 }

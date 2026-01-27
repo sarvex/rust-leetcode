@@ -1,27 +1,65 @@
 impl Solution {
-    #[allow(dead_code)]
+    /// Stack-based simplification of Unix-style file paths.
+    ///
+    /// # Intuition
+    /// Split the path by '/' to extract components. A stack naturally handles
+    /// directory traversal: push on valid names, pop on '..', and ignore
+    /// '.' and empty segments.
+    ///
+    /// # Approach
+    /// Split the path string on '/'. For each component, match against
+    /// ".." (pop), "." or "" (skip), and anything else (push). Join the
+    /// stack with '/' and prepend the root.
+    ///
+    /// # Complexity
+    /// - Time: O(n) — single pass through the path
+    /// - Space: O(n) — stack and split components
     pub fn simplify_path(path: String) -> String {
-        let mut s: Vec<&str> = Vec::new();
+        let mut stack: Vec<&str> = Vec::new();
 
-        // Split the path
-        let p_vec = path.split("/").collect::<Vec<&str>>();
-
-        // Traverse the path vector
-        for p in p_vec {
-            match p {
-                // Do nothing for "" or "."
-                "" | "." => {
-                    continue;
-                }
+        for component in path.split('/') {
+            match component {
                 ".." => {
-                    if !s.is_empty() {
-                        s.pop();
-                    }
+                    stack.pop();
                 }
-                _ => s.push(p),
+                "" | "." => {}
+                name => stack.push(name),
             }
         }
 
-        "/".to_string() + &s.join("/")
+        format!("/{}", stack.join("/"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn simple_path() {
+        assert_eq!(Solution::simplify_path("/home/".to_string()), "/home");
+    }
+
+    #[test]
+    fn double_dot() {
+        assert_eq!(Solution::simplify_path("/../".to_string()), "/");
+    }
+
+    #[test]
+    fn multiple_slashes() {
+        assert_eq!(
+            Solution::simplify_path("/home//foo/".to_string()),
+            "/home/foo"
+        );
+    }
+
+    #[test]
+    fn complex_path() {
+        assert_eq!(Solution::simplify_path("/a/./b/../../c/".to_string()), "/c");
+    }
+
+    #[test]
+    fn root_only() {
+        assert_eq!(Solution::simplify_path("/".to_string()), "/");
     }
 }

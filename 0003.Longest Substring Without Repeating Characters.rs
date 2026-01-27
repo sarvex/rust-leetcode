@@ -1,51 +1,85 @@
 impl Solution {
-    /// Finds the length of the longest substring without repeating characters.
+    /// Sliding window with frequency array for longest unique substring.
     ///
-    /// # Problem
-    /// Given a string `s`, find the length of the longest substring without repeating characters.
+    /// # Intuition
+    /// A contiguous window of unique characters can be maintained by expanding
+    /// the right boundary and contracting the left boundary whenever a duplicate
+    /// is detected. A fixed-size frequency array gives O(1) character counting.
     ///
-    /// # Arguments
-    /// * `s` - A string to search for the longest substring without repeating characters
-    ///
-    /// # Returns
-    /// The length of the longest substring without repeating characters as an i32
-    ///
-    /// # Algorithm
-    /// Uses a sliding window approach with two pointers:
-    /// 1. Expand the right pointer to include new characters
-    /// 2. When a duplicate is found, contract the left pointer until the duplicate is removed
-    /// 3. Track the maximum window size seen during this process
+    /// # Approach
+    /// Convert the string to bytes for direct indexing. Maintain a 128-element
+    /// frequency array and two pointers (`window_start`, `window_end`). As
+    /// `window_end` advances, increment the frequency of the current byte. If
+    /// the frequency exceeds one, shrink the window from the left until the
+    /// duplicate is removed. Track the maximum window size throughout.
     ///
     /// # Complexity
-    /// - Time Complexity: O(n) where n is the length of the string
-    /// - Space Complexity: O(1) as we use a fixed-size array of 128 characters
-    ///
-    /// # Example
-    /// ```
-    /// let s = String::from("abcabcbb");
-    /// assert_eq!(Solution::length_of_longest_substring(s), 3);
-    /// ```
+    /// - Time: O(n) — each character is visited at most twice
+    /// - Space: O(1) — fixed 128-element frequency array
     pub fn length_of_longest_substring(s: String) -> i32 {
-        let mut char_frequency = [0; 128];
+        let bytes = s.as_bytes();
+        let mut frequency = [0u16; 128];
         let mut max_length = 0;
         let mut window_start = 0;
-        let chars: Vec<char> = s.chars().collect();
-        let string_length = chars.len();
 
-        for (window_end, &current_char) in chars.iter().enumerate() {
-            char_frequency[current_char as usize] += 1;
+        for (window_end, &current_byte) in bytes.iter().enumerate() {
+            frequency[current_byte as usize] += 1;
 
-            // Shrink window while we have a duplicate character
-            while char_frequency[current_char as usize] > 1 {
-                let start_char = chars[window_start];
-                char_frequency[start_char as usize] -= 1;
+            while frequency[current_byte as usize] > 1 {
+                frequency[bytes[window_start] as usize] -= 1;
                 window_start += 1;
             }
 
-            // Update maximum length found so far
-            max_length = max_length.max((window_end - window_start + 1) as i32);
+            max_length = max_length.max(window_end - window_start + 1);
         }
 
-        max_length
+        max_length as i32
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn repeating_pattern() {
+        assert_eq!(
+            Solution::length_of_longest_substring("abcabcbb".to_string()),
+            3
+        );
+    }
+
+    #[test]
+    fn all_identical() {
+        assert_eq!(
+            Solution::length_of_longest_substring("bbbbb".to_string()),
+            1
+        );
+    }
+
+    #[test]
+    fn interleaved_repeats() {
+        assert_eq!(
+            Solution::length_of_longest_substring("pwwkew".to_string()),
+            3
+        );
+    }
+
+    #[test]
+    fn empty_string() {
+        assert_eq!(Solution::length_of_longest_substring(String::new()), 0);
+    }
+
+    #[test]
+    fn all_unique() {
+        assert_eq!(
+            Solution::length_of_longest_substring("abcdef".to_string()),
+            6
+        );
+    }
+
+    #[test]
+    fn single_character() {
+        assert_eq!(Solution::length_of_longest_substring("a".to_string()), 1);
     }
 }

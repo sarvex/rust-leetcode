@@ -15,17 +15,31 @@
 //   }
 // }
 impl Solution {
+    /// Sorts a linked list in O(n log n) time using merge sort.
+    ///
+    /// # Intuition
+    /// Merge sort naturally fits linked lists: splitting at the midpoint
+    /// and merging two sorted halves requires no random access.
+    ///
+    /// # Approach
+    /// 1. Count the list length, split at the midpoint.
+    /// 2. Recursively sort both halves.
+    /// 3. Merge the two sorted halves by comparing head elements.
+    ///
+    /// # Complexity
+    /// - Time: O(n log n)
+    /// - Space: O(log n) recursion stack
     pub fn sort_list(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
         fn merge(l1: Option<Box<ListNode>>, l2: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
             match (l1, l2) {
                 (None, Some(node)) | (Some(node), None) => Some(node),
-                (Some(mut node1), Some(mut node2)) => {
-                    if node1.val < node2.val {
-                        node1.next = merge(node1.next.take(), Some(node2));
-                        Some(node1)
+                (Some(mut n1), Some(mut n2)) => {
+                    if n1.val < n2.val {
+                        n1.next = merge(n1.next.take(), Some(n2));
+                        Some(n1)
                     } else {
-                        node2.next = merge(Some(node1), node2.next.take());
-                        Some(node2)
+                        n2.next = merge(Some(n1), n2.next.take());
+                        Some(n2)
                     }
                 }
                 _ => None,
@@ -48,9 +62,9 @@ impl Solution {
                 cur = &mut cur.as_mut().unwrap().next;
             }
             let right = cur.as_mut().unwrap().next.take();
-
             merge(sort(head), sort(right))
         }
+
         sort(head)
     }
 }

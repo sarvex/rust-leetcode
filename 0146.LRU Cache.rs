@@ -1,3 +1,19 @@
+/// Doubly-linked list with hash map for O(1) LRU cache operations.
+///
+/// # Intuition
+/// An LRU cache requires O(1) lookup by key and O(1) eviction of the least
+/// recently used entry. A hash map provides fast lookup while a doubly-linked
+/// list maintains access order, enabling O(1) move-to-front and removal.
+///
+/// # Approach
+/// Maintain a hash map from key to `Rc<RefCell<Node>>` and a doubly-linked
+/// list with explicit head/tail pointers. On `get`, move the accessed node
+/// to the front. On `put`, either update an existing node (and move to front)
+/// or insert a new node at the front, evicting the tail if capacity is exceeded.
+///
+/// # Complexity
+/// - Time: O(1) per `get` and `put` operation
+/// - Space: O(capacity) — bounded by the cache capacity
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -28,15 +44,11 @@ struct LRUCache {
     tail: Option<Rc<RefCell<Node>>>,
 }
 
-/**
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl LRUCache {
     fn new(capacity: i32) -> Self {
         Self {
             capacity: capacity as usize,
-            cache: HashMap::new(),
+            cache: HashMap::with_capacity(capacity as usize),
             head: None,
             tail: None,
         }
@@ -48,76 +60,130 @@ impl LRUCache {
                 let node = Rc::clone(node);
                 self.remove(&node);
                 self.push_front(&node);
-                let value = node.borrow().value;
-                value
+                node.borrow().value
             }
             None => -1,
         }
     }
 
     fn put(&mut self, key: i32, value: i32) {
-        match self.cache.get(&key) {
-            Some(node) => {
-                let node = Rc::clone(node);
-                node.borrow_mut().value = value;
-                self.remove(&node);
-                self.push_front(&node);
-            }
-            None => {
-                let node = Rc::new(RefCell::new(Node::new(key, value)));
-                self.cache.insert(key, Rc::clone(&node));
-                self.push_front(&node);
-                if self.cache.len() > self.capacity {
-                    let back_key = self.pop_back().unwrap().borrow().key;
-                    self.cache.remove(&back_key);
+        if let Some(node) = self.cache.get(&key) {
+            let node = Rc::clone(node);
+            node.borrow_mut().value = value;
+            self.remove(&node);
+            self.push_front(&node);
+        } else {
+            let node = Rc::new(RefCell::new(Node::new(key, value)));
+            self.cache.insert(key, Rc::clone(&node));
+            self.push_front(&node);
+
+            if self.cache.len() > self.capacity {
+                if let Some(evicted) = self.pop_back() {
+                    self.cache.remove(&evicted.borrow().key);
                 }
             }
-        };
+        }
     }
 
+    #[inline]
     fn push_front(&mut self, node: &Rc<RefCell<Node>>) {
+        node.borrow_mut().prev = None;
         match self.head.take() {
             Some(head) => {
                 head.borrow_mut().prev = Some(Rc::clone(node));
-                node.borrow_mut().prev = None;
                 node.borrow_mut().next = Some(head);
                 self.head = Some(Rc::clone(node));
             }
             None => {
+                node.borrow_mut().next = None;
                 self.head = Some(Rc::clone(node));
                 self.tail = Some(Rc::clone(node));
             }
-        };
+        }
     }
 
+    #[inline]
     fn remove(&mut self, node: &Rc<RefCell<Node>>) {
-        match (node.borrow().prev.as_ref(), node.borrow().next.as_ref()) {
+        let (prev, next) = {
+            let borrowed = node.borrow();
+            (borrowed.prev.clone(), borrowed.next.clone())
+        };
+
+        match (&prev, &next) {
             (None, None) => {
                 self.head = None;
                 self.tail = None;
             }
-            (None, Some(next)) => {
-                self.head = Some(Rc::clone(next));
-                next.borrow_mut().prev = None;
+            (None, Some(next_node)) => {
+                self.head = Some(Rc::clone(next_node));
+                next_node.borrow_mut().prev = None;
             }
-            (Some(prev), None) => {
-                self.tail = Some(Rc::clone(prev));
-                prev.borrow_mut().next = None;
+            (Some(prev_node), None) => {
+                self.tail = Some(Rc::clone(prev_node));
+                prev_node.borrow_mut().next = None;
             }
-            (Some(prev), Some(next)) => {
-                next.borrow_mut().prev = Some(Rc::clone(prev));
-                prev.borrow_mut().next = Some(Rc::clone(next));
+            (Some(prev_node), Some(next_node)) => {
+                next_node.borrow_mut().prev = Some(Rc::clone(prev_node));
+                prev_node.borrow_mut().next = Some(Rc::clone(next_node));
             }
-        };
+        }
+
+        node.borrow_mut().prev = None;
+        node.borrow_mut().next = None;
     }
 
+    #[inline]
     fn pop_back(&mut self) -> Option<Rc<RefCell<Node>>> {
-        match self.tail.take() {
-            Some(tail) => {
-                self.remove(&tail);
-                Some(tail)
-            }
-            None => None,
-        }
+        self.tail.take().map(|tail| {
+            self.remove(&tail);
+            tail
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_get_and_put() {
+        let mut cache = LRUCache::new(2);
+        cache.put(1, 1);
+        cache.put(2, 2);
+        assert_eq!(cache.get(1), 1);
+        cache.put(3, 3); // evicts key 2
+        assert_eq!(cache.get(2), -1);
+        cache.put(4, 4); // evicts key 1
+        assert_eq!(cache.get(1), -1);
+        assert_eq!(cache.get(3), 3);
+        assert_eq!(cache.get(4), 4);
+    }
+
+    #[test]
+    fn update_existing_key() {
+        let mut cache = LRUCache::new(2);
+        cache.put(1, 10);
+        cache.put(1, 20);
+        assert_eq!(cache.get(1), 20);
+    }
+
+    #[test]
+    fn capacity_one() {
+        let mut cache = LRUCache::new(1);
+        cache.put(1, 1);
+        cache.put(2, 2);
+        assert_eq!(cache.get(1), -1);
+        assert_eq!(cache.get(2), 2);
+    }
+
+    #[test]
+    fn get_refreshes_recency() {
+        let mut cache = LRUCache::new(2);
+        cache.put(1, 1);
+        cache.put(2, 2);
+        cache.get(1); // refreshes key 1
+        cache.put(3, 3); // evicts key 2 (least recent)
+        assert_eq!(cache.get(2), -1);
+        assert_eq!(cache.get(1), 1);
     }
 }

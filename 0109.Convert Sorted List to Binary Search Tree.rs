@@ -34,8 +34,33 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
+
 impl Solution {
-    fn build(vals: &Vec<i32>, start: usize, end: usize) -> Option<Rc<RefCell<TreeNode>>> {
+    /// Converts a sorted linked list to a height-balanced BST via array conversion and recursive midpoint splitting.
+    ///
+    /// # Intuition
+    /// A sorted list maps directly to a balanced BST by choosing the middle element as root.
+    /// Collecting values into an array enables O(1) midpoint access.
+    ///
+    /// # Approach
+    /// 1. Traverse the linked list and collect all values into a vector.
+    /// 2. Recursively select the midpoint of each subarray as root.
+    /// 3. Build left and right subtrees from the left and right halves.
+    ///
+    /// # Complexity
+    /// - Time: O(n) for list traversal plus O(n) for tree construction
+    /// - Space: O(n) for the values vector plus O(log n) recursion stack
+    pub fn sorted_list_to_bst(head: Option<Box<ListNode>>) -> Option<Rc<RefCell<TreeNode>>> {
+        let mut vals = Vec::new();
+        let mut cur = &head;
+        while let Some(node) = cur {
+            vals.push(node.val);
+            cur = &node.next;
+        }
+        Self::build(&vals, 0, vals.len())
+    }
+
+    fn build(vals: &[i32], start: usize, end: usize) -> Option<Rc<RefCell<TreeNode>>> {
         if start == end {
             return None;
         }
@@ -45,15 +70,5 @@ impl Solution {
             left: Self::build(vals, start, mid),
             right: Self::build(vals, mid + 1, end),
         })))
-    }
-
-    pub fn sorted_list_to_bst(head: Option<Box<ListNode>>) -> Option<Rc<RefCell<TreeNode>>> {
-        let mut vals = Vec::new();
-        let mut cur = &head;
-        while let Some(node) = cur {
-            vals.push(node.val);
-            cur = &node.next;
-        }
-        Self::build(&vals, 0, vals.len())
     }
 }
