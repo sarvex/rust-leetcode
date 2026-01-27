@@ -1,33 +1,52 @@
 impl Solution {
-    #[allow(dead_code)]
+    /// Determines if the array can be partitioned into two equal-sum subsets using DP.
+    ///
+    /// # Intuition
+    /// This reduces to the 0/1 knapsack problem: can we select elements summing
+    /// to exactly half the total? A 1-D boolean DP array suffices.
+    ///
+    /// # Approach
+    /// 1. If the total sum is odd, return false immediately.
+    /// 2. Create a DP array of size target + 1, with dp[0] = true.
+    /// 3. For each number, update dp in reverse to avoid using the same element twice.
+    ///
+    /// # Complexity
+    /// - Time: O(n × target)
+    /// - Space: O(target)
     pub fn can_partition(nums: Vec<i32>) -> bool {
-        let mut sum = 0;
-        for e in &nums {
-            sum += *e;
-        }
-
+        let sum: i32 = nums.iter().sum();
         if sum % 2 != 0 {
             return false;
         }
-
-        let n = nums.len();
-        let m = (sum / 2) as usize;
-        let mut dp: Vec<Vec<bool>> = vec![vec![false; m + 1]; n + 1];
-
-        // Initialize the dp vector
-        dp[0][0] = true;
-
-        // Begin the actual dp process
-        for i in 1..=n {
-            for j in 0..=m {
-                dp[i][j] = if (nums[i - 1] as usize) > j {
-                    dp[i - 1][j]
-                } else {
-                    dp[i - 1][j] || dp[i - 1][j - (nums[i - 1] as usize)]
-                };
+        let target = (sum / 2) as usize;
+        let mut dp = vec![false; target + 1];
+        dp[0] = true;
+        for &num in &nums {
+            let v = num as usize;
+            for j in (v..=target).rev() {
+                dp[j] = dp[j] || dp[j - v];
             }
         }
+        dp[target]
+    }
+}
 
-        dp[n][m]
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_can_partition() {
+        assert!(Solution::can_partition(vec![1, 5, 11, 5]));
+    }
+
+    #[test]
+    fn test_cannot_partition() {
+        assert!(!Solution::can_partition(vec![1, 2, 3, 5]));
+    }
+
+    #[test]
+    fn test_single_element() {
+        assert!(!Solution::can_partition(vec![1]));
     }
 }

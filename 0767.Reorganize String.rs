@@ -1,48 +1,89 @@
-use std::collections::{BinaryHeap, HashMap, VecDeque};
+use std::collections::BinaryHeap;
 
 impl Solution {
-    #[allow(dead_code)]
+    /// Reorganizes a string so no two adjacent characters are the same.
+    ///
+    /// # Intuition
+    /// Greedily place the most frequent character, then delay it by one step
+    /// to avoid adjacency. A max-heap ensures the most frequent character
+    /// is always chosen next.
+    ///
+    /// # Approach
+    /// Count character frequencies. If any frequency exceeds `(n+1)/2`, return
+    /// empty. Use a max-heap with a cooldown queue of size 1 to alternate
+    /// characters.
+    ///
+    /// # Complexity
+    /// - Time: O(n log k) where k is the number of distinct characters
+    /// - Space: O(k) for the heap and counts
     pub fn reorganize_string(s: String) -> String {
-        let mut map = HashMap::new();
-        let mut pq = BinaryHeap::new();
-        let mut ret = String::new();
-        let mut queue = VecDeque::new();
         let n = s.len();
-
-        // Initialize the HashMap
-        for c in s.chars() {
-            map.entry(c)
-                .and_modify(|e| {
-                    *e += 1;
-                })
-                .or_insert(1);
+        let mut freq = [0usize; 26];
+        for b in s.bytes() {
+            freq[(b - b'a') as usize] += 1;
         }
 
-        // Initialize the binary heap
-        for (k, v) in map.iter() {
-            if 2 * *v - 1 > n {
-                return "".to_string();
-            } else {
-                pq.push((*v, *k));
-            }
+        if freq.iter().any(|&f| 2 * f - 1 > n) {
+            return String::new();
         }
 
-        while !pq.is_empty() {
-            let (v, k) = pq.pop().unwrap();
-            ret.push(k);
-            queue.push_back((v - 1, k));
-            if queue.len() == 2 {
-                let (v, k) = queue.pop_front().unwrap();
-                if v != 0 {
-                    pq.push((v, k));
+        let mut heap: BinaryHeap<(usize, u8)> = freq
+            .iter()
+            .enumerate()
+            .filter(|(_, &f)| f > 0)
+            .map(|(i, &f)| (f, i as u8 + b'a'))
+            .collect();
+
+        let mut result = String::with_capacity(n);
+        let mut prev: Option<(usize, u8)> = None;
+
+        while let Some((count, ch)) = heap.pop() {
+            result.push(ch as char);
+            if let Some(p) = prev.take() {
+                if p.0 > 0 {
+                    heap.push(p);
                 }
             }
+            prev = Some((count - 1, ch));
         }
 
-        if ret.len() == n {
-            ret
+        if result.len() == n {
+            result
         } else {
-            "".to_string()
+            String::new()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn is_valid(s: &str) -> bool {
+        s.as_bytes().windows(2).all(|w| w[0] != w[1])
+    }
+
+    #[test]
+    fn test_possible() {
+        let result = Solution::reorganize_string("aab".to_string());
+        assert_eq!(result.len(), 3);
+        assert!(is_valid(&result));
+    }
+
+    #[test]
+    fn test_impossible() {
+        assert_eq!(Solution::reorganize_string("aaab".to_string()), "");
+    }
+
+    #[test]
+    fn test_single_char() {
+        assert_eq!(Solution::reorganize_string("a".to_string()), "a");
+    }
+
+    #[test]
+    fn test_two_chars() {
+        let result = Solution::reorganize_string("ab".to_string());
+        assert!(is_valid(&result));
+        assert_eq!(result.len(), 2);
     }
 }

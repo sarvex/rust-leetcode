@@ -1,34 +1,30 @@
 use rand::{thread_rng, Rng};
 
+/// Weighted random index picker using prefix sums and binary search.
+///
+/// Precomputes a prefix sum array. Each pick generates a random target
+/// in [1, total_weight] and binary-searches for the corresponding index.
 struct Solution {
-    sum: Vec<i32>,
+    prefix: Vec<i32>,
 }
 
-/**
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl Solution {
     fn new(w: Vec<i32>) -> Self {
-        let n = w.len();
-        let mut sum = vec![0; n + 1];
-        for i in 1..=n {
-            sum[i] = sum[i - 1] + w[i - 1];
+        let mut prefix = Vec::with_capacity(w.len());
+        let mut sum = 0;
+        for &weight in &w {
+            sum += weight;
+            prefix.push(sum);
         }
-        Self { sum }
+        Self { prefix }
     }
 
     fn pick_index(&self) -> i32 {
-        let x = thread_rng().gen_range(1, self.sum.last().unwrap() + 1);
-        let (mut left, mut right) = (1, self.sum.len() - 1);
-        while left < right {
-            let mid = (left + right) >> 1;
-            if self.sum[mid] < x {
-                left = mid + 1;
-            } else {
-                right = mid;
-            }
+        let total = *self.prefix.last().unwrap();
+        let target = thread_rng().gen_range(1, total + 1);
+        match self.prefix.binary_search(&target) {
+            Ok(i) => i as i32,
+            Err(i) => i as i32,
         }
-        (left - 1) as i32
     }
 }

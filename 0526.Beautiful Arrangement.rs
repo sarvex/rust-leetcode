@@ -1,32 +1,66 @@
 impl Solution {
-    fn dfs(i: usize, n: usize, mat: &Vec<Vec<usize>>, vis: &mut Vec<bool>, res: &mut i32) {
-        if i == n + 1 {
-            *res += 1;
-            return;
-        }
-        for &j in mat[i].iter() {
-            if !vis[j] {
-                vis[j] = true;
-                Self::dfs(i + 1, n, mat, vis, res);
-                vis[j] = false;
-            }
-        }
-    }
-
+    /// Counts beautiful arrangements using backtracking with precomputed divisibility.
+    ///
+    /// # Intuition
+    /// Position i is "beautiful" if nums[i] % i == 0 or i % nums[i] == 0.
+    /// Precompute valid values for each position to prune the search.
+    ///
+    /// # Approach
+    /// 1. For each position, precompute which values satisfy the divisibility condition.
+    /// 2. Backtrack through positions, placing unvisited valid values.
+    /// 3. Count complete arrangements.
+    ///
+    /// # Complexity
+    /// - Time: O(k) where k is the number of valid permutations (much less than n!)
+    /// - Space: O(n²) for precomputed candidates + O(n) recursion
     pub fn count_arrangement(n: i32) -> i32 {
         let n = n as usize;
-        let mut vis = vec![false; n + 1];
-        let mut mat = vec![Vec::new(); n + 1];
-        for i in 1..=n {
-            for j in 1..=n {
-                if i % j == 0 || j % i == 0 {
-                    mat[i].push(j);
+        let candidates: Vec<Vec<usize>> = (0..=n)
+            .map(|i| {
+                if i == 0 {
+                    vec![]
+                } else {
+                    (1..=n).filter(|&j| i % j == 0 || j % i == 0).collect()
+                }
+            })
+            .collect();
+
+        fn backtrack(pos: usize, n: usize, candidates: &[Vec<usize>], used: &mut Vec<bool>) -> i32 {
+            if pos > n {
+                return 1;
+            }
+            let mut count = 0;
+            for &j in &candidates[pos] {
+                if !used[j] {
+                    used[j] = true;
+                    count += backtrack(pos + 1, n, candidates, used);
+                    used[j] = false;
                 }
             }
+            count
         }
 
-        let mut res = 0;
-        Self::dfs(1, n, &mat, &mut vis, &mut res);
-        res
+        let mut used = vec![false; n + 1];
+        backtrack(1, n, &candidates, &mut used)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_two() {
+        assert_eq!(Solution::count_arrangement(2), 2);
+    }
+
+    #[test]
+    fn test_one() {
+        assert_eq!(Solution::count_arrangement(1), 1);
+    }
+
+    #[test]
+    fn test_three() {
+        assert_eq!(Solution::count_arrangement(3), 3);
     }
 }

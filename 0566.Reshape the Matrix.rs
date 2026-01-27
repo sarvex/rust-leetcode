@@ -1,30 +1,53 @@
 impl Solution {
+    /// Reshapes a matrix to the given dimensions if element count matches.
+    ///
+    /// # Intuition
+    /// Flatten the matrix conceptually using row-major indexing and redistribute
+    /// elements into the new shape.
+    ///
+    /// # Approach
+    /// 1. Verify m×n == r×c; if not, return the original matrix.
+    /// 2. Iterate through all elements using a linear index, mapping to new (row, col).
+    ///
+    /// # Complexity
+    /// - Time: O(m × n)
+    /// - Space: O(r × c)
     pub fn matrix_reshape(mat: Vec<Vec<i32>>, r: i32, c: i32) -> Vec<Vec<i32>> {
-        let r = r as usize;
-        let c = c as usize;
-        let m = mat.len();
-        let n = mat[0].len();
+        let (m, n) = (mat.len(), mat[0].len());
+        let (r, c) = (r as usize, c as usize);
         if m * n != r * c {
             return mat;
         }
-        let mut i = 0;
-        let mut j = 0;
         (0..r)
-            .into_iter()
-            .map(|_| {
+            .map(|i| {
                 (0..c)
-                    .into_iter()
-                    .map(|_| {
-                        let res = mat[i][j];
-                        j += 1;
-                        if j == n {
-                            j = 0;
-                            i += 1;
-                        }
-                        res
+                    .map(|j| {
+                        let idx = i * c + j;
+                        mat[idx / n][idx % n]
                     })
                     .collect()
             })
             .collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_reshape() {
+        assert_eq!(
+            Solution::matrix_reshape(vec![vec![1, 2], vec![3, 4]], 1, 4),
+            vec![vec![1, 2, 3, 4]]
+        );
+    }
+
+    #[test]
+    fn test_invalid() {
+        assert_eq!(
+            Solution::matrix_reshape(vec![vec![1, 2], vec![3, 4]], 2, 4),
+            vec![vec![1, 2], vec![3, 4]]
+        );
     }
 }

@@ -1,6 +1,3 @@
-// Forward declaration of guess API.
-// unsafe fn guess(num: i32) -> i32 {}
-
 impl Solution {
     /// Finds the guessed number using binary search.
     ///
@@ -15,11 +12,11 @@ impl Solution {
     /// # Complexity
     /// - Time: O(log n)
     /// - Space: O(1)
-    unsafe fn guessNumber(n: i32) -> i32 {
+    fn guessNumber(n: i32) -> i32 {
         let (mut left, mut right) = (1, n);
         loop {
             let mid = left + (right - left) / 2;
-            match guess(mid) {
+            match unsafe { guess(mid) } {
                 -1 => right = mid - 1,
                 1 => left = mid + 1,
                 _ => break mid,

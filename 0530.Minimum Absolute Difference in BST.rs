@@ -18,23 +18,37 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
-impl Solution {
-    pub fn get_minimum_difference(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
-        const inf: i32 = 1 << 30;
-        let mut ans = inf;
-        let mut pre = -inf;
 
-        fn dfs(node: Option<Rc<RefCell<TreeNode>>>, ans: &mut i32, pre: &mut i32) {
-            if let Some(n) = node {
-                let n = n.borrow();
-                dfs(n.left.clone(), ans, pre);
-                *ans = (*ans).min(n.val - *pre);
-                *pre = n.val;
-                dfs(n.right.clone(), ans, pre);
+impl Solution {
+    /// Finds the minimum absolute difference between any two BST nodes via in-order traversal.
+    ///
+    /// # Intuition
+    /// In-order traversal of a BST yields sorted values. The minimum difference
+    /// must occur between consecutive elements in this sorted sequence.
+    ///
+    /// # Approach
+    /// 1. Perform in-order DFS, tracking the previous value.
+    /// 2. Update the minimum difference at each node.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(h) recursion depth
+    pub fn get_minimum_difference(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
+        const INF: i32 = 1 << 30;
+        let mut min_diff = INF;
+        let mut prev = -INF;
+
+        fn dfs(node: &Option<Rc<RefCell<TreeNode>>>, min_diff: &mut i32, prev: &mut i32) {
+            if let Some(rc) = node {
+                let inner = rc.borrow();
+                dfs(&inner.left, min_diff, prev);
+                *min_diff = (*min_diff).min(inner.val - *prev);
+                *prev = inner.val;
+                dfs(&inner.right, min_diff, prev);
             }
         }
 
-        dfs(root, &mut ans, &mut pre);
-        ans
+        dfs(&root, &mut min_diff, &mut prev);
+        min_diff
     }
 }

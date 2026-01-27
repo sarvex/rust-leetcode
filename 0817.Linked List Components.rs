@@ -15,23 +15,37 @@
 //   }
 // }
 use std::collections::HashSet;
+
 impl Solution {
+    /// Counts connected components in a linked list subset.
+    ///
+    /// # Intuition
+    /// A connected component starts whenever a node is in the subset and its
+    /// predecessor is not. Traverse the list tracking membership transitions.
+    ///
+    /// # Approach
+    /// Store the subset in a `HashSet`. Walk the list, counting transitions
+    /// from outside the set to inside.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(m) where m is the subset size
     pub fn num_components(head: Option<Box<ListNode>>, nums: Vec<i32>) -> i32 {
-        let set = nums.into_iter().collect::<HashSet<i32>>();
-        let mut res = 0;
-        let mut in_set = false;
+        let set: HashSet<i32> = nums.into_iter().collect();
+        let mut count = 0;
+        let mut in_component = false;
         let mut cur = &head;
         while let Some(node) = cur {
             if set.contains(&node.val) {
-                if !in_set {
-                    in_set = true;
-                    res += 1;
+                if !in_component {
+                    in_component = true;
+                    count += 1;
                 }
             } else {
-                in_set = false;
+                in_component = false;
             }
             cur = &node.next;
         }
-        res
+        count
     }
 }

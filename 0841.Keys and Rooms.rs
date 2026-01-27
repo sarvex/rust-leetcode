@@ -1,16 +1,60 @@
 impl Solution {
+    /// Determines if all rooms can be visited starting from room 0.
+    ///
+    /// # Intuition
+    /// This is a graph reachability problem from node 0. DFS/BFS from room 0
+    /// using collected keys to unlock new rooms.
+    ///
+    /// # Approach
+    /// Use a stack-based DFS. Mark rooms as visited. Push newly found keys
+    /// onto the stack. Check if all rooms are visited at the end.
+    ///
+    /// # Complexity
+    /// - Time: O(n + k) where k is total number of keys
+    /// - Space: O(n)
     pub fn can_visit_all_rooms(rooms: Vec<Vec<i32>>) -> bool {
         let n = rooms.len();
-        let mut is_open = vec![false; n];
-        let mut keys = vec![0];
-        while !keys.is_empty() {
-            let i = keys.pop().unwrap();
-            if is_open[i] {
+        let mut visited = vec![false; n];
+        let mut stack = vec![0usize];
+
+        while let Some(room) = stack.pop() {
+            if visited[room] {
                 continue;
             }
-            is_open[i] = true;
-            rooms[i].iter().for_each(|&key| keys.push(key as usize));
+            visited[room] = true;
+            stack.extend(rooms[room].iter().map(|&k| k as usize));
         }
-        is_open.iter().all(|&v| v)
+
+        visited.iter().all(|&v| v)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_all_reachable() {
+        assert!(Solution::can_visit_all_rooms(vec![
+            vec![1],
+            vec![2],
+            vec![3],
+            vec![],
+        ]));
+    }
+
+    #[test]
+    fn test_not_all_reachable() {
+        assert!(!Solution::can_visit_all_rooms(vec![
+            vec![1, 3],
+            vec![3, 0, 1],
+            vec![2],
+            vec![0],
+        ]));
+    }
+
+    #[test]
+    fn test_single_room() {
+        assert!(Solution::can_visit_all_rooms(vec![vec![]]));
     }
 }

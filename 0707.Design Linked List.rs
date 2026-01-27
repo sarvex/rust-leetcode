@@ -1,31 +1,38 @@
+/// Singly linked list implementation using boxed nodes.
+///
+/// # Intuition
+/// A linked list supports dynamic insertion and deletion at any index
+/// by traversing to the target position and relinking pointers.
+///
+/// # Approach
+/// Store the head as `Option<Box<ListNode>>`. Use a dummy node for
+/// insertion and deletion to simplify edge cases at the head.
+///
+/// # Complexity
+/// - Time: O(n) for get, add, and delete operations
+/// - Space: O(n) for storing n elements
 #[derive(Default)]
 struct MyLinkedList {
     head: Option<Box<ListNode>>,
 }
 
-/**
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl MyLinkedList {
     fn new() -> Self {
-        Default::default()
+        Self::default()
     }
 
     fn get(&self, mut index: i32) -> i32 {
-        if self.head.is_none() {
-            return -1;
-        }
-        let mut cur = self.head.as_ref().unwrap();
+        let mut cur = match self.head.as_ref() {
+            Some(node) => node,
+            None => return -1,
+        };
         while index > 0 {
             match cur.next {
-                None => {
-                    return -1;
-                }
                 Some(ref next) => {
                     cur = next;
                     index -= 1;
                 }
+                None => return -1,
             }
         }
         cur.val
@@ -40,15 +47,15 @@ impl MyLinkedList {
 
     fn add_at_tail(&mut self, val: i32) {
         let new_node = Some(Box::new(ListNode { val, next: None }));
-        if self.head.is_none() {
-            self.head = new_node;
-            return;
+        match self.head.as_mut() {
+            None => self.head = new_node,
+            Some(mut cur) => {
+                while let Some(ref mut next) = cur.next {
+                    cur = next;
+                }
+                cur.next = new_node;
+            }
         }
-        let mut cur = self.head.as_mut().unwrap();
-        while let Some(ref mut next) = cur.next {
-            cur = next;
-        }
-        cur.next = new_node;
     }
 
     fn add_at_index(&mut self, mut index: i32, val: i32) {
@@ -58,10 +65,10 @@ impl MyLinkedList {
         });
         let mut cur = &mut dummy;
         while index > 0 {
-            if cur.next.is_none() {
-                return;
+            match cur.next.as_mut() {
+                Some(next) => cur = next,
+                None => return,
             }
-            cur = cur.next.as_mut().unwrap();
             index -= 1;
         }
         cur.next = Some(Box::new(ListNode {

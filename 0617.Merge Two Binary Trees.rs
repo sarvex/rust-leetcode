@@ -18,24 +18,38 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
+
 impl Solution {
+    /// Merges two binary trees by summing overlapping nodes.
+    ///
+    /// # Intuition
+    /// Recursively merge corresponding nodes. Where only one tree has a node,
+    /// use that subtree directly.
+    ///
+    /// # Approach
+    /// 1. Match on both roots.
+    /// 2. If both present, sum values and recurse on children.
+    /// 3. If only one present, return that subtree.
+    ///
+    /// # Complexity
+    /// - Time: O(min(m, n)) where m, n are node counts
+    /// - Space: O(min(h1, h2)) recursion depth
     pub fn merge_trees(
         root1: Option<Rc<RefCell<TreeNode>>>,
         root2: Option<Rc<RefCell<TreeNode>>>,
     ) -> Option<Rc<RefCell<TreeNode>>> {
-        match (root1.is_some(), root2.is_some()) {
-            (false, false) => None,
-            (true, false) => root1,
-            (false, true) => root2,
-            (true, true) => {
+        match (root1, root2) {
+            (None, None) => None,
+            (Some(r), None) | (None, Some(r)) => Some(r),
+            (Some(r1), Some(r2)) => {
                 {
-                    let mut r1 = root1.as_ref().unwrap().borrow_mut();
-                    let mut r2 = root2.as_ref().unwrap().borrow_mut();
-                    r1.val += r2.val;
-                    r1.left = Self::merge_trees(r1.left.take(), r2.left.take());
-                    r1.right = Self::merge_trees(r1.right.take(), r2.right.take());
+                    let mut n1 = r1.borrow_mut();
+                    let mut n2 = r2.borrow_mut();
+                    n1.val += n2.val;
+                    n1.left = Self::merge_trees(n1.left.take(), n2.left.take());
+                    n1.right = Self::merge_trees(n1.right.take(), n2.right.take());
                 }
-                root1
+                Some(r1)
             }
         }
     }

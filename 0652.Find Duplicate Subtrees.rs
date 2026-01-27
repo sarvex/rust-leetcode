@@ -19,38 +19,53 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+
 impl Solution {
-    fn dfs(
-        root: &Option<Rc<RefCell<TreeNode>>>,
-        map: &mut HashMap<String, i32>,
-        res: &mut Vec<Option<Rc<RefCell<TreeNode>>>>,
-    ) -> String {
-        if root.is_none() {
-            return String::from('#');
-        }
-
-        let s = {
-            let root = root.as_ref().unwrap().as_ref().borrow();
-            format!(
-                "{},{},{}",
-                root.val.to_string(),
-                Self::dfs(&root.left, map, res),
-                Self::dfs(&root.right, map, res)
-            )
-        };
-        *map.entry(s.clone()).or_insert(0) += 1;
-        if *map.get(&s).unwrap() == 2 {
-            res.push(root.clone());
-        }
-        return s;
-    }
-
+    /// Finds all duplicate subtrees by serializing each subtree.
+    ///
+    /// # Intuition
+    /// Serialize every subtree into a canonical string. When a serialization
+    /// appears for the second time, it represents a duplicate subtree.
+    ///
+    /// # Approach
+    /// 1. DFS post-order: serialize each subtree as "val,left,right".
+    /// 2. Track serialization counts in a hash map.
+    /// 3. On count == 2, add the subtree root to the result.
+    ///
+    /// # Complexity
+    /// - Time: O(n²) due to string concatenation
+    /// - Space: O(n²) for stored serializations
     pub fn find_duplicate_subtrees(
         root: Option<Rc<RefCell<TreeNode>>>,
     ) -> Vec<Option<Rc<RefCell<TreeNode>>>> {
-        let mut map = HashMap::new();
-        let mut res = Vec::new();
-        Self::dfs(&root, &mut map, &mut res);
-        res
+        fn dfs(
+            node: &Option<Rc<RefCell<TreeNode>>>,
+            freq: &mut HashMap<String, i32>,
+            result: &mut Vec<Option<Rc<RefCell<TreeNode>>>>,
+        ) -> String {
+            match node {
+                None => "#".to_string(),
+                Some(rc) => {
+                    let inner = rc.borrow();
+                    let serial = format!(
+                        "{},{},{}",
+                        inner.val,
+                        dfs(&inner.left, freq, result),
+                        dfs(&inner.right, freq, result),
+                    );
+                    let count = freq.entry(serial.clone()).or_insert(0);
+                    *count += 1;
+                    if *count == 2 {
+                        result.push(node.clone());
+                    }
+                    serial
+                }
+            }
+        }
+
+        let mut freq = HashMap::new();
+        let mut result = Vec::new();
+        dfs(&root, &mut freq, &mut result);
+        result
     }
 }

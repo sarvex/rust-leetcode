@@ -1,40 +1,61 @@
 impl Solution {
+    /// Performs flood fill via DFS from the starting pixel.
+    ///
+    /// # Intuition
+    /// Starting from `(sr, sc)`, recursively paint all connected pixels that
+    /// share the original color to the new color.
+    ///
+    /// # Approach
+    /// If the starting pixel already matches the new color, return immediately.
+    /// Otherwise DFS in four directions, painting each matching pixel.
+    ///
+    /// # Complexity
+    /// - Time: O(m * n)
+    /// - Space: O(m * n) recursion stack in worst case
     pub fn flood_fill(mut image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Vec<i32>> {
-        let m = image.len();
-        let n = image[0].len();
-        let sr = sr as usize;
-        let sc = sc as usize;
-
-        let oc = image[sr][sc];
-        if oc == color {
+        let (sr, sc) = (sr as usize, sc as usize);
+        let original = image[sr][sc];
+        if original == color {
             return image;
         }
-        let dirs = [-1, 0, 1, 0, -1];
-        fn dfs(
-            image: &mut Vec<Vec<i32>>,
-            i: usize,
-            j: usize,
-            oc: i32,
-            color: i32,
-            m: usize,
-            n: usize,
-            dirs: &[i32; 5],
-        ) {
-            image[i][j] = color;
-            for k in 0..4 {
-                let x = i as isize + dirs[k] as isize;
-                let y = j as isize + dirs[k + 1] as isize;
-                if x >= 0 && x < m as isize && y >= 0 && y < n as isize {
-                    let x = x as usize;
-                    let y = y as usize;
-                    if image[x][y] == oc {
-                        dfs(image, x, y, oc, color, m, n, dirs);
-                    }
+
+        fn dfs(image: &mut Vec<Vec<i32>>, r: usize, c: usize, original: i32, color: i32) {
+            image[r][c] = color;
+            let (rows, cols) = (image.len(), image[0].len());
+            for (dr, dc) in [(!0usize, 0), (1, 0), (0, !0usize), (0, 1)] {
+                let nr = r.wrapping_add(dr);
+                let nc = c.wrapping_add(dc);
+                if nr < rows && nc < cols && image[nr][nc] == original {
+                    dfs(image, nr, nc, original, color);
                 }
             }
         }
 
-        dfs(&mut image, sr, sc, oc, color, m, n, &dirs);
+        dfs(&mut image, sr, sc, original, color);
         image
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic_fill() {
+        let image = vec![vec![1, 1, 1], vec![1, 1, 0], vec![1, 0, 1]];
+        let expected = vec![vec![2, 2, 2], vec![2, 2, 0], vec![2, 0, 1]];
+        assert_eq!(Solution::flood_fill(image, 1, 1, 2), expected);
+    }
+
+    #[test]
+    fn test_same_color() {
+        let image = vec![vec![0, 0, 0], vec![0, 0, 0]];
+        let expected = vec![vec![0, 0, 0], vec![0, 0, 0]];
+        assert_eq!(Solution::flood_fill(image, 0, 0, 0), expected);
+    }
+
+    #[test]
+    fn test_single_pixel() {
+        assert_eq!(Solution::flood_fill(vec![vec![1]], 0, 0, 2), vec![vec![2]]);
     }
 }

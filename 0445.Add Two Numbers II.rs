@@ -14,40 +14,57 @@
 //     }
 //   }
 // }
-impl Solution {
-    fn reverse(mut head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
-        let mut pre = None;
-        while let Some(mut node) = head {
-            let next = node.next.take();
-            node.next = pre.take();
-            pre = Some(node);
-            head = next;
-        }
-        pre
-    }
 
+impl Solution {
+    /// Adds two numbers represented as linked lists (most significant digit first).
+    ///
+    /// # Intuition
+    /// Reverse both lists to process from least significant digit, perform
+    /// digit-by-digit addition with carry, then reverse the result.
+    ///
+    /// # Approach
+    /// 1. Reverse both input lists.
+    /// 2. Add corresponding digits with carry propagation.
+    /// 3. Reverse the result list to restore MSB-first order.
+    ///
+    /// # Complexity
+    /// - Time: O(m + n)
+    /// - Space: O(max(m, n))
     pub fn add_two_numbers(
-        mut l1: Option<Box<ListNode>>,
-        mut l2: Option<Box<ListNode>>,
+        l1: Option<Box<ListNode>>,
+        l2: Option<Box<ListNode>>,
     ) -> Option<Box<ListNode>> {
-        l1 = Self::reverse(l1);
-        l2 = Self::reverse(l2);
-        let mut dummy = Some(Box::new(ListNode::new(0)));
-        let mut cur = &mut dummy;
-        let mut sum = 0;
-        while l1.is_some() || l2.is_some() || sum != 0 {
-            if let Some(node) = l1 {
-                sum += node.val;
-                l1 = node.next;
+        fn reverse(mut head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+            let mut prev = None;
+            while let Some(mut node) = head {
+                let next = node.next.take();
+                node.next = prev;
+                prev = Some(node);
+                head = next;
             }
-            if let Some(node) = l2 {
-                sum += node.val;
-                l2 = node.next;
-            }
-            cur.as_mut().unwrap().next = Some(Box::new(ListNode::new(sum % 10)));
-            cur = &mut cur.as_mut().unwrap().next;
-            sum /= 10;
+            prev
         }
-        Self::reverse(dummy.unwrap().next.take())
+
+        let mut a = reverse(l1);
+        let mut b = reverse(l2);
+        let mut dummy = Box::new(ListNode::new(0));
+        let mut tail = &mut dummy;
+        let mut carry = 0;
+
+        while a.is_some() || b.is_some() || carry > 0 {
+            let mut sum = carry;
+            if let Some(node) = a {
+                sum += node.val;
+                a = node.next;
+            }
+            if let Some(node) = b {
+                sum += node.val;
+                b = node.next;
+            }
+            carry = sum / 10;
+            tail.next = Some(Box::new(ListNode::new(sum % 10)));
+            tail = tail.next.as_mut().unwrap();
+        }
+        reverse(dummy.next)
     }
 }

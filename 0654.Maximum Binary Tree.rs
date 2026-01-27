@@ -18,27 +18,34 @@
 // }
 use std::cell::RefCell;
 use std::rc::Rc;
-impl Solution {
-    fn construct(nums: &Vec<i32>, start: usize, end: usize) -> Option<Rc<RefCell<TreeNode>>> {
-        if start >= end {
-            return None;
-        }
-        let mut idx = 0;
-        let mut max_val = -1;
-        for i in start..end {
-            if nums[i] > max_val {
-                idx = i;
-                max_val = nums[i];
-            }
-        }
-        Some(Rc::new(RefCell::new(TreeNode {
-            val: max_val,
-            left: Self::construct(nums, start, idx),
-            right: Self::construct(nums, idx + 1, end),
-        })))
-    }
 
+impl Solution {
+    /// Constructs a maximum binary tree from the array recursively.
+    ///
+    /// # Intuition
+    /// The root is the maximum element. Left subtree is built from elements
+    /// before the max, right subtree from elements after.
+    ///
+    /// # Approach
+    /// 1. Find the index of the maximum in the range.
+    /// 2. Create a node with that value.
+    /// 3. Recurse on left and right sub-ranges.
+    ///
+    /// # Complexity
+    /// - Time: O(n²) worst case, O(n log n) average
+    /// - Space: O(n) recursion depth
     pub fn construct_maximum_binary_tree(nums: Vec<i32>) -> Option<Rc<RefCell<TreeNode>>> {
-        Self::construct(&nums, 0, nums.len())
+        fn build(nums: &[i32]) -> Option<Rc<RefCell<TreeNode>>> {
+            if nums.is_empty() {
+                return None;
+            }
+            let (idx, &max_val) = nums.iter().enumerate().max_by_key(|(_, &v)| v).unwrap();
+            Some(Rc::new(RefCell::new(TreeNode {
+                val: max_val,
+                left: build(&nums[..idx]),
+                right: build(&nums[idx + 1..]),
+            })))
+        }
+        build(&nums)
     }
 }

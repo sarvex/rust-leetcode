@@ -1,26 +1,52 @@
 impl Solution {
+    /// Minimizes total travel distance for a squirrel collecting nuts.
+    ///
+    /// # Intuition
+    /// All nuts require a round trip to the tree except the first nut the
+    /// squirrel picks up. The optimal first nut maximizes the savings:
+    /// tree_dist − squirrel_dist.
+    ///
+    /// # Approach
+    /// 1. Compute total round-trip distance (2 × sum of tree-to-nut distances).
+    /// 2. For each nut, compute savings from going there first.
+    /// 3. Subtract the maximum savings from the total.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(1)
     pub fn min_distance(
-        height: i32,
-        width: i32,
+        _height: i32,
+        _width: i32,
         tree: Vec<i32>,
         squirrel: Vec<i32>,
         nuts: Vec<Vec<i32>>,
     ) -> i32 {
-        let (tr, tc) = (tree[0], tree[1]);
-        let (sr, sc) = (squirrel[0], squirrel[1]);
-        let s: i32 = nuts
+        let round_trip: i32 = nuts
             .iter()
-            .map(|nut| (nut[0] - tr).abs() + (nut[1] - tc).abs())
-            .sum::<i32>()
-            * 2;
+            .map(|n| ((n[0] - tree[0]).abs() + (n[1] - tree[1]).abs()) * 2)
+            .sum();
+        let max_savings = nuts
+            .iter()
+            .map(|n| {
+                let to_tree = (n[0] - tree[0]).abs() + (n[1] - tree[1]).abs();
+                let to_squirrel = (n[0] - squirrel[0]).abs() + (n[1] - squirrel[1]).abs();
+                to_tree - to_squirrel
+            })
+            .max()
+            .unwrap_or(0);
+        round_trip - max_savings
+    }
+}
 
-        let mut ans = i32::MAX;
-        for nut in &nuts {
-            let a = (nut[0] - tr).abs() + (nut[1] - tc).abs();
-            let b = (nut[0] - sr).abs() + (nut[1] - sc).abs();
-            ans = ans.min(s - a + b);
-        }
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-        ans
+    #[test]
+    fn test_basic() {
+        assert_eq!(
+            Solution::min_distance(5, 7, vec![2, 2], vec![4, 4], vec![vec![3, 0], vec![2, 5]],),
+            12
+        );
     }
 }

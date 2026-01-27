@@ -1,20 +1,48 @@
 impl Solution {
+    /// Finds minimum cost to climb stairs using bottom-up DP.
+    ///
+    /// # Intuition
+    /// At each step, choose the cheaper of the previous one or two steps.
+    /// Only two previous values are needed at any time.
+    ///
+    /// # Approach
+    /// Iterate from step 2 to n, computing the minimum cost to reach each
+    /// step from the two preceding steps. The answer is the cost at step n.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(1)
     pub fn min_cost_climbing_stairs(cost: Vec<i32>) -> i32 {
         let n = cost.len();
-        let mut f = vec![-1; n];
-
-        fn dfs(i: usize, cost: &Vec<i32>, f: &mut Vec<i32>, n: usize) -> i32 {
-            if i >= n {
-                return 0;
-            }
-            if f[i] < 0 {
-                let next1 = dfs(i + 1, cost, f, n);
-                let next2 = dfs(i + 2, cost, f, n);
-                f[i] = cost[i] + next1.min(next2);
-            }
-            f[i]
+        let (mut a, mut b) = (cost[0], cost[1]);
+        for i in 2..n {
+            let next = cost[i] + a.min(b);
+            a = b;
+            b = next;
         }
+        a.min(b)
+    }
+}
 
-        dfs(0, &cost, &mut f, n).min(dfs(1, &cost, &mut f, n))
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic() {
+        assert_eq!(Solution::min_cost_climbing_stairs(vec![10, 15, 20]), 15);
+    }
+
+    #[test]
+    fn test_longer() {
+        assert_eq!(
+            Solution::min_cost_climbing_stairs(vec![1, 100, 1, 1, 1, 100, 1, 1, 100, 1]),
+            6
+        );
+    }
+
+    #[test]
+    fn test_two_steps() {
+        assert_eq!(Solution::min_cost_climbing_stairs(vec![0, 1]), 0);
     }
 }

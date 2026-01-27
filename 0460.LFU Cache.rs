@@ -49,7 +49,7 @@ impl LinkedList {
                 self.head = Some(Rc::clone(node));
                 self.tail = Some(Rc::clone(node));
             }
-        };
+        }
     }
 
     fn remove(&mut self, node: &Rc<RefCell<Node>>) {
@@ -70,17 +70,14 @@ impl LinkedList {
                 next.borrow_mut().prev = Some(Rc::clone(prev));
                 prev.borrow_mut().next = Some(Rc::clone(next));
             }
-        };
+        }
     }
 
     fn pop_back(&mut self) -> Option<Rc<RefCell<Node>>> {
-        match self.tail.take() {
-            Some(tail) => {
-                self.remove(&tail);
-                Some(tail)
-            }
-            None => None,
-        }
+        self.tail.take().map(|tail| {
+            self.remove(&tail);
+            tail
+        })
     }
 
     fn is_empty(&self) -> bool {
@@ -88,6 +85,10 @@ impl LinkedList {
     }
 }
 
+/// LFU (Least Frequently Used) cache with O(1) get and put operations.
+///
+/// Uses a hash map for key-to-node lookup and a frequency map of doubly-linked
+/// lists to track access frequency and recency within each frequency bucket.
 struct LFUCache {
     cache: HashMap<i32, Rc<RefCell<Node>>>,
     freq_map: HashMap<i32, LinkedList>,
@@ -95,10 +96,6 @@ struct LFUCache {
     capacity: usize,
 }
 
-/**
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl LFUCache {
     fn new(capacity: i32) -> Self {
         Self {
@@ -113,13 +110,11 @@ impl LFUCache {
         if self.capacity == 0 {
             return -1;
         }
-
         match self.cache.get(&key) {
             Some(node) => {
                 let node = Rc::clone(node);
                 self.incr_freq(&node);
-                let value = node.borrow().value;
-                value
+                node.borrow().value
             }
             None => -1,
         }
@@ -129,7 +124,6 @@ impl LFUCache {
         if self.capacity == 0 {
             return;
         }
-
         match self.cache.get(&key) {
             Some(node) => {
                 let node = Rc::clone(node);
@@ -146,7 +140,7 @@ impl LFUCache {
                 self.cache.insert(key, node);
                 self.min_freq = 1;
             }
-        };
+        }
     }
 
     fn incr_freq(&mut self, node: &Rc<RefCell<Node>>) {
@@ -165,15 +159,9 @@ impl LFUCache {
 
     fn add_node(&mut self, node: &Rc<RefCell<Node>>) {
         let freq = node.borrow().freq;
-        match self.freq_map.get_mut(&freq) {
-            Some(list) => {
-                list.push_front(node);
-            }
-            None => {
-                let mut list = LinkedList::new();
-                list.push_front(node);
-                self.freq_map.insert(node.borrow().freq, list);
-            }
-        };
+        self.freq_map
+            .entry(freq)
+            .or_insert_with(LinkedList::new)
+            .push_front(node);
     }
 }

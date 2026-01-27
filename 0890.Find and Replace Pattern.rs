@@ -1,23 +1,61 @@
 use std::collections::HashMap;
+
 impl Solution {
+    /// Finds words matching a character-mapping pattern.
+    ///
+    /// # Intuition
+    /// Two strings match if there is a bijection between their characters.
+    /// Track last-seen positions for both directions of the mapping.
+    ///
+    /// # Approach
+    /// For each word, verify bijection by comparing last-seen positions of
+    /// corresponding characters in the word and pattern.
+    ///
+    /// # Complexity
+    /// - Time: O(n * L) where n is word count and L is word length
+    /// - Space: O(L) for the maps
     pub fn find_and_replace_pattern(words: Vec<String>, pattern: String) -> Vec<String> {
-        let pattern = pattern.as_bytes();
-        let n = pattern.len();
+        let pat = pattern.as_bytes();
+        let n = pat.len();
         words
             .into_iter()
             .filter(|word| {
-                let word = word.as_bytes();
-                let mut map1 = HashMap::new();
-                let mut map2 = HashMap::new();
-                for i in 0..n {
-                    if map1.get(&word[i]).unwrap_or(&n) != map2.get(&pattern[i]).unwrap_or(&n) {
-                        return false;
-                    }
-                    map1.insert(word[i], i);
-                    map2.insert(pattern[i], i);
-                }
-                true
+                let wb = word.as_bytes();
+                let mut w_map: HashMap<u8, usize> = HashMap::new();
+                let mut p_map: HashMap<u8, usize> = HashMap::new();
+                (0..n).all(|i| {
+                    let w_prev = w_map.insert(wb[i], i);
+                    let p_prev = p_map.insert(pat[i], i);
+                    w_prev == p_prev
+                })
             })
             .collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn to_vec(words: &[&str]) -> Vec<String> {
+        words.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn test_basic() {
+        let mut result = Solution::find_and_replace_pattern(
+            to_vec(&["abc", "deq", "mee", "aqq", "dkd", "ccc"]),
+            "abb".to_string(),
+        );
+        result.sort();
+        assert_eq!(result, to_vec(&["aqq", "mee"]));
+    }
+
+    #[test]
+    fn test_identity() {
+        assert_eq!(
+            Solution::find_and_replace_pattern(to_vec(&["a", "b", "c"]), "a".to_string()),
+            to_vec(&["a", "b", "c"]),
+        );
     }
 }

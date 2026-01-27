@@ -1,14 +1,51 @@
 impl Solution {
+    /// Sorts a string according to a custom character ordering.
+    ///
+    /// # Intuition
+    /// Assign each character a priority based on its position in the order
+    /// string. Characters not in the order get the highest priority (appear last).
+    ///
+    /// # Approach
+    /// Build a priority map from the order string. Sort the string's bytes
+    /// by their mapped priority.
+    ///
+    /// # Complexity
+    /// - Time: O(n log n) for sorting
+    /// - Space: O(n) for the sorted output
     pub fn custom_sort_string(order: String, s: String) -> String {
-        let n = order.len();
-        let mut d = [n; 26];
-        for (i, c) in order.as_bytes().iter().enumerate() {
-            d[(c - b'a') as usize] = i;
+        let mut priority = [order.len(); 26];
+        for (i, b) in order.bytes().enumerate() {
+            priority[(b - b'a') as usize] = i;
         }
-        let mut ans = s.chars().collect::<Vec<_>>();
-        ans.sort_by(|&a, &b| {
-            d[((a as u8) - ('a' as u8)) as usize].cmp(&d[((b as u8) - ('a' as u8)) as usize])
-        });
-        ans.into_iter().collect()
+        let mut bytes = s.into_bytes();
+        bytes.sort_unstable_by_key(|&b| priority[(b - b'a') as usize]);
+        String::from_utf8(bytes).unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic() {
+        assert_eq!(
+            Solution::custom_sort_string("cba".to_string(), "abcd".to_string()),
+            "cbad"
+        );
+    }
+
+    #[test]
+    fn test_partial_order() {
+        let result = Solution::custom_sort_string("bcafg".to_string(), "abcd".to_string());
+        assert_eq!(result, "bcad");
+    }
+
+    #[test]
+    fn test_no_reorder_needed() {
+        assert_eq!(
+            Solution::custom_sort_string("abc".to_string(), "abc".to_string()),
+            "abc"
+        );
     }
 }

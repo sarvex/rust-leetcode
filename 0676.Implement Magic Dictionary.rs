@@ -1,50 +1,50 @@
-use std::collections::HashMap;
-
-#[derive(Clone)]
+/// Magic dictionary supporting search with exactly one character difference.
+///
+/// Uses a trie to efficiently search for words that differ by exactly one
+/// character from the query.
 struct Trie {
-    children: Vec<Option<Box<Trie>>>,
+    children: [Option<Box<Trie>>; 26],
     is_end: bool,
 }
 
 impl Trie {
     fn new() -> Self {
-        Trie {
-            children: vec![None; 26],
+        Self {
+            children: Default::default(),
             is_end: false,
         }
     }
 
     fn insert(&mut self, word: &str) {
         let mut node = self;
-        for &ch in word.as_bytes() {
-            let index = (ch - b'a') as usize;
-            node = node.children[index].get_or_insert_with(|| Box::new(Trie::new()));
+        for &b in word.as_bytes() {
+            let idx = (b - b'a') as usize;
+            node = node.children[idx].get_or_insert_with(|| Box::new(Trie::new()));
         }
         node.is_end = true;
     }
 
-    fn search(&self, word: &str, diff: i32) -> bool {
+    fn search_with_diff(&self, word: &[u8], diff: i32) -> bool {
         if word.is_empty() {
             return diff == 1 && self.is_end;
         }
-
-        let index = (word.as_bytes()[0] - b'a') as usize;
-        if let Some(child) = &self.children[index] {
-            if child.search(&word[1..], diff) {
+        let idx = (word[0] - b'a') as usize;
+        if let Some(child) = &self.children[idx] {
+            if child.search_with_diff(&word[1..], diff) {
                 return true;
             }
         }
-
         if diff == 0 {
             for (i, child) in self.children.iter().enumerate() {
-                if i != index && child.is_some() {
-                    if child.as_ref().unwrap().search(&word[1..], 1) {
-                        return true;
+                if i != idx {
+                    if let Some(c) = child {
+                        if c.search_with_diff(&word[1..], 1) {
+                            return true;
+                        }
                     }
                 }
             }
         }
-
         false
     }
 }
@@ -53,22 +53,18 @@ struct MagicDictionary {
     trie: Trie,
 }
 
-/**
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl MagicDictionary {
     fn new() -> Self {
-        MagicDictionary { trie: Trie::new() }
+        Self { trie: Trie::new() }
     }
 
     fn build_dict(&mut self, dictionary: Vec<String>) {
-        for word in dictionary {
-            self.trie.insert(&word);
+        for word in &dictionary {
+            self.trie.insert(word);
         }
     }
 
     fn search(&self, search_word: String) -> bool {
-        self.trie.search(&search_word, 0)
+        self.trie.search_with_diff(search_word.as_bytes(), 0)
     }
 }

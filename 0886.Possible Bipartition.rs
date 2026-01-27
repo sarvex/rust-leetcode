@@ -1,28 +1,65 @@
 impl Solution {
-    fn dfs(i: usize, v: usize, color: &mut Vec<usize>, g: &Vec<Vec<usize>>) -> bool {
-        color[i] = v;
-        for &j in (*g[i]).iter() {
-            if color[j] == color[i] || (color[j] == 0 && Self::dfs(j, v ^ 3, color, g)) {
-                return true;
-            }
-        }
-        false
-    }
-
+    /// Checks if people can be split into two groups where no dislikes are in the same group.
+    ///
+    /// # Intuition
+    /// This is a graph 2-coloring (bipartite check) problem. Build a dislike
+    /// graph and verify it is bipartite.
+    ///
+    /// # Approach
+    /// Build an adjacency list from dislikes. DFS color each component with
+    /// two colors. If a neighbor has the same color, return false.
+    ///
+    /// # Complexity
+    /// - Time: O(n + e) where e is number of dislikes
+    /// - Space: O(n + e)
     pub fn possible_bipartition(n: i32, dislikes: Vec<Vec<i32>>) -> bool {
         let n = n as usize;
-        let mut color = vec![0; n + 1];
-        let mut g = vec![Vec::new(); n + 1];
-        for d in dislikes.iter() {
-            let (i, j) = (d[0] as usize, d[1] as usize);
-            g[i].push(j);
-            g[j].push(i);
+        let mut graph = vec![Vec::new(); n + 1];
+        for d in &dislikes {
+            let (u, v) = (d[0] as usize, d[1] as usize);
+            graph[u].push(v);
+            graph[v].push(u);
         }
-        for i in 1..=n {
-            if color[i] == 0 && Self::dfs(i, 1, &mut color, &g) {
-                return false;
-            }
+
+        let mut color = vec![0u8; n + 1];
+
+        fn dfs(node: usize, c: u8, graph: &[Vec<usize>], color: &mut [u8]) -> bool {
+            color[node] = c;
+            graph[node].iter().all(|&nb| {
+                if color[nb] == c {
+                    false
+                } else {
+                    color[nb] != 0 || dfs(nb, 3 - c, graph, color)
+                }
+            })
         }
-        true
+
+        (1..=n).all(|i| color[i] != 0 || dfs(i, 1, &graph, &mut color))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_possible() {
+        assert!(Solution::possible_bipartition(
+            4,
+            vec![vec![1, 2], vec![1, 3], vec![2, 4]],
+        ));
+    }
+
+    #[test]
+    fn test_impossible() {
+        assert!(!Solution::possible_bipartition(
+            3,
+            vec![vec![1, 2], vec![1, 3], vec![2, 3]],
+        ));
+    }
+
+    #[test]
+    fn test_no_dislikes() {
+        assert!(Solution::possible_bipartition(5, vec![]));
     }
 }

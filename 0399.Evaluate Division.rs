@@ -1,87 +1,109 @@
 use std::collections::HashMap;
 
-#[derive(Debug)]
-pub struct DSUNode {
-    parent: String,
-    weight: f64,
+struct UnionFind {
+    parent: HashMap<String, String>,
+    weight: HashMap<String, f64>,
 }
 
-pub struct DisjointSetUnion {
-    nodes: HashMap<String, DSUNode>,
-}
-
-impl DisjointSetUnion {
-    pub fn new(equations: &Vec<Vec<String>>) -> DisjointSetUnion {
-        let mut nodes = HashMap::new();
-        for equation in equations.iter() {
-            for iter in equation.iter() {
-                nodes.insert(
-                    iter.clone(),
-                    DSUNode {
-                        parent: iter.clone(),
-                        weight: 1.0,
-                    },
-                );
+impl UnionFind {
+    fn new(equations: &[Vec<String>]) -> Self {
+        let mut parent = HashMap::new();
+        let mut weight = HashMap::new();
+        for eq in equations {
+            for var in eq {
+                parent.entry(var.clone()).or_insert_with(|| var.clone());
+                weight.entry(var.clone()).or_insert(1.0);
             }
         }
-        DisjointSetUnion { nodes }
+        Self { parent, weight }
     }
 
-    pub fn find(&mut self, v: &String) -> String {
-        let origin = self.nodes[v].parent.clone();
-        if origin == *v {
-            return origin;
+    fn find(&mut self, x: &str) -> String {
+        let p = self.parent[x].clone();
+        if p == x {
+            return p;
         }
-
-        let root = self.find(&origin);
-        self.nodes.get_mut(v).unwrap().parent = root.clone();
-        self.nodes.get_mut(v).unwrap().weight *= self.nodes[&origin].weight;
+        let root = self.find(&p);
+        let pw = self.weight[&p];
+        self.weight.entry(x.to_string()).and_modify(|w| *w *= pw);
+        self.parent.insert(x.to_string(), root.clone());
         root
     }
 
-    pub fn union(&mut self, a: &String, b: &String, v: f64) {
-        let pa = self.find(a);
-        let pb = self.find(b);
-        if pa == pb {
+    fn union(&mut self, a: &str, b: &str, value: f64) {
+        let ra = self.find(a);
+        let rb = self.find(b);
+        if ra == rb {
             return;
         }
-        let (wa, wb) = (self.nodes[a].weight, self.nodes[b].weight);
-        self.nodes.get_mut(&pa).unwrap().parent = pb;
-        self.nodes.get_mut(&pa).unwrap().weight = (wb * v) / wa;
+        let (wa, wb) = (self.weight[a], self.weight[b]);
+        self.parent.insert(ra.clone(), rb);
+        self.weight.insert(ra, wb * value / wa);
     }
 
-    pub fn exist(&mut self, k: &String) -> bool {
-        self.nodes.contains_key(k)
-    }
-
-    pub fn calc_value(&mut self, a: &String, b: &String) -> f64 {
-        if !self.exist(a) || !self.exist(b) || self.find(a) != self.find(b) {
+    fn query(&mut self, a: &str, b: &str) -> f64 {
+        if !self.parent.contains_key(a) || !self.parent.contains_key(b) {
+            return -1.0;
+        }
+        let ra = self.find(a);
+        let rb = self.find(b);
+        if ra != rb {
             -1.0
         } else {
-            let wa = self.nodes[a].weight;
-            let wb = self.nodes[b].weight;
-            wa / wb
+            self.weight[a] / self.weight[b]
         }
     }
 }
 
 impl Solution {
+    /// Evaluates division queries using a weighted Union-Find.
+    ///
+    /// # Intuition
+    /// Each equation a/b = v establishes a ratio relationship. Union-Find with
+    /// weights tracks the cumulative ratio from each variable to its root,
+    /// enabling O(α(n)) query evaluation.
+    ///
+    /// # Approach
+    /// 1. Build a weighted Union-Find from the equations.
+    /// 2. For each query, find both roots; if they match, compute weight_a / weight_b.
+    /// 3. Return -1.0 for disconnected or unknown variables.
+    ///
+    /// # Complexity
+    /// - Time: O((E + Q) · α(N)) where E = equations, Q = queries
+    /// - Space: O(N) for the Union-Find structure
     pub fn calc_equation(
         equations: Vec<Vec<String>>,
         values: Vec<f64>,
         queries: Vec<Vec<String>>,
     ) -> Vec<f64> {
-        let mut dsu = DisjointSetUnion::new(&equations);
-        for (i, &v) in values.iter().enumerate() {
-            let (a, b) = (&equations[i][0], &equations[i][1]);
-            dsu.union(a, b, v);
+        let mut uf = UnionFind::new(&equations);
+        for (eq, &val) in equations.iter().zip(values.iter()) {
+            uf.union(&eq[0], &eq[1], val);
         }
+        queries.iter().map(|q| uf.query(&q[0], &q[1])).collect()
+    }
+}
 
-        let mut ans = vec![];
-        for querie in queries {
-            let (c, d) = (&querie[0], &querie[1]);
-            ans.push(dsu.calc_value(c, d));
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_eq(pairs: &[(&str, &str)]) -> Vec<Vec<String>> {
+        pairs
+            .iter()
+            .map(|(a, b)| vec![a.to_string(), b.to_string()])
+            .collect()
+    }
+
+    #[test]
+    fn test_basic() {
+        let equations = make_eq(&[("a", "b"), ("b", "c")]);
+        let values = vec![2.0, 3.0];
+        let queries = make_eq(&[("a", "c"), ("b", "a"), ("a", "e"), ("a", "a"), ("x", "x")]);
+        let result = Solution::calc_equation(equations, values, queries);
+        let expected = vec![6.0, 0.5, -1.0, 1.0, -1.0];
+        for (r, e) in result.iter().zip(expected.iter()) {
+            assert!((r - e).abs() < 1e-5, "expected {e}, got {r}");
         }
-        ans
     }
 }

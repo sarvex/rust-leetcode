@@ -1,3 +1,22 @@
+use std::sync::OnceLock;
+
+const MAX_N: usize = 50;
+
+static BINOMIAL: OnceLock<Vec<Vec<u64>>> = OnceLock::new();
+
+fn get_binomial() -> &'static Vec<Vec<u64>> {
+    BINOMIAL.get_or_init(|| {
+        let mut binomial = vec![vec![0u64; MAX_N + 1]; MAX_N + 1];
+        (0..=MAX_N).for_each(|i| {
+            binomial[i][0] = 1;
+            (1..=i).for_each(|j| {
+                binomial[i][j] = binomial[i - 1][j - 1] + binomial[i - 1][j];
+            });
+        });
+        binomial
+    })
+}
+
 impl Solution {
     /// Greedy bit construction using combinatorics to find nth smallest number with k ones.
     ///
@@ -7,17 +26,17 @@ impl Solution {
     /// the current bit, using binomial coefficients C(remaining_bits, remaining_ones).
     ///
     /// # Approach
-    /// Precompute binomial coefficients C(m, k) for efficient lookup. For each bit position
-    /// from MSB to LSB, count valid numbers if we skip setting this bit. If count < n, we
-    /// must set the bit (reduce k and adjust n). Otherwise, skip the bit and continue.
+    /// Precompute binomial coefficients C(m, k) once using lazy static initialization.
+    /// For each bit position from MSB to LSB, count valid numbers if we skip setting this bit.
+    /// If count < n, we must set the bit (reduce k and adjust n). Otherwise, skip the bit.
     ///
     /// # Complexity
-    /// - Time: O(50²) for precomputation + O(50) for construction = O(1) amortized
-    /// - Space: O(50²) for binomial coefficient table
-    pub fn find_nth_smallest(n: i64, k: i32) -> i64 {
+    /// - Time: O(50) per query, O(50²) one-time precomputation
+    /// - Space: O(50²) for static binomial coefficient table
+    pub fn nth_smallest(n: i64, k: i32) -> i64 {
         let n = n as u64;
         let k = k as usize;
-        let binomial = Self::precompute_binomial();
+        let binomial = get_binomial();
 
         let mut result = 0u64;
         let mut remaining_ones = k;
@@ -49,21 +68,6 @@ impl Solution {
 
         result as i64
     }
-
-    /// Precomputes binomial coefficients C(m, k) for m, k ≤ 50.
-    fn precompute_binomial() -> Vec<Vec<u64>> {
-        const MAX_N: usize = 50;
-        let mut binomial = vec![vec![0u64; MAX_N + 1]; MAX_N + 1];
-
-        (0..=MAX_N).for_each(|i| {
-            binomial[i][0] = 1;
-            (1..=i).for_each(|j| {
-                binomial[i][j] = binomial[i - 1][j - 1] + binomial[i - 1][j];
-            });
-        });
-
-        binomial
-    }
 }
 
 #[cfg(test)]
@@ -72,38 +76,38 @@ mod tests {
 
     #[test]
     fn example1() {
-        assert_eq!(Solution::find_nth_smallest(4, 2), 9);
+        assert_eq!(Solution::nth_smallest(4, 2), 9);
     }
 
     #[test]
     fn example2() {
-        assert_eq!(Solution::find_nth_smallest(3, 1), 4);
+        assert_eq!(Solution::nth_smallest(3, 1), 4);
     }
 
     #[test]
     fn first_number() {
-        assert_eq!(Solution::find_nth_smallest(1, 2), 3);
+        assert_eq!(Solution::nth_smallest(1, 2), 3);
     }
 
     #[test]
     fn single_one() {
-        assert_eq!(Solution::find_nth_smallest(1, 1), 1);
-        assert_eq!(Solution::find_nth_smallest(2, 1), 2);
-        assert_eq!(Solution::find_nth_smallest(3, 1), 4);
+        assert_eq!(Solution::nth_smallest(1, 1), 1);
+        assert_eq!(Solution::nth_smallest(2, 1), 2);
+        assert_eq!(Solution::nth_smallest(3, 1), 4);
     }
 
     #[test]
     fn two_ones() {
-        assert_eq!(Solution::find_nth_smallest(1, 2), 3); // 11
-        assert_eq!(Solution::find_nth_smallest(2, 2), 5); // 101
-        assert_eq!(Solution::find_nth_smallest(3, 2), 6); // 110
-        assert_eq!(Solution::find_nth_smallest(4, 2), 9); // 1001
+        assert_eq!(Solution::nth_smallest(1, 2), 3); // 11
+        assert_eq!(Solution::nth_smallest(2, 2), 5); // 101
+        assert_eq!(Solution::nth_smallest(3, 2), 6); // 110
+        assert_eq!(Solution::nth_smallest(4, 2), 9); // 1001
     }
 
     #[test]
     fn large_n() {
         // Test with larger n values
-        let result = Solution::find_nth_smallest(100, 5);
+        let result = Solution::nth_smallest(100, 5);
         assert!(result > 0);
         assert_eq!(result.count_ones(), 5);
     }

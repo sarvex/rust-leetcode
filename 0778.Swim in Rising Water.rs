@@ -1,72 +1,80 @@
-const DIR: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
-
 impl Solution {
-    #[allow(dead_code)]
+    /// Finds minimum time to swim from top-left to bottom-right using Union-Find.
+    ///
+    /// # Intuition
+    /// At time t, all cells with elevation <= t are accessible. Incrementally
+    /// union adjacent accessible cells until top-left and bottom-right are connected.
+    ///
+    /// # Approach
+    /// Sort cells by elevation. Process cells in increasing elevation order,
+    /// unioning each newly accessible cell with its already-accessible neighbors.
+    /// Return the elevation when source and sink become connected.
+    ///
+    /// # Complexity
+    /// - Time: O(n^2 * alpha(n^2)) effectively O(n^2)
+    /// - Space: O(n^2) for the union-find structure
     pub fn swim_in_water(grid: Vec<Vec<i32>>) -> i32 {
         let n = grid.len();
-        let m = grid[0].len();
-        let mut ret_time = 0;
-        let mut disjoint_set: Vec<usize> = vec![0; n * m];
+        let total = n * n;
+        let mut parent: Vec<usize> = (0..total).collect();
 
-        // Initialize the disjoint set
-        for i in 0..n * m {
-            disjoint_set[i] = i;
-        }
-
-        loop {
-            if Self::check_and_union(&grid, &mut disjoint_set, ret_time) {
-                break;
+        fn find(parent: &mut [usize], x: usize) -> usize {
+            if parent[x] != x {
+                parent[x] = find(parent, parent[x]);
             }
-            // Otherwise, keep checking
-            ret_time += 1;
+            parent[x]
         }
 
-        ret_time
-    }
+        fn union(parent: &mut [usize], x: usize, y: usize) {
+            let px = find(parent, x);
+            let py = find(parent, y);
+            parent[px] = py;
+        }
 
-    #[allow(dead_code)]
-    fn check_and_union(grid: &Vec<Vec<i32>>, d_set: &mut Vec<usize>, cur_time: i32) -> bool {
-        let n = grid.len();
-        let m = grid[0].len();
+        let mut order: Vec<(i32, usize, usize)> = grid
+            .iter()
+            .enumerate()
+            .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, &v)| (v, i, j)))
+            .collect();
+        order.sort_unstable();
 
-        for i in 0..n {
-            for j in 0..m {
-                if grid[i][j] != cur_time {
-                    continue;
-                }
-                // Otherwise, let's union the square with its neighbors
-                for (dx, dy) in DIR {
-                    let x = dx + (i as i32);
-                    let y = dy + (j as i32);
-                    if Self::check_bounds(x, y, n as i32, m as i32)
-                        && grid[x as usize][y as usize] <= cur_time
-                    {
-                        Self::union(i * m + j, (x as usize) * m + (y as usize), d_set);
-                    }
+        let mut accessible = vec![vec![false; n]; n];
+        for &(elevation, r, c) in &order {
+            accessible[r][c] = true;
+            for (dr, dc) in [(!0usize, 0), (1, 0), (0, !0usize), (0, 1)] {
+                let nr = r.wrapping_add(dr);
+                let nc = c.wrapping_add(dc);
+                if nr < n && nc < n && accessible[nr][nc] {
+                    union(&mut parent, r * n + c, nr * n + nc);
                 }
             }
+            if find(&mut parent, 0) == find(&mut parent, total - 1) {
+                return elevation;
+            }
         }
+        0
+    }
+}
 
-        Self::find(0, d_set) == Self::find(n * m - 1, d_set)
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic() {
+        let grid = vec![vec![0, 2], vec![1, 3]];
+        assert_eq!(Solution::swim_in_water(grid), 3);
     }
 
-    #[allow(dead_code)]
-    fn find(x: usize, d_set: &mut Vec<usize>) -> usize {
-        if d_set[x] != x {
-            d_set[x] = Self::find(d_set[x], d_set);
-        }
-        d_set[x]
-    }
-
-    #[allow(dead_code)]
-    fn union(x: usize, y: usize, d_set: &mut Vec<usize>) {
-        let p_x = Self::find(x, d_set);
-        let p_y = Self::find(y, d_set);
-        d_set[p_x] = p_y;
-    }
-
-    #[allow(dead_code)]
-    fn check_bounds(i: i32, j: i32, n: i32, m: i32) -> bool {
-        i >= 0 && i < n && j >= 0 && j < m
+    #[test]
+    fn test_larger() {
+        let grid = vec![
+            vec![0, 1, 2, 3, 4],
+            vec![24, 23, 22, 21, 5],
+            vec![12, 13, 14, 15, 16],
+            vec![11, 17, 18, 19, 20],
+            vec![10, 9, 8, 7, 6],
+        ];
+        assert_eq!(Solution::swim_in_water(grid), 16);
     }
 }

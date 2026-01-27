@@ -1,18 +1,55 @@
 impl Solution {
+    /// Generates 1..n in lexicographical order using iterative DFS.
+    ///
+    /// # Intuition
+    /// Lexicographical order corresponds to a pre-order traversal of a 10-ary
+    /// trie where each node branches by appending digits 0–9.
+    ///
+    /// # Approach
+    /// 1. Start at 1 and push onto the result.
+    /// 2. Try to go deeper by multiplying by 10.
+    /// 3. If that exceeds n, backtrack by dividing by 10 until we can increment.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(n) for the result vector
     pub fn lexical_order(n: i32) -> Vec<i32> {
-        let mut ans = Vec::with_capacity(n as usize);
-        let mut v = 1;
+        let mut result = Vec::with_capacity(n as usize);
+        let mut current = 1;
         for _ in 0..n {
-            ans.push(v);
-            if v * 10 <= n {
-                v *= 10;
+            result.push(current);
+            if current * 10 <= n {
+                current *= 10;
             } else {
-                while v % 10 == 9 || v + 1 > n {
-                    v /= 10;
+                while current % 10 == 9 || current + 1 > n {
+                    current /= 10;
                 }
-                v += 1;
+                current += 1;
             }
         }
-        ans
+        result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_thirteen() {
+        assert_eq!(
+            Solution::lexical_order(13),
+            vec![1, 10, 11, 12, 13, 2, 3, 4, 5, 6, 7, 8, 9]
+        );
+    }
+
+    #[test]
+    fn test_two() {
+        assert_eq!(Solution::lexical_order(2), vec![1, 2]);
+    }
+
+    #[test]
+    fn test_one() {
+        assert_eq!(Solution::lexical_order(1), vec![1]);
     }
 }

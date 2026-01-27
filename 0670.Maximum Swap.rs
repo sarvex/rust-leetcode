@@ -1,35 +1,66 @@
 impl Solution {
-    pub fn maximum_swap(mut num: i32) -> i32 {
-        let mut list = {
-            let mut res = Vec::new();
-            while num != 0 {
-                res.push(num % 10);
-                num /= 10;
-            }
-            res
-        };
-        let n = list.len();
-        let idx = {
-            let mut i = 0;
-            (0..n)
-                .map(|j| {
-                    if list[j] > list[i] {
-                        i = j;
-                    }
-                    i
-                })
-                .collect::<Vec<usize>>()
-        };
-        for i in (0..n).rev() {
-            if list[i] != list[idx[i]] {
-                list.swap(i, idx[i]);
+    /// Finds the maximum number achievable by swapping at most two digits.
+    ///
+    /// # Intuition
+    /// For each digit position (from left), find the largest digit to its right
+    /// and swap if it is strictly greater. The rightmost occurrence of the
+    /// maximum is preferred to maximize the result.
+    ///
+    /// # Approach
+    /// 1. Extract digits into a vector (LSB first).
+    /// 2. Build a "max suffix index" array: for each position, the index of the
+    ///    largest digit from position 0 to i.
+    /// 3. Scan from the most significant digit; swap with the first larger digit found.
+    ///
+    /// # Complexity
+    /// - Time: O(d) where d = number of digits
+    /// - Space: O(d)
+    pub fn maximum_swap(num: i32) -> i32 {
+        let mut digits = Vec::new();
+        let mut n = num;
+        while n > 0 {
+            digits.push(n % 10);
+            n /= 10;
+        }
+        if digits.is_empty() {
+            return 0;
+        }
+        let len = digits.len();
+        let mut max_idx = vec![0usize; len];
+        max_idx[0] = 0;
+        for i in 1..len {
+            max_idx[i] = if digits[i] > digits[max_idx[i - 1]] {
+                i
+            } else {
+                max_idx[i - 1]
+            };
+        }
+        for i in (0..len).rev() {
+            if digits[i] != digits[max_idx[i]] {
+                digits.swap(i, max_idx[i]);
                 break;
             }
         }
-        let mut res = 0;
-        for i in list.iter().rev() {
-            res = res * 10 + i;
-        }
-        res
+        digits.iter().rev().fold(0, |acc, &d| acc * 10 + d)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic() {
+        assert_eq!(Solution::maximum_swap(2736), 7236);
+    }
+
+    #[test]
+    fn test_no_swap() {
+        assert_eq!(Solution::maximum_swap(9973), 9973);
+    }
+
+    #[test]
+    fn test_single_digit() {
+        assert_eq!(Solution::maximum_swap(5), 5);
     }
 }

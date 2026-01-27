@@ -1,17 +1,22 @@
+/// Circular queue implemented with a fixed-size array.
+///
+/// Uses a front pointer and size counter to manage the circular buffer,
+/// avoiding the need for a rear pointer.
 struct MyCircularQueue {
-    q: Vec<i32>,
+    data: Vec<i32>,
+    front: usize,
     size: usize,
     capacity: usize,
-    front: usize,
 }
 
 impl MyCircularQueue {
     fn new(k: i32) -> Self {
-        MyCircularQueue {
-            q: vec![0; k as usize],
-            size: 0,
-            capacity: k as usize,
+        let cap = k as usize;
+        Self {
+            data: vec![0; cap],
             front: 0,
+            size: 0,
+            capacity: cap,
         }
     }
 
@@ -20,7 +25,7 @@ impl MyCircularQueue {
             return false;
         }
         let rear = (self.front + self.size) % self.capacity;
-        self.q[rear] = value;
+        self.data[rear] = value;
         self.size += 1;
         true
     }
@@ -38,7 +43,7 @@ impl MyCircularQueue {
         if self.is_empty() {
             -1
         } else {
-            self.q[self.front]
+            self.data[self.front]
         }
     }
 
@@ -46,8 +51,7 @@ impl MyCircularQueue {
         if self.is_empty() {
             -1
         } else {
-            let rear = (self.front + self.size - 1) % self.capacity;
-            self.q[rear]
+            self.data[(self.front + self.size - 1) % self.capacity]
         }
     }
 
