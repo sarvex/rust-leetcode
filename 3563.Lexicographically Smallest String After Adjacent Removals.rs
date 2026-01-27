@@ -1,5 +1,5 @@
 impl Solution {
-    /// Lexicographically Smallest String After Adjacent Removals
+    /// Lexicographically smallest string after adjacent removals using interval DP.
     ///
     /// # Intuition
     /// Use interval DP to precompute which even-length substrings can be fully removed,
@@ -17,7 +17,7 @@ impl Solution {
     /// - Time: O(n³) for interval DP
     /// - Space: O(n²) for the DP tables
     pub fn lexicographically_smallest_string(s: String) -> String {
-        let s = s.chars().collect::<Vec<_>>();
+        let s = s.as_bytes();
         let n = s.len();
         let mut e = vec![vec![false; n + 1]; n + 1];
 
@@ -43,7 +43,7 @@ impl Solution {
 
         let mut sub = vec![String::new(); n + 1];
         for i in (0..n).rev() {
-            let mut r = format!("{}{}", s[i], &sub[i + 1]);
+            let mut r = format!("{}{}", s[i] as char, &sub[i + 1]);
             for j in 1..=(n - i) / 2 {
                 if e[i][i + j * 2] {
                     r = r.min(sub[i + j * 2].clone());

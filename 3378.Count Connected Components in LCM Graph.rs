@@ -2,16 +2,19 @@ impl Solution {
     /// Counts connected components where nodes connect if their LCM ≤ threshold.
     ///
     /// # Intuition
-    /// Two numbers a and b are connected if lcm(a, b) ≤ threshold. Key insight:
-    /// if both a and b divide some m ≤ threshold, then lcm(a, b) ≤ m ≤ threshold.
+    /// If both a and b divide some m ≤ threshold, then lcm(a,b) ≤ m ≤ threshold.
+    /// Numbers exceeding the threshold are isolated since their LCM with anything
+    /// also exceeds it.
     ///
     /// # Approach
-    /// 1. Numbers > threshold are isolated (lcm with anything exceeds threshold)
-    /// 2. For numbers ≤ threshold, use Union-Find: iterate through multiples m
-    ///    up to threshold and union all numbers that share a common multiple
+    /// 1. Partition numbers into isolated (> threshold) and valid (≤ threshold).
+    /// 2. Use Union-Find over multiples: for each valid number v, iterate
+    ///    multiples v, 2v, 3v, … ≤ threshold and union the first visitor of
+    ///    each multiple with v.
+    /// 3. Count distinct roots among valid numbers plus the isolated count.
     ///
     /// # Complexity
-    /// - Time: O(threshold × log(threshold) × α(n)) where α is inverse Ackermann
+    /// - Time: O(threshold × log(threshold) × α(n))
     /// - Space: O(threshold)
     pub fn count_components(nums: Vec<i32>, threshold: i32) -> i32 {
         let threshold = threshold as usize;
@@ -64,82 +67,42 @@ mod tests {
     use super::Solution;
 
     #[test]
-    fn test_example_1() {
-        let nums = vec![2, 4, 8, 3, 9];
-        let threshold = 5;
-
-        let result = Solution::count_components(nums, threshold);
-
-        assert_eq!(result, 4);
+    fn shared_multiples_form_components() {
+        assert_eq!(Solution::count_components(vec![2, 4, 8, 3, 9], 5), 4);
     }
 
     #[test]
-    fn test_example_2() {
-        let nums = vec![2, 4, 8, 3, 9, 12];
-        let threshold = 10;
-
-        let result = Solution::count_components(nums, threshold);
-
-        assert_eq!(result, 2);
+    fn larger_threshold_merges_more() {
+        assert_eq!(Solution::count_components(vec![2, 4, 8, 3, 9, 12], 10), 2);
     }
 
     #[test]
-    fn test_all_isolated() {
-        let nums = vec![100, 200, 300];
-        let threshold = 5;
-
-        let result = Solution::count_components(nums, threshold);
-
-        assert_eq!(result, 3);
+    fn all_exceed_threshold_are_isolated() {
+        assert_eq!(Solution::count_components(vec![100, 200, 300], 5), 3);
     }
 
     #[test]
-    fn test_single_element() {
-        let nums = vec![5];
-        let threshold = 10;
-
-        let result = Solution::count_components(nums, threshold);
-
-        assert_eq!(result, 1);
+    fn single_element_is_one_component() {
+        assert_eq!(Solution::count_components(vec![5], 10), 1);
     }
 
     #[test]
-    fn test_all_connected_via_one() {
-        let nums = vec![1, 2, 3];
-        let threshold = 6;
-
-        let result = Solution::count_components(nums, threshold);
-
-        assert_eq!(result, 1);
+    fn one_divides_everything_connects_all() {
+        assert_eq!(Solution::count_components(vec![1, 2, 3], 6), 1);
     }
 
     #[test]
-    fn test_lcm_equals_threshold() {
-        let nums = vec![2, 3];
-        let threshold = 6;
-
-        let result = Solution::count_components(nums, threshold);
-
-        assert_eq!(result, 1);
+    fn lcm_exactly_at_threshold_connects() {
+        assert_eq!(Solution::count_components(vec![2, 3], 6), 1);
     }
 
     #[test]
-    fn test_lcm_exceeds_threshold() {
-        let nums = vec![2, 3];
-        let threshold = 5;
-
-        let result = Solution::count_components(nums, threshold);
-
-        assert_eq!(result, 2);
+    fn lcm_exceeding_threshold_separates() {
+        assert_eq!(Solution::count_components(vec![2, 3], 5), 2);
     }
 
     #[test]
-    fn test_divisibility_chain() {
-        let nums = vec![2, 4, 8];
-        let threshold = 8;
-
-        let result = Solution::count_components(nums, threshold);
-
-        assert_eq!(result, 1);
+    fn divisibility_chain_single_component() {
+        assert_eq!(Solution::count_components(vec![2, 4, 8], 8), 1);
     }
 }

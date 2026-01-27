@@ -1,21 +1,65 @@
 impl Solution {
+    /// Finds the maximum distance between valid index pairs using binary search.
+    ///
+    /// # Intuition
+    /// Since nums1 is non-increasing and nums2 is non-increasing, for each
+    /// element in nums1 we can binary search for the rightmost position in
+    /// nums2 where the value is still >= nums1[i].
+    ///
+    /// # Approach
+    /// 1. For each index i in nums1, binary search in nums2[i..] for the
+    ///    last index j where nums2[j] >= nums1[i].
+    /// 2. Track the maximum j - i.
+    ///
+    /// # Complexity
+    /// - Time: O(m * log n)
+    /// - Space: O(1)
     pub fn max_distance(nums1: Vec<i32>, nums2: Vec<i32>) -> i32 {
-        let m = nums1.len();
         let n = nums2.len();
-        let mut res = 0;
-        for i in 0..m {
-            let mut left = i;
-            let mut right = n;
-            while left < right {
-                let mid = left + (right - left) / 2;
-                if nums2[mid] >= nums1[i] {
-                    left = mid + 1;
+        let mut result = 0;
+
+        for (i, &val) in nums1.iter().enumerate() {
+            let mut lo = i;
+            let mut hi = n;
+            while lo < hi {
+                let mid = lo + (hi - lo) / 2;
+                if nums2[mid] >= val {
+                    lo = mid + 1;
                 } else {
-                    right = mid;
+                    hi = mid;
                 }
             }
-            res = res.max((left - i - 1) as i32);
+            if lo > i {
+                result = result.max((lo - i - 1) as i32);
+            }
         }
-        res
+
+        result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic_distance() {
+        assert_eq!(
+            Solution::max_distance(vec![55, 30, 5, 4, 2], vec![100, 20, 10, 10, 5]),
+            2
+        );
+    }
+
+    #[test]
+    fn test_no_valid_pairs() {
+        assert_eq!(
+            Solution::max_distance(vec![30, 29, 19, 5], vec![25, 25, 25, 25, 25]),
+            2
+        );
+    }
+
+    #[test]
+    fn test_single_element() {
+        assert_eq!(Solution::max_distance(vec![5], vec![5]), 0);
     }
 }

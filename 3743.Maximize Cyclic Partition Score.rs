@@ -1,7 +1,5 @@
-struct Solution;
-
 impl Solution {
-    /// Linear DP with array rotation for maximizing cyclic partition score
+    /// Linear DP with array rotation for maximizing cyclic partition score.
     ///
     /// # Intuition
     /// Rotate the array starting from the maximum element to handle cyclic nature.
@@ -13,15 +11,13 @@ impl Solution {
     /// 3. Track best score using first j elements, incrementally add segments
     ///
     /// # Complexity
-    /// - Time complexity: O(n × k)
-    /// - Space complexity: O(n)
+    /// - Time: O(n * k)
+    /// - Space: O(n)
     pub fn maximum_score(nums: Vec<i32>, k: i32) -> i64 {
         let length = nums.len();
         let partition_count = (k as usize).min(length);
 
-        let max_element_index = (0..length)
-            .max_by_key(|&index| nums[index])
-            .unwrap_or(0);
+        let max_element_index = (0..length).max_by_key(|&index| nums[index]).unwrap_or(0);
 
         let forward_rotation: Vec<i64> = (0..length)
             .map(|index| nums[(max_element_index + index) % length] as i64)
@@ -50,14 +46,14 @@ impl Solution {
 
             let mut result = current_dp[length];
 
-            for segment in 1..partition_count {
+            for _segment in 1..partition_count {
                 next_dp.fill(NEG_INFINITY);
 
                 let mut best_minus_value = NEG_INFINITY;
                 let mut best_plus_value = NEG_INFINITY;
                 let mut best_score = NEG_INFINITY;
 
-                for position in segment..length {
+                for position in _segment..length {
                     let current_value = arr[position];
                     let previous_score = current_dp[position];
 
@@ -90,80 +86,70 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
-        let nums = vec![1, 2, 3, 3];
-        let k = 2;
-        assert_eq!(Solution::maximum_score(nums, k), 3);
+    fn test_two_partitions() {
+        assert_eq!(Solution::maximum_score(vec![1, 2, 3, 3], 2), 3);
     }
 
     #[test]
-    fn test_example_2() {
-        let nums = vec![1, 2, 3, 3];
-        let k = 1;
-        assert_eq!(Solution::maximum_score(nums, k), 2);
+    fn test_single_partition() {
+        assert_eq!(Solution::maximum_score(vec![1, 2, 3, 3], 1), 2);
     }
 
     #[test]
-    fn test_example_3() {
-        let nums = vec![1, 2, 3, 3];
-        let k = 4;
-        assert_eq!(Solution::maximum_score(nums, k), 3);
+    fn test_max_partitions() {
+        assert_eq!(Solution::maximum_score(vec![1, 2, 3, 3], 4), 3);
     }
 
     #[test]
-    fn test_failed_case_1() {
-        let nums = vec![1, 1000000000, 1000000000];
-        let k = 3;
-        assert_eq!(Solution::maximum_score(nums, k), 999999999);
+    fn test_large_value_difference() {
+        assert_eq!(
+            Solution::maximum_score(vec![1, 1000000000, 1000000000], 3),
+            999999999
+        );
     }
 
     #[test]
-    fn test_failed_case_2() {
-        let nums = vec![
-            563861991, 113020722, 111783372, 603350366, 771729177, 91633423, 664375708, 85118934,
-        ];
-        let k = 4;
-        assert_eq!(Solution::maximum_score(nums, k), 2201760791);
+    fn test_eight_elements_four_partitions() {
+        assert_eq!(
+            Solution::maximum_score(
+                vec![
+                    563861991, 113020722, 111783372, 603350366, 771729177, 91633423, 664375708,
+                    85118934
+                ],
+                4
+            ),
+            2201760791
+        );
     }
 
     #[test]
     fn test_single_element() {
-        let nums = vec![5];
-        let k = 1;
-        assert_eq!(Solution::maximum_score(nums, k), 0);
+        assert_eq!(Solution::maximum_score(vec![5], 1), 0);
     }
 
     #[test]
-    fn test_two_elements() {
-        let nums = vec![1, 10];
-        let k = 1;
-        assert_eq!(Solution::maximum_score(nums, k), 9);
+    fn test_two_elements_one_partition() {
+        assert_eq!(Solution::maximum_score(vec![1, 10], 1), 9);
     }
 
     #[test]
     fn test_two_elements_two_partitions() {
-        let nums = vec![1, 10];
-        let k = 2;
-        assert_eq!(Solution::maximum_score(nums, k), 9);
+        assert_eq!(Solution::maximum_score(vec![1, 10], 2), 9);
     }
 
     #[test]
     fn test_uniform_array() {
-        let nums = vec![5, 5, 5, 5];
-        let k = 2;
-        assert_eq!(Solution::maximum_score(nums, k), 0);
+        assert_eq!(Solution::maximum_score(vec![5, 5, 5, 5], 2), 0);
     }
 
     #[test]
     fn test_increasing_array() {
-        let nums = vec![1, 2, 3, 4, 5];
-        let k = 2;
-        let result = Solution::maximum_score(nums, k);
+        let result = Solution::maximum_score(vec![1, 2, 3, 4, 5], 2);
         assert!(result >= 4);
     }
 
     #[test]
-    fn test_large_case() {
+    fn test_large_array_many_partitions() {
         let nums = vec![
             162, 79, 100, 157, 111, 134, 17, 108, 121, 191, 78, 64, 5, 107, 76, 156, 115, 147, 152,
             124, 99, 176, 85, 187, 90, 155, 33, 89, 79, 148, 118, 37, 133, 53, 79, 22, 118, 36, 65,
@@ -174,27 +160,24 @@ mod tests {
             165, 102, 105, 179, 81, 28, 26, 165, 62, 81, 22, 161, 46, 46, 137, 61, 181, 125, 135,
             157, 155, 24,
         ];
-        let k = 95;
-        let result = Solution::maximum_score(nums, k);
-        assert_eq!(result, 5848);
+        assert_eq!(Solution::maximum_score(nums, 95), 5848);
     }
 
     #[test]
-    fn test_large_case_2() {
+    fn test_large_array_108_partitions() {
         let nums = vec![
             135, 195, 110, 67, 87, 168, 145, 5, 105, 9, 74, 152, 117, 177, 107, 184, 61, 34, 30,
             192, 63, 193, 102, 34, 67, 145, 136, 180, 122, 190, 49, 69, 80, 54, 58, 129, 93, 167,
-            200, 61, 12, 188, 158, 78, 80, 154, 126, 138, 76, 141, 102, 108, 91, 32, 1, 190, 33, 89,
-            25, 171, 24, 56, 69, 186, 111, 153, 126, 10, 164, 105, 4, 188, 96, 24, 118, 179, 73, 50,
-            86, 119, 102, 127, 4, 66, 94, 32, 123, 84, 155, 75, 193, 159, 52, 147, 57, 155, 17, 49,
-            87, 67, 3, 57, 122, 106, 112, 87, 134, 188, 35, 127, 195, 36, 20, 164, 133, 178, 149,
-            65, 177, 51, 189, 90, 84, 73, 22, 106, 137, 23, 129, 165, 105, 60, 65, 42, 35, 61, 48,
-            25, 60, 73, 66, 10, 144, 26, 105, 73, 158, 158, 84, 200, 27, 17, 102, 186, 20, 138, 43,
-            170, 6, 171, 124, 158, 57, 48, 110, 109, 74, 153, 100, 112, 125, 22, 36, 73, 18, 30,
-            116, 113,
+            200, 61, 12, 188, 158, 78, 80, 154, 126, 138, 76, 141, 102, 108, 91, 32, 1, 190, 33,
+            89, 25, 171, 24, 56, 69, 186, 111, 153, 126, 10, 164, 105, 4, 188, 96, 24, 118, 179,
+            73, 50, 86, 119, 102, 127, 4, 66, 94, 32, 123, 84, 155, 75, 193, 159, 52, 147, 57, 155,
+            17, 49, 87, 67, 3, 57, 122, 106, 112, 87, 134, 188, 35, 127, 195, 36, 20, 164, 133,
+            178, 149, 65, 177, 51, 189, 90, 84, 73, 22, 106, 137, 23, 129, 165, 105, 60, 65, 42,
+            35, 61, 48, 25, 60, 73, 66, 10, 144, 26, 105, 73, 158, 158, 84, 200, 27, 17, 102, 186,
+            20, 138, 43, 170, 6, 171, 124, 158, 57, 48, 110, 109, 74, 153, 100, 112, 125, 22, 36,
+            73, 18, 30, 116, 113,
         ];
-        let k = 108;
-        let result = Solution::maximum_score(nums, k);
+        let result = Solution::maximum_score(nums, 108);
         assert!(result > 0);
     }
 }

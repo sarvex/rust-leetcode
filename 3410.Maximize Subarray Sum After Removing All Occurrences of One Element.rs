@@ -83,8 +83,6 @@ impl<T: Copy, H: SegmentTreeHelper<T>> SegmentTree<T, H> {
     }
 }
 
-/// Segment tree node: (max_subarray, prefix_max, suffix_max, total)
-/// For negative values: max/prefix/suffix are 0 (can skip), but total carries cost
 struct SubarrayHelper;
 
 impl SegmentTreeHelper<(i64, i64, i64, i64)> for SubarrayHelper {
@@ -94,30 +92,27 @@ impl SegmentTreeHelper<(i64, i64, i64, i64)> for SubarrayHelper {
         right: (i64, i64, i64, i64),
     ) -> (i64, i64, i64, i64) {
         (
-            // max_subarray: best in left, best in right, or crossing (left suffix + right prefix)
             left.0.max(right.0).max(right.1 + left.2),
-            // prefix_max: left prefix, or all of left + right prefix
             left.1.max(left.3 + right.1),
-            // suffix_max: right suffix, or all of right + left suffix
             right.2.max(right.3 + left.2),
-            // total: sum of both
             left.3 + right.3,
         )
     }
 }
 
 impl Solution {
-    /// Finds maximum subarray sum after optionally removing all occurrences of one element
+    /// Maximizes subarray sum after optionally removing all occurrences of one element.
     ///
     /// # Intuition
-    /// Use segment tree storing (max_subarray, prefix_max, suffix_max, total).
-    /// For negative values, set max/prefix/suffix to 0 (can skip) but total carries cost.
-    /// To simulate removal, temporarily zero out positions and query entire range.
+    /// A segment tree storing (max_subarray, prefix_max, suffix_max, total)
+    /// supports efficient "what if we remove value v?" queries by temporarily
+    /// zeroing out all positions of v.
     ///
     /// # Approach
-    /// 1. Build segment tree with nodes allowing negative values to be "skipped"
-    /// 2. Query base case (no removal)
-    /// 3. For each unique negative: zero out its positions, query, restore
+    /// 1. Build segment tree where negative values can be "skipped" (max clamped to 0)
+    ///    but their total carries the actual value for aggregation.
+    /// 2. Query the base case (no removal).
+    /// 3. For each unique negative value, zero out its positions, query, restore.
     ///
     /// # Complexity
     /// - Time: O(n log n)
@@ -125,13 +120,11 @@ impl Solution {
     pub fn max_subarray_sum(nums: Vec<i32>) -> i64 {
         let n = nums.len();
 
-        // Early exit: if max element is negative, answer is that single element
         let max_val = *nums.iter().max().unwrap() as i64;
         if max_val < 0 {
             return max_val;
         }
 
-        // Build initial values: for negative x, can skip (0,0,0) but total is x
         let nodes: Vec<_> = nums
             .iter()
             .map(|&x| x as i64)
@@ -140,7 +133,6 @@ impl Solution {
 
         let mut tree = SegmentTree::new(&nodes, SubarrayHelper);
 
-        // Collect positions of each negative value
         let mut neg_positions: HashMap<i32, Vec<usize>> = HashMap::new();
         for (i, &x) in nums.iter().enumerate() {
             if x < 0 {
@@ -148,19 +140,15 @@ impl Solution {
             }
         }
 
-        // Base case: no removal
         let mut result = tree.query(0, n - 1).0;
 
-        // Try removing each unique negative value
         for (&val, positions) in &neg_positions {
-            // Zero out all positions (removal simulation)
             for &i in positions {
                 tree.update(i, (0, 0, 0, 0));
             }
 
             result = result.max(tree.query(0, n - 1).0);
 
-            // Restore positions
             for &i in positions {
                 tree.update(i, (0, 0, 0, val as i64));
             }
@@ -175,62 +163,52 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn removing_negative_bridges_segments() {
         assert_eq!(Solution::max_subarray_sum(vec![-3, 2, -2, -1, 3, -2, 3]), 7);
     }
 
     #[test]
-    fn test_example_2() {
+    fn all_positive_uses_entire_array() {
         assert_eq!(Solution::max_subarray_sum(vec![1, 2, 3, 4]), 10);
     }
 
     #[test]
-    fn test_all_negative() {
+    fn all_negative_returns_max_element() {
         assert_eq!(Solution::max_subarray_sum(vec![-5, -3, -2]), -2);
     }
 
     #[test]
-    fn test_single_positive() {
+    fn single_positive_element() {
         assert_eq!(Solution::max_subarray_sum(vec![5]), 5);
     }
 
     #[test]
-    fn test_single_negative() {
+    fn single_negative_element() {
         assert_eq!(Solution::max_subarray_sum(vec![-5]), -5);
     }
 
     #[test]
-    fn test_alternating() {
-        // Remove -1: [5, 5, 5] = 15
+    fn removing_repeated_negative_unifies_segments() {
         assert_eq!(Solution::max_subarray_sum(vec![5, -1, 5, -1, 5]), 15);
     }
 
     #[test]
-    fn test_remove_bridges_segments() {
-        // Remove -5: [10, 10, 10] = 30
+    fn removing_large_negative_bridges_far_segments() {
         assert_eq!(Solution::max_subarray_sum(vec![10, -5, 10, -5, 10]), 30);
     }
 
     #[test]
-    fn test_mixed_negatives() {
-        // Remove -4: [1, -2, 3, 5] max is 3+5=8
+    fn mixed_negatives_choose_best_removal() {
         assert_eq!(Solution::max_subarray_sum(vec![1, -2, 3, -4, 5]), 8);
     }
 
     #[test]
-    fn test_two_elements() {
+    fn two_elements_sum() {
         assert_eq!(Solution::max_subarray_sum(vec![1, 2]), 3);
     }
 
     #[test]
-    fn test_negative_bridges_positive() {
-        // Remove -1: [100, 100] = 200
-        assert_eq!(Solution::max_subarray_sum(vec![100, -1, -1, -1, 100]), 200);
-    }
-
-    #[test]
-    fn test_all_same_negative() {
-        // Cannot remove all, best is single -2
+    fn all_same_negative_returns_single() {
         assert_eq!(Solution::max_subarray_sum(vec![-2, -2, -2]), -2);
     }
 }

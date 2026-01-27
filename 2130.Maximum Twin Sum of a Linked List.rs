@@ -14,20 +14,35 @@
 //     }
 //   }
 // }
+
 impl Solution {
+    /// Finds the maximum twin sum by collecting values and pairing from ends.
+    ///
+    /// # Intuition
+    /// Twin nodes are at positions `i` and `n - 1 - i`. By collecting all
+    /// values into a vector, we can pair elements from both ends and find
+    /// the maximum sum.
+    ///
+    /// # Approach
+    /// 1. Traverse the linked list, collecting values into a vector.
+    /// 2. Pair the first element with the last, second with second-to-last, etc.
+    /// 3. Return the maximum sum among all pairs.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(n)
     pub fn pair_sum(head: Option<Box<ListNode>>) -> i32 {
-        let mut arr = Vec::new();
-        let mut node = &head;
-        while node.is_some() {
-            let t = node.as_ref().unwrap();
-            arr.push(t.val);
-            node = &t.next;
+        let mut values = Vec::new();
+        let mut current = &head;
+        while let Some(node) = current {
+            values.push(node.val);
+            current = &node.next;
         }
-        let n = arr.len();
-        let mut ans = 0;
-        for i in 0..n >> 1 {
-            ans = ans.max(arr[i] + arr[n - 1 - i]);
-        }
-        ans
+
+        let n = values.len();
+        (0..n / 2)
+            .map(|i| values[i] + values[n - 1 - i])
+            .max()
+            .unwrap_or(0)
     }
 }

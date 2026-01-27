@@ -1,38 +1,57 @@
 impl Solution {
-    #[allow(dead_code)]
+    /// Minimum cost to paint all walls using paid and free painters.
+    ///
+    /// # Intuition
+    /// The paid painter paints wall `i` in `time[i]` units at `cost[i]`, during
+    /// which the free painter can paint `time[i]` walls. This is a knapsack-like
+    /// problem: pick a subset of walls for the paid painter such that total time
+    /// covers all remaining walls, minimizing total cost.
+    ///
+    /// # Approach
+    /// 1. Use top-down DP with memoization: `dfs(i, j)` where `i` is current wall
+    ///    index and `j` tracks remaining capacity offset.
+    /// 2. If remaining walls can all be painted for free, return 0.
+    /// 3. If out of walls, return infinity.
+    /// 4. Choose to pay for wall `i` (gaining `time[i]` free capacity) or skip it.
+    ///
+    /// # Complexity
+    /// - Time: O(n²)
+    /// - Space: O(n²)
     pub fn paint_walls(cost: Vec<i32>, time: Vec<i32>) -> i32 {
         let n = cost.len();
-        let mut record_vec: Vec<Vec<i32>> = vec![vec![-1; n << 1 | 1]; n];
-        Self::dfs(&mut record_vec, 0, n as i32, n as i32, &time, &cost)
+        let mut memo = vec![vec![-1i32; n << 1 | 1]; n];
+        Self::dfs(&mut memo, 0, n as i32, n as i32, &time, &cost)
     }
 
-    #[allow(dead_code)]
-    fn dfs(
-        record_vec: &mut Vec<Vec<i32>>,
-        i: i32,
-        j: i32,
-        n: i32,
-        time: &Vec<i32>,
-        cost: &Vec<i32>,
-    ) -> i32 {
+    fn dfs(memo: &mut [Vec<i32>], i: i32, j: i32, n: i32, time: &[i32], cost: &[i32]) -> i32 {
         if n - i <= j - n {
-            // All the remaining walls can be printed at no cost
-            // Just return 0
             return 0;
         }
         if i >= n {
-            // No way this case can be achieved
-            // Just return +INF
             return 1 << 30;
         }
-        if record_vec[i as usize][j as usize] == -1 {
-            // This record hasn't been written
-            record_vec[i as usize][j as usize] = std::cmp::min(
-                Self::dfs(record_vec, i + 1, j + time[i as usize], n, time, cost)
-                    + cost[i as usize],
-                Self::dfs(record_vec, i + 1, j - 1, n, time, cost),
-            );
+        let (ui, uj) = (i as usize, j as usize);
+        if memo[ui][uj] != -1 {
+            return memo[ui][uj];
         }
-        record_vec[i as usize][j as usize]
+        let pay = Self::dfs(memo, i + 1, j + time[ui], n, time, cost) + cost[ui];
+        let skip = Self::dfs(memo, i + 1, j - 1, n, time, cost);
+        memo[ui][uj] = pay.min(skip);
+        memo[ui][uj]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_wall_painting() {
+        assert_eq!(Solution::paint_walls(vec![1, 2, 3, 2], vec![1, 2, 3, 2]), 3);
+    }
+
+    #[test]
+    fn expensive_but_time_efficient() {
+        assert_eq!(Solution::paint_walls(vec![2, 3, 4, 2], vec![1, 1, 1, 1]), 4);
     }
 }

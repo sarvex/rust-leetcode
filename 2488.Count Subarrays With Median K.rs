@@ -1,5 +1,5 @@
 impl Solution {
-    /// Counts subarrays where k is the median using balance transformation
+    /// Counts subarrays where k is the median using balance transformation.
     ///
     /// # Intuition
     /// For k to be the median, the count of elements greater than k must equal
@@ -14,8 +14,8 @@ impl Solution {
     ///   finding complementary balances
     ///
     /// # Complexity
-    /// - Time: O(n) - single pass left and right from k's position
-    /// - Space: O(n) - hashmap storing at most n prefix sums
+    /// - Time: O(n) — single pass left and right from k's position
+    /// - Space: O(n) — hashmap storing at most n prefix sums
     pub fn count_subarrays(nums: Vec<i32>, k: i32) -> i32 {
         let n = nums.len();
         let k_pos = nums.iter().position(|&x| x == k).unwrap();
@@ -33,10 +33,10 @@ impl Solution {
         balance = 0;
 
         for i in k_pos..n {
-            if nums[i] < k {
-                balance -= 1;
-            } else if nums[i] > k {
-                balance += 1;
+            match nums[i].cmp(&k) {
+                std::cmp::Ordering::Less => balance -= 1,
+                std::cmp::Ordering::Greater => balance += 1,
+                std::cmp::Ordering::Equal => {}
             }
             result += left_count.get(&(-balance)).unwrap_or(&0);
             result += left_count.get(&(1 - balance)).unwrap_or(&0);
@@ -52,52 +52,36 @@ mod tests {
 
     #[test]
     fn test_example_1() {
-        let nums = vec![3, 2, 1, 4, 5];
-        let k = 4;
-        assert_eq!(Solution::count_subarrays(nums, k), 3);
+        assert_eq!(Solution::count_subarrays(vec![3, 2, 1, 4, 5], 4), 3);
     }
 
     #[test]
     fn test_example_2() {
-        let nums = vec![2, 3, 1];
-        let k = 3;
-        assert_eq!(Solution::count_subarrays(nums, k), 1);
+        assert_eq!(Solution::count_subarrays(vec![2, 3, 1], 3), 1);
     }
 
     #[test]
     fn test_single_element() {
-        let nums = vec![1];
-        let k = 1;
-        assert_eq!(Solution::count_subarrays(nums, k), 1);
+        assert_eq!(Solution::count_subarrays(vec![1], 1), 1);
     }
 
     #[test]
     fn test_k_at_start() {
-        // Valid: [1], [1,2] (sorted [1,2], left middle is 1)
-        let nums = vec![1, 2, 3];
-        let k = 1;
-        assert_eq!(Solution::count_subarrays(nums, k), 2);
+        assert_eq!(Solution::count_subarrays(vec![1, 2, 3], 1), 2);
     }
 
     #[test]
     fn test_k_at_end() {
-        let nums = vec![1, 2, 3];
-        let k = 3;
-        assert_eq!(Solution::count_subarrays(nums, k), 1);
+        assert_eq!(Solution::count_subarrays(vec![1, 2, 3], 3), 1);
     }
 
     #[test]
     fn test_k_in_middle() {
-        let nums = vec![1, 2, 3];
-        let k = 2;
-        assert_eq!(Solution::count_subarrays(nums, k), 3);
+        assert_eq!(Solution::count_subarrays(vec![1, 2, 3], 2), 3);
     }
 
     #[test]
     fn test_larger_array() {
-        // Valid: [3], [4,3], [1,4,3], [5,2,1,4,3]
-        let nums = vec![5, 2, 1, 4, 3];
-        let k = 3;
-        assert_eq!(Solution::count_subarrays(nums, k), 4);
+        assert_eq!(Solution::count_subarrays(vec![5, 2, 1, 4, 3], 3), 4);
     }
 }

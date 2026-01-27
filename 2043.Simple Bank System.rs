@@ -1,47 +1,61 @@
+/// Simple bank system supporting transfers, deposits, and withdrawals.
 struct Bank {
     balance: Vec<i64>,
 }
 
-/**
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
 impl Bank {
     fn new(balance: Vec<i64>) -> Self {
-        Bank { balance }
+        Self { balance }
+    }
+
+    fn is_valid(&self, account: i32) -> bool {
+        (account as usize) <= self.balance.len()
     }
 
     fn transfer(&mut self, account1: i32, account2: i32, money: i64) -> bool {
-        let (account1, account2, n) = (account1 as usize, account2 as usize, self.balance.len());
-        if n < account1 || n < account2 {
+        if !self.is_valid(account1) || !self.is_valid(account2) {
             return false;
         }
-        if self.balance[account1 - 1] < money {
+        let idx1 = (account1 - 1) as usize;
+        if self.balance[idx1] < money {
             return false;
         }
-        self.balance[account1 - 1] -= money;
-        self.balance[account2 - 1] += money;
+        self.balance[idx1] -= money;
+        self.balance[(account2 - 1) as usize] += money;
         true
     }
 
     fn deposit(&mut self, account: i32, money: i64) -> bool {
-        let (account, n) = (account as usize, self.balance.len());
-        if n < account {
+        if !self.is_valid(account) {
             return false;
         }
-        self.balance[account - 1] += money;
+        self.balance[(account - 1) as usize] += money;
         true
     }
 
     fn withdraw(&mut self, account: i32, money: i64) -> bool {
-        let (account, n) = (account as usize, self.balance.len());
-        if n < account {
+        if !self.is_valid(account) {
             return false;
         }
-        if self.balance[account - 1] < money {
+        let idx = (account - 1) as usize;
+        if self.balance[idx] < money {
             return false;
         }
-        self.balance[account - 1] -= money;
+        self.balance[idx] -= money;
         true
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bank_operations() {
+        let mut bank = Bank::new(vec![10, 100, 20, 50, 30]);
+        assert!(bank.transfer(3, 5, 10));
+        assert!(bank.deposit(5, 20));
+        assert!(!bank.transfer(5, 1, 100));
+        assert!(bank.withdraw(1, 10));
     }
 }

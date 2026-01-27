@@ -18,10 +18,10 @@ impl Solution {
     /// - Time: O(n) for both passes
     /// - Space: O(n) for storing lengths
     pub fn process_str(s: String, k: i64) -> char {
-        let s: Vec<char> = s.chars().collect();
+        let s = s.as_bytes();
         let n = s.len();
 
-        const CAP: i64 = 2_000_000_000_000_000; // 2 * 10^15, safely above max k
+        const CAP: i64 = 2_000_000_000_000_000;
 
         let mut lens = vec![0i64; n + 1];
 
@@ -29,15 +29,15 @@ impl Solution {
         for (i, &c) in s.iter().enumerate() {
             let prev = lens[i];
             lens[i + 1] = match c {
-                '*' => (prev - 1).max(0),
-                '#' => {
+                b'*' => (prev - 1).max(0),
+                b'#' => {
                     if prev > CAP / 2 {
                         CAP
                     } else {
                         prev * 2
                     }
                 }
-                '%' => prev,
+                b'%' => prev,
                 _ => {
                     if prev >= CAP {
                         CAP
@@ -60,23 +60,18 @@ impl Solution {
             let curr_len = lens[i + 1];
 
             match s[i] {
-                '#' => {
-                    // String was duplicated; if k in second half, map to first
+                b'#' => {
                     if k >= prev_len {
                         k -= prev_len;
                     }
                 }
-                '%' => {
-                    // String was reversed
+                b'%' => {
                     k = curr_len - 1 - k;
                 }
-                '*' => {
-                    // Character was removed; k unchanged
-                }
+                b'*' => {}
                 c => {
-                    // Character was appended at position curr_len - 1
                     if k == curr_len - 1 {
-                        return c;
+                        return c as char;
                     }
                 }
             }

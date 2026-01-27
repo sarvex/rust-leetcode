@@ -1,22 +1,20 @@
 impl Solution {
-    /// Greedy traversal from right to left with ceiling division for optimal splits.
+    /// Greedy right-to-left traversal with ceiling division for optimal splits.
     ///
     /// # Intuition
-    /// The key insight is that the rightmost element should remain unchanged since
-    /// any split only produces smaller values. By traversing from right to left,
-    /// we can determine the minimum number of operations needed while maintaining
-    /// the largest possible upper bound at each position.
+    /// The rightmost element should remain unchanged since splitting only produces
+    /// smaller values. By traversing right to left, we determine the minimum
+    /// operations while maintaining the largest possible upper bound at each position.
     ///
     /// # Approach
-    /// 1. Traverse the array from right to left, tracking the maximum allowed value
-    /// 2. For each element greater than the current bound, calculate minimum splits
-    /// 3. Use ceiling division to find the optimal number of parts: `(num + bound - 1) / bound`
-    /// 4. After splitting, update the bound to the smallest resulting piece: `num / parts`
-    /// 5. Accumulate `(parts - 1)` operations for each split
+    /// 1. Traverse from right to left, tracking the maximum allowed value
+    /// 2. For elements exceeding the bound, compute minimum splits via ceiling division
+    /// 3. Update the bound to the smallest resulting piece: `num / parts`
+    /// 4. Accumulate `(parts - 1)` operations per split
     ///
     /// # Complexity
-    /// - Time: O(n) where n is the length of the input array
-    /// - Space: O(1) constant extra space
+    /// - Time: O(n)
+    /// - Space: O(1)
     pub fn minimum_replacement(nums: Vec<i32>) -> i64 {
         let mut total_operations: i64 = 0;
 
@@ -39,7 +37,7 @@ impl Solution {
         total_operations
     }
 
-    /// Computes ceiling division without overflow: ⌈dividend / divisor⌉
+    /// Computes ceiling division: ⌈dividend / divisor⌉
     #[inline]
     const fn ceiling_div(dividend: i32, divisor: i32) -> i32 {
         (dividend + divisor - 1) / divisor
@@ -50,81 +48,47 @@ impl Solution {
 mod tests {
     use super::*;
 
-    struct TestCase {
-        nums: Vec<i32>,
-        expected: i64,
+    #[test]
+    fn test_example_requires_splits() {
+        assert_eq!(Solution::minimum_replacement(vec![3, 9, 3]), 2);
     }
 
     #[test]
-    fn test_example_case_requires_splits() {
-        let test = TestCase {
-            nums: vec![3, 9, 3],
-            expected: 2,
-        };
-        assert_eq!(Solution::minimum_replacement(test.nums), test.expected);
-    }
-
-    #[test]
-    fn test_already_sorted_array() {
-        let test = TestCase {
-            nums: vec![1, 2, 3, 4, 5],
-            expected: 0,
-        };
-        assert_eq!(Solution::minimum_replacement(test.nums), test.expected);
+    fn test_already_sorted() {
+        assert_eq!(Solution::minimum_replacement(vec![1, 2, 3, 4, 5]), 0);
     }
 
     #[test]
     fn test_single_element() {
-        let test = TestCase {
-            nums: vec![42],
-            expected: 0,
-        };
-        assert_eq!(Solution::minimum_replacement(test.nums), test.expected);
+        assert_eq!(Solution::minimum_replacement(vec![42]), 0);
     }
 
     #[test]
     fn test_empty_array() {
-        let test = TestCase {
-            nums: vec![],
-            expected: 0,
-        };
-        assert_eq!(Solution::minimum_replacement(test.nums), test.expected);
+        assert_eq!(Solution::minimum_replacement(vec![]), 0);
     }
 
     #[test]
     fn test_two_elements_requiring_split() {
-        let test = TestCase {
-            nums: vec![10, 3],
-            expected: 3,
-        };
-        assert_eq!(Solution::minimum_replacement(test.nums), test.expected);
+        assert_eq!(Solution::minimum_replacement(vec![10, 3]), 3);
     }
 
     #[test]
     fn test_descending_array() {
-        let test = TestCase {
-            nums: vec![5, 4, 3, 2, 1],
-            expected: 10,
-        };
-        assert_eq!(Solution::minimum_replacement(test.nums), test.expected);
+        assert_eq!(Solution::minimum_replacement(vec![5, 4, 3, 2, 1]), 10);
     }
 
     #[test]
     fn test_all_equal_elements() {
-        let test = TestCase {
-            nums: vec![7, 7, 7, 7],
-            expected: 0,
-        };
-        assert_eq!(Solution::minimum_replacement(test.nums), test.expected);
+        assert_eq!(Solution::minimum_replacement(vec![7, 7, 7, 7]), 0);
     }
 
     #[test]
     fn test_large_values() {
-        let test = TestCase {
-            nums: vec![1_000_000_000, 1],
-            expected: 999_999_999,
-        };
-        assert_eq!(Solution::minimum_replacement(test.nums), test.expected);
+        assert_eq!(
+            Solution::minimum_replacement(vec![1_000_000_000, 1]),
+            999_999_999
+        );
     }
 
     #[test]

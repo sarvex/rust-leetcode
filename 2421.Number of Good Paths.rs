@@ -29,44 +29,48 @@ impl UnionFind {
             return;
         }
 
-        if self.max_value[root_a] < self.max_value[root_b] {
-            self.parent[root_a] = root_b;
-        } else if self.max_value[root_b] < self.max_value[root_a] {
-            self.parent[root_b] = root_a;
-        } else {
-            self.good_path_count +=
-                self.nodes_with_max_value[root_a] * self.nodes_with_max_value[root_b];
-            self.parent[root_a] = root_b;
-            self.nodes_with_max_value[root_b] += self.nodes_with_max_value[root_a];
+        match self.max_value[root_a].cmp(&self.max_value[root_b]) {
+            std::cmp::Ordering::Less => {
+                self.parent[root_a] = root_b;
+            }
+            std::cmp::Ordering::Greater => {
+                self.parent[root_b] = root_a;
+            }
+            std::cmp::Ordering::Equal => {
+                self.good_path_count +=
+                    self.nodes_with_max_value[root_a] * self.nodes_with_max_value[root_b];
+                self.parent[root_a] = root_b;
+                self.nodes_with_max_value[root_b] += self.nodes_with_max_value[root_a];
+            }
         }
     }
 }
 
 impl Solution {
-    /// Number of Good Paths
+    /// Counts good paths in a tree using Union-Find sorted by edge max value.
     ///
     /// # Intuition
     /// Process edges in order of max endpoint value. Union-by-max-value ensures
     /// roots always hold the maximum value, simplifying merge logic.
     ///
     /// # Approach
-    /// 1. Sort edges in-place by max(vals[u], vals[v])
+    /// 1. Sort edges by max(vals[u], vals[v])
     /// 2. Union components using max value as rank
     /// 3. When merging same-max components, add count1 * count2 pairs
     ///
     /// # Complexity
-    /// - Time: O(n log n) for sorting, O(n α(n)) for Union-Find
+    /// - Time: O(n log n) for sorting, O(n * alpha(n)) for Union-Find
     /// - Space: O(n) for Union-Find arrays
     pub fn number_of_good_paths(vals: Vec<i32>, edges: Vec<Vec<i32>>) -> i32 {
-        let mut union_find = UnionFind::new(&vals);
+        let mut uf = UnionFind::new(&vals);
         let mut edges = edges;
         edges.sort_unstable_by_key(|e| vals[e[0] as usize].max(vals[e[1] as usize]));
 
-        for edge in edges {
-            union_find.union(edge[0] as usize, edge[1] as usize);
+        for edge in &edges {
+            uf.union(edge[0] as usize, edge[1] as usize);
         }
 
-        (vals.len() + union_find.good_path_count) as i32
+        (vals.len() + uf.good_path_count) as i32
     }
 }
 
@@ -89,17 +93,16 @@ mod tests {
     }
 
     #[test]
-    fn test_example_3() {
-        let vals = vec![1];
-        let edges = vec![];
-        assert_eq!(Solution::number_of_good_paths(vals, edges), 1);
+    fn test_single_node() {
+        assert_eq!(Solution::number_of_good_paths(vec![1], vec![]), 1);
     }
 
     #[test]
-    fn test_single_edge() {
-        let vals = vec![2, 2];
-        let edges = vec![vec![0, 1]];
-        assert_eq!(Solution::number_of_good_paths(vals, edges), 3);
+    fn test_single_edge_same_values() {
+        assert_eq!(
+            Solution::number_of_good_paths(vec![2, 2], vec![vec![0, 1]]),
+            3
+        );
     }
 
     #[test]
@@ -124,7 +127,7 @@ mod tests {
     }
 
     #[test]
-    fn test_large_same_value() {
+    fn test_all_same_four_nodes() {
         let vals = vec![5, 5, 5, 5];
         let edges = vec![vec![0, 1], vec![1, 2], vec![2, 3]];
         assert_eq!(Solution::number_of_good_paths(vals, edges), 10);

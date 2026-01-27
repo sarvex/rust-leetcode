@@ -1,30 +1,20 @@
 impl Solution {
-    fn dfs(g: &[Vec<usize>], vals: &[i32], counts: &mut [usize], i: usize, parent: usize) -> i32 {
-        let mut subtree_sum = vals[i];
-        for &conn in &g[i] {
-            if conn != parent {
-                subtree_sum += Self::dfs(g, vals, counts, conn, i);
-            }
-        }
-        counts[subtree_sum as usize] += 1;
-        subtree_sum
-    }
-
-    /// Single DFS with sieve-style subtree sum counting
+    /// Finds the maximum number of edges to remove to create equal-sum components.
     ///
     /// # Intuition
-    /// Instead of running DFS for each potential target, compute all subtree sums in one pass.
-    /// A subtree with sum equal to a multiple of target can be split into multiple components.
+    /// Instead of running DFS for each potential target, compute all subtree sums
+    /// in one pass. A valid partition into k components requires each subtree sum
+    /// to be a multiple of the target sum S/k.
     ///
     /// # Approach
     /// 1. Build adjacency list and compute total sum S
     /// 2. Single DFS to count frequency of each subtree sum
-    /// 3. Find divisors of S in O(√S) instead of iterating 2..=n
-    /// 4. For each divisor k (where k ≤ n), check if k components can be formed
+    /// 3. Find divisors of S in O(sqrt(S))
+    /// 4. For each divisor k (where k <= n), check if k components can be formed
     /// 5. Return maximum valid components - 1
     ///
     /// # Complexity
-    /// - Time: O(n + √S + d × k) where d is number of divisors
+    /// - Time: O(n + sqrt(S) + d * k) where d is number of divisors
     /// - Space: O(n + S) for adjacency list and subtree sum counts
     pub fn component_value(nums: Vec<i32>, edges: Vec<Vec<i32>>) -> i32 {
         let n = nums.len();
@@ -71,6 +61,17 @@ impl Solution {
 
         0
     }
+
+    fn dfs(g: &[Vec<usize>], vals: &[i32], counts: &mut [usize], i: usize, parent: usize) -> i32 {
+        let subtree_sum = g[i]
+            .iter()
+            .filter(|&&conn| conn != parent)
+            .fold(vals[i], |sum, &conn| {
+                sum + Self::dfs(g, vals, counts, conn, i)
+            });
+        counts[subtree_sum as usize] += 1;
+        subtree_sum
+    }
 }
 
 #[cfg(test)]
@@ -85,10 +86,8 @@ mod tests {
     }
 
     #[test]
-    fn test_example_2() {
-        let nums = vec![2];
-        let edges = vec![];
-        assert_eq!(Solution::component_value(nums, edges), 0);
+    fn test_single_node() {
+        assert_eq!(Solution::component_value(vec![2], vec![]), 0);
     }
 
     #[test]
@@ -113,7 +112,7 @@ mod tests {
     }
 
     #[test]
-    fn test_large_single_node() {
+    fn test_indivisible_sum() {
         let nums = vec![50, 1, 1, 1, 1];
         let edges = vec![vec![0, 1], vec![1, 2], vec![2, 3], vec![3, 4]];
         assert_eq!(Solution::component_value(nums, edges), 0);

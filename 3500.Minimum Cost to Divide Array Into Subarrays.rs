@@ -1,5 +1,5 @@
 impl Solution {
-    /// Convex Hull Trick optimized DP with cost reformulation
+    /// Convex Hull Trick optimized DP with cost reformulation.
     ///
     /// # Intuition
     /// Reformulate the cost by separating the subarray index contribution. When making

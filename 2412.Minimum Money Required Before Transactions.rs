@@ -8,13 +8,13 @@ impl Solution {
     /// # Approach
     /// 1. Sum all net losses: transactions where cost exceeds cashback contribute (cost - cashback)
     /// 2. For the "last" transaction in worst-case ordering:
-    ///    - If losing (cost > cashback): we need total_loss + cashback (since we already counted cost - cashback)
-    ///    - If winning (cost <= cashback): we need total_loss + cost (no loss was counted for this transaction)
+    ///    - If losing (cost > cashback): we need total_loss + cashback
+    ///    - If winning (cost <= cashback): we need total_loss + cost
     /// 3. Track maximum required money across all possible "last" transactions
     ///
     /// # Complexity
     /// - Time: O(n) — single pass through transactions
-    /// - Space: O(1) — constant extra space
+    /// - Space: O(1)
     pub fn minimum_money(transactions: Vec<Vec<i32>>) -> i64 {
         let (total_loss, max_additional) =
             transactions
@@ -23,7 +23,6 @@ impl Solution {
                     let (cost, cashback) = (transaction[0], transaction[1]);
                     let net_loss = (cost - cashback).max(0);
                     let additional = if cost > cashback { cashback } else { cost };
-
                     (loss_sum + net_loss as i64, max_add.max(additional))
                 });
 
@@ -49,14 +48,12 @@ mod tests {
 
     #[test]
     fn test_single_winning_transaction() {
-        let transactions = vec![vec![1, 5]];
-        assert_eq!(Solution::minimum_money(transactions), 1);
+        assert_eq!(Solution::minimum_money(vec![vec![1, 5]]), 1);
     }
 
     #[test]
     fn test_single_losing_transaction() {
-        let transactions = vec![vec![5, 1]];
-        assert_eq!(Solution::minimum_money(transactions), 5);
+        assert_eq!(Solution::minimum_money(vec![vec![5, 1]]), 5);
     }
 
     #[test]

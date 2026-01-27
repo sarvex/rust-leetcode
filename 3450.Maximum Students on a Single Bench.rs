@@ -1,19 +1,55 @@
 use std::collections::{HashMap, HashSet};
 
 impl Solution {
+    /// Finds the bench with the most distinct students.
+    ///
+    /// # Intuition
+    /// Group students by bench, count unique student IDs per bench, and return
+    /// the maximum.
+    ///
+    /// # Approach
+    /// 1. Build a map from bench_id to a set of student IDs.
+    /// 2. Return the maximum set size across all benches.
+    ///
+    /// # Complexity
+    /// - Time: O(n) where n is the number of entries
+    /// - Space: O(n) for the hash map and sets
     pub fn max_students_on_bench(students: Vec<Vec<i32>>) -> i32 {
-        let mut d: HashMap<i32, HashSet<i32>> = HashMap::new();
-        for e in students {
-            let student_id = e[0];
-            let bench_id = e[1];
-            d.entry(bench_id)
-                .or_insert_with(HashSet::new)
-                .insert(student_id);
+        let mut bench_students: HashMap<i32, HashSet<i32>> = HashMap::new();
+        for entry in &students {
+            bench_students.entry(entry[1]).or_default().insert(entry[0]);
         }
-        let mut ans = 0;
-        for s in d.values() {
-            ans = ans.max(s.len() as i32);
-        }
-        ans
+        bench_students
+            .values()
+            .map(|s| s.len() as i32)
+            .max()
+            .unwrap_or(0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn multiple_benches_returns_max() {
+        let students = vec![vec![1, 1], vec![2, 1], vec![3, 2], vec![1, 2], vec![2, 2]];
+        assert_eq!(Solution::max_students_on_bench(students), 3);
+    }
+
+    #[test]
+    fn single_bench_single_student() {
+        assert_eq!(Solution::max_students_on_bench(vec![vec![1, 1]]), 1);
+    }
+
+    #[test]
+    fn duplicate_student_on_same_bench_not_double_counted() {
+        let students = vec![vec![1, 1], vec![1, 1], vec![2, 1]];
+        assert_eq!(Solution::max_students_on_bench(students), 2);
+    }
+
+    #[test]
+    fn empty_input_returns_zero() {
+        assert_eq!(Solution::max_students_on_bench(vec![]), 0);
     }
 }

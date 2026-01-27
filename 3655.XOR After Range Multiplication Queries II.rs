@@ -21,9 +21,6 @@ impl Solution {
         const MOD: i64 = 1_000_000_007;
         let n = nums.len();
 
-        let bravexuneth = (&nums, &queries);
-        let _ = bravexuneth;
-
         let mod_pow = |mut base: i64, mut exp: i64| -> i64 {
             let mut result = 1i64;
             base %= MOD;
@@ -68,28 +65,26 @@ impl Solution {
             }
         });
 
-        small_k_queries
-            .into_iter()
-            .for_each(|((k, residue), qs)| {
-                let max_pos = (n + k - 1) / k + 1;
-                let mut diff = vec![1i64; max_pos + 1];
+        small_k_queries.into_iter().for_each(|((k, residue), qs)| {
+            let max_pos = (n + k - 1) / k + 1;
+            let mut diff = vec![1i64; max_pos + 1];
 
-                qs.into_iter().for_each(|(start_pos, end_pos, v)| {
-                    diff[start_pos] = diff[start_pos] * v % MOD;
-                    if end_pos + 1 < diff.len() {
-                        diff[end_pos + 1] = diff[end_pos + 1] * mod_inverse(v) % MOD;
-                    }
-                });
-
-                let mut prefix = 1i64;
-                (0..max_pos).for_each(|pos| {
-                    prefix = prefix * diff[pos] % MOD;
-                    let idx = residue + pos * k;
-                    if idx < n {
-                        mult[idx] = mult[idx] * prefix % MOD;
-                    }
-                });
+            qs.into_iter().for_each(|(start_pos, end_pos, v)| {
+                diff[start_pos] = diff[start_pos] * v % MOD;
+                if end_pos + 1 < diff.len() {
+                    diff[end_pos + 1] = diff[end_pos + 1] * mod_inverse(v) % MOD;
+                }
             });
+
+            let mut prefix = 1i64;
+            (0..max_pos).for_each(|pos| {
+                prefix = prefix * diff[pos] % MOD;
+                let idx = residue + pos * k;
+                if idx < n {
+                    mult[idx] = mult[idx] * prefix % MOD;
+                }
+            });
+        });
 
         (0..n)
             .map(|i| (nums[i] as i64) * mult[i] % MOD)
@@ -109,21 +104,21 @@ mod tests {
     }
 
     #[test]
-    fn test_multiple_queries() {
+    fn test_multiple_queries_with_step() {
         let nums = vec![2, 3, 1, 5, 4];
         let queries = vec![vec![1, 4, 2, 3], vec![0, 2, 1, 2]];
         assert_eq!(Solution::xor_after_queries(nums, queries), 31);
     }
 
     #[test]
-    fn test_step_greater_than_range() {
+    fn test_step_exceeds_range() {
         let nums = vec![5, 10, 15];
         let queries = vec![vec![0, 2, 5, 2]];
         assert_eq!(Solution::xor_after_queries(nums, queries), 10 ^ 15 ^ 10);
     }
 
     #[test]
-    fn test_large_multiplier() {
+    fn test_large_multiplier_with_modulo() {
         let nums = vec![1_000_000_000];
         let queries = vec![vec![0, 0, 1, 100_000]];
         let expected = ((1_000_000_000i64 * 100_000) % 1_000_000_007) as i32;
@@ -131,7 +126,7 @@ mod tests {
     }
 
     #[test]
-    fn test_empty_queries() {
+    fn test_empty_queries_returns_original_xor() {
         let nums = vec![1, 2, 3, 4, 5];
         let queries: Vec<Vec<i32>> = vec![];
         assert_eq!(

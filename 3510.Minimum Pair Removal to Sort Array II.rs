@@ -2,7 +2,7 @@ use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
 impl Solution {
-    /// Minimum Pair Removal to Sort Array II
+    /// Minimum pair removal to sort array using min-heap with lazy deletion.
     ///
     /// # Intuition
     /// Use min-heap with lazy deletion via sum comparison. Staleness detected by

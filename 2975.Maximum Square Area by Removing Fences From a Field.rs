@@ -1,21 +1,21 @@
 use std::collections::HashSet;
 
 impl Solution {
-    /// Maximum Square Area by Removing Fences From a Field
+    /// Finds the maximum square area achievable by removing fences.
     ///
     /// # Intuition
-    /// Find the largest gap common to both directions. Build HashSet from shorter
-    /// array's gaps, iterate longer array with early pruning.
+    /// A square requires equal horizontal and vertical gaps. Enumerate all pairwise
+    /// distances in each direction and find the largest common distance.
     ///
     /// # Approach
-    /// 1. Add boundaries and sort both fence arrays
-    /// 2. Build HashSet of gaps from shorter array
-    /// 3. Iterate longer array pairs: outer loop forward, inner loop reverse
-    /// 4. Prune inner loop when diff <= max_side (since diff decreases as j decreases)
+    /// 1. Add boundaries (1, m) and (1, n) to fence arrays, then sort with `sort_unstable`.
+    /// 2. Build a `HashSet` of all pairwise gaps from the shorter array.
+    /// 3. Iterate the longer array's pairs in reverse gap order with early pruning.
+    /// 4. Return `(side² mod 10⁹+7)` or `-1` if no common gap exists.
     ///
     /// # Complexity
-    /// - Time: O(h² + v²) worst case, better average with pruning
-    /// - Space: O(min(h², v²)) for HashSet
+    /// - Time: O(h² + v²) worst case, better with pruning
+    /// - Space: O(min(h², v²)) for the HashSet
     pub fn maximize_square_area(
         m: i32,
         n: i32,
@@ -44,28 +44,27 @@ impl Solution {
             }
         }
 
-        let mut max_side = 0_i32;
+        let mut max_side = 0i32;
         let l_len = long.len();
 
         for i in 0..l_len {
             for j in (i + 1..l_len).rev() {
                 let diff = long[j] - long[i];
-
                 if diff <= max_side {
                     break;
                 }
-
                 if gaps.contains(&diff) {
                     max_side = diff;
                 }
             }
         }
 
-        if max_side == 0 {
-            -1
-        } else {
-            let side = max_side as i64;
-            ((side * side) % 1_000_000_007) as i32
+        match max_side {
+            0 => -1,
+            side => {
+                let s = side as i64;
+                ((s * s) % 1_000_000_007) as i32
+            }
         }
     }
 }
@@ -75,12 +74,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn test_square_exists() {
         assert_eq!(Solution::maximize_square_area(4, 3, vec![2, 3], vec![2]), 4);
     }
 
     #[test]
-    fn test_example_2() {
+    fn test_no_common_gap() {
         assert_eq!(Solution::maximize_square_area(6, 7, vec![2], vec![4]), -1);
     }
 
@@ -90,7 +89,7 @@ mod tests {
     }
 
     #[test]
-    fn test_large_square_possible() {
+    fn test_full_grid() {
         assert_eq!(
             Solution::maximize_square_area(5, 5, vec![2, 3, 4], vec![2, 3, 4]),
             16
@@ -98,7 +97,7 @@ mod tests {
     }
 
     #[test]
-    fn test_no_common_gaps() {
+    fn test_no_common_gaps_asymmetric() {
         assert_eq!(
             Solution::maximize_square_area(10, 5, vec![5], vec![2, 3]),
             -1
@@ -106,7 +105,7 @@ mod tests {
     }
 
     #[test]
-    fn test_failing_case() {
+    fn test_multiple_fences() {
         assert_eq!(
             Solution::maximize_square_area(7, 4, vec![2, 3, 6, 5], vec![3, 2]),
             9

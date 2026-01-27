@@ -1,20 +1,21 @@
 impl Solution {
-    /// Maximum Score of Non-overlapping Intervals
+    /// Selects up to 4 non-overlapping intervals maximizing total weight.
     ///
     /// # Intuition
-    /// Select up to 4 non-overlapping intervals to maximize total weight. When multiple
-    /// solutions have equal weight, return lexicographically smallest indices.
+    /// Sort intervals by end position and apply DP over the number of intervals
+    /// selected (1–4). Binary search finds the latest non-overlapping predecessor.
+    /// Ties in weight are broken by lexicographically smallest index vector.
     ///
     /// # Approach
-    /// 1. Sort intervals by end position while preserving original indices
-    /// 2. Use DP where dp[k][i] tracks (max_weight, sorted_indices) for exactly k intervals
-    /// 3. For each interval, binary search finds the latest non-overlapping predecessor
-    /// 4. Track lexicographically smallest indices when weights are equal
-    /// 5. Return the best solution among 1 to 4 intervals
+    /// 1. Sort by end position, preserving original indices.
+    /// 2. For each interval and each k in 1..=4, binary-search the latest
+    ///    predecessor and extend dp[k-1][pred] by the current interval.
+    /// 3. Propagate the better of "skip" vs "take" per cell.
+    /// 4. Return the best across k = 1..=4.
     ///
     /// # Complexity
-    /// - Time: O(n log n) for sorting and binary search
-    /// - Space: O(n) for DP table with O(1) index storage per cell
+    /// - Time: O(n log n)
+    /// - Space: O(n) per DP layer
     pub fn maximum_weight(intervals: Vec<Vec<i32>>) -> Vec<i32> {
         let n = intervals.len();
 
@@ -24,7 +25,7 @@ impl Solution {
             .map(|(i, v)| (v[0] as i64, v[1] as i64, v[2] as i64, i))
             .collect();
 
-        indexed.sort_by_key(|x| x.1);
+        indexed.sort_unstable_by_key(|x| x.1);
 
         let find_prev = |target: i64, end: usize| -> i32 {
             let (mut lo, mut hi) = (-1i32, end as i32 - 1);
@@ -57,16 +58,14 @@ impl Solution {
 
             for k in 1..=4usize {
                 if i > 0 {
-                    let prev = dp[k][i - 1].clone();
-                    dp[k][i] = prev;
+                    let prev_state = dp[k][i - 1].clone();
+                    dp[k][i] = prev_state;
                 }
 
-                let prev_state = if k == 1 {
-                    Some((0i64, vec![]))
-                } else if prev >= 0 {
-                    dp[k - 1][prev as usize].clone()
-                } else {
-                    None
+                let prev_state = match k {
+                    1 => Some((0i64, vec![])),
+                    _ if prev >= 0 => dp[k - 1][prev as usize].clone(),
+                    _ => None,
                 };
 
                 if let Some((prev_weight, mut prev_indices)) = prev_state {
@@ -95,7 +94,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn selects_two_non_overlapping_intervals() {
         let intervals = vec![
             vec![1, 3, 2],
             vec![4, 5, 2],
@@ -108,7 +107,7 @@ mod tests {
     }
 
     #[test]
-    fn test_example_2() {
+    fn selects_four_non_overlapping_intervals() {
         let intervals = vec![
             vec![5, 8, 1],
             vec![6, 7, 7],
@@ -122,39 +121,41 @@ mod tests {
     }
 
     #[test]
-    fn test_single_interval() {
-        let intervals = vec![vec![1, 5, 10]];
-        assert_eq!(Solution::maximum_weight(intervals), vec![0]);
+    fn single_interval_returns_its_index() {
+        assert_eq!(Solution::maximum_weight(vec![vec![1, 5, 10]]), vec![0]);
     }
 
     #[test]
-    fn test_all_overlapping() {
+    fn all_overlapping_picks_heaviest() {
         let intervals = vec![vec![1, 10, 5], vec![2, 8, 3], vec![3, 7, 4]];
         assert_eq!(Solution::maximum_weight(intervals), vec![0]);
     }
 
     #[test]
-    fn test_non_overlapping_chain() {
+    fn non_overlapping_chain_selects_all_four() {
         let intervals = vec![vec![1, 2, 1], vec![3, 4, 2], vec![5, 6, 3], vec![7, 8, 4]];
         assert_eq!(Solution::maximum_weight(intervals), vec![0, 1, 2, 3]);
     }
 
     #[test]
-    fn test_lexicographic_tiebreaker() {
+    fn lexicographic_tiebreaker_selects_smallest_indices() {
         let intervals = vec![vec![1, 2, 5], vec![3, 4, 5], vec![1, 2, 5], vec![3, 4, 5]];
-        let result = Solution::maximum_weight(intervals);
-        assert_eq!(result, vec![0, 1]);
-    }
-
-    #[test]
-    fn test_boundary_non_overlap() {
-        let intervals = vec![vec![1, 5, 3], vec![5, 10, 4]];
-        assert_eq!(Solution::maximum_weight(intervals), vec![1]);
-    }
-
-    #[test]
-    fn test_strict_non_overlap() {
-        let intervals = vec![vec![1, 4, 3], vec![5, 10, 4]];
         assert_eq!(Solution::maximum_weight(intervals), vec![0, 1]);
+    }
+
+    #[test]
+    fn boundary_overlap_not_non_overlapping() {
+        assert_eq!(
+            Solution::maximum_weight(vec![vec![1, 5, 3], vec![5, 10, 4]]),
+            vec![1]
+        );
+    }
+
+    #[test]
+    fn strict_non_overlap_selects_both() {
+        assert_eq!(
+            Solution::maximum_weight(vec![vec![1, 4, 3], vec![5, 10, 4]]),
+            vec![0, 1]
+        );
     }
 }

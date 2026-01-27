@@ -1,55 +1,59 @@
 impl Solution {
-    /// Finds the minimum time to repair all cars with mechanics of different ranks
+    /// Find minimum time to repair all cars via binary search.
     ///
-    /// # intuition
-    /// A binary search approach can find the minimum time where all cars can be repaired.
-    /// For a given time, each mechanic can repair sqrt(time/rank) cars.
+    /// # Intuition
+    /// Each mechanic with rank r repairs cars in r*n² time for n cars. Binary
+    /// search on the answer: for a given time, each mechanic can fix sqrt(time/rank) cars.
     ///
-    /// # approach
-    /// 1. Use binary search to find the minimum time needed
-    /// 2. For each potential time, check if all cars can be repaired
-    /// 3. Return the minimum valid time
+    /// # Approach
+    /// 1. Binary search on time from 1 to min_rank * cars²
+    /// 2. For each candidate time, sum each mechanic's capacity
+    /// 3. Return the smallest time where total capacity >= cars
     ///
-    /// # complexity
-    /// Time complexity: O(n * log(m)), where n is the number of mechanics and m is the maximum possible time
-    /// Space complexity: O(1)
+    /// # Complexity
+    /// - Time: O(n * log(min_rank * cars²))
+    /// - Space: O(1)
     pub fn repair_cars(ranks: Vec<i32>, cars: i32) -> i64 {
-        let cars_i64: i64 = cars as i64;
-        let min_rank: i64 = *ranks.iter().min().unwrap() as i64;
-        
-        // Define search boundaries
+        let cars_i64 = cars as i64;
+        let min_rank = *ranks.iter().min().unwrap_or(&1) as i64;
+
         let mut left: i64 = 1;
         let mut right: i64 = min_rank * cars_i64 * cars_i64;
-        
+
         while left < right {
-            let mid: i64 = left + (right - left) / 2;
-            
-            if Self::can_repair_all_cars(&ranks, cars_i64, mid) {
+            let mid = left + (right - left) / 2;
+            let total: i64 = ranks
+                .iter()
+                .map(|&r| ((mid / r as i64) as f64).sqrt() as i64)
+                .sum();
+
+            if total >= cars_i64 {
                 right = mid;
             } else {
                 left = mid + 1;
             }
         }
-        
+
         left
     }
-    
-    /// Helper function to check if all cars can be repaired within the given time
-    fn can_repair_all_cars(ranks: &Vec<i32>, total_cars: i64, time: i64) -> bool {
-        let mut cars_repaired: i64 = 0;
-        
-        for &rank in ranks {
-            // Calculate how many cars this mechanic can repair within 'time'
-            let rank_i64: i64 = rank as i64;
-            let mechanic_capacity: i64 = (time / rank_i64).sqrt();
-            cars_repaired += mechanic_capacity;
-            
-            // Early return if we've already repaired enough cars
-            if cars_repaired >= total_cars {
-                return true;
-            }
-        }
-        
-        false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic() {
+        assert_eq!(Solution::repair_cars(vec![4, 2, 3, 1], 10), 16);
+    }
+
+    #[test]
+    fn test_single_mechanic() {
+        assert_eq!(Solution::repair_cars(vec![5], 3), 45);
+    }
+
+    #[test]
+    fn test_uniform_ranks() {
+        assert_eq!(Solution::repair_cars(vec![1, 1, 1], 6), 4);
     }
 }

@@ -1,5 +1,5 @@
 impl Solution {
-    /// Finds minimum distances between node pairs in an implicit graph
+    /// Finds minimum distances between node pairs in an implicit graph.
     ///
     /// # Intuition
     /// Nodes are connected if their values differ by at most maxDiff. When sorted by value,

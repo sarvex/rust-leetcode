@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 impl Solution {
-    /// Uses DP with sliding window median to find minimum operations for k non-overlapping subarrays
+    /// Uses DP with sliding window median to find minimum operations for k non-overlapping subarrays.
     ///
     /// # Intuition
     /// To make all elements in a subarray equal with minimum operations, we should make them

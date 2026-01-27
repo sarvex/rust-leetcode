@@ -1,5 +1,5 @@
 impl Solution {
-    /// Number of Distinct Roll Sequences
+    /// Counts distinct dice roll sequences with GCD and gap constraints.
     ///
     /// # Intuition
     /// Track the last two dice rolls to enforce both constraints: GCD of adjacent
@@ -17,9 +17,6 @@ impl Solution {
     /// - Space: O(6²) = O(1)
     pub fn distinct_sequences(n: i32) -> i32 {
         const MOD: i64 = 1_000_000_007;
-
-        // Precomputed list of valid next rolls for each current roll (1-indexed internally as 0-5)
-        // valid_next[i] contains all j where gcd(i+1, j+1) == 1 and i != j
         const VALID_NEXT: [&[usize]; 6] = [
             &[1, 2, 3, 4, 5], // From 1: can go to 2,3,4,5,6
             &[0, 2, 4],       // From 2: can go to 1,3,5
@@ -30,16 +27,13 @@ impl Solution {
         ];
 
         let n = n as usize;
-
         if n == 1 {
             return 6;
         }
 
         // dp[prev][curr] = count of sequences ending with (prev+1, curr+1)
-        // Use 6 as sentinel for "no previous roll" in first transition
+        // Index 6 is sentinel for "no previous roll"
         let mut dp = [[0i64; 6]; 7];
-
-        // Initialize for n=1: any single roll, prev = sentinel (6)
         for curr in 0..6 {
             dp[6][curr] = 1;
         }
@@ -53,7 +47,7 @@ impl Solution {
         }
         dp = new_dp;
 
-        // Build sequences of length 3 to n
+        // Build sequences of length 3..=n
         for _ in 3..=n {
             new_dp = [[0i64; 6]; 7];
             for prev in 0..6 {
@@ -62,7 +56,6 @@ impl Solution {
                         continue;
                     }
                     for &next in VALID_NEXT[curr] {
-                        // Ensure gap > 2 between equal values
                         if next != prev {
                             new_dp[curr][next] = (new_dp[curr][next] + dp[prev][curr]) % MOD;
                         }
@@ -72,15 +65,9 @@ impl Solution {
             dp = new_dp;
         }
 
-        // Sum all valid ending states
-        let mut result = 0i64;
-        for prev in 0..7 {
-            for curr in 0..6 {
-                result = (result + dp[prev][curr]) % MOD;
-            }
-        }
-
-        result as i32
+        dp.iter()
+            .flat_map(|row| row.iter())
+            .fold(0i64, |acc, &v| (acc + v) % MOD) as i32
     }
 }
 
@@ -99,19 +86,17 @@ mod tests {
     }
 
     #[test]
+    fn test_n_equals_3() {
+        assert_eq!(Solution::distinct_sequences(3), 66);
+    }
+
+    #[test]
     fn test_n_equals_4() {
         assert_eq!(Solution::distinct_sequences(4), 184);
     }
 
     #[test]
-    fn test_n_equals_3() {
-        // Manual verification: valid sequences of length 3
-        assert_eq!(Solution::distinct_sequences(3), 66);
-    }
-
-    #[test]
     fn test_large_n() {
-        // Verify it handles large inputs without overflow
         let result = Solution::distinct_sequences(10000);
         assert!(result >= 0);
     }

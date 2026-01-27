@@ -1,24 +1,22 @@
 use std::collections::VecDeque;
 
 impl Solution {
-    /// Sliding window with monotonic deque tracking stair-step structure
+    /// Counts non-decreasing subarrays achievable with at most k increment operations.
     ///
     /// # Intuition
-    /// To make a subarray non-decreasing with minimum operations, each element must be
-    /// incremented to at least the running maximum (prefix max). Process right-to-left
-    /// so that extending the window leftward adds a new potential maximum that dominates
-    /// subsequent elements.
+    /// Processing right-to-left, each new left element may dominate subsequent
+    /// elements. A monotonic deque of (value, count, sum) segments tracks the
+    /// staircase structure; merging dominated segments updates the total cost.
     ///
     /// # Approach
-    /// Process from right to left using two pointers. Maintain a monotonic deque of
-    /// (value, count, sum) segments. When adding element at position l:
-    /// - Merge segments where max <= nums[l] (these elements are now dominated by nums[l])
-    /// - Update cost based on how much increment each dominated element needs
-    /// - Shrink from right while cost exceeds k
+    /// 1. Sweep l from n-1 to 0; maintain a right boundary r and a deque.
+    /// 2. When adding nums[l], merge back-segments whose max ≤ nums[l].
+    /// 3. Shrink from the front (right end) while cost exceeds k.
+    /// 4. Accumulate (r − l) into the answer for each l.
     ///
     /// # Complexity
-    /// - Time: O(n) - each element pushed/popped at most once
-    /// - Space: O(n) - for the monotonic deque
+    /// - Time: O(n) — each element pushed and popped at most once
+    /// - Space: O(n) for the deque
     pub fn count_non_decreasing_subarrays(nums: Vec<i32>, k: i32) -> i64 {
         let n = nums.len();
         let k = k as i64;
@@ -27,7 +25,6 @@ impl Solution {
         let mut cost = 0i64;
         let mut r = n;
 
-        // Pre-allocate deque: (max_value, count, sum)
         let mut dq: VecDeque<(i64, i64, i64)> = VecDeque::with_capacity(n);
 
         for l in (0..n).rev() {
@@ -35,7 +32,6 @@ impl Solution {
             let mut cnt = 1i64;
             let mut sum = val;
 
-            // Merge segments dominated by the new leftmost element
             while let Some(&(seg_max, seg_cnt, seg_sum)) = dq.back() {
                 if seg_max <= val {
                     dq.pop_back();
@@ -50,7 +46,6 @@ impl Solution {
             cost += val * cnt - sum;
             dq.push_back((val, cnt, sum));
 
-            // Shrink from right while cost exceeds k
             while cost > k && r > l {
                 r -= 1;
                 let (front_max, front_cnt, front_sum) = dq.front_mut().unwrap();
@@ -64,7 +59,6 @@ impl Solution {
                 }
             }
 
-            // Handle edge case where window becomes invalid
             if r <= l {
                 r = l + 1;
                 dq.clear();
@@ -84,7 +78,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn mixed_array_with_budget() {
         assert_eq!(
             Solution::count_non_decreasing_subarrays(vec![6, 3, 1, 2, 4, 4], 7),
             17
@@ -92,7 +86,7 @@ mod tests {
     }
 
     #[test]
-    fn test_example_2() {
+    fn another_mixed_example() {
         assert_eq!(
             Solution::count_non_decreasing_subarrays(vec![6, 3, 1, 3, 6], 4),
             12
@@ -100,12 +94,12 @@ mod tests {
     }
 
     #[test]
-    fn test_single_element() {
+    fn single_element_always_valid() {
         assert_eq!(Solution::count_non_decreasing_subarrays(vec![5], 0), 1);
     }
 
     #[test]
-    fn test_already_non_decreasing() {
+    fn already_non_decreasing_counts_all() {
         assert_eq!(
             Solution::count_non_decreasing_subarrays(vec![1, 2, 3, 4], 0),
             10
@@ -113,7 +107,7 @@ mod tests {
     }
 
     #[test]
-    fn test_decreasing_array() {
+    fn decreasing_with_sufficient_budget() {
         assert_eq!(
             Solution::count_non_decreasing_subarrays(vec![4, 3, 2, 1], 10),
             10

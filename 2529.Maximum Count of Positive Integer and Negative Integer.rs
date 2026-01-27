@@ -1,34 +1,46 @@
 impl Solution {
+    /// Returns the maximum of the count of positive and negative integers.
+    ///
+    /// # Intuition
+    /// The array is sorted, so binary search finds the boundary between negatives,
+    /// zeros, and positives efficiently.
+    ///
+    /// # Approach
+    /// 1. Binary search for the first index >= 0 (negative count)
+    /// 2. Binary search for the first index >= 1 (positive count = n - that index)
+    /// 3. Return the max of both counts
+    ///
+    /// # Complexity
+    /// - Time: O(log n) — two binary searches
+    /// - Space: O(1)
     pub fn maximum_count(nums: Vec<i32>) -> i32 {
-        let n = nums.len();
-        
-        // Binary search helper function
-        let search = |x: i32| {
-            let mut left = 0;
-            let mut right = n;
-            
-            while left < right {
-                let mid = (left + right) >> 1;
-                if nums[mid] >= x {
-                    right = mid;
-                } else {
-                    left = mid + 1;
-                }
-            }
-            
-            left
-        };
-        
-        // Find the index of the first positive number (>= 1)
-        let i = search(1);
-        // Find the index of the first non-negative number (>= 0)
-        let j = search(0);
-        
-        // Count of positive numbers = total length - index of first positive
-        let positive_count = (n - i) as i32;
-        // Count of negative numbers = index of first non-negative
-        let negative_count = j as i32;
-        
-        std::cmp::max(positive_count, negative_count)
+        let neg_count = nums.partition_point(|&x| x < 0) as i32;
+        let pos_count = (nums.len() - nums.partition_point(|&x| x < 1)) as i32;
+        neg_count.max(pos_count)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_mixed() {
+        assert_eq!(Solution::maximum_count(vec![-2, -1, -1, 1, 2, 3]), 3);
+    }
+
+    #[test]
+    fn test_with_zeros() {
+        assert_eq!(Solution::maximum_count(vec![-3, -2, -1, 0, 0, 1, 2]), 3);
+    }
+
+    #[test]
+    fn test_all_positive() {
+        assert_eq!(Solution::maximum_count(vec![5, 20, 66, 1314]), 4);
+    }
+
+    #[test]
+    fn test_all_zeros() {
+        assert_eq!(Solution::maximum_count(vec![0, 0, 0]), 0);
     }
 }

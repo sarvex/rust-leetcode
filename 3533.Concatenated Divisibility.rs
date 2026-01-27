@@ -1,20 +1,20 @@
-/// Bitmask DP with memoization to find lexicographically smallest divisible permutation
-///
-/// # Intuition
-/// We need to find the lexicographically smallest permutation where concatenating all numbers
-/// is divisible by k. Sorting indices and trying them in order ensures lexicographic ordering.
-/// Use bitmask DP to track which elements are used and the current remainder modulo k.
-///
-/// # Approach
-/// 1. Sort indices by corresponding values to ensure lexicographic ordering
-/// 2. Precompute multipliers (10^digits mod k) for each number
-/// 3. Use flat memoization array with (mask * k + rem) indexing for cache efficiency
-/// 4. DFS with closure captures context, reducing parameter passing overhead
-///
-/// # Complexity
-/// - Time: O(2^n * k * n)
-/// - Space: O(2^n * k) for memoization table
 impl Solution {
+    /// Bitmask DP with memoization to find lexicographically smallest divisible permutation.
+    ///
+    /// # Intuition
+    /// We need to find the lexicographically smallest permutation where concatenating all numbers
+    /// is divisible by k. Sorting indices and trying them in order ensures lexicographic ordering.
+    /// Use bitmask DP to track which elements are used and the current remainder modulo k.
+    ///
+    /// # Approach
+    /// 1. Sort indices by corresponding values to ensure lexicographic ordering
+    /// 2. Precompute multipliers (10^digits mod k) for each number
+    /// 3. Use flat memoization array with (mask * k + rem) indexing for cache efficiency
+    /// 4. DFS with closure captures context, reducing parameter passing overhead
+    ///
+    /// # Complexity
+    /// - Time: O(2^n * k * n)
+    /// - Space: O(2^n * k) for memoization table
     pub fn concatenated_divisibility(nums: Vec<i32>, k: i32) -> Vec<i32> {
         let n = nums.len();
         let k = k as usize;

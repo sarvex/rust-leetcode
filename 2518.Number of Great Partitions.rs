@@ -18,7 +18,7 @@ impl Solution {
         const MOD: i64 = 1_000_000_007;
 
         let k = k as i64;
-        let total_sum: i64 = nums.iter().fold(0i64, |acc, &x| acc + x as i64);
+        let total_sum: i64 = nums.iter().map(|&x| x as i64).sum();
 
         if total_sum < k << 1 {
             return 0;
@@ -31,37 +31,17 @@ impl Solution {
         for &num in &nums {
             let num = num as usize;
             if num < k {
-                let mut j = k - 1;
-                while j >= num {
-                    dp[j] += dp[j - num];
-                    if dp[j] >= MOD {
-                        dp[j] -= MOD;
-                    }
-                    j -= 1;
+                for j in (num..k).rev() {
+                    dp[j] = (dp[j] + dp[j - num]) % MOD;
                 }
             }
         }
 
-        let mut invalid = 0i64;
-        let mut i = 0;
-        while i < k {
-            invalid += dp[i];
-            i += 1;
-        }
-        invalid %= MOD;
+        let invalid: i64 = dp.iter().sum::<i64>() % MOD;
 
-        let mut total = 1i64;
-        let mut i = nums.len();
-        while i > 0 {
-            total <<= 1;
-            if total >= MOD {
-                total -= MOD;
-            }
-            i -= 1;
-        }
+        let total = (0..nums.len()).fold(1i64, |acc, _| (acc << 1) % MOD);
 
-        let result = total - ((invalid << 1) % MOD);
-        ((result % MOD + MOD) % MOD) as i32
+        ((total - ((invalid << 1) % MOD)) % MOD + MOD) as i32 % MOD as i32
     }
 }
 

@@ -1,18 +1,20 @@
 impl Solution {
-    /// Combinatorics with modular arithmetic
+    /// Computes total Manhattan distance across all k-piece arrangements on an m×n grid.
     ///
     /// # Intuition
-    /// Instead of iterating over all arrangements, use linearity: for each pair of cells,
-    /// count arrangements where both have pieces and multiply by their Manhattan distance.
+    /// By linearity of expectation, sum over all cell pairs the number of
+    /// arrangements containing both cells times their Manhattan distance.
+    /// Each pair appears in C(m·n−2, k−2) arrangements.
     ///
     /// # Approach
-    /// 1. Each cell pair both has pieces in C(m*n-2, k-2) arrangements
-    /// 2. Sum of Manhattan distances over all cell pairs = m * n * (m + n) * (m * n - 1) / 6
-    /// 3. Use precomputed factorials and modular inverse for efficient computation
+    /// 1. Precompute factorials and inverse factorials modulo 10^9+7.
+    /// 2. The sum of Manhattan distances over all cell pairs equals
+    ///    m·n·(m+n)·(m·n−1)/6.
+    /// 3. Multiply by C(m·n−2, k−2).
     ///
     /// # Complexity
-    /// - Time: O(m * n) for factorial precomputation
-    /// - Space: O(m * n) for factorial arrays
+    /// - Time: O(m × n) for factorial precomputation
+    /// - Space: O(m × n) for factorial arrays
     pub fn distance_sum(m: i32, n: i32, k: i32) -> i32 {
         const MOD: i64 = 1_000_000_007;
 
@@ -59,5 +61,30 @@ impl Solution {
                 % MOD;
 
         (sum_dist * c % MOD) as i32
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn small_grid_two_pieces() {
+        assert!(Solution::distance_sum(2, 2, 2) > 0);
+    }
+
+    #[test]
+    fn single_row_grid() {
+        assert!(Solution::distance_sum(1, 5, 2) > 0);
+    }
+
+    #[test]
+    fn single_column_grid() {
+        assert!(Solution::distance_sum(5, 1, 3) > 0);
+    }
+
+    #[test]
+    fn minimum_pieces() {
+        assert_eq!(Solution::distance_sum(2, 2, 2), 8);
     }
 }

@@ -1,5 +1,5 @@
 impl Solution {
-    /// Sum of interaction costs using per-group edge contribution
+    /// Sum of interaction costs using per-group edge contribution.
     ///
     /// # Intuition
     /// For each edge, count how many same-group node pairs cross it.
@@ -14,14 +14,13 @@ impl Solution {
     /// # Complexity
     /// - Time: O(n + sum of group sizes) amortized
     /// - Space: O(n) for tree structure and counts
-    pub fn max_subgraph_score(n: i32, edges: Vec<Vec<i32>>, group: Vec<i32>) -> i64 {
+    pub fn total_sum_of_interaction_costs(n: i32, edges: Vec<Vec<i32>>, group: Vec<i32>) -> i64 {
         let n = n as usize;
 
         if n <= 1 {
             return 0;
         }
 
-        // Build CSR adjacency list
         let mut degree = vec![0u32; n];
         for edge in &edges {
             degree[edge[0] as usize] += 1;
@@ -44,7 +43,6 @@ impl Solution {
             adj_pos[v] += 1;
         }
 
-        // BFS to build parent array and processing order
         let mut parent = vec![u32::MAX; n];
         let mut order = Vec::with_capacity(n);
 
@@ -70,7 +68,6 @@ impl Solution {
         parent[0] = u32::MAX;
         order.reverse();
 
-        // Count nodes per group and collect node lists
         let mut group_size = [0i32; 21];
         for &g in &group {
             group_size[g as usize] += 1;
@@ -87,21 +84,18 @@ impl Solution {
         let mut total_cost = 0i64;
         let mut cnt = vec![0i32; n];
 
-        // Process each group independently
         for g in 1..21 {
             let tg = group_size[g];
             if tg < 2 {
                 continue;
             }
 
-            // Initialize counts for nodes in this group
             for &u in &group_nodes[g] {
                 cnt[u as usize] = 1;
             }
 
             let mut g_cost = 0i64;
 
-            // Propagate counts leaf-to-root
             for &u in &order {
                 let u = u as usize;
                 let c_u = cnt[u];
@@ -130,42 +124,38 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
-        let n = 3;
+    fn test_all_same_group_linear_tree() {
         let edges = vec![vec![0, 1], vec![1, 2]];
         let group = vec![1, 1, 1];
-        assert_eq!(Solution::total_sum_of_interaction_costs(n, edges, group), 4);
+        assert_eq!(Solution::total_sum_of_interaction_costs(3, edges, group), 4);
     }
 
     #[test]
-    fn test_example_2() {
-        let n = 3;
+    fn test_two_groups_linear_tree() {
         let edges = vec![vec![0, 1], vec![1, 2]];
         let group = vec![3, 2, 3];
-        assert_eq!(Solution::total_sum_of_interaction_costs(n, edges, group), 2);
+        assert_eq!(Solution::total_sum_of_interaction_costs(3, edges, group), 2);
     }
 
     #[test]
-    fn test_example_3() {
-        let n = 4;
+    fn test_star_tree_mixed_groups() {
         let edges = vec![vec![0, 1], vec![0, 2], vec![0, 3]];
         let group = vec![1, 1, 4, 4];
-        assert_eq!(Solution::total_sum_of_interaction_costs(n, edges, group), 3);
+        assert_eq!(Solution::total_sum_of_interaction_costs(4, edges, group), 3);
     }
 
     #[test]
-    fn test_example_4() {
-        let n = 2;
+    fn test_no_same_group_pair() {
         let edges = vec![vec![0, 1]];
         let group = vec![9, 8];
-        assert_eq!(Solution::total_sum_of_interaction_costs(n, edges, group), 0);
+        assert_eq!(Solution::total_sum_of_interaction_costs(2, edges, group), 0);
     }
 
     #[test]
     fn test_single_node() {
-        let n = 1;
-        let edges: Vec<Vec<i32>> = vec![];
-        let group = vec![1];
-        assert_eq!(Solution::total_sum_of_interaction_costs(n, edges, group), 0);
+        assert_eq!(
+            Solution::total_sum_of_interaction_costs(1, vec![], vec![1]),
+            0
+        );
     }
 }

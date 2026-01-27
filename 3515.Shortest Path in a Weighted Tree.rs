@@ -1,5 +1,5 @@
 impl Solution {
-    /// Uses Euler tour with Binary Indexed Tree for efficient path queries and updates
+    /// Uses Euler tour with Binary Indexed Tree for efficient path queries and updates.
     ///
     /// # Intuition
     /// In a tree rooted at node 1, the distance from root to any node is the sum of edge

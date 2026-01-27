@@ -1,32 +1,34 @@
 impl Solution {
-    /// Counts distinct excellent pairs using frequency counting
+    /// Counts excellent pairs where popcount(a|b) + popcount(a&b) >= k.
     ///
     /// # Intuition
-    /// `popcount(a OR b) + popcount(a AND b) = popcount(a) + popcount(b)`.
-    /// This simplifies to counting pairs where sum of popcounts >= k.
+    /// `popcount(a | b) + popcount(a & b) = popcount(a) + popcount(b)`.
+    /// This simplifies to counting pairs of distinct values whose combined
+    /// popcounts meet the threshold.
     ///
     /// # Approach
-    /// 1. Deduplicate using HashSet for O(n) average insertion
-    /// 2. Count frequency of each popcount (max 30 for 10^9)
-    /// 3. Direct double loop to count valid pairs
+    /// 1. Deduplicate using HashSet
+    /// 2. Count frequency of each popcount value (max 30 for 10^9)
+    /// 3. Double loop over popcount frequencies to count valid pairs
     ///
     /// # Complexity
-    /// - Time: O(n)
-    /// - Space: O(n)
+    /// - Time: O(n) for dedup, O(1) for the 31×31 pair counting
+    /// - Space: O(n) for the HashSet
     pub fn count_excellent_pairs(nums: Vec<i32>, k: i32) -> i64 {
         use std::collections::HashSet;
 
         let unique: HashSet<i32> = nums.into_iter().collect();
-        let mut cnt = vec![0i64; 31];
+        let mut cnt = [0i64; 31];
 
         for num in unique {
             cnt[num.count_ones() as usize] += 1;
         }
 
+        let k = k as usize;
         let mut ans = 0i64;
         for i in 0..31 {
             for j in 0..31 {
-                if i + j >= k as usize {
+                if i + j >= k {
                     ans += cnt[i] * cnt[j];
                 }
             }
@@ -55,7 +57,7 @@ mod tests {
     }
 
     #[test]
-    fn test_all_same_elements() {
+    fn test_all_duplicates() {
         assert_eq!(Solution::count_excellent_pairs(vec![3, 3, 3, 3], 4), 1);
     }
 

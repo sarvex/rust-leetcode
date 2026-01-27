@@ -1,5 +1,5 @@
 impl Solution {
-    /// Minimum Cost to Merge Sorted Lists using Bitmask DP
+    /// Minimum cost to merge sorted lists using bitmask DP.
     ///
     /// # Intuition
     /// With at most 12 lists, bitmask DP explores all merge orders. Computing medians via
@@ -24,7 +24,6 @@ impl Solution {
 
         let lens: Vec<u16> = lists.iter().map(|a| a.len() as u16).collect();
 
-        // cnt[i * v + t] = count of elements <= values[t] in lists[i]
         let mut cnt = vec![0u16; n * v];
         for (i, a) in lists.iter().enumerate() {
             let mut p = 0usize;
@@ -52,7 +51,7 @@ impl Solution {
             let lenm = total_len[pm] + lens[i];
             total_len[mask] = lenm;
             total_len_i64[mask] = lenm as i64;
-            k_mask[mask] = ((lenm as usize) - 1) >> 1;
+            k_mask[mask] = ((lenm as usize).wrapping_sub(1)) >> 1;
 
             let c = mcount[pm] as usize;
             members_base[mask] = members_base[pm];
@@ -60,47 +59,32 @@ impl Solution {
             mcount[mask] = (c + 1) as u8;
         }
 
-        #[inline(always)]
-        unsafe fn median_for_mask(
-            cnt_ptr: *const u16,
-            bases: *const u16,
-            cnt_bases: usize,
-            v: usize,
-            k: usize,
-        ) -> usize {
-            let mut lo = 0usize;
-            let mut hi = v - 1;
+        let median_for_mask = |bases: &[u16; 12], cnt_bases: usize, k: usize| -> usize {
+            let (mut lo, mut hi) = (0usize, v - 1);
             while lo < hi {
                 let mid = (lo + hi) >> 1;
-                let mut s = 0usize;
-                for t in 0..cnt_bases {
-                    let base = *bases.add(t) as usize;
-                    s += *cnt_ptr.add(base + mid) as usize;
-                }
-                if s > k {
-                    hi = mid;
-                } else {
-                    lo = mid + 1;
+                let s: usize = (0..cnt_bases)
+                    .map(|t| cnt[bases[t] as usize + mid] as usize)
+                    .sum();
+                match s > k {
+                    true => hi = mid,
+                    false => lo = mid + 1,
                 }
             }
             lo
-        }
+        };
 
-        let mut median = vec![0i32; nmask];
-        unsafe {
-            let cnt_ptr = cnt.as_ptr();
-            let val_ptr = values.as_ptr();
-            for mask in 1..nmask {
-                let idx = median_for_mask(
-                    cnt_ptr,
-                    members_base[mask].as_ptr(),
-                    mcount[mask] as usize,
-                    v,
-                    k_mask[mask],
-                );
-                median[mask] = *val_ptr.add(idx);
-            }
-        }
+        let median: Vec<i32> = (0..nmask)
+            .map(|mask| {
+                if mask == 0 {
+                    0
+                } else {
+                    let idx =
+                        median_for_mask(&members_base[mask], mcount[mask] as usize, k_mask[mask]);
+                    values[idx]
+                }
+            })
+            .collect();
 
         let inf: i64 = i64::MAX / 4;
         let mut dp = vec![inf; nmask];
@@ -108,37 +92,26 @@ impl Solution {
             dp[1usize << i] = 0;
         }
 
-        unsafe {
-            let dp_ptr = dp.as_mut_ptr();
-            let med_ptr = median.as_ptr();
-            let len_ptr = total_len_i64.as_ptr();
-
-            for mask in 1..nmask {
-                if mask & (mask - 1) == 0 {
-                    continue;
-                }
-                let fixed = mask & mask.wrapping_neg();
-                let lenm = *len_ptr.add(mask);
-
-                let mut best = inf;
-                let mut sub = (mask - 1) & mask;
-                while sub != 0 {
-                    if (sub & fixed) != 0 {
-                        let other = mask ^ sub;
-
-                        let a = *med_ptr.add(sub) as i64;
-                        let b = *med_ptr.add(other) as i64;
-                        let diff = if a >= b { a - b } else { b - a };
-
-                        let cost = *dp_ptr.add(sub) + *dp_ptr.add(other) + lenm + diff;
-                        if cost < best {
-                            best = cost;
-                        }
-                    }
-                    sub = (sub - 1) & mask;
-                }
-                *dp_ptr.add(mask) = best;
+        for mask in 1..nmask {
+            if mask & (mask - 1) == 0 {
+                continue;
             }
+            let fixed = mask & mask.wrapping_neg();
+            let lenm = total_len_i64[mask];
+
+            let mut best = inf;
+            let mut sub = (mask - 1) & mask;
+            while sub != 0 {
+                if (sub & fixed) != 0 {
+                    let other = mask ^ sub;
+
+                    let diff = (median[sub] as i64 - median[other] as i64).abs();
+                    let cost = dp[sub] + dp[other] + lenm + diff;
+                    best = best.min(cost);
+                }
+                sub = (sub - 1) & mask;
+            }
+            dp[mask] = best;
         }
 
         dp[nmask - 1]
@@ -150,25 +123,25 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn test_three_lists_merge() {
         let lists = vec![vec![1, 3, 5], vec![2, 4], vec![6, 7, 8]];
         assert_eq!(Solution::min_merge_cost(lists), 18);
     }
 
     #[test]
-    fn test_example_2() {
+    fn test_overlapping_values() {
         let lists = vec![vec![1, 1, 5], vec![1, 4, 7, 8]];
         assert_eq!(Solution::min_merge_cost(lists), 10);
     }
 
     #[test]
-    fn test_example_3() {
+    fn test_two_singletons() {
         let lists = vec![vec![1], vec![3]];
         assert_eq!(Solution::min_merge_cost(lists), 4);
     }
 
     #[test]
-    fn test_example_4() {
+    fn test_identical_singletons() {
         let lists = vec![vec![1], vec![1]];
         assert_eq!(Solution::min_merge_cost(lists), 2);
     }

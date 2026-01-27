@@ -1,23 +1,55 @@
 impl Solution {
+    /// Computes move costs with prefix and suffix sweeps.
+    ///
+    /// # Intuition
+    /// For each box, the total moves equal the sum of distances from all balls.
+    /// Two passes (left-to-right and right-to-left) accumulate the contribution
+    /// of balls from each side efficiently.
+    ///
+    /// # Approach
+    /// 1. Left pass: track cumulative ball count and running cost from the left.
+    /// 2. Right pass: track cumulative ball count and running cost from the right.
+    /// 3. Sum both passes for each position.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(n) for the result
     pub fn min_operations(boxes: String) -> Vec<i32> {
-        let s = boxes.as_bytes();
-        let n = s.len();
-        let mut left = vec![0; n];
-        let mut right = vec![0; n];
-        let mut count = 0;
-        for i in 1..n {
-            if s[i - 1] == b'1' {
-                count += 1;
-            }
-            left[i] = left[i - 1] + count;
+        let bytes = boxes.as_bytes();
+        let n = bytes.len();
+        let mut result = vec![0i32; n];
+        let mut count = 0i32;
+        let mut ops = 0i32;
+        for i in 0..n {
+            result[i] += ops;
+            count += (bytes[i] - b'0') as i32;
+            ops += count;
         }
         count = 0;
-        for i in (0..n - 1).rev() {
-            if s[i + 1] == b'1' {
-                count += 1;
-            }
-            right[i] = right[i + 1] + count;
+        ops = 0;
+        for i in (0..n).rev() {
+            result[i] += ops;
+            count += (bytes[i] - b'0') as i32;
+            ops += count;
         }
-        (0..n).into_iter().map(|i| left[i] + right[i]).collect()
+        result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_example_one() {
+        assert_eq!(Solution::min_operations("110".to_string()), vec![1, 1, 3]);
+    }
+
+    #[test]
+    fn test_example_two() {
+        assert_eq!(
+            Solution::min_operations("001011".to_string()),
+            vec![11, 8, 5, 4, 3, 1]
+        );
     }
 }

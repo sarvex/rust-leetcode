@@ -1,7 +1,5 @@
-use std::cmp;
-
 impl Solution {
-    /// Total Waviness of Numbers in Range II using Precomputed DP Tables
+    /// Total waviness of numbers in range using precomputed DP tables.
     ///
     /// # Intuition
     /// Precompute waviness contributions for all digit positions and values upfront.
@@ -20,10 +18,9 @@ impl Solution {
     /// - Time: O(D * 10) preprocessing + O(D) per query, where D ~ 15
     /// - Space: O(D * 10) for precomputed tables
     pub fn total_waviness(num1: i64, num2: i64) -> i64 {
-        if num1 == 1 {
-            Self::helper(num2)
-        } else {
-            Self::helper(num2) - Self::helper(num1 - 1)
+        match num1 {
+            1 => Self::helper(num2),
+            _ => Self::helper(num2) - Self::helper(num1 - 1),
         }
     }
 
@@ -57,21 +54,24 @@ impl Solution {
                 let mut unrestricted_count: i64 = 0;
                 let mut restricted_count: i64 = 0;
 
-                if d == 0 {
-                    unrestricted[len][d] = unrestricted[len - 1][9];
-                    for j in 1..10 {
-                        unrestricted_count += j as i64;
+                match d {
+                    0 => {
+                        unrestricted[len][d] = unrestricted[len - 1][9];
+                        for j in 1..10 {
+                            unrestricted_count += j as i64;
+                        }
                     }
-                } else {
-                    unrestricted[len][d] = unrestricted[len][d - 1] + unrestricted[len - 1][9];
-                    restricted[len][d] = restricted[len][d - 1] + unrestricted[len - 1][9];
-                    for j in d + 1..10 {
-                        unrestricted_count += j as i64;
-                        restricted_count += j as i64;
-                    }
-                    for j in 0..d {
-                        unrestricted_count += (9 - j) as i64;
-                        restricted_count += (9 - j) as i64;
+                    _ => {
+                        unrestricted[len][d] = unrestricted[len][d - 1] + unrestricted[len - 1][9];
+                        restricted[len][d] = restricted[len][d - 1] + unrestricted[len - 1][9];
+                        for j in d + 1..10 {
+                            unrestricted_count += j as i64;
+                            restricted_count += j as i64;
+                        }
+                        for j in 0..d {
+                            unrestricted_count += (9 - j) as i64;
+                            restricted_count += (9 - j) as i64;
+                        }
                     }
                 }
 
@@ -85,8 +85,7 @@ impl Solution {
         let mut num = Vec::new();
 
         while temp > 0 {
-            let digit = temp % 10;
-            num.push(digit);
+            num.push(temp % 10);
             temp /= 10;
         }
 
@@ -129,7 +128,7 @@ impl Solution {
 
             let mut equal_count: i64 = 0;
             if curr_digit > num[i - 1] {
-                let stop = cmp::min(curr_digit, num[i + 1]);
+                let stop = curr_digit.min(num[i + 1]);
                 equal_count += stop;
                 equal_count *= ten;
                 if curr_digit > num[i + 1] {
@@ -157,22 +156,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example1() {
+    fn test_small_range_120_130() {
         assert_eq!(Solution::total_waviness(120, 130), 3);
     }
 
     #[test]
-    fn test_example2() {
+    fn test_range_spanning_200() {
         assert_eq!(Solution::total_waviness(198, 202), 3);
     }
 
     #[test]
-    fn test_example3() {
+    fn test_single_wavy_number() {
         assert_eq!(Solution::total_waviness(4848, 4848), 2);
     }
 
     #[test]
-    fn test_large() {
+    fn test_large_range() {
         assert_eq!(
             Solution::total_waviness(2549294942, 5067104447),
             11661365485

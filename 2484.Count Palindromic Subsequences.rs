@@ -1,5 +1,5 @@
 impl Solution {
-    /// Counts palindromic subsequences of length 5 in a digit string
+    /// Counts palindromic subsequences of length 5 in a digit string.
     ///
     /// # Intuition
     /// A palindrome of length 5 has the form d1-d2-d3-d2-d1 where:
@@ -23,8 +23,6 @@ impl Solution {
         const DIGITS: usize = 10;
 
         let chars: Vec<usize> = s.bytes().map(|b| (b - b'0') as usize).collect();
-        let n = chars.len();
-
         let pair = |d1: usize, d2: usize| d1 * DIGITS + d2;
 
         let mut prefix_singles = [0u64; DIGITS];
@@ -32,7 +30,6 @@ impl Solution {
         let mut suffix_singles = [0u64; DIGITS];
         let mut suffix_pairs = [0u64; DIGITS * DIGITS];
 
-        // Build complete suffix counts for entire string
         for &ch in chars.iter().rev() {
             for d in 0..DIGITS {
                 suffix_pairs[pair(ch, d)] += suffix_singles[d];
@@ -44,24 +41,19 @@ impl Solution {
         let mut matched_pairs: u64 = 0;
 
         for &mid in &chars {
-            // Remove current character from suffix (it's now the middle)
             suffix_singles[mid] -= 1;
             for d in 0..DIGITS {
                 let right_pair = pair(mid, d);
                 let left_pair = pair(d, mid);
-                // Subtract pairs that included this character as first element
                 matched_pairs -= prefix_pairs[left_pair] * suffix_singles[d];
                 suffix_pairs[right_pair] -= suffix_singles[d];
             }
 
-            // Add contribution from all valid palindromes with this middle
             result = (result + matched_pairs) % MOD;
 
-            // Add current character to prefix
             for d in 0..DIGITS {
                 let left_pair = pair(d, mid);
                 let right_pair = pair(mid, d);
-                // Add new pairs formed with this character as second element
                 matched_pairs += prefix_singles[d] * suffix_pairs[right_pair];
                 prefix_pairs[left_pair] += prefix_singles[d];
             }
@@ -77,44 +69,47 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
-        // "10301" appears twice (using different '3's as middle)
+    fn test_example_with_repeated_digits() {
         assert_eq!(Solution::count_palindromes("103301".to_string()), 2);
     }
 
     #[test]
-    fn test_example_2() {
-        // All 21 subsequences are "00000"
+    fn test_all_zeros() {
         assert_eq!(Solution::count_palindromes("0000000".to_string()), 21);
     }
 
     #[test]
-    fn test_example_3() {
-        // Only "99999" and "00000"
+    fn test_two_groups() {
         assert_eq!(Solution::count_palindromes("9999900000".to_string()), 2);
     }
 
     #[test]
-    fn test_short_string() {
+    fn test_too_short() {
         assert_eq!(Solution::count_palindromes("1234".to_string()), 0);
     }
 
     #[test]
-    fn test_exact_five() {
+    fn test_exact_five_palindrome() {
         assert_eq!(Solution::count_palindromes("12321".to_string()), 1);
+    }
+
+    #[test]
+    fn test_exact_five_no_palindrome() {
         assert_eq!(Solution::count_palindromes("12345".to_string()), 0);
     }
 
     #[test]
-    fn test_single_digit_repeated() {
-        // C(5,5) = 1 way to choose 5 positions from 5
+    fn test_single_digit_repeated_five() {
         assert_eq!(Solution::count_palindromes("11111".to_string()), 1);
-        // C(6,5) = 6 ways to choose 5 positions from 6
+    }
+
+    #[test]
+    fn test_single_digit_repeated_six() {
         assert_eq!(Solution::count_palindromes("111111".to_string()), 6);
     }
 
     #[test]
-    fn test_no_palindrome_possible() {
+    fn test_all_unique_digits() {
         assert_eq!(Solution::count_palindromes("12345678".to_string()), 0);
     }
 }

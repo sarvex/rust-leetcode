@@ -1,15 +1,14 @@
 impl Solution {
-    /// Minimum Deletions to Make Array Divisible
+    /// Finds minimum deletions so the smallest remaining element divides all of numsDivide.
     ///
     /// # Intuition
-    /// A number divides all elements in `numsDivide` if and only if it divides
-    /// their GCD. This reduces the problem to finding the smallest element in
-    /// `nums` that divides `gcd(numsDivide)`.
+    /// A number divides all elements in `numsDivide` iff it divides their GCD.
+    /// This reduces to finding the smallest element in `nums` that divides `gcd(numsDivide)`.
     ///
     /// # Approach
-    /// 1. Compute the GCD of all elements in `numsDivide`
-    /// 2. Find minimum element in `nums` that divides the GCD (single pass)
-    /// 3. Count elements smaller than this minimum (single pass)
+    /// 1. Compute GCD of all elements in `numsDivide`
+    /// 2. Find minimum element in `nums` that divides the GCD
+    /// 3. Count elements smaller than this minimum
     ///
     /// # Complexity
     /// - Time: O(n + m log M) where n = nums.len(), m = numsDivide.len(), M = max(numsDivide)
@@ -17,12 +16,12 @@ impl Solution {
     pub fn min_operations(nums: Vec<i32>, nums_divide: Vec<i32>) -> i32 {
         let target_gcd = nums_divide.into_iter().fold(0, Self::gcd);
 
-        let min_valid = nums.iter().filter(|&&num| target_gcd % num == 0).min();
-
-        match min_valid {
-            Some(&min) => nums.iter().filter(|&&num| num < min).count() as i32,
-            None => -1,
-        }
+        nums.iter()
+            .filter(|&&num| target_gcd % num == 0)
+            .min()
+            .map_or(-1, |&min_val| {
+                nums.iter().filter(|&&num| num < min_val).count() as i32
+            })
     }
 
     #[inline]
@@ -40,50 +39,51 @@ mod tests {
 
     #[test]
     fn test_example_1() {
-        let nums = vec![2, 3, 2, 4, 3];
-        let nums_divide = vec![9, 6, 9, 3, 15];
-        assert_eq!(Solution::min_operations(nums, nums_divide), 2);
+        assert_eq!(
+            Solution::min_operations(vec![2, 3, 2, 4, 3], vec![9, 6, 9, 3, 15]),
+            2
+        );
     }
 
     #[test]
     fn test_example_2() {
-        let nums = vec![4, 3, 6];
-        let nums_divide = vec![8, 2, 6, 10];
-        assert_eq!(Solution::min_operations(nums, nums_divide), -1);
+        assert_eq!(
+            Solution::min_operations(vec![4, 3, 6], vec![8, 2, 6, 10]),
+            -1
+        );
     }
 
     #[test]
     fn test_single_element_divides() {
-        let nums = vec![1];
-        let nums_divide = vec![5, 10, 15];
-        assert_eq!(Solution::min_operations(nums, nums_divide), 0);
+        assert_eq!(Solution::min_operations(vec![1], vec![5, 10, 15]), 0);
     }
 
     #[test]
     fn test_all_same_elements() {
-        let nums = vec![3, 3, 3];
-        let nums_divide = vec![9, 12, 15];
-        assert_eq!(Solution::min_operations(nums, nums_divide), 0);
+        assert_eq!(Solution::min_operations(vec![3, 3, 3], vec![9, 12, 15]), 0);
     }
 
     #[test]
     fn test_no_valid_divisor() {
-        let nums = vec![7, 11, 13];
-        let nums_divide = vec![4, 8, 12];
-        assert_eq!(Solution::min_operations(nums, nums_divide), -1);
+        assert_eq!(
+            Solution::min_operations(vec![7, 11, 13], vec![4, 8, 12]),
+            -1
+        );
     }
 
     #[test]
     fn test_delete_multiple_elements() {
-        let nums = vec![2, 2, 2, 5, 5];
-        let nums_divide = vec![25, 50, 75];
-        assert_eq!(Solution::min_operations(nums, nums_divide), 3);
+        assert_eq!(
+            Solution::min_operations(vec![2, 2, 2, 5, 5], vec![25, 50, 75]),
+            3
+        );
     }
 
     #[test]
     fn test_large_gcd() {
-        let nums = vec![100, 50, 25, 5];
-        let nums_divide = vec![1000, 500, 250];
-        assert_eq!(Solution::min_operations(nums, nums_divide), 0);
+        assert_eq!(
+            Solution::min_operations(vec![100, 50, 25, 5], vec![1000, 500, 250]),
+            0
+        );
     }
 }

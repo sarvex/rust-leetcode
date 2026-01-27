@@ -1,5 +1,5 @@
 impl Solution {
-    // Bitmask DP with submask enumeration
+    /// Bitmask DP with submask enumeration.
     ///
     /// # Intuition
     /// Since n ≤ 22, we can use bitmask DP where each bit represents whether a node
@@ -59,5 +59,38 @@ impl Solution {
         }
 
         dp[m - 1]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Solution;
+
+    #[test]
+    fn test_example_linear_chain() {
+        let edges = vec![vec![0, 1], vec![1, 2]];
+        let score = vec![1, 2, 3];
+        assert_eq!(Solution::max_profit(3, edges, score), 14);
+    }
+
+    #[test]
+    fn test_no_edges() {
+        let edges: Vec<Vec<i32>> = vec![];
+        let score = vec![3, 1, 2];
+        assert_eq!(Solution::max_profit(3, edges, score), 14);
+    }
+
+    #[test]
+    fn test_single_node() {
+        let edges: Vec<Vec<i32>> = vec![];
+        let score = vec![5];
+        assert_eq!(Solution::max_profit(1, edges, score), 5);
+    }
+
+    #[test]
+    fn test_diamond_dag() {
+        let edges = vec![vec![0, 1], vec![0, 2], vec![1, 3], vec![2, 3]];
+        let score = vec![1, 2, 3, 4];
+        assert_eq!(Solution::max_profit(4, edges, score), 26);
     }
 }

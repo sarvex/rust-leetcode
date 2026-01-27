@@ -1,5 +1,5 @@
 impl Solution {
-    /// Match-and-extend with palindrome precomputation
+    /// Match-and-extend with palindrome precomputation.
     ///
     /// # Intuition
     /// A palindrome formed by s_sub + t_sub requires matching characters from the start
@@ -102,5 +102,50 @@ impl Solution {
         });
 
         result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Solution;
+
+    #[test]
+    fn test_example_basic_concatenation() {
+        assert_eq!(
+            Solution::longest_palindrome("a".to_string(), "a".to_string()),
+            2
+        );
+    }
+
+    #[test]
+    fn test_example_longer_palindrome() {
+        assert_eq!(
+            Solution::longest_palindrome("abc".to_string(), "def".to_string()),
+            1
+        );
+    }
+
+    #[test]
+    fn test_full_palindrome_from_both() {
+        assert_eq!(
+            Solution::longest_palindrome("ab".to_string(), "ba".to_string()),
+            4
+        );
+    }
+
+    #[test]
+    fn test_single_char_palindrome() {
+        assert_eq!(
+            Solution::longest_palindrome("a".to_string(), "b".to_string()),
+            1
+        );
+    }
+
+    #[test]
+    fn test_palindrome_extension() {
+        assert_eq!(
+            Solution::longest_palindrome("abcba".to_string(), "x".to_string()),
+            5
+        );
     }
 }

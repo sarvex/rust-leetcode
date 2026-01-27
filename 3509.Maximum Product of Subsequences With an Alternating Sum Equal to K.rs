@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 impl Solution {
-    /// Dynamic programming with bitset for product tracking.
+    /// Dynamic programming with bitset for product tracking of alternating subsequences.
     ///
     /// # Intuition
     /// Use u64 chunks as bitset for efficient product tracking. Iterate only through set bits

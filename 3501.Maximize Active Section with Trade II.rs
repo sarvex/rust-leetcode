@@ -1,5 +1,5 @@
 impl Solution {
-    /// Uses sparse tables over 0-runs for O(log n) query processing
+    /// Uses sparse tables over 0-runs for O(log n) query processing.
     ///
     /// # Intuition
     /// Trade: sacrifice inner 1-run, convert 0-run to 1's.

@@ -1,5 +1,3 @@
-use std::cmp::{max, min};
-
 const MAXV: usize = 100_000;
 
 struct SegTree {
@@ -36,8 +34,8 @@ impl SegTree {
         let right_child = left_child | 1;
         self.build_rec(left_child, left, mid, array);
         self.build_rec(right_child, mid + 1, right, array);
-        self.min_val[node] = min(self.min_val[left_child], self.min_val[right_child]);
-        self.max_val[node] = max(self.max_val[left_child], self.max_val[right_child]);
+        self.min_val[node] = self.min_val[left_child].min(self.min_val[right_child]);
+        self.max_val[node] = self.max_val[left_child].max(self.max_val[right_child]);
     }
 
     fn apply(&mut self, node: usize, delta: i32) {
@@ -60,8 +58,8 @@ impl SegTree {
     fn pull_up(&mut self, node: usize) {
         let left_child = node << 1;
         let right_child = left_child | 1;
-        self.min_val[node] = min(self.min_val[left_child], self.min_val[right_child]);
-        self.max_val[node] = max(self.max_val[left_child], self.max_val[right_child]);
+        self.min_val[node] = self.min_val[left_child].min(self.min_val[right_child]);
+        self.max_val[node] = self.max_val[left_child].max(self.max_val[right_child]);
     }
 
     fn range_add(&mut self, query_left: usize, query_right: usize, delta: i32) {

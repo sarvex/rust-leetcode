@@ -116,10 +116,16 @@ mod tests {
     }
 
     #[test]
-    fn test_direct_edge() {
+    fn test_direct_edge_within_budget() {
         let edges = vec![vec![0, 1, 5]];
         let online = vec![true, true];
         assert_eq!(Solution::find_max_path_score(edges, online, 5), 5);
+    }
+
+    #[test]
+    fn test_direct_edge_exceeds_budget() {
+        let edges = vec![vec![0, 1, 5]];
+        let online = vec![true, true];
         assert_eq!(Solution::find_max_path_score(edges, online, 4), -1);
     }
 
@@ -128,18 +134,26 @@ mod tests {
         let edges = vec![vec![0, 1, 5], vec![1, 2, 10]];
         let online = vec![true, true, true];
         assert_eq!(Solution::find_max_path_score(edges, online, 10), -1);
+    }
+
+    #[test]
+    fn test_cost_within_k() {
+        let edges = vec![vec![0, 1, 5], vec![1, 2, 10]];
+        let online = vec![true, true, true];
         assert_eq!(Solution::find_max_path_score(edges, online, 15), 5);
     }
 
     #[test]
-    fn test_multiple_paths() {
-        let edges = vec![
-            vec![0, 1, 10],
-            vec![1, 2, 10],
-            vec![0, 2, 5],
-        ];
+    fn test_multiple_paths_large_budget() {
+        let edges = vec![vec![0, 1, 10], vec![1, 2, 10], vec![0, 2, 5]];
         let online = vec![true, true, true];
         assert_eq!(Solution::find_max_path_score(edges, online, 20), 10);
+    }
+
+    #[test]
+    fn test_multiple_paths_small_budget() {
+        let edges = vec![vec![0, 1, 10], vec![1, 2, 10], vec![0, 2, 5]];
+        let online = vec![true, true, true];
         assert_eq!(Solution::find_max_path_score(edges, online, 5), 5);
     }
 }

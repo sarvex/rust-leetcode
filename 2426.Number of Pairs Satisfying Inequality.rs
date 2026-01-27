@@ -2,29 +2,28 @@ impl Solution {
     /// Counts pairs satisfying the transformed inequality using modified merge sort.
     ///
     /// # Intuition
-    /// Transform the inequality `nums1[i] - nums1[j] <= nums2[i] - nums2[j] + diff`
-    /// into `d[i] <= d[j] + diff` where `d[k] = nums1[k] - nums2[k]`. This reduces
-    /// the problem to counting pairs in a single array during merge sort.
+    /// Transform `nums1[i] - nums1[j] <= nums2[i] - nums2[j] + diff` into
+    /// `d[i] <= d[j] + diff` where `d[k] = nums1[k] - nums2[k]`. Counting
+    /// valid pairs becomes a merge-sort inversion count variant.
     ///
     /// # Approach
     /// 1. Compute difference array `d[i] = nums1[i] - nums2[i]`
     /// 2. Use merge sort to count valid pairs during the merge phase
-    /// 3. For each element in right half, count elements in left half satisfying condition
-    /// 4. Since both halves are sorted, use two-pointer technique for O(n) merge counting
+    /// 3. For each element in right half, count valid left-half elements via two pointers
     ///
     /// # Complexity
-    /// - Time: O(n log n) - standard merge sort complexity
-    /// - Space: O(n) - temporary arrays during merge
+    /// - Time: O(n log n) — merge sort
+    /// - Space: O(n) — temporary arrays during merge
     pub fn number_of_pairs(nums1: Vec<i32>, nums2: Vec<i32>, diff: i32) -> i64 {
-        let n = nums1.len();
-        let mut differences: Vec<i64> = (0..n)
-            .map(|i| i64::from(nums1[i]) - i64::from(nums2[i]))
+        let mut differences: Vec<i64> = nums1
+            .iter()
+            .zip(nums2.iter())
+            .map(|(&a, &b)| i64::from(a) - i64::from(b))
             .collect();
 
         Self::merge_sort_count(&mut differences, i64::from(diff))
     }
 
-    /// Recursively sorts array while counting valid pairs across partitions.
     fn merge_sort_count(arr: &mut [i64], diff: i64) -> i64 {
         let n = arr.len();
         if n <= 1 {
@@ -39,13 +38,10 @@ impl Solution {
         left_count + right_count + cross_count
     }
 
-    /// Merges two sorted halves while counting pairs where left[i] <= right[j] + diff.
     fn merge_and_count(arr: &mut [i64], mid: usize, diff: i64) -> i64 {
         let left = arr[..mid].to_vec();
         let right = arr[mid..].to_vec();
 
-        // Count pairs: for each element in right, count valid elements in left
-        // Since both are sorted, use two-pointer technique
         let mut count = 0i64;
         let mut left_ptr = 0;
 
@@ -57,11 +53,7 @@ impl Solution {
             count += left_ptr as i64;
         }
 
-        // Standard merge to maintain sorted order for parent calls
-        let mut i = 0;
-        let mut j = 0;
-        let mut k = 0;
-
+        let (mut i, mut j, mut k) = (0, 0, 0);
         while i < left.len() && j < right.len() {
             if left[i] <= right[j] {
                 arr[k] = left[i];
@@ -95,53 +87,40 @@ mod tests {
 
     #[test]
     fn test_example_1() {
-        let nums1 = vec![3, 2, 5];
-        let nums2 = vec![2, 2, 1];
-        let diff = 1;
-        assert_eq!(Solution::number_of_pairs(nums1, nums2, diff), 3);
+        assert_eq!(
+            Solution::number_of_pairs(vec![3, 2, 5], vec![2, 2, 1], 1),
+            3
+        );
     }
 
     #[test]
     fn test_example_2() {
-        let nums1 = vec![3, -1];
-        let nums2 = vec![-2, 2];
-        let diff = -1;
-        assert_eq!(Solution::number_of_pairs(nums1, nums2, diff), 0);
+        assert_eq!(Solution::number_of_pairs(vec![3, -1], vec![-2, 2], -1), 0);
     }
 
     #[test]
     fn test_all_pairs_valid() {
-        let nums1 = vec![1, 2, 3];
-        let nums2 = vec![3, 2, 1];
-        let diff = 10;
-        // d = [-2, 0, 2], all pairs satisfy d[i] <= d[j] + 10
-        assert_eq!(Solution::number_of_pairs(nums1, nums2, diff), 3);
+        assert_eq!(
+            Solution::number_of_pairs(vec![1, 2, 3], vec![3, 2, 1], 10),
+            3
+        );
     }
 
     #[test]
     fn test_no_pairs_valid() {
-        let nums1 = vec![10, 1];
-        let nums2 = vec![1, 10];
-        let diff = -20;
-        // d = [9, -9], need 9 <= -9 + (-20) = -29, false
-        assert_eq!(Solution::number_of_pairs(nums1, nums2, diff), 0);
+        assert_eq!(Solution::number_of_pairs(vec![10, 1], vec![1, 10], -20), 0);
     }
 
     #[test]
     fn test_single_pair() {
-        let nums1 = vec![0, 0];
-        let nums2 = vec![0, 0];
-        let diff = 0;
-        // d = [0, 0], need 0 <= 0 + 0 = 0, true
-        assert_eq!(Solution::number_of_pairs(nums1, nums2, diff), 1);
+        assert_eq!(Solution::number_of_pairs(vec![0, 0], vec![0, 0], 0), 1);
     }
 
     #[test]
     fn test_negative_values() {
-        let nums1 = vec![-10000, 10000];
-        let nums2 = vec![10000, -10000];
-        let diff = 0;
-        // d = [-20000, 20000], need -20000 <= 20000 + 0, true
-        assert_eq!(Solution::number_of_pairs(nums1, nums2, diff), 1);
+        assert_eq!(
+            Solution::number_of_pairs(vec![-10000, 10000], vec![10000, -10000], 0),
+            1
+        );
     }
 }

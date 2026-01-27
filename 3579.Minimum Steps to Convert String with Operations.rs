@@ -1,5 +1,5 @@
 impl Solution {
-    /// Minimum Operations to Convert String
+    /// Minimum operations to convert string using segment DP with reverse and swap.
     ///
     /// # Intuition
     /// Each contiguous substring can be transformed independently using reverse,

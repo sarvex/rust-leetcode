@@ -1,3 +1,4 @@
+/// Trie node for prefix-complete word search.
 struct Trie {
     children: [Option<Box<Trie>>; 26],
     is_end: bool,
@@ -5,30 +6,33 @@ struct Trie {
 
 impl Trie {
     fn new() -> Self {
-        Trie {
+        Self {
             children: Default::default(),
             is_end: false,
         }
     }
 
-    fn insert(&mut self, w: &str) {
+    fn insert(&mut self, word: &str) {
         let mut node = self;
-        for c in w.chars() {
-            let idx = (c as usize) - ('a' as usize);
+        for b in word.bytes() {
+            let idx = (b - b'a') as usize;
             node = node.children[idx].get_or_insert_with(|| Box::new(Trie::new()));
         }
         node.is_end = true;
     }
 
-    fn search(&self, w: &str) -> bool {
+    fn all_prefixes_exist(&self, word: &str) -> bool {
         let mut node = self;
-        for c in w.chars() {
-            let idx = (c as usize) - ('a' as usize);
-            if let Some(next_node) = &node.children[idx] {
-                node = next_node.as_ref();
-                if !node.is_end {
-                    return false;
+        for b in word.bytes() {
+            let idx = (b - b'a') as usize;
+            match &node.children[idx] {
+                Some(child) => {
+                    node = child.as_ref();
+                    if !node.is_end {
+                        return false;
+                    }
                 }
+                None => return false,
             }
         }
         true
@@ -36,17 +40,67 @@ impl Trie {
 }
 
 impl Solution {
+    /// Finds the longest word where every prefix is also in the dictionary.
+    ///
+    /// # Intuition
+    /// A trie efficiently validates that all prefixes of a word exist as
+    /// complete words. Among valid candidates, pick the longest (or
+    /// lexicographically smallest on ties).
+    ///
+    /// # Approach
+    /// 1. Insert all words into a trie.
+    /// 2. For each word, check if every prefix ends at a trie node marked as complete.
+    /// 3. Track the best candidate by length then lexicographic order.
+    ///
+    /// # Complexity
+    /// - Time: O(n * L) where L is average word length
+    /// - Space: O(n * L)
     pub fn longest_word(words: Vec<String>) -> String {
         let mut trie = Trie::new();
-        for w in &words {
-            trie.insert(w);
+        for word in &words {
+            trie.insert(word);
         }
-        let mut ans = String::new();
-        for w in &words {
-            if (w.len() > ans.len() || (w.len() == ans.len() && w < &ans)) && trie.search(w) {
-                ans = w.clone();
+
+        let mut result = String::new();
+        for word in &words {
+            if (word.len() > result.len() || (word.len() == result.len() && *word < result))
+                && trie.all_prefixes_exist(word)
+            {
+                result = word.clone();
             }
         }
-        ans
+
+        result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic() {
+        assert_eq!(
+            Solution::longest_word(
+                vec!["k", "ki", "kit", "kite", "kites"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect()
+            ),
+            "kites"
+        );
+    }
+
+    #[test]
+    fn test_missing_prefix() {
+        assert_eq!(
+            Solution::longest_word(
+                vec!["a", "banana", "app", "appl", "ap", "apply", "apple"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect()
+            ),
+            "apple"
+        );
     }
 }

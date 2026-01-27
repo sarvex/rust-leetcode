@@ -1,30 +1,34 @@
 impl Solution {
-    /// 3441. Minimum Cost Good Caption
+    /// Produces the lexicographically smallest good caption with minimum cost.
     ///
     /// # Intuition
-    /// A good caption requires every character to appear in groups of at least 3 consecutive
-    /// occurrences. We can change characters to adjacent alphabet letters with cost 1 per step.
-    /// Since groups must have length ≥ 3, we only need to consider segment lengths 3, 4, 5
-    /// (any length ≥ 6 can be optimally split into smaller valid segments).
+    /// A good caption requires every character to appear in runs of ≥ 3.
+    /// Segment lengths 3–5 suffice (≥ 6 splits optimally). Backward DP finds
+    /// the minimum cost; suffix comparison breaks ties lexicographically.
     ///
     /// # Approach
-    /// 1. Use backward DP where dp[i] = minimum cost to make caption[i..n] a good caption
-    /// 2. Track best_choice[i] = (char, len) that gives lexicographically smallest suffix
-    /// 3. When comparing choices with equal cost, simulate and compare resulting suffixes
-    /// 4. Reconstruct by following the precomputed best choices
+    /// 1. Precompute prefix sums per character for O(1) segment cost queries.
+    /// 2. Backward DP: dp[i] = minimum cost for caption[i..n].
+    /// 3. For each position, evaluate all (char, len) candidates with minimum
+    ///    cost and select the lexicographically smallest suffix via lazy
+    ///    character-by-character comparison.
+    /// 4. Reconstruct by following best_choice from position 0.
     ///
     /// # Complexity
-    /// - Time: O(n × 26 × 5) for DP with suffix comparisons amortized
-    /// - Space: O(n × 26) for prefix sums, O(n) for DP arrays
+    /// - Time: O(n × 26 × 5) for DP, amortized suffix comparison
+    /// - Space: O(n × 26) for prefix sums, O(n) for DP
     pub fn min_cost_good_caption(caption: String) -> String {
         let n = caption.len();
         if n < 3 {
             return String::new();
         }
 
-        let s: Vec<i64> = caption.bytes().map(|c| (c - b'a') as i64).collect();
+        let s: Vec<i64> = caption
+            .as_bytes()
+            .iter()
+            .map(|&c| (c - b'a') as i64)
+            .collect();
 
-        // Precompute prefix sums for efficient cost calculation
         let mut prefix = vec![vec![0i64; n + 1]; 26];
         for c in 0..26 {
             for i in 0..n {
@@ -34,11 +38,8 @@ impl Solution {
 
         let cost = |l: usize, r: usize, c: usize| -> i64 { prefix[c][r + 1] - prefix[c][l] };
 
-        // Backward DP
-        // dp[i] = minimum cost to make s[i..n] a good caption
-        // best_choice[i] = (char, len) giving lex smallest suffix among optimal choices
         let mut dp = vec![i64::MAX; n + 1];
-        let mut best_choice = vec![(26usize, 0usize); n + 1]; // (char, len)
+        let mut best_choice = vec![(26usize, 0usize); n + 1];
         dp[n] = 0;
 
         for i in (0..n).rev() {
@@ -47,7 +48,6 @@ impl Solution {
                 continue;
             }
 
-            // Collect all valid (char, len) candidates with their costs
             let mut candidates: Vec<(usize, usize, i64)> = Vec::new();
 
             for len in 3..=remaining.min(5) {
@@ -66,18 +66,15 @@ impl Solution {
                 continue;
             }
 
-            // Find minimum cost
             let min_cost = candidates.iter().map(|x| x.2).min().unwrap();
             dp[i] = min_cost;
 
-            // Filter to only minimum cost candidates
             let optimal: Vec<(usize, usize)> = candidates
                 .into_iter()
                 .filter(|x| x.2 == min_cost)
                 .map(|x| (x.0, x.1))
                 .collect();
 
-            // Find lexicographically smallest among optimal choices
             let mut best = optimal[0];
             for &candidate in &optimal[1..] {
                 if Self::is_lex_smaller(i, candidate, best, &best_choice, n) {
@@ -92,23 +89,18 @@ impl Solution {
             return String::new();
         }
 
-        // Reconstruct by following best_choice
         let mut result = Vec::with_capacity(n);
         let mut i = 0;
 
         while i < n {
             let (c, len) = best_choice[i];
-            for _ in 0..len {
-                result.push(b'a' + c as u8);
-            }
+            result.extend(std::iter::repeat(b'a' + c as u8).take(len));
             i += len;
         }
 
         String::from_utf8(result).unwrap()
     }
 
-    /// Compare two choices (c1, len1) vs (c2, len2) at position i
-    /// Returns true if choice1 produces lexicographically smaller suffix
     fn is_lex_smaller(
         start: usize,
         choice1: (usize, usize),
@@ -124,30 +116,22 @@ impl Solution {
         let mut offset2 = 0usize;
 
         loop {
-            // Both reached end
-            if pos1 + offset1 >= n && pos2 + offset2 >= n {
-                return false; // Equal
-            }
-            if pos1 + offset1 >= n {
-                return true; // Shorter is considered smaller (shouldn't happen with valid partitions)
-            }
-            if pos2 + offset2 >= n {
-                return false;
+            match (pos1 + offset1 >= n, pos2 + offset2 >= n) {
+                (true, true) => return false,
+                (true, false) => return true,
+                (false, true) => return false,
+                _ => {}
             }
 
-            // Compare characters at current position
-            if c1 < c2 {
-                return true;
-            }
-            if c1 > c2 {
-                return false;
+            match c1.cmp(&c2) {
+                std::cmp::Ordering::Less => return true,
+                std::cmp::Ordering::Greater => return false,
+                std::cmp::Ordering::Equal => {}
             }
 
-            // Characters equal, advance both
             offset1 += 1;
             offset2 += 1;
 
-            // Move to next segment if needed
             if offset1 >= len1 {
                 pos1 += len1;
                 offset1 = 0;
@@ -171,22 +155,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn four_char_alternating() {
         assert_eq!(Solution::min_cost_good_caption("cdcd".to_string()), "cccc");
     }
 
     #[test]
-    fn test_example_2() {
+    fn three_char_mixed() {
         assert_eq!(Solution::min_cost_good_caption("aca".to_string()), "aaa");
     }
 
     #[test]
-    fn test_example_3() {
+    fn too_short_returns_empty() {
         assert_eq!(Solution::min_cost_good_caption("bc".to_string()), "");
     }
 
     #[test]
-    fn test_already_good() {
+    fn already_good_unchanged() {
         assert_eq!(
             Solution::min_cost_good_caption("aaabbb".to_string()),
             "aaabbb"
@@ -194,17 +178,17 @@ mod tests {
     }
 
     #[test]
-    fn test_single_char() {
+    fn single_char_returns_empty() {
         assert_eq!(Solution::min_cost_good_caption("a".to_string()), "");
     }
 
     #[test]
-    fn test_length_three() {
+    fn three_distinct_chars_median() {
         assert_eq!(Solution::min_cost_good_caption("abc".to_string()), "bbb");
     }
 
     #[test]
-    fn test_failing_case() {
+    fn nine_chars_split_into_segments() {
         assert_eq!(
             Solution::min_cost_good_caption("dlqlawbgd".to_string()),
             "llllddddd"
@@ -212,7 +196,7 @@ mod tests {
     }
 
     #[test]
-    fn test_six_chars() {
+    fn six_identical_chars_unchanged() {
         assert_eq!(
             Solution::min_cost_good_caption("aaaaaa".to_string()),
             "aaaaaa"

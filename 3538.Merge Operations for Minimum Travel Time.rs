@@ -1,5 +1,5 @@
 impl Solution {
-    /// Minimum Travel Time After K Merge Operations
+    /// Minimum travel time after k merge operations using 3D DP.
     ///
     /// # Intuition
     /// When we merge sign i into sign i+1, the time value accumulates. The key observation

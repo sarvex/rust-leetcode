@@ -1,5 +1,5 @@
 impl Solution {
-    /// Segment tree for counting prefix products with specific remainders
+    /// Segment tree for counting prefix products with specific remainders.
     ///
     /// # Intuition
     /// For range [start, n-1], count how many prefixes [start, j] have product ≡ x (mod k).

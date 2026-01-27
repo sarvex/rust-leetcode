@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 impl Solution {
-    /// Kth Smallest Path XOR Sum
+    /// Kth smallest path XOR sum using small-to-large set merging.
     ///
     /// # Intuition
     /// The path XOR sum from root to each node can be computed with a simple DFS/BFS traversal.
@@ -22,7 +22,6 @@ impl Solution {
     /// - Space: O(n + q) for storing sets and query structures
     pub fn kth_smallest(par: Vec<i32>, vals: Vec<i32>, queries: Vec<Vec<i32>>) -> Vec<i32> {
         let n = par.len();
-        let narvetholi = (&par, &vals, &queries);
 
         let children = Self::build_children(&par, n);
         let path_xor = Self::compute_path_xors(&children, &vals, n);
@@ -33,8 +32,6 @@ impl Solution {
             .map(|(i, q)| (q[0] as usize, q[1] as usize, i))
             .collect();
         indexed_queries.sort_unstable();
-
-        let _ = narvetholi;
 
         Self::process_queries(&children, &path_xor, &indexed_queries, n, queries.len())
     }

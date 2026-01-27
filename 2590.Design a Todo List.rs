@@ -8,18 +8,27 @@ struct Task {
     due_date: i32,
 }
 
+/// A TodoList that supports adding, retrieving, filtering, and completing tasks per user.
+///
+/// # Intuition
+/// Each user maintains a list of tasks. Tasks are globally identified by an
+/// auto-incrementing ID. Completing a task removes it from the user's list.
+///
+/// # Approach
+/// - Store tasks per user in a HashMap<i32, Vec<Task>>
+/// - Auto-increment task IDs globally
+/// - Sort by due_date when retrieving tasks
+/// - Filter by tag using HashSet membership
 struct TodoList {
-    /// The global task id
-    id: i32,
-    /// The mapping from `user_id` to `task`
-    user_map: HashMap<i32, Vec<Task>>,
+    next_id: i32,
+    user_tasks: HashMap<i32, Vec<Task>>,
 }
 
 impl TodoList {
     fn new() -> Self {
         Self {
-            id: 1,
-            user_map: HashMap::new(),
+            next_id: 1,
+            user_tasks: HashMap::new(),
         }
     }
 
@@ -30,70 +39,85 @@ impl TodoList {
         due_date: i32,
         tags: Vec<String>,
     ) -> i32 {
-        if self.user_map.contains_key(&user_id) {
-            // Just add the task
-            self.user_map.get_mut(&user_id).unwrap().push(Task {
-                task_id: self.id,
-                description: task_description,
-                tags: tags.into_iter().collect::<HashSet<String>>(),
-                due_date,
-            });
-            // Increase the global id
-            self.id += 1;
-            return self.id - 1;
-        }
-        // Otherwise, create a new user
-        self.user_map.insert(
-            user_id,
-            vec![Task {
-                task_id: self.id,
-                description: task_description,
-                tags: tags.into_iter().collect::<HashSet<String>>(),
-                due_date,
-            }],
-        );
-        self.id += 1;
-        self.id - 1
+        let task = Task {
+            task_id: self.next_id,
+            description: task_description,
+            tags: tags.into_iter().collect(),
+            due_date,
+        };
+        self.user_tasks
+            .entry(user_id)
+            .or_insert_with(Vec::new)
+            .push(task);
+        let id = self.next_id;
+        self.next_id += 1;
+        id
     }
 
     fn get_all_tasks(&self, user_id: i32) -> Vec<String> {
-        if !self.user_map.contains_key(&user_id) || self.user_map.get(&user_id).unwrap().is_empty()
-        {
-            return vec![];
-        }
-        // Get the task vector
-        let mut ret_vec = (*self.user_map.get(&user_id).unwrap()).clone();
-        // Sort by due date
-        ret_vec.sort_by(|lhs, rhs| lhs.due_date.cmp(&rhs.due_date));
-        // Return the description vector
-        ret_vec.into_iter().map(|x| x.description).collect()
+        self.user_tasks
+            .get(&user_id)
+            .map(|tasks| {
+                let mut sorted = tasks.clone();
+                sorted.sort_unstable_by_key(|t| t.due_date);
+                sorted.into_iter().map(|t| t.description).collect()
+            })
+            .unwrap_or_default()
     }
 
     fn get_tasks_for_tag(&self, user_id: i32, tag: String) -> Vec<String> {
-        if !self.user_map.contains_key(&user_id) || self.user_map.get(&user_id).unwrap().is_empty()
-        {
-            return vec![];
-        }
-        // Get the task vector
-        let mut ret_vec = (*self.user_map.get(&user_id).unwrap()).clone();
-        // Sort by due date
-        ret_vec.sort_by(|lhs, rhs| lhs.due_date.cmp(&rhs.due_date));
-        // Return the description vector
-        ret_vec
-            .into_iter()
-            .filter(|x| x.tags.contains(&tag))
-            .map(|x| x.description)
-            .collect()
+        self.user_tasks
+            .get(&user_id)
+            .map(|tasks| {
+                let mut sorted: Vec<_> = tasks
+                    .iter()
+                    .filter(|t| t.tags.contains(&tag))
+                    .cloned()
+                    .collect();
+                sorted.sort_unstable_by_key(|t| t.due_date);
+                sorted.into_iter().map(|t| t.description).collect()
+            })
+            .unwrap_or_default()
     }
 
     fn complete_task(&mut self, user_id: i32, task_id: i32) {
-        if !self.user_map.contains_key(&user_id) || self.user_map.get(&user_id).unwrap().is_empty()
-        {
-            return;
+        if let Some(tasks) = self.user_tasks.get_mut(&user_id) {
+            tasks.retain(|t| t.task_id != task_id);
         }
-        self.user_map
-            .get_mut(&user_id)
-            .unwrap()
-            .retain(|x| (*x).task_id != task_id);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_todo_list_workflow() {
+        let mut todo = TodoList::new();
+        let id1 = todo.add_task(1, "Task1".into(), 50, vec!["work".into()]);
+        let id2 = todo.add_task(1, "Task2".into(), 30, vec!["home".into()]);
+
+        assert_eq!(id1, 1);
+        assert_eq!(id2, 2);
+        assert_eq!(todo.get_all_tasks(1), vec!["Task2", "Task1"]);
+
+        todo.complete_task(1, id2);
+        assert_eq!(todo.get_all_tasks(1), vec!["Task1"]);
+    }
+
+    #[test]
+    fn test_filter_by_tag() {
+        let mut todo = TodoList::new();
+        todo.add_task(1, "A".into(), 10, vec!["x".into()]);
+        todo.add_task(1, "B".into(), 20, vec!["y".into()]);
+        todo.add_task(1, "C".into(), 5, vec!["x".into()]);
+
+        assert_eq!(todo.get_tasks_for_tag(1, "x".into()), vec!["C", "A"]);
+    }
+
+    #[test]
+    fn test_nonexistent_user() {
+        let todo = TodoList::new();
+        assert!(todo.get_all_tasks(999).is_empty());
     }
 }

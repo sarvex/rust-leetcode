@@ -1,28 +1,27 @@
-/// Subtree Inversion Sum - Optimized Bottom-Up Tree DP
-///
-/// # Intuition
-/// Track two states per node: `f[d]` for normal parity and `g[d]` for inverted parity,
-/// where `d` is the distance from the nearest inverted ancestor. When `d >= k`, we can
-/// choose to invert; otherwise we cannot.
-///
-/// # Approach
-/// Use bottom-up tree DP with iterative post-order traversal:
-/// - `f[node][d]` = max sum of subtree with parity=0 (normal), distance=d
-/// - `g[node][d]` = max sum of subtree with parity=1 (inverted), distance=d
-///
-/// For distance d < k (cannot invert):
-/// - `f[node][d] = nums[node] + sum(f[child][d+1])`
-/// - `g[node][d] = -nums[node] + sum(g[child][d+1])`
-///
-/// For distance d = k (can invert):
-/// - `f[node][k] = max(nums[node] + sum(f[child][k]), -nums[node] + sum(g[child][1]))`
-/// - `g[node][k] = max(-nums[node] + sum(g[child][k]), nums[node] + sum(f[child][1]))`
-///
-/// # Complexity
-/// - Time: O(n * k)
-/// - Space: O(n * k)
-
 impl Solution {
+    /// Optimized bottom-up tree DP for subtree inversion sum.
+    ///
+    /// # Intuition
+    /// Track two states per node: `f[d]` for normal parity and `g[d]` for inverted parity,
+    /// where `d` is the distance from the nearest inverted ancestor. When `d >= k`, we can
+    /// choose to invert; otherwise we cannot.
+    ///
+    /// # Approach
+    /// Use bottom-up tree DP with iterative post-order traversal:
+    /// - `f[node][d]` = max sum of subtree with parity=0 (normal), distance=d
+    /// - `g[node][d]` = max sum of subtree with parity=1 (inverted), distance=d
+    ///
+    /// For distance d < k (cannot invert):
+    /// - `f[node][d] = nums[node] + sum(f[child][d+1])`
+    /// - `g[node][d] = -nums[node] + sum(g[child][d+1])`
+    ///
+    /// For distance d = k (can invert):
+    /// - `f[node][k] = max(nums[node] + sum(f[child][k]), -nums[node] + sum(g[child][1]))`
+    /// - `g[node][k] = max(-nums[node] + sum(g[child][k]), nums[node] + sum(f[child][1]))`
+    ///
+    /// # Complexity
+    /// - Time: O(n * k)
+    /// - Space: O(n * k)
     pub fn subtree_inversion_sum(edges: Vec<Vec<i32>>, nums: Vec<i32>, k: i32) -> i64 {
         let n = nums.len();
         let k = k as usize;

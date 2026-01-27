@@ -29,7 +29,7 @@ impl BIT {
 }
 
 impl Solution {
-    /// Sliding Window with BIT for Inversion Count
+    /// Sliding window with BIT for minimum inversion count.
     ///
     /// # Intuition
     /// Use a sliding window of size k and maintain inversion count incrementally.
@@ -51,7 +51,6 @@ impl Solution {
             return 0;
         }
 
-        // Coordinate compression
         let mut sorted: Vec<i32> = nums.clone();
         sorted.sort_unstable();
         sorted.dedup();
@@ -65,28 +64,23 @@ impl Solution {
         let mut bit = BIT::new(max_rank);
         let mut inversions: i64 = 0;
 
-        // Initial window: count inversions while building
         for i in 0..k {
             let r = rank[i];
-            // Elements already in BIT with rank > r form inversions
             inversions += (i as i64) - bit.query(r);
             bit.update(r, 1);
         }
 
         let mut min_inversions = inversions;
 
-        // Slide window
         for i in k..n {
             let out_rank = rank[i - k];
             let in_rank = rank[i];
 
-            // Remove outgoing: loses inversions with smaller elements after it
             bit.update(out_rank, -1);
             if out_rank > 0 {
                 inversions -= bit.query(out_rank - 1);
             }
 
-            // Add incoming: gains inversions with larger elements before it
             inversions += ((k - 1) as i64) - bit.query(in_rank);
             bit.update(in_rank, 1);
 
@@ -99,20 +93,20 @@ impl Solution {
 
 #[cfg(test)]
 mod tests {
-    use super::Solution;
+    use super::*;
 
     #[test]
-    fn test_example_1() {
+    fn test_window_with_zero_inversions() {
         assert_eq!(Solution::min_inversion_count(vec![3, 1, 2, 5, 4], 3), 0);
     }
 
     #[test]
-    fn test_example_2() {
+    fn test_fully_reversed_array() {
         assert_eq!(Solution::min_inversion_count(vec![5, 3, 2, 1], 4), 6);
     }
 
     #[test]
-    fn test_example_3() {
+    fn test_window_size_one() {
         assert_eq!(Solution::min_inversion_count(vec![2, 1], 1), 0);
     }
 
@@ -122,14 +116,12 @@ mod tests {
     }
 
     #[test]
-    fn test_two_elements_sorted() {
+    fn test_sorted_pair() {
         assert_eq!(Solution::min_inversion_count(vec![1, 2], 2), 0);
     }
 
     #[test]
-    fn test_two_elements_reversed() {
+    fn test_reversed_pair() {
         assert_eq!(Solution::min_inversion_count(vec![2, 1], 2), 1);
     }
 }
-
-struct Solution;

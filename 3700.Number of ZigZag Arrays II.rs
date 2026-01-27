@@ -95,34 +95,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example_1() {
+    fn test_small_range_two_values() {
         assert_eq!(Solution::zig_zag_arrays(3, 4, 5), 2);
     }
 
     #[test]
-    fn example_2() {
+    fn test_three_values() {
         assert_eq!(Solution::zig_zag_arrays(3, 1, 3), 10);
     }
 
     #[test]
-    fn small_range() {
+    fn test_length_four_small_range() {
         assert_eq!(Solution::zig_zag_arrays(4, 1, 2), 2);
     }
 
     #[test]
-    fn larger_n() {
-        assert_eq!(
-            Solution::zig_zag_arrays(100, 1, 10),
-            perturbation_free_result()
-        );
-    }
-
-    fn perturbation_free_result() -> i32 {
-        Solution::zig_zag_arrays(100, 1, 10)
-    }
-
-    #[test]
-    fn max_range() {
+    fn test_large_n_matrix_exponentiation() {
         let result = Solution::zig_zag_arrays(1000000000, 1, 75);
         assert!(result >= 0);
     }

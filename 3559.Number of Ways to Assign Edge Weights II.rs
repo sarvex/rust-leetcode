@@ -1,5 +1,5 @@
 impl Solution {
-    /// Uses Binary Lifting LCA with combinatorial path length analysis
+    /// Uses Binary Lifting LCA with combinatorial path length analysis.
     ///
     /// # Intuition
     /// For a path with k edges where each edge can have weight 1 or 2, the total

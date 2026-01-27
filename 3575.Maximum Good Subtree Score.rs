@@ -1,5 +1,5 @@
 impl Solution {
-    /// Maximum Good Subtree Score
+    /// Maximum good subtree score using bitmask DP with subset enumeration.
     ///
     /// # Intuition
     /// A good subset requires each digit 0-9 to appear at most once across all

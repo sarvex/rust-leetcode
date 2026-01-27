@@ -1,5 +1,5 @@
 impl Solution {
-    /// Maximum subgraph score for each node using tree DP with rerooting
+    /// Maximum subgraph score for each node using tree DP with rerooting.
     ///
     /// # Intuition
     /// For each node, find the maximum score of any connected subgraph containing it.
@@ -86,56 +86,46 @@ impl Solution {
 mod tests {
     use super::*;
 
-    struct Solution;
-
     #[test]
-    fn test_example_1() {
-        let n = 3;
+    fn test_linear_tree_mixed_good() {
         let edges = vec![vec![0, 1], vec![1, 2]];
         let good = vec![1, 0, 1];
-        assert_eq!(Solution::max_subgraph_score(n, edges, good), vec![1, 1, 1]);
+        assert_eq!(Solution::max_subgraph_score(3, edges, good), vec![1, 1, 1]);
     }
 
     #[test]
-    fn test_example_2() {
-        let n = 5;
+    fn test_star_tree_with_subtree() {
         let edges = vec![vec![1, 0], vec![1, 2], vec![1, 3], vec![3, 4]];
         let good = vec![0, 1, 0, 1, 1];
         assert_eq!(
-            Solution::max_subgraph_score(n, edges, good),
+            Solution::max_subgraph_score(5, edges, good),
             vec![2, 3, 2, 3, 3]
         );
     }
 
     #[test]
-    fn test_example_3() {
-        let n = 2;
+    fn test_all_bad_nodes() {
         let edges = vec![vec![0, 1]];
         let good = vec![0, 0];
-        assert_eq!(Solution::max_subgraph_score(n, edges, good), vec![-1, -1]);
+        assert_eq!(Solution::max_subgraph_score(2, edges, good), vec![-1, -1]);
     }
 
     #[test]
-    fn test_all_good() {
-        let n = 3;
+    fn test_all_good_nodes() {
         let edges = vec![vec![0, 1], vec![1, 2]];
         let good = vec![1, 1, 1];
-        assert_eq!(Solution::max_subgraph_score(n, edges, good), vec![3, 3, 3]);
+        assert_eq!(Solution::max_subgraph_score(3, edges, good), vec![3, 3, 3]);
     }
 
     #[test]
-    fn test_single_good() {
-        let n = 3;
+    fn test_single_good_center() {
         let edges = vec![vec![0, 1], vec![1, 2]];
         let good = vec![0, 1, 0];
-        assert_eq!(Solution::max_subgraph_score(n, edges, good), vec![0, 1, 0]);
+        assert_eq!(Solution::max_subgraph_score(3, edges, good), vec![0, 1, 0]);
     }
 
     #[test]
-    fn test_single_node() {
-        let n = 1;
-        let edges: Vec<Vec<i32>> = vec![];
-        let good = vec![1];
-        assert_eq!(Solution::max_subgraph_score(n, edges, good), vec![1]);
+    fn test_single_node_good() {
+        assert_eq!(Solution::max_subgraph_score(1, vec![], vec![1]), vec![1]);
     }
 }

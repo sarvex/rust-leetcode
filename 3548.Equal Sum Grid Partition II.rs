@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 impl Solution {
-    /// Partition grid with equal sums using single-cut approach
+    /// Partition grid with equal sums using single-cut approach.
     ///
     /// # Intuition
     /// We can make one horizontal or vertical cut to split the grid into two sections.

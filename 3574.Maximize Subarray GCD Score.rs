@@ -1,4 +1,6 @@
 impl Solution {
+    /// Maximize subarray GCD score with optional doubling.
+    ///
     /// # Intuition
     /// Use distinct GCDs technique: for each right endpoint, only O(log M) distinct GCD values exist.
     /// Store positions for each pow2 value and use binary search for range counting.
@@ -48,7 +50,7 @@ impl Solution {
                 Vec::with_capacity(entries.len() + 1);
 
             for (g, mp, ls, le) in entries {
-                let new_g = gcd(g, nums[r]);
+                let new_g = Self::gcd(g, nums[r]);
                 let new_mp = mp.min(pow2[r]);
 
                 match new_entries.last_mut() {
@@ -96,13 +98,13 @@ impl Solution {
 
         ans
     }
-}
 
-fn gcd(a: i32, b: i32) -> i32 {
-    if b == 0 {
-        a
-    } else {
-        gcd(b, a % b)
+    fn gcd(a: i32, b: i32) -> i32 {
+        if b == 0 {
+            a
+        } else {
+            Self::gcd(b, a % b)
+        }
     }
 }
 

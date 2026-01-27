@@ -19,9 +19,23 @@
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
+
 impl Solution {
-    fn create_tree(vals: &Vec<Vec<i32>>, i: usize, j: usize) -> Option<Rc<RefCell<TreeNode>>> {
-        if i == vals.len() {
+    /// Reverses node values at every odd level of a perfect binary tree.
+    ///
+    /// # Intuition
+    /// Perform a level-order traversal collecting values per level, reverse
+    /// odd-level values, then reconstruct the tree from the collected levels.
+    ///
+    /// # Approach
+    /// 1. BFS to collect values level by level, reversing odd levels
+    /// 2. Reconstruct the tree recursively using the collected level values
+    ///
+    /// # Complexity
+    /// - Time: O(n) — each node visited once during BFS and once during reconstruction
+    /// - Space: O(n) — storage for all node values
+    fn create_tree(vals: &[Vec<i32>], i: usize, j: usize) -> Option<Rc<RefCell<TreeNode>>> {
+        if i >= vals.len() {
             return None;
         }
         Some(Rc::new(RefCell::new(TreeNode {
@@ -36,14 +50,15 @@ impl Solution {
     ) -> Option<Rc<RefCell<TreeNode>>> {
         let mut queue = VecDeque::new();
         queue.push_back(root);
-        let mut d = 0;
+        let mut depth = 0;
         let mut vals = Vec::new();
+
         while !queue.is_empty() {
-            let mut val = Vec::new();
+            let mut level_vals = Vec::with_capacity(queue.len());
             for _ in 0..queue.len() {
-                let mut node = queue.pop_front().unwrap();
-                let mut node = node.as_mut().unwrap().borrow_mut();
-                val.push(node.val);
+                let node = queue.pop_front().unwrap();
+                let mut node = node.as_ref().unwrap().borrow_mut();
+                level_vals.push(node.val);
                 if node.left.is_some() {
                     queue.push_back(node.left.take());
                 }
@@ -51,12 +66,13 @@ impl Solution {
                     queue.push_back(node.right.take());
                 }
             }
-            if d % 2 == 1 {
-                val.reverse();
+            if depth % 2 == 1 {
+                level_vals.reverse();
             }
-            vals.push(val);
-            d += 1;
+            vals.push(level_vals);
+            depth += 1;
         }
+
         Self::create_tree(&vals, 0, 0)
     }
 }
