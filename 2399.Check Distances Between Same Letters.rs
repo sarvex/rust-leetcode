@@ -17,8 +17,8 @@ impl Solution {
         let bytes = s.as_bytes();
         let mut first = [0i32; 26];
 
-        bytes.iter().enumerate().all(|(i, &c)| {
-            let j = (c - b'a') as usize;
+        bytes.iter().enumerate().all(|(i, c)| {
+            let j = (*c - b'a') as usize;
             let i = i as i32;
             if first[j] > 0 {
                 i - first[j] == distance[j]

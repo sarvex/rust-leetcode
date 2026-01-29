@@ -18,7 +18,7 @@ impl Solution {
         let mut differences: Vec<i64> = nums1
             .iter()
             .zip(nums2.iter())
-            .map(|(&a, &b)| i64::from(a) - i64::from(b))
+            .map(|(a, b)| i64::from(*a) - i64::from(*b))
             .collect();
 
         Self::merge_sort_count(&mut differences, i64::from(diff))

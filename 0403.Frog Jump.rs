@@ -17,7 +17,7 @@ impl Solution {
     /// - Space: O(n²) for the memoization table
     pub fn can_cross(stones: Vec<i32>) -> bool {
         let n = stones.len();
-        let pos: HashMap<i32, usize> = stones.iter().enumerate().map(|(i, &s)| (s, i)).collect();
+        let pos: HashMap<i32, usize> = stones.iter().enumerate().map(|(i, s)| (*s, i)).collect();
         let mut memo = vec![vec![-1i8; n]; n];
 
         fn dfs(

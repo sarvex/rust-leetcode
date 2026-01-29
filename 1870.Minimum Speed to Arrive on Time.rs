@@ -26,8 +26,8 @@ impl Solution {
             let total: f64 = dist
                 .iter()
                 .enumerate()
-                .map(|(i, &d)| {
-                    let t = d as f64 / speed as f64;
+                .map(|(i, d)| {
+                    let t = *d as f64 / spee*d as f64;
                     if i == n - 1 {
                         t
                     } else {

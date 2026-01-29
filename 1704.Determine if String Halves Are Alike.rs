@@ -26,8 +26,8 @@ impl Solution {
         let balance: i32 = bytes
             .iter()
             .enumerate()
-            .map(|(i, &b)| {
-                if !is_vowel(b) {
+            .map(|(i, b)| {
+                if !is_vowel(*b) {
                     return 0;
                 }
                 if i < n / 2 {

@@ -17,7 +17,7 @@ impl Solution {
         let xy: i32 = grid
             .iter()
             .flat_map(|row| row.iter())
-            .filter(|&&v| v > 0)
+            .filter(|v| **v > 0)
             .count() as i32;
         let yz: i32 = grid.iter().map(|row| *row.iter().max().unwrap_or(&0)).sum();
         let zx: i32 = (0..n)

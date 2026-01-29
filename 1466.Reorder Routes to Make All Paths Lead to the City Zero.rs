@@ -24,8 +24,8 @@ impl Solution {
         fn dfs(node: usize, parent: i32, graph: &[Vec<(usize, i32)>]) -> i32 {
             graph[node]
                 .iter()
-                .filter(|&&(next, _)| next as i32 != parent)
-                .map(|&(next, cost)| cost + dfs(next, node as i32, graph))
+                .filter(|(next, _)| *next as i32 != parent)
+                .map(|(next, cost)| cost + dfs(*next, node as i32, graph))
                 .sum()
         }
 

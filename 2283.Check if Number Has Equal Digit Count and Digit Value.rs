@@ -16,13 +16,13 @@ impl Solution {
         let bytes = num.as_bytes();
         let mut freq = [0u8; 10];
         for &b in bytes {
-            freq[(b - b'0') as usize] += 1;
+            freq[(*b - b'0') as usize] += 1;
         }
 
         bytes
             .iter()
             .enumerate()
-            .all(|(i, &b)| (b - b'0') == freq[i])
+            .all(|(i, b)| (*b - b'0') == freq[i])
     }
 }
 

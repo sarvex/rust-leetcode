@@ -28,7 +28,7 @@ impl Solution {
             mask[(pair[1] - b'0') as usize] |= bit;
         });
 
-        mask.iter().filter(|&&m| m == 7).count() as i32
+        mask.iter().filter(|m| **m == 7).count() as i32
     }
 }
 

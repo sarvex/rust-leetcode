@@ -34,7 +34,7 @@ impl Solution {
         let mut order: Vec<(i32, usize, usize)> = grid
             .iter()
             .enumerate()
-            .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, &v)| (v, i, j)))
+            .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, v)| (*v, i, j)))
             .collect();
         order.sort_unstable();
 

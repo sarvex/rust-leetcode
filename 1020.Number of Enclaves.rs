@@ -44,7 +44,7 @@ impl Solution {
             }
         }
 
-        grid.iter().flatten().filter(|&&x| x == 1).count() as i32
+        grid.iter().flatten().filter(|x| **x == 1).count() as i32
     }
 }
 

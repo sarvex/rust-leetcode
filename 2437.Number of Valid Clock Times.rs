@@ -23,7 +23,7 @@ impl Solution {
                     .as_bytes()
                     .iter()
                     .zip(pattern.iter())
-                    .all(|(&c, &p)| p == b'?' || p == c)
+                    .all(|(c, p)| *p == b'?' || *p == *c)
             })
             .count() as i32
     }

@@ -19,7 +19,7 @@ impl Solution {
         let mismatches = bytes
             .iter()
             .enumerate()
-            .filter(|(i, &b)| b != if i % 2 == 0 { b'0' } else { b'1' })
+            .filter(|(i, b)| **b != if *i % 2 == 0 { b'0' } else { b'1' })
             .count();
         mismatches.min(n - mismatches) as i32
     }

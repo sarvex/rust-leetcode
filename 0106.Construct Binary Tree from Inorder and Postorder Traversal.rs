@@ -35,7 +35,7 @@ impl Solution {
     /// - Space: O(n) — hash map and recursion stack
     pub fn build_tree(inorder: Vec<i32>, postorder: Vec<i32>) -> Option<Rc<RefCell<TreeNode>>> {
         let index_map: HashMap<i32, usize> =
-            inorder.iter().enumerate().map(|(i, &v)| (v, i)).collect();
+            inorder.iter().enumerate().map(|(i, v)| (*v, i)).collect();
 
         fn dfs(
             postorder: &[i32],

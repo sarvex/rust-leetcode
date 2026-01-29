@@ -22,7 +22,7 @@ impl Solution {
         matrix
             .iter()
             .filter_map(|row| {
-                let (min_col, &min_val) = row.iter().enumerate().min_by_key(|(_, &v)| v).unwrap();
+                let (min_col, &min_val) = row.iter().enumerate().min_by_key(|(_, v)| *v).unwrap();
                 if min_val == col_max[min_col] {
                     Some(min_val)
                 } else {

@@ -16,7 +16,7 @@ impl Solution {
     /// - Space: O(n) for the hash set
     pub fn count_elements(arr: Vec<i32>) -> i32 {
         let set: HashSet<i32> = arr.iter().copied().collect();
-        arr.iter().filter(|&&x| set.contains(&(x + 1))).count() as i32
+        arr.iter().filter(|x| set.contains(&(**x + 1))).count() as i32
     }
 }
 

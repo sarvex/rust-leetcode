@@ -23,7 +23,7 @@ impl Solution {
         par.iter()
             .enumerate()
             .skip(1)
-            .for_each(|(i, &p)| children[p as usize].push(i));
+            .for_each(|(i, p)| children[*p as usize].push(i));
 
         let digit_mask = |mut val: i64| -> Option<usize> {
             let mut mask = 0usize;

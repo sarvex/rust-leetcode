@@ -21,12 +21,12 @@ impl Solution {
         digits
             .iter()
             .enumerate()
-            .map(|(i, &c)| {
+            .map(|(i, c)| {
                 let needs_dash = ((i + 1) % 3 == 0 && i < n - 2) || (n % 3 == 1 && i == n - 3);
                 if needs_dash {
-                    format!("{c}-")
+                    format!("{}-", *c)
                 } else {
-                    c.to_string()
+                    (*c).to_string()
                 }
             })
             .collect()

@@ -18,7 +18,7 @@ impl Solution {
     /// - Space: O(n^2) for the DP table
     pub fn len_longest_fib_subseq(arr: Vec<i32>) -> i32 {
         let n = arr.len();
-        let index: HashMap<i32, usize> = arr.iter().enumerate().map(|(i, &v)| (v, i)).collect();
+        let index: HashMap<i32, usize> = arr.iter().enumerate().map(|(i, v)| (*v, i)).collect();
         let mut dp = vec![vec![2; n]; n];
         let mut max_len = 0;
 

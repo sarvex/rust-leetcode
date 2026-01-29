@@ -22,7 +22,7 @@ impl Solution {
         let mut pairs: Vec<(i32, i32)> = nums.iter().copied().zip(cost.iter().copied()).collect();
         pairs.sort_unstable_by_key(|&(num, _)| num);
 
-        let total_weight: i64 = cost.iter().map(|&c| i64::from(c)).sum();
+        let total_weight: i64 = cost.iter().map(|&c| i64::from(*c)).sum();
         let median_threshold = (total_weight + 1) / 2;
 
         let mut accumulated = 0i64;
@@ -39,7 +39,7 @@ impl Solution {
     fn calculate_total_cost(nums: &[i32], cost: &[i32], target: i64) -> i64 {
         nums.iter()
             .zip(cost.iter())
-            .map(|(&num, &c)| (i64::from(num) - target).abs() * i64::from(c))
+            .map(|(num, c)| (i64::from(*num) - target).abs() * i64::from(*c))
             .sum()
     }
 }

@@ -16,7 +16,7 @@ impl Solution {
                 nums[..j]
                     .iter()
                     .enumerate()
-                    .filter(move |(i, &x)| x == nums[j] && (i * j) as i32 % k == 0)
+                    .filter(move |(i, x)| *x == nums[j] && (i * j) as i32 % k == 0)
             })
             .count() as i32
     }

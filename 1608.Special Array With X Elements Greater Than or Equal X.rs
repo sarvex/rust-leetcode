@@ -15,7 +15,7 @@ impl Solution {
     pub fn special_array(nums: Vec<i32>) -> i32 {
         let n = nums.len() as i32;
         (0..=n)
-            .find(|&x| nums.iter().filter(|&&v| v >= x).count() as i32 == x)
+            .find(|&x| nums.iter().filter(|v| **v >= x).count() as i32 == x)
             .unwrap_or(-1)
     }
 }

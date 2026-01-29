@@ -1,458 +1,292 @@
 # Rust Agent Rules
 
-This rules file defines standards for enterprise-grade, production-ready Rust development using **Rust 2024 edition**, adhering to idiomatic Rust patterns, industry best practices, clean architecture principles, and self-documenting code conventions optimized for maximum performance and efficiency.
+Enterprise-grade, performant Rust solutions using **Rust 2024 edition**. Code that wins at LeetCode and ships to production.
 
-## Rust Edition
+## Rust 2024 Edition
 
-- **Target Rust 2024 edition** for all code
 - Use `edition = "2024"` in Cargo.toml
-- Follow Rust 2024 match ergonomics rules strictly
-- Leverage new language features introduced in Rust 2024
+- Follow Rust 2024 match ergonomics rules (see [Match Ergonomics](#match-ergonomics-rust-2024))
+- Run `cargo fmt` and `cargo clippy -- -D warnings` before committing
 
-## Persona
-
-- You are a 10x Rust developer who writes concise, self-documenting code that is highly performant and production-ready
-- Minimize the tokens used in prompts and communications
-- Do not check for existing files when asked to create a new file
-- Guide in problem-solving instead of providing direct answers
-- When asked about programming concepts, give direct and clear explanations
-- Break problems into smaller, manageable steps and help others think through them
-- Ask leading questions and provide hints instead of just telling the answer
-- Encourage debugging independently before offering suggestions
-- Refer to relevant documentation instead of providing solutions
-- Encourage modular thinking—breaking problems into reusable components
-- Focus on zero-cost abstractions and memory safety without sacrificing performance
-- Prefer compile-time checks over runtime assertions when possible
-- Write code that is enterprise-grade, auditable, and maintainable at scale
-- Prioritize idiomatic Rust patterns that leverage the language's strengths
-
-## Enterprise-Grade Standards
-
-### Production Readiness
-
-- All code must be production-ready: no TODO comments, no placeholder logic
-- Implement comprehensive error handling with actionable error messages
-- Design for horizontal scalability and high availability
-- Ensure all public APIs are backward-compatible or versioned
-- Implement graceful degradation for external service failures
-- Use feature flags for controlled rollouts of new functionality
-- Design for observability: logging, metrics, and distributed tracing
-- Implement circuit breakers for external dependencies
-- Ensure deterministic behavior across all code paths
-
-### Code Quality Gates
-
-- Zero tolerance for clippy warnings in CI/CD pipelines
-- Mandatory code review for all changes
-- Automated security scanning with `cargo-audit` and `cargo-deny`
-- Performance regression testing for critical paths
-- Minimum 90% code coverage for business logic
-- Static analysis with `cargo-clippy --all-targets -- -D warnings`
-- MSRV (Minimum Supported Rust Version) policy enforcement
-
-### Reliability & Resilience
-
-- Implement retry logic with exponential backoff for transient failures
-- Use timeouts for all external calls
-- Design idempotent operations where possible
-- Implement health checks and readiness probes
-- Use structured logging with correlation IDs
-- Handle resource exhaustion gracefully (memory, file descriptors, connections)
-
-## Code Style
-
-### Syntax & Formatting
-
-- Maximum line length of 120 characters
-- Follow the official Rust style guide (rustfmt defaults)
-- Use trailing commas in multiline structures
-- Organize imports alphabetically, with std imports first
-- Use consistent block style with opening brace on the same line
-- Use Rust's standard formatting with `rustfmt`
-- Include detailed documentation comments with `///`
-- Group implementation logic within `impl Solution`
-- Place tests in a `#[cfg(test)]` module
-
-### Naming Conventions
-
-- Use `snake_case` for variables, functions, methods, modules, and macros
-- Use `PascalCase` for types, traits, and enum variants
-- Use `SCREAMING_SNAKE_CASE` for constants and static variables
-- Use short but descriptive lifetime names (e.g., `'a`, `'ctx`, `'item`)
-- Prefix getter methods with `get_` only when they perform non-trivial computation
-- Suffix conversion methods with `_as_` or use `into_`, `to_` consistently
-- Use descriptive error enum names ending with `Error` or `Err`
-- Descriptive variable naming (e.g., `num_to_index` not `map`)
-- Name closures descriptively when stored in variables (e.g., `is_valid`, `transform_item`)
-
-### Type System
-
-- Leverage the type system to prevent errors at compile time
-- Prefer newtype patterns over primitive types for domain concepts
-- Use phantom types to encode additional information at the type level
-- Implement appropriate traits for user-defined types (`Debug`, `Clone`, etc.)
-- Use generics over trait objects for zero-cost abstractions unless dynamic dispatch is required
-- Leverage type state patterns for enforcing invariants
-- Use `impl Fn` / `impl FnMut` / `impl FnOnce` for closure parameters in public APIs
-- Prefer concrete closure types over `Box<dyn Fn>` for performance
-
-## Lambda Functions & Closures
-
-### Closure-First Design
-
-- **Prefer closures over named functions** for single-use transformations
-- Use closures extensively with iterator combinators for expressive, efficient code
-- Leverage closures for callback patterns and event handling
-- Use closures to capture context and reduce parameter passing
-- Prefer `|x| expr` syntax for simple, single-expression closures
-- Use multi-line closures with explicit blocks for complex logic
-
-### Iterator Combinators with Closures
-
-- **Always prefer iterator chains over manual loops** for collection processing
-- Use `.map()` for element transformation
-- Use `.filter()` for conditional selection
-- Use `.filter_map()` to combine filtering and transformation
-- Use `.fold()` / `.reduce()` for aggregations
-- Use `.flat_map()` for nested collection flattening
-- Use `.take_while()` / `.skip_while()` for conditional iteration
-- Use `.enumerate()` when indices are needed
-- Use `.zip()` for parallel iteration over multiple collections
-- Use `.chain()` to concatenate iterators
-- Use `.collect()` with type annotations for clarity
-- Use `.any()` / `.all()` for boolean aggregations
-- Use `.find()` / `.position()` for searching
-- Use `.partition()` for splitting collections
-- Use `.inspect()` for debugging iterator chains (remove in production)
-
-### Closure Performance Guidelines
-
-- Prefer `move` closures when ownership transfer improves performance
-- Use `&` references in closures to avoid unnecessary cloning
-- Leverage closure inlining—prefer `impl Fn` over `dyn Fn` for monomorphization
-- Avoid capturing large structs; capture only necessary fields
-- Use `FnOnce` for closures that consume captured values
-- Use `FnMut` for closures that mutate captured state
-- Use `Fn` for closures that only read captured state
-- Chain iterator operations to enable loop fusion optimization
-
-### Rust 2024 Match Ergonomics in Closures
-
-Rust 2024 enforces stricter match ergonomics. Reference patterns are not allowed when the default binding mode is already `ref`:
+## Code Structure
 
 ```rust
-// WRONG: Mixing implicit ref binding with explicit & pattern (Rust 2024 error)
-.filter(|(i, &c)| ...)  // Error: reference pattern not allowed under `ref` default binding mode
-.take_while(|&&c| ...)  // Error: same issue
-
-// CORRECT: Use consistent patterns with explicit dereference
-.filter(|(i, c)| (*c - b'0') as usize != i % 2)  // Dereference inside closure
-.take_while(|c| **c == target)                   // Double dereference for &&T
-
-// CORRECT: Fully explicit pattern (alternative)
-.filter(|&(i, c)| (c - b'0') as usize != i % 2)  // Move & to outer pattern
-```
-
-Key rules for Rust 2024:
-- When matching on `&T`, the default binding mode becomes `ref`
-- Cannot use `&` patterns inside a pattern that already has implicit `ref` binding
-- Either dereference inside the closure body, or make the outer pattern explicit with `&`
-- Prefer the dereference approach (`*c`) for clarity and consistency
-
-### Idiomatic Closure Patterns
-
-```rust
-// Prefer this: expressive, efficient, idiomatic (Rust 2024 compliant)
-let result: Vec<_> = items
-    .iter()
-    .filter(|item| item.is_valid())
-    .map(|item| item.transform())
-    .collect();
-
-// Over this: verbose, imperative
-let mut result = Vec::new();
-for item in &items {
-    if item.is_valid() {
-        result.push(item.transform());
+impl Solution {
+    /// Brief description of the approach.
+    ///
+    /// # Intuition
+    /// Key insight that unlocks the solution.
+    ///
+    /// # Approach
+    /// Algorithm explanation with key steps.
+    ///
+    /// # Complexity
+    /// - Time: O(n)
+    /// - Space: O(1)
+    pub fn solve(nums: Vec<i32>) -> i32 {
+        nums.iter().filter(|n| **n > 0).sum()
     }
 }
 
-// Rust 2024 compliant enumeration pattern
-let count: usize = chars
-    .iter()
-    .enumerate()
-    .filter(|(i, c)| **c == expected[*i])  // Dereference c, not pattern match
-    .count();
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_example() {
+        assert_eq!(Solution::solve(vec![1, -2, 3]), 4);
+    }
+
+    #[test]
+    fn test_edge_empty() {
+        assert_eq!(Solution::solve(vec![]), 0);
+    }
+}
 ```
 
-### Advanced Closure Techniques
+## Naming
 
-- Use closure composition for complex transformations
-- Leverage `Option::map` and `Result::map` for monadic operations
-- Use `and_then` for chained fallible operations
-- Implement custom iterator adapters with closures when needed
-- Use closures with `sort_by`, `sort_by_key` for custom ordering
-- Leverage `group_by` patterns with closures for data aggregation
-- Use closures in `HashMap::entry` API for efficient updates
+| Type | Convention | Example |
+|------|------------|---------|
+| Variables, functions | `snake_case` | `num_to_index`, `find_max` |
+| Types, traits, enums | `PascalCase` | `TreeNode`, `ListNode` |
+| Constants | `SCREAMING_SNAKE_CASE` | `MOD`, `MAX_SIZE` |
 
-## Documentation
+Use descriptive names: `char_count` over `map`, `left_sum` over `ls`.
 
-### Doc Comments
+## Iterators vs Loops
 
-- Document all public items with doc comments (`///` or `//!`)
-- For public functions include:
-  - Tagline describing the approach of the solution as first section
-  - #intuition - first thoughts on how to solve the problem as second section
-  - #approach - approach to solving the problem as third section
-  - #complexity - separate lines for time and space complexity as fourth section
-- Include examples in documentation for non-obvious functions
-- Explain the purpose, not the mechanics (what/why, not how)
-- Document panics, errors, and edge cases explicitly
-- Use Markdown formatting in doc comments for readability
-- Include links to related items where appropriate
-- Document closure parameters with expected behavior
+Use iterators when the transformation is clear:
 
-### Code Documentation
+```rust
+// Good: clear pipeline
+let sum: i32 = nums.iter().filter(|x| **x > 0).sum();
 
-- Write self-documenting code with descriptive variable and function names and minimal comments
-- Document complex algorithms with high-level explanations
-- Use doc comments to explain "why" decisions were made
-- Include performance characteristics for critical paths
-- Document invariants and assumptions
-- Comment complex closure chains explaining the transformation pipeline
+// Good: complex early-exit logic is clearer as loop
+for &num in &nums {
+    if num < 0 { break; }
+    process(num);
+}
+```
 
-## Language Features
+**Guideline**: If an iterator chain exceeds 4-5 combinators or requires awkward workarounds, use a loop.
 
-### Ownership & Borrowing
+## Match Ergonomics (Rust 2024)
 
-- Prefer borrowing over ownership when appropriate
-- Use lifetimes explicitly when they clarify intent
-- Avoid unnecessary cloning by leveraging Rust's borrowing system
-- Use `Cow<T>` for conditionally owned data
-- Design APIs to minimize ownership transfers when possible
-- Implement `Copy` trait only for small, stack-allocated types
-- Use `move` closures judiciously to transfer ownership when beneficial
+Rust 2024 disallows reference patterns (`&`) when default binding mode is already `ref`:
 
-### Error Handling
+```rust
+// ERROR in Rust 2024
+.filter(|(i, &c)| ...)      // & inside implicit ref binding
+.take_while(|&&c| ...)      // same issue
 
-- Use `Result<T, E>` for operations that can fail
-- Define custom error types for domain-specific errors
-- Implement `std::error::Error` trait for error types
-- Use `?` operator for error propagation
-- Avoid unwrapping in production code unless panic is intended
-- Use `thiserror` or similar for deriving error implementations
-- Use pattern matching and `Option`/`Result` types
-- Prefer `if let` and `match` over `.unwrap()`
-- Return empty collections when no solution exists
-- Use `.ok()`, `.err()`, `.map_err()` for error transformation
-- Leverage `Option::and_then` and `Result::and_then` for chained operations
+// CORRECT: dereference in body
+.filter(|(i, c)| *c == target)
+.take_while(|c| **c == target)
 
-### Concurrency & Async
+// CORRECT: explicit outer pattern
+.filter(|&(i, c)| c == target)
+```
 
-- Use message passing over shared state when possible
-- Leverage `tokio` or `async-std` for asynchronous operations
-- Use appropriate synchronization primitives (`Mutex`, `RwLock`, etc.)
-- Consider performance implications of locking strategies
-- Use channels for communication between threads
-- Design for backpressure in asynchronous systems
-- Use `rayon` for data-parallel operations with closure-based APIs
-- Leverage `par_iter()` for parallel iterator processing
+Run `cargo fix --edition` to auto-migrate.
 
-### Memory Management
+## Performance Patterns
 
-- Minimize heap allocations in hot paths
-- Use stack allocation for temporary values
-- Leverage custom allocators for performance-critical components
-- Reuse allocations when processing large data sets
-- Avoid unnecessary Box indirection
-- Use `Vec` capacity hints when approximate size is known
-- Prefer `.collect::<Vec<_>>()` over manual vector construction
-- Use `with_capacity` when collection size is predictable
+### Preallocate Collections
+```rust
+let mut result = Vec::with_capacity(n);
+let mut seen = HashMap::with_capacity(n);
+```
 
-## Performance Optimization
+### Avoid Unnecessary Cloning
+```rust
+// Prefer
+fn process(s: &str) -> usize { s.len() }
 
-### Compile-Time Features
+// Over
+fn process(s: String) -> usize { s.len() }
+```
 
-- Enable Link-Time Optimization (LTO) for release builds
-- Use appropriate optimization levels (`opt-level`)
-- Configure codegen units appropriately (fewer for better optimization)
-- Enable profile-guided optimization for critical applications
-- Use conditional compilation for platform-specific optimizations
-- Leverage `const` evaluation for compile-time computation
-- Use `#[inline]` hints for small, hot functions
-- Leverage `const fn` for compile-time closure-like behavior
+### Use Entry API for HashMap
+```rust
+*freq.entry(key).or_insert(0) += 1;
+```
 
-### Runtime Performance
+### Bit Manipulation
+```rust
+// Check if power of 2
+n > 0 && (n & (n - 1)) == 0
 
-- Profile before optimizing (use flamegraphs, perf, etc.)
-- Focus on hot paths identified by profiling
-- Avoid allocations in tight loops
-- Use SIMD operations via `std::simd` or `packed_simd` when appropriate
-- Batch operations to minimize overhead
-- Consider cache locality when designing data structures
-- Leverage zero-copy parsing when possible
-- Use memoization for expensive, repeated calculations
-- Initialize collections with capacity when size is known
-- Use references (`&`) to avoid unnecessary cloning
-- Leverage Rust's standard library (HashMap, BTreeMap, etc.)
-- **Prefer lazy iterators over eager collection operations**
-- Use `.iter()` over `.into_iter()` when ownership isn't needed
-- Chain iterator operations for loop fusion
+// Count set bits
+n.count_ones()
 
-### Memory Efficiency
+// XOR for finding single element
+nums.iter().fold(0, |acc, x| acc ^ x)
+```
 
-- Use appropriate data structures for the task
-- Consider `smallvec` for small arrays that might grow
-- Use compact representations for large data sets
-- Leverage bit packing for space efficiency when appropriate
-- Consider arena allocators for objects with the same lifetime
-- Minimize padding through careful struct field ordering
-- Use `Box<[T]>` over `Vec<T>` for fixed-size heap allocations
+## Common Algorithm Patterns
 
-## Clean Architecture
+### Two Pointers
+```rust
+let (mut l, mut r) = (0, nums.len() - 1);
+while l < r {
+    match nums[l] + nums[r] {
+        sum if sum == target => return vec![l, r],
+        sum if sum < target => l += 1,
+        _ => r -= 1,
+    }
+}
+```
 
-### Module Structure
+### Sliding Window
+```rust
+let (mut start, mut end, mut best) = (0, 0, 0);
+while end < nums.len() {
+    // expand: add nums[end] to window state
+    while /* window invalid */ {
+        // shrink: remove nums[start] from state
+        start += 1;
+    }
+    best = best.max(end - start + 1);
+    end += 1;
+}
+```
 
-- Organize code by domain concept, not implementation details
-- Separate interface from implementation
-- Use the facade pattern to simplify complex subsystems
-- Keep public API surface minimal and focused
-- Hide implementation details in private modules
-- Use re-exports to create a clean public API
-- Use closure-based dependency injection for testability
+### Binary Search
+```rust
+// Standard library
+nums.binary_search(&target).unwrap_or_else(|i| i)
 
-### Dependency Management
+// Custom bounds
+let idx = nums.partition_point(|&x| x < target);
+```
 
-- Follow dependency inversion principle
-- Define clear abstraction boundaries using traits
-- Minimize external dependencies
-- Use feature flags to make dependencies optional when possible
-- Audit dependencies for security and performance
-- Prefer stdlib solutions when they exist
-- Use closure parameters for pluggable behavior
+### DFS/BFS
+```rust
+// DFS recursive
+fn dfs(node: Option<Rc<RefCell<TreeNode>>>) -> i32 {
+    node.map_or(0, |n| {
+        let n = n.borrow();
+        1 + dfs(n.left.clone()).max(dfs(n.right.clone()))
+    })
+}
 
-### Application Layers
+// BFS iterative
+let mut queue = VecDeque::from([root]);
+while let Some(node) = queue.pop_front() {
+    // process, then queue.push_back(children)
+}
+```
 
-- Domain: Core business logic and entities
-- Application: Use cases and business rules
-- Infrastructure: External resources and technical concerns
-- Interface: User interaction points (CLI, API, GUI)
-- Dependencies should point inward toward domain
+### Dynamic Programming
+```rust
+// Bottom-up with space optimization
+let (mut prev, mut curr) = (0, 1);
+for i in 2..=n {
+    (prev, curr) = (curr, prev + curr);
+}
+```
 
-## Coding Patterns
+### Union-Find
+```rust
+fn find(parent: &mut [usize], x: usize) -> usize {
+    if parent[x] != x {
+        parent[x] = find(parent, parent[x]); // path compression
+    }
+    parent[x]
+}
 
-### Rust Idioms
+fn union(parent: &mut [usize], rank: &mut [usize], x: usize, y: usize) {
+    let (px, py) = (find(parent, x), find(parent, y));
+    if px != py {
+        match rank[px].cmp(&rank[py]) {
+            std::cmp::Ordering::Less => parent[px] = py,
+            std::cmp::Ordering::Greater => parent[py] = px,
+            std::cmp::Ordering::Equal => { parent[py] = px; rank[px] += 1; }
+        }
+    }
+}
+```
 
-- Use builder pattern for complex object construction
-- Implement From/Into for clean type conversions
-- Use the newtype pattern for type safety
-- **Leverage iterators with closures for collection processing**
-- Use match expressions over if/else chains when appropriate
-- Follow the "fail fast" principle for errors
-- Use `Option::map` and `Result::map` for transformations
-- Chain methods using closures for fluent APIs
+## Error Handling
 
-### Functional Patterns
+**LeetCode context**: Constraints are guaranteed. Use direct indexing and `unwrap()` when the problem guarantees validity.
 
-- Prefer immutable data transformations over mutable state
-- Use closures for strategy pattern implementation
-- Leverage higher-order functions for code reuse
-- Use `Option` and `Result` as monads with closure combinators
-- Implement custom iterators for domain-specific sequences
-- Use closure-based callbacks for event-driven architectures
-- Apply function composition patterns where applicable
+**Production context**: Use `Result<T, E>` with `?` propagation:
 
-### API Design
+```rust
+fn parse_input(s: &str) -> Result<i32, ParseIntError> {
+    s.trim().parse()
+}
+```
 
-- Make illegal states unrepresentable through the type system
-- Provide sensible defaults while allowing configuration
-- Design for composition over inheritance
-- Make interfaces hard to misuse
-- Prefer methods returning `Self` for chainable APIs
-- Use associated types in traits for better ergonomics
-- Accept `impl Fn` for maximum flexibility in closure parameters
-- Design APIs that compose well with iterator adapters
+## Safety Guidelines
 
-### Testing
+- Prefer safe abstractions; use `unsafe` only when necessary and isolate it
+- Validate inputs at system boundaries
+- Use `#[cfg(debug_assertions)]` for expensive runtime checks during development
 
-- Write unit tests for core logic (min 90% coverage)
-- Use property-based testing for complex algorithms
-- Test error cases explicitly
-- Leverage Rust's type system in test code
-- Use integration tests for crossing module boundaries (min 80% coverage)
-- Apply end-to-end tests for critical flows (min 60% coverage)
-- Use doc tests as examples and verification
-- Test performance-critical code with benchmarks
-- Follow the AAA pattern (Arrange, Act, Assert)
-- Keep tests independent and isolated
-- Use descriptive test names
-- Implement test factories for test data
-- Test edge cases and boundary conditions
-- Encourage reflection on what was learned after solving issues
-- Use closures for test setup and teardown logic
-- Test closure behavior with various input combinations
+```rust
+// Isolated unsafe with safety comment
+// SAFETY: index is bounds-checked above
+unsafe { *slice.get_unchecked(index) }
+```
 
-## Safety & Security
+## Testing Checklist
 
-### Safety Practices
+Every solution needs:
+- [ ] Example cases from problem statement
+- [ ] Edge cases: empty input, single element, all same values
+- [ ] Boundary conditions: i32::MIN, i32::MAX, large n
+- [ ] Negative cases where applicable
 
-- **Never use `unsafe` code** - always find safe alternatives
-- Use `#[forbid(unsafe_code)]` at the crate level
-- Use bounds checking or validation for all input
-- Audit external dependencies for unsafe usage
-- Never expose raw pointers in public APIs
-- Prefer safe abstractions from std library over manual memory management
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-### Security Considerations
+    #[test]
+    fn test_examples() {
+        assert_eq!(Solution::solve(vec![2, 7, 11, 15], 9), vec![0, 1]);
+    }
 
-- Validate all external input
-- Use constant-time comparisons for sensitive data
-- Avoid serializing/deserializing untrusted data into complex types
-- Use secure defaults for cryptographic operations
-- Implement proper error handling that doesn't leak information
-- Consider fuzzing for input processing code
-- Sanitize closure inputs when accepting user-provided functions
+    #[test]
+    fn test_edge_two_elements() {
+        assert_eq!(Solution::solve(vec![3, 3], 6), vec![0, 1]);
+    }
 
-## Tooling Integration
+    #[test]
+    fn test_negative_numbers() {
+        assert_eq!(Solution::solve(vec![-1, -2, -3, -4, -5], -8), vec![2, 4]);
+    }
+}
+```
 
-### Development Tools
+## Tooling
 
-- Use clippy with pedantic lints enabled
-- Configure rustfmt for consistent formatting
-- Leverage cargo-audit for security vulnerability checking
-- Use cargo-expand for macro debugging
-- Implement CI with comprehensive test coverage
-- Use cargo-flamegraph for performance profiling
-- Use `cargo clippy -- -W clippy::nursery` for additional checks
+```bash
+# Format and lint
+cargo fmt && cargo clippy -- -D warnings
 
-### Optimization Tools
+# Run tests
+cargo test
 
-- Use cargo bench for performance benchmarking
-- Configure LLVM optimization passes appropriately
-- Use PGO (Profile-Guided Optimization) for critical paths
-- Leverage miri for undefined behavior detection
-- Use cargo-bloat to identify binary size contributors
-- Configure appropriate target-specific optimizations
-- Profile closure-heavy code to ensure inlining occurs
+# Check for security vulnerabilities
+cargo audit
 
-## Documentation & Knowledge Sharing
+# Benchmark (for optimization work)
+cargo bench
+```
 
-### Repository Documentation
+## Quick Reference
 
-- Maintain a comprehensive README
-- Include setup and development instructions
-- Document architecture decisions (ADRs)
-- Provide troubleshooting guides
-- Keep documentation in sync with code
-- Maintain a changelog for the codebase
-- Document common closure patterns used in the codebase
-
-### Learning & Improvement
-
-- Encourage reading and understanding error messages instead of just fixing issues
-- Help identify patterns in mistakes to improve debugging skills
-- Suggest different approaches instead of leading to one specific solution
-- Guide toward using debugging tools like LLDB, GDB, and Rust-specific analyzers
-- Help understand how to search effectively for Rust-specific solutions
-- Document known limitations and edge cases
-- Share idiomatic closure patterns through code reviews
+| Need | Use |
+|------|-----|
+| O(1) lookup | `HashMap`, `HashSet` |
+| Sorted keys | `BTreeMap`, `BTreeSet` |
+| Queue (FIFO) | `VecDeque` |
+| Stack (LIFO) | `Vec` with `push`/`pop` |
+| Priority queue | `BinaryHeap` (max-heap; wrap in `Reverse` for min) |
+| Counting | `HashMap<K, usize>` with entry API |
+| Memoization | `HashMap<State, Result>` |
+| Graph adjacency | `Vec<Vec<usize>>` or `HashMap<usize, Vec<usize>>` |

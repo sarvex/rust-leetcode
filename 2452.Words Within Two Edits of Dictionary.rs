@@ -21,7 +21,7 @@ impl Solution {
                     s.as_bytes()
                         .iter()
                         .zip(t.as_bytes().iter())
-                        .filter(|(&a, &b)| a != b)
+                        .filter(|(a, b)| *a != *b)
                         .count()
                         < 3
                 })

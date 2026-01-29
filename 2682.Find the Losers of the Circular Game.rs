@@ -19,7 +19,7 @@ impl Solution {
         let mut pos = 0usize;
         let mut step = 1usize;
 
-        while !visited[pos] {
+        while !*visited[pos] {
             visited[pos] = true;
             pos = (pos + step * k as usize) % n_us;
             step += 1;
@@ -28,7 +28,7 @@ impl Solution {
         visited
             .iter()
             .enumerate()
-            .filter(|(_, &v)| !v)
+            .filter(|(_, v)| !*v)
             .map(|(i, _)| (i + 1) as i32)
             .collect()
     }

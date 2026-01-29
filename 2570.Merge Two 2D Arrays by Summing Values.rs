@@ -25,8 +25,8 @@ impl Solution {
 
         cnt.iter()
             .enumerate()
-            .filter(|(_, &v)| v > 0)
-            .map(|(i, &v)| vec![i as i32, v])
+            .filter(|(_, v)| *v > 0)
+            .map(|(i, v)| vec![i as i32, *v])
             .collect()
     }
 }

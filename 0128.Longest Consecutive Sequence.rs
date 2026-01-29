@@ -19,10 +19,10 @@ impl Solution {
     pub fn longest_consecutive(nums: Vec<i32>) -> i32 {
         let set: HashSet<i32> = nums.iter().copied().collect();
         set.iter()
-            .filter(|&&num| !set.contains(&(num - 1)))
-            .map(|&start| {
+            .filter(|num| !set.contains(&(**num - 1)))
+            .map(|start| {
                 (0..)
-                    .take_while(|&len| set.contains(&(start + len)))
+                    .take_while(|len| set.contains(&(*start + *len)))
                     .count() as i32
             })
             .max()

@@ -39,7 +39,7 @@ impl Solution {
             if nums.is_empty() {
                 return None;
             }
-            let (idx, &max_val) = nums.iter().enumerate().max_by_key(|(_, &v)| v).unwrap();
+            let (idx, &max_val) = nums.iter().enumerate().max_by_key(|(_, v)| *v).unwrap();
             Some(Rc::new(RefCell::new(TreeNode {
                 val: max_val,
                 left: build(&nums[..idx]),

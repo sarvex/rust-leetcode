@@ -17,7 +17,7 @@ impl Solution {
         let mut diff: Vec<i32> = nums1
             .iter()
             .zip(nums2.iter())
-            .map(|(&a, &b)| a - b)
+            .map(|(a, b)| *a - *b)
             .collect();
         diff.sort_unstable();
 

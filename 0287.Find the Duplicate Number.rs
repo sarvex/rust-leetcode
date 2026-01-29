@@ -17,7 +17,7 @@ impl Solution {
         let (mut left, mut right) = (1, nums.len() - 1);
         while left < right {
             let mid = (left + right) >> 1;
-            let count = nums.iter().filter(|&&x| x <= mid as i32).count();
+            let count = nums.iter().filter(|x| **x <= mid as i32).count();
             if count > mid {
                 right = mid;
             } else {

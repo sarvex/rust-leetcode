@@ -27,7 +27,7 @@ impl Solution {
             s.extend(std::iter::repeat(cur).take(count));
             i += 1;
         }
-        s.iter().take(n).filter(|&&x| x == 1).count() as i32
+        s.iter().take(n).filter(|x| **x == 1).count() as i32
     }
 }
 

@@ -57,12 +57,12 @@ impl Solution {
         let mut cells: Vec<(i32, usize, usize)> = grid
             .iter()
             .enumerate()
-            .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, &v)| (v, i, j)))
+            .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, v)| (*v, i, j)))
             .collect();
         cells.sort_unstable_by(|a, b| b.0.cmp(&a.0));
 
         let mut visited = vec![vec![false; n]; m];
-        for &(val, r, c) in &cells {
+        for (val, r, c) in &cells {
             visited[r][c] = true;
             for (dr, dc) in [(!0usize, 0), (1, 0), (0, !0usize), (0, 1)] {
                 let nr = r.wrapping_add(dr);
@@ -72,7 +72,7 @@ impl Solution {
                 }
             }
             if uf.connected(0, m * n - 1) {
-                return val;
+                return *val;
             }
         }
         0

@@ -15,7 +15,7 @@ impl Solution {
     pub fn most_words_found(sentences: Vec<String>) -> i32 {
         sentences
             .iter()
-            .map(|s| s.as_bytes().iter().filter(|&&b| b == b' ').count() as i32 + 1)
+            .map(|s| s.as_bytes().iter().filter(|b| **b == b' ').count() as i32 + 1)
             .max()
             .unwrap_or(0)
     }

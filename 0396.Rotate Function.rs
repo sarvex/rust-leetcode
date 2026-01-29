@@ -17,7 +17,7 @@ impl Solution {
     pub fn max_rotate_function(nums: Vec<i32>) -> i32 {
         let n = nums.len() as i32;
         let sum: i32 = nums.iter().sum();
-        let f0: i32 = nums.iter().enumerate().map(|(i, &v)| i as i32 * v).sum();
+        let f0: i32 = nums.iter().enumerate().map(|(i, v)| i as i32 * *v).sum();
         (1..nums.len())
             .fold((f0, f0), |(prev, best), k| {
                 let current = prev + sum - n * nums[nums.len() - k];

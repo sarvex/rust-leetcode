@@ -29,7 +29,7 @@ impl Solution {
         let val_to_idx: HashMap<i32, usize> = sorted_unique
             .iter()
             .enumerate()
-            .map(|(i, &v)| (v, i))
+            .map(|(i, v)| (*v, i))
             .collect();
         let nums: Vec<usize> = nums.iter().map(|v| val_to_idx[v]).collect();
         let m = sorted_unique.len();

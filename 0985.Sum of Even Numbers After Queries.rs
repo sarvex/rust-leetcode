@@ -13,7 +13,7 @@ impl Solution {
     /// - Time: O(n + q) where q is query count
     /// - Space: O(q) for the result
     pub fn sum_even_after_queries(mut nums: Vec<i32>, queries: Vec<Vec<i32>>) -> Vec<i32> {
-        let mut even_sum: i32 = nums.iter().filter(|&&x| x % 2 == 0).sum();
+        let mut even_sum: i32 = nums.iter().filter(|x| **x % 2 == 0).sum();
         let mut result = Vec::with_capacity(queries.len());
 
         for query in &queries {

@@ -13,7 +13,7 @@ impl Solution {
     /// - Space: O(1)
     pub fn percentage_letter(s: String, letter: char) -> i32 {
         let target = letter as u8;
-        let count = s.as_bytes().iter().filter(|&&b| b == target).count();
+        let count = s.as_bytes().iter().filter(|b| **b == target).count();
         (100 * count / s.len()) as i32
     }
 }

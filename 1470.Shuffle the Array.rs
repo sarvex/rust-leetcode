@@ -17,7 +17,7 @@ impl Solution {
         nums[..n]
             .iter()
             .zip(nums[n..].iter())
-            .flat_map(|(&x, &y)| [x, y])
+            .flat_map(|(x, y)| [*x, *y])
             .collect()
     }
 }

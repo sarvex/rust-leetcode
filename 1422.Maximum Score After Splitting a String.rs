@@ -16,7 +16,7 @@ impl Solution {
     /// - Space: O(1)
     pub fn max_score(s: String) -> i32 {
         let bytes = s.as_bytes();
-        let mut ones: i32 = bytes.iter().filter(|&&b| b == b'1').count() as i32;
+        let mut ones: i32 = bytes.iter().filter(|b| **b == b'1').count() as i32;
         let mut zeros = 0i32;
         let mut best = 0;
 

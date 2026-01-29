@@ -20,8 +20,8 @@ impl Solution {
         weight
             .iter()
             .enumerate()
-            .filter(|(_, &w)| w > 0)
-            .map(|(val, &w)| vec![val as i32, w])
+            .filter(|(_, w)| *w > 0)
+            .map(|(val, w)| vec![val as i32, *w])
             .collect()
     }
 }

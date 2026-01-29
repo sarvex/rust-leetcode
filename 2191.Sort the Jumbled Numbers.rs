@@ -33,11 +33,11 @@ impl Solution {
         let mut indexed: Vec<(i32, usize)> = nums
             .iter()
             .enumerate()
-            .map(|(i, &v)| (map_value(v), i))
+            .map(|(i, v)| (map_value(*v), i))
             .collect();
         indexed.sort();
 
-        indexed.iter().map(|&(_, i)| nums[i]).collect()
+        indexed.iter().map(|(_, i)| nums[*i]).collect()
     }
 }
 

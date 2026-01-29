@@ -36,8 +36,8 @@ impl Solution {
 
         result
             .iter()
-            .skip_while(|&&d| d == 0)
-            .map(|&d| (d + b'0') as char)
+            .skip_while(|d| **d == 0)
+            .map(|d| (*d + b'0') as char)
             .collect()
     }
 }

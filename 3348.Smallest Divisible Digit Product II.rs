@@ -1,5 +1,5 @@
 /// Tracks required counts of prime factors 2, 3, 5, 7 for divisibility.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Default)]
 struct PrimeFactorCount {
     twos: u8,
     threes: u8,
@@ -7,18 +7,18 @@ struct PrimeFactorCount {
     sevens: u8,
 }
 
-/// Precomputed factor contributions for digits 0-9: (twos, threes, fives, sevens)
-const DIGIT_FACTORS: [(u8, u8, u8, u8); 10] = [
+/// Precomputed factor contributions for digits 0-9: (twos, threes, fives, sevens).
+const DIGIT_PRIME_FACTORS: [(u8, u8, u8, u8); 10] = [
     (0, 0, 0, 0), // 0
     (0, 0, 0, 0), // 1
-    (1, 0, 0, 0), // 2
-    (0, 1, 0, 0), // 3
-    (2, 0, 0, 0), // 4
-    (0, 0, 1, 0), // 5
-    (1, 1, 0, 0), // 6
-    (0, 0, 0, 1), // 7
-    (3, 0, 0, 0), // 8
-    (0, 2, 0, 0), // 9
+    (1, 0, 0, 0), // 2 = 2^1
+    (0, 1, 0, 0), // 3 = 3^1
+    (2, 0, 0, 0), // 4 = 2^2
+    (0, 0, 1, 0), // 5 = 5^1
+    (1, 1, 0, 0), // 6 = 2^1 * 3^1
+    (0, 0, 0, 1), // 7 = 7^1
+    (3, 0, 0, 0), // 8 = 2^3
+    (0, 2, 0, 0), // 9 = 3^2
 ];
 
 impl Solution {
@@ -30,150 +30,154 @@ impl Solution {
     /// factor requirements as we process each digit prefix.
     ///
     /// # Approach
-    /// 1. Validate t contains only factors 2, 3, 5, 7. If not, return "-1".
-    /// 2. Calculate prefix requirements, stopping at first zero (invalid digit).
-    /// 3. If original number satisfies requirements, return it.
-    /// 4. Try incrementing each position from right to left, filling suffix optimally.
-    /// 5. Fallback to length n+1 if no same-length solution exists.
+    /// 1. Validate t contains only factors 2, 3, 5, 7. If not, return "-1"
+    /// 2. Calculate prefix requirements, stopping at first zero (invalid digit)
+    /// 3. If original number satisfies requirements, return it
+    /// 4. Try incrementing each position from right to left, filling suffix optimally
+    /// 5. Fallback to length n+1 if no same-length solution exists
     ///
     /// # Complexity
     /// - Time: O(n) where n is the length of num
     /// - Space: O(n) for storing prefix requirements and result
-    pub fn smallest_number(num: String, t: i64) -> String {
-        let required_factors = Self::extract_prime_factors(t);
+    pub fn smallest_number(num: String, target: i64) -> String {
+        // Extract prime factors from target
+        let required_factors = Self::extract_prime_factors(target);
         if required_factors.twos == u8::MAX {
-            return "-1".into();
+            return "-1".to_string();
         }
 
-        let bytes = num.as_bytes();
-        let num_length = bytes.len();
+        let input_bytes = num.as_bytes();
+        let input_length = input_bytes.len();
 
-        let min_digits_for_t = Self::min_digits_needed(required_factors);
+        // Calculate minimum digits needed for target
+        let min_digits_for_target = Self::compute_minimum_digits_needed(required_factors);
 
-        // Early check: if t=1, any zero-free number works
-        if min_digits_for_t == 0 {
-            if !bytes.contains(&b'0') {
-                return num;
-            }
-        }
-
-        let mut prefix_requirements = Vec::with_capacity(num_length + 1);
-        prefix_requirements.push(required_factors);
-
-        let mut remaining_factors = required_factors;
-        let mut first_zero_index = num_length;
-
-        for (idx, &byte) in bytes.iter().enumerate() {
-            if byte == b'0' {
-                first_zero_index = idx;
-                break;
-            }
-            remaining_factors = Self::subtract_digit_factors(remaining_factors, byte - b'0');
-            prefix_requirements.push(remaining_factors);
-        }
-
-        // Check if original number is valid
-        if first_zero_index == num_length && Self::min_digits_needed(remaining_factors) == 0 {
+        // Early return if current number already satisfies and has no zeros
+        if min_digits_for_target == 0 && !input_bytes.contains(&b'0') {
             return num;
         }
 
-        let max_changeable_index = first_zero_index.min(num_length - 1);
+        // Build prefix factor requirements array
+        let mut prefix_factors = Vec::with_capacity(input_length + 1);
+        prefix_factors.push(required_factors);
 
-        // Try incrementing each position from right to left
-        for change_index in (0..=max_changeable_index).rev() {
-            let factors_before = prefix_requirements[change_index];
-            let suffix_length = num_length - 1 - change_index;
-            let current_digit = bytes[change_index] - b'0';
+        let mut remaining_factors = required_factors;
+        let mut first_zero_pos = input_length;
 
-            for candidate in (current_digit + 1)..=9 {
-                let factors_after = Self::subtract_digit_factors(factors_before, candidate);
-                let min_needed = Self::min_digits_needed(factors_after);
+        // Process each digit, tracking remaining factors needed
+        for (pos, &digit_byte) in input_bytes.iter().enumerate() {
+            if digit_byte == b'0' {
+                first_zero_pos = pos;
+                break;
+            }
+            let digit = digit_byte - b'0';
+            remaining_factors = Self::subtract_digit_contribution(remaining_factors, digit);
+            prefix_factors.push(remaining_factors);
+        }
 
-                if min_needed <= suffix_length {
+        // If no zeros and already satisfies, return original
+        if first_zero_pos == input_length
+            && Self::compute_minimum_digits_needed(remaining_factors) == 0
+        {
+            return num;
+        }
+
+        // Try incrementing from rightmost possible position
+        let max_changeable_pos = first_zero_pos.min(input_length - 1);
+
+        for change_pos in (0..=max_changeable_pos).rev() {
+            let factors_before = prefix_factors[change_pos];
+            let suffix_len = input_length - 1 - change_pos;
+            let current_digit = input_bytes[change_pos] - b'0';
+
+            // Try each larger digit at this position
+            for new_digit in (current_digit + 1)..=9 {
+                let factors_after = Self::subtract_digit_contribution(factors_before, new_digit);
+                let min_suffix_digits = Self::compute_minimum_digits_needed(factors_after);
+
+                if min_suffix_digits <= suffix_len {
                     return Self::build_result(
-                        &bytes[..change_index],
-                        candidate,
+                        &input_bytes[..change_pos],
+                        new_digit,
                         factors_after,
-                        suffix_length,
+                        suffix_len,
                     );
                 }
             }
         }
 
-        // Fallback: smallest number with more digits
-        let result_length = min_digits_for_t.max(num_length + 1);
-        Self::build_result(&[], b'1' - b'0', required_factors, result_length - 1)
+        // No same-length solution found, create longer number
+        let result_len = min_digits_for_target.max(input_length + 1);
+        Self::build_result(&[], 1, required_factors, result_len - 1)
     }
 
+    /// Extracts prime factors 2, 3, 5, 7 from target value.
     #[inline(always)]
-    fn extract_prime_factors(mut target: i64) -> PrimeFactorCount {
-        let mut twos = 0u8;
-        while target % 2 == 0 {
-            twos += 1;
-            target /= 2;
+    fn extract_prime_factors(mut value: i64) -> PrimeFactorCount {
+        let mut factors = PrimeFactorCount::default();
+
+        // Extract powers of 2
+        while value % 2 == 0 {
+            factors.twos += 1;
+            value /= 2;
         }
-        let mut threes = 0u8;
-        while target % 3 == 0 {
-            threes += 1;
-            target /= 3;
+
+        // Extract powers of 3
+        while value % 3 == 0 {
+            factors.threes += 1;
+            value /= 3;
         }
-        let mut fives = 0u8;
-        while target % 5 == 0 {
-            fives += 1;
-            target /= 5;
+
+        // Extract powers of 5
+        while value % 5 == 0 {
+            factors.fives += 1;
+            value /= 5;
         }
-        let mut sevens = 0u8;
-        while target % 7 == 0 {
-            sevens += 1;
-            target /= 7;
+
+        // Extract powers of 7
+        while value % 7 == 0 {
+            factors.sevens += 1;
+            value /= 7;
         }
-        if target != 1 {
-            return PrimeFactorCount {
-                twos: u8::MAX,
-                threes: 0,
-                fives: 0,
-                sevens: 0,
-            };
+
+        // If any other prime factors remain, no solution exists
+        if value != 1 {
+            factors.twos = u8::MAX; // Sentinel value for invalid
         }
-        PrimeFactorCount {
-            twos,
-            threes,
-            fives,
-            sevens,
-        }
+
+        factors
     }
 
+    /// Subtracts contribution of a digit from remaining factor requirements.
     #[inline(always)]
-    fn subtract_digit_factors(factors: PrimeFactorCount, digit: u8) -> PrimeFactorCount {
-        let (s2, s3, s5, s7) = DIGIT_FACTORS[digit as usize];
+    fn subtract_digit_contribution(factors: PrimeFactorCount, digit: u8) -> PrimeFactorCount {
+        let (twos, threes, fives, sevens) = DIGIT_PRIME_FACTORS[digit as usize];
         PrimeFactorCount {
-            twos: factors.twos.saturating_sub(s2),
-            threes: factors.threes.saturating_sub(s3),
-            fives: factors.fives.saturating_sub(s5),
-            sevens: factors.sevens.saturating_sub(s7),
+            twos: factors.twos.saturating_sub(twos),
+            threes: factors.threes.saturating_sub(threes),
+            fives: factors.fives.saturating_sub(fives),
+            sevens: factors.sevens.saturating_sub(sevens),
         }
     }
 
     /// Calculates minimum digits needed to satisfy factor requirements.
     #[inline(always)]
-    fn min_digits_needed(factors: PrimeFactorCount) -> usize {
+    fn compute_minimum_digits_needed(factors: PrimeFactorCount) -> usize {
+        // Each 7 needs digit 7, each 5 needs digit 5
         let mut count = factors.sevens as usize + factors.fives as usize;
 
-        let threes = factors.threes as usize;
-        let twos = factors.twos as usize;
+        // Each pair of 3s can use digit 9, each triple of 2s can use digit 8
+        count += (factors.threes / 2) as usize + (factors.twos / 3) as usize;
 
-        // Use 9s for pairs of 3s, 8s for triples of 2s
-        count += threes / 2 + twos / 3;
+        // Handle remaining factors
+        let rem_threes = factors.threes % 2;
+        let rem_twos = factors.twos % 3;
 
-        let rem3 = threes % 2;
-        let rem2 = twos % 3;
-
-        // Handle remainders optimally
-        count += match (rem3, rem2) {
-            (0, 0) => 0,
-            (0, 1) | (0, 2) | (1, 0) | (1, 1) => 1,
-            (1, 2) => 2,
-            _ => 0,
+        count += match (rem_threes, rem_twos) {
+            (0, 0) => 0,                            // No remainder
+            (0, 1) | (0, 2) | (1, 0) | (1, 1) => 1, // One digit handles remainder
+            (1, 2) => 2,                            // Need two digits (2 and 6)
+            _ => unreachable!(),
         };
 
         count
@@ -185,32 +189,34 @@ impl Solution {
         prefix: &[u8],
         changed_digit: u8,
         mut factors: PrimeFactorCount,
-        suffix_length: usize,
+        suffix_len: usize,
     ) -> String {
-        let total_length = prefix.len() + 1 + suffix_length;
-        let mut result = Vec::with_capacity(total_length);
+        let mut result = Vec::with_capacity(prefix.len() + 1 + suffix_len);
 
+        // Add prefix and changed digit
         result.extend_from_slice(prefix);
         result.push(changed_digit + b'0');
 
-        // Build suffix digits
-        let mut suffix = Vec::with_capacity(suffix_length);
+        // Build optimal suffix digits
+        let mut suffix = Vec::with_capacity(suffix_len);
 
-        for _ in 0..factors.sevens {
-            suffix.push(b'7');
-        }
-        for _ in 0..factors.fives {
-            suffix.push(b'5');
-        }
+        // Add required prime factor digits
+        suffix.extend(vec![b'7'; factors.sevens as usize]);
+        suffix.extend(vec![b'5'; factors.fives as usize]);
+
+        // Use 9s for pairs of 3s
         while factors.threes >= 2 {
             suffix.push(b'9');
             factors.threes -= 2;
         }
+
+        // Use 8s for triples of 2s
         while factors.twos >= 3 {
             suffix.push(b'8');
             factors.twos -= 3;
         }
 
+        // Handle remaining factors with appropriate digits
         match (factors.threes, factors.twos) {
             (0, 1) => suffix.push(b'2'),
             (0, 2) => suffix.push(b'4'),
@@ -223,13 +229,15 @@ impl Solution {
             _ => {}
         }
 
+        // Sort suffix digits to get smallest lexicographic result
         suffix.sort_unstable();
 
-        // Pad with 1s, then append sorted suffix
-        let padding = suffix_length - suffix.len();
-        result.resize(result.len() + padding, b'1');
+        // Pad with 1s if needed
+        let padding = suffix_len - suffix.len();
+        result.extend(vec![b'1'; padding]);
         result.extend(suffix);
 
+        // SAFETY: result contains only ASCII digits '0'-'9', which are valid UTF-8
         unsafe { String::from_utf8_unchecked(result) }
     }
 }
@@ -239,7 +247,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_example1() {
+    fn test_example_basic_increment() {
         assert_eq!(
             Solution::smallest_number("1234".to_string(), 256),
             "1488".to_string()
@@ -247,7 +255,7 @@ mod tests {
     }
 
     #[test]
-    fn test_example2() {
+    fn test_example_already_valid() {
         assert_eq!(
             Solution::smallest_number("12355".to_string(), 50),
             "12355".to_string()
@@ -255,7 +263,7 @@ mod tests {
     }
 
     #[test]
-    fn test_example3() {
+    fn test_example_impossible() {
         assert_eq!(
             Solution::smallest_number("11111".to_string(), 26),
             "-1".to_string()
@@ -271,7 +279,7 @@ mod tests {
     }
 
     #[test]
-    fn test_t_is_one() {
+    fn test_target_is_one() {
         assert_eq!(
             Solution::smallest_number("123".to_string(), 1),
             "123".to_string()
@@ -295,7 +303,7 @@ mod tests {
     }
 
     #[test]
-    fn test_large_t_small_num() {
+    fn test_large_target_small_num() {
         assert_eq!(
             Solution::smallest_number("12".to_string(), 1968750),
             "255555579".to_string()
@@ -307,6 +315,30 @@ mod tests {
         assert_eq!(
             Solution::smallest_number("4093".to_string(), 180),
             "4159".to_string()
+        );
+    }
+
+    #[test]
+    fn test_all_ones() {
+        assert_eq!(
+            Solution::smallest_number("1111".to_string(), 7),
+            "1117".to_string()
+        );
+    }
+
+    #[test]
+    fn test_prime_beyond_seven() {
+        assert_eq!(
+            Solution::smallest_number("999".to_string(), 11),
+            "-1".to_string()
+        );
+    }
+
+    #[test]
+    fn test_complex_factors() {
+        assert_eq!(
+            Solution::smallest_number("123".to_string(), 84),
+            "136".to_string()
         );
     }
 }

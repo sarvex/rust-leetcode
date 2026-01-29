@@ -17,7 +17,7 @@ impl Solution {
         let mut remaining: Vec<i32> = capacity
             .iter()
             .zip(rocks.iter())
-            .map(|(&c, &r)| c - r)
+            .map(|(c, r)| *c - *r)
             .collect();
         remaining.sort_unstable();
 

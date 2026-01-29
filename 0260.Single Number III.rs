@@ -15,12 +15,12 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(1)
     pub fn single_number(nums: Vec<i32>) -> Vec<i32> {
-        let xor_all = nums.iter().fold(0, |acc, &x| acc ^ x);
+        let xor_all = nums.iter().fold(0, |acc, x| acc ^ *x);
         let lowest_bit = xor_all & (-xor_all);
         let a = nums
             .iter()
-            .filter(|&&x| x & lowest_bit != 0)
-            .fold(0, |acc, &x| acc ^ x);
+            .filter(|x| **x & lowest_bit != 0)
+            .fold(0, |acc, x| acc ^ *x);
         vec![a, xor_all ^ a]
     }
 }

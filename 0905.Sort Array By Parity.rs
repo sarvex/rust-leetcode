@@ -35,7 +35,7 @@ mod tests {
     #[test]
     fn test_basic() {
         let result = Solution::sort_array_by_parity(vec![3, 1, 2, 4]);
-        assert!(result.iter().take_while(|&&x| x % 2 == 0).count() == 2);
+        assert!(result.iter().take_while(|x| **x % 2 == 0).count() == 2);
     }
 
     #[test]

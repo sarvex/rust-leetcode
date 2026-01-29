@@ -18,7 +18,7 @@ impl Solution {
         workers.sort_unstable();
         jobs.iter()
             .zip(workers.iter())
-            .map(|(&a, &b)| (a + b - 1) / b)
+            .map(|(a, b)| (*a + *b - 1) / *b)
             .max()
             .unwrap_or(0)
     }

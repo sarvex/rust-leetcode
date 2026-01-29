@@ -25,8 +25,8 @@ impl Solution {
                 let mut col = start_pos[1];
                 instructions[i..]
                     .iter()
-                    .take_while(|&&b| {
-                        match b {
+                    .take_while(|b| {
+                        match **b {
                             b'U' => row -= 1,
                             b'D' => row += 1,
                             b'L' => col -= 1,

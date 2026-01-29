@@ -23,7 +23,7 @@ impl AuthenticationManager {
         if self
             .tokens
             .get(&token_id)
-            .is_some_and(|&expiry| expiry > current_time)
+            .is_some_and(|expiry| *expiry > current_time)
         {
             self.tokens
                 .insert(token_id, current_time + self.time_to_live);
@@ -33,7 +33,7 @@ impl AuthenticationManager {
     fn count_unexpired_tokens(&self, current_time: i32) -> i32 {
         self.tokens
             .values()
-            .filter(|&&expiry| expiry > current_time)
+            .filter(|expiry| **expiry > current_time)
             .count() as i32
     }
 }

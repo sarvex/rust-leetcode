@@ -15,7 +15,7 @@ impl Solution {
     pub fn total_hamming_distance(nums: Vec<i32>) -> i32 {
         let n = nums.len() as i32;
         (0..32).fold(0, |total, bit| {
-            let ones = nums.iter().filter(|&&x| (x >> bit) & 1 == 1).count() as i32;
+            let ones = nums.iter().filter(|x| (**x >> bit) & 1 == 1).count() as i32;
             total + ones * (n - ones)
         })
     }

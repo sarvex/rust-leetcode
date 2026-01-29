@@ -20,7 +20,7 @@ impl Solution {
         let base: i32 = customers
             .iter()
             .zip(grumpy.iter())
-            .map(|(&c, &g)| c * (1 - g))
+            .map(|(c, g)| *c * (1 - *g))
             .sum();
 
         let mut window: i32 = (0..minutes).map(|i| customers[i] * grumpy[i]).sum();

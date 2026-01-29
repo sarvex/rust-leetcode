@@ -17,7 +17,7 @@ impl Solution {
         seats
             .iter()
             .zip(students.iter())
-            .map(|(&s, &t)| (s - t).abs())
+            .map(|(s, t)| (*s - *t).abs())
             .sum()
     }
 }

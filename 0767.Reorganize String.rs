@@ -30,8 +30,8 @@ impl Solution {
         let mut heap: BinaryHeap<(usize, u8)> = freq
             .iter()
             .enumerate()
-            .filter(|(_, &f)| f > 0)
-            .map(|(i, &f)| (f, i as u8 + b'a'))
+            .filter(|(_, f)| **f > 0)
+            .map(|(i, f)| (*f, i as u8 + b'a'))
             .collect();
 
         let mut result = String::with_capacity(n);

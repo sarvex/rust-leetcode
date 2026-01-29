@@ -17,8 +17,8 @@ impl Solution {
     /// - Space: O(1)
     pub fn number_of_beams(bank: Vec<String>) -> i32 {
         bank.iter()
-            .map(|row| row.as_bytes().iter().filter(|&&b| b == b'1').count() as i32)
-            .filter(|&count| count > 0)
+            .map(|row| row.as_bytes().iter().filter(|b| **b == b'1').count() as i32)
+            .filter(|count| *count > 0)
             .fold((0, 0), |(total, prev), cur| (total + prev * cur, cur))
             .0
     }

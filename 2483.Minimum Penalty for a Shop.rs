@@ -16,12 +16,12 @@ impl Solution {
     /// - Space: O(1)
     pub fn best_closing_time(customers: String) -> i32 {
         let bytes = customers.as_bytes();
-        let total_y = bytes.iter().filter(|&&b| b == b'Y').count() as i32;
+        let total_y = bytes.iter().filter(|&&b| *b == b'Y').count() as i32;
 
         let (best_hour, _, _) = bytes.iter().enumerate().fold(
             (0, total_y, total_y),
-            |(best_hour, best_penalty, penalty), (i, &b)| {
-                let new_penalty = if b == b'Y' { penalty - 1 } else { penalty + 1 };
+            |(best_hour, best_penalty, penalty), (i, b)| {
+                let new_penalty = if *b == b'Y' { penalty - 1 } else { penalty + 1 };
                 if new_penalty < best_penalty {
                     (i as i32 + 1, new_penalty, new_penalty)
                 } else {
