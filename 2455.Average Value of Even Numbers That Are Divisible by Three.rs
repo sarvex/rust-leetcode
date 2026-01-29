@@ -16,7 +16,7 @@ impl Solution {
     pub fn average_value(nums: Vec<i32>) -> i32 {
         let (sum, count) = nums
             .iter()
-            .filter(|&&x| x % 6 == 0)
+            .filter(|x| **x % 6 == 0)
             .fold((0, 0), |(s, n), &x| (s + x, n + 1));
 
         if count == 0 {

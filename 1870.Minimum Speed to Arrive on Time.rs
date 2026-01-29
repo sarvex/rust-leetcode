@@ -27,7 +27,7 @@ impl Solution {
                 .iter()
                 .enumerate()
                 .map(|(i, d)| {
-                    let t = *d as f64 / spee*d as f64;
+                    let t = *d as f64 / speed as f64;
                     if i == n - 1 {
                         t
                     } else {

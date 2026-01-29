@@ -17,7 +17,7 @@ impl Solution {
         let k = k as usize;
         let s = blocks.as_bytes();
 
-        let black_count = s[..k].iter().filter(|&&c| c == b'B').count();
+        let black_count = s[..k].iter().filter(|c| **c == b'B').count();
         let mut min_whites = k - black_count;
         let mut blacks = black_count;
 

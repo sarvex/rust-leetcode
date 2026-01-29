@@ -19,13 +19,13 @@ impl Solution {
     /// - Time: O(n log n + k log k)
     /// - Space: O(n + k)
     pub fn k_sum(nums: Vec<i32>, k: i32) -> i64 {
-        let max_sum: i64 = nums.iter().filter(|&&x| x > 0).map(|&x| x as i64).sum();
+        let max_sum: i64 = nums.iter().filter(|x| **x > 0).map(|x| *x as i64).sum();
 
         if k == 1 {
             return max_sum;
         }
 
-        let mut abs_values: Vec<i64> = nums.iter().map(|&x| (x as i64).abs()).collect();
+        let mut abs_values: Vec<i64> = nums.iter().map(|x| (*x as i64).abs()).collect();
         abs_values.sort_unstable();
 
         let n = abs_values.len();

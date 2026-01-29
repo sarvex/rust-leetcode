@@ -24,7 +24,7 @@ impl Solution {
         let mut budget = additional_rocks;
         remaining
             .iter()
-            .take_while(|&&need| {
+            .take_while(|need| {
                 budget -= need;
                 budget >= 0
             })

@@ -17,7 +17,7 @@ impl Solution {
     pub fn most_frequent_even(nums: Vec<i32>) -> i32 {
         let cnt: HashMap<i32, i32> =
             nums.iter()
-                .filter(|&&x| x % 2 == 0)
+                .filter(|x| **x % 2 == 0)
                 .fold(HashMap::new(), |mut acc, &x| {
                     *acc.entry(x).or_insert(0) += 1;
                     acc

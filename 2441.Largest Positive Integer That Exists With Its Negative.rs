@@ -18,7 +18,7 @@ impl Solution {
     pub fn find_max_k(nums: Vec<i32>) -> i32 {
         let set: HashSet<i32> = nums.iter().copied().collect();
         set.iter()
-            .filter(|&&x| x > 0 && set.contains(&-x))
+            .filter(|x| **x > 0 && set.contains(&-**x))
             .copied()
             .max()
             .unwrap_or(-1)

@@ -65,7 +65,7 @@ impl Solution {
     fn dfs(g: &[Vec<usize>], vals: &[i32], counts: &mut [usize], i: usize, parent: usize) -> i32 {
         let subtree_sum = g[i]
             .iter()
-            .filter(|&&conn| conn != parent)
+            .filter(|conn| **conn != parent)
             .fold(vals[i], |sum, &conn| {
                 sum + Self::dfs(g, vals, counts, conn, i)
             });

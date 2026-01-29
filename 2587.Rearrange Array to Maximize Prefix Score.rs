@@ -17,7 +17,7 @@ impl Solution {
 
         let mut prefix_sum: i64 = 0;
         nums.iter()
-            .take_while(|&&x| {
+            .take_while(|x| {
                 prefix_sum += x as i64;
                 prefix_sum > 0
             })
