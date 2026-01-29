@@ -1,19 +1,18 @@
-// Definition for singly-linked list.
-// #[derive(PartialEq, Eq, Clone, Debug)]
-// pub struct ListNode {
-//   pub val: i32,
-//   pub next: Option<Box<ListNode>>
-// }
-//
-// impl ListNode {
-//   #[inline]
-//   fn new(val: i32) -> Self {
-//     ListNode {
-//       next: None,
-//       val
-//     }
-//   }
-// }
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub struct ListNode {
+    pub val: i32,
+    pub next: Option<Box<ListNode>>,
+}
+
+impl ListNode {
+    #[inline]
+    fn new(val: i32) -> Self {
+        ListNode { next: None, val }
+    }
+}
+
+pub struct Solution;
+
 impl Solution {
     /// Reverses a singly linked list iteratively using pointer manipulation.
     ///
@@ -38,5 +37,94 @@ impl Solution {
             prev = Some(node);
         }
         prev
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Helper function to create a linked list from a vector
+    fn vec_to_list(vec: Vec<i32>) -> Option<Box<ListNode>> {
+        let mut head = None;
+        for val in vec.into_iter().rev() {
+            let mut node = Box::new(ListNode::new(val));
+            node.next = head;
+            head = Some(node);
+        }
+        head
+    }
+
+    /// Helper function to convert a linked list to a vector
+    fn list_to_vec(mut head: Option<Box<ListNode>>) -> Vec<i32> {
+        let mut result = Vec::new();
+        while let Some(node) = head {
+            result.push(node.val);
+            head = node.next;
+        }
+        result
+    }
+
+    #[test]
+    fn test_reverse_list_example1() {
+        // Input: [1,2,3,4,5]
+        // Expected: [5,4,3,2,1]
+        let head = vec_to_list(vec![1, 2, 3, 4, 5]);
+        let reversed = Solution::reverse_list(head);
+        assert_eq!(list_to_vec(reversed), vec![5, 4, 3, 2, 1]);
+    }
+
+    #[test]
+    fn test_reverse_list_example2() {
+        // Input: [1,2]
+        // Expected: [2,1]
+        let head = vec_to_list(vec![1, 2]);
+        let reversed = Solution::reverse_list(head);
+        assert_eq!(list_to_vec(reversed), vec![2, 1]);
+    }
+
+    #[test]
+    fn test_reverse_list_empty() {
+        // Input: []
+        // Expected: []
+        let head = None;
+        let reversed = Solution::reverse_list(head);
+        assert_eq!(reversed, None);
+    }
+
+    #[test]
+    fn test_reverse_list_single_node() {
+        // Input: [1]
+        // Expected: [1]
+        let head = vec_to_list(vec![1]);
+        let reversed = Solution::reverse_list(head);
+        assert_eq!(list_to_vec(reversed), vec![1]);
+    }
+
+    #[test]
+    fn test_reverse_list_three_nodes() {
+        // Input: [1,2,3]
+        // Expected: [3,2,1]
+        let head = vec_to_list(vec![1, 2, 3]);
+        let reversed = Solution::reverse_list(head);
+        assert_eq!(list_to_vec(reversed), vec![3, 2, 1]);
+    }
+
+    #[test]
+    fn test_reverse_list_negative_values() {
+        // Input: [-1,-2,-3]
+        // Expected: [-3,-2,-1]
+        let head = vec_to_list(vec![-1, -2, -3]);
+        let reversed = Solution::reverse_list(head);
+        assert_eq!(list_to_vec(reversed), vec![-3, -2, -1]);
+    }
+
+    #[test]
+    fn test_reverse_list_large_list() {
+        // Input: [1,2,3,4,5,6,7,8,9,10]
+        // Expected: [10,9,8,7,6,5,4,3,2,1]
+        let head = vec_to_list(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        let reversed = Solution::reverse_list(head);
+        assert_eq!(list_to_vec(reversed), vec![10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
     }
 }

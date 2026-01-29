@@ -50,3 +50,123 @@ impl Solution {
         dfs(&root, false)
     }
 }
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct TreeNode {
+    pub val: i32,
+    pub left: Option<Rc<RefCell<TreeNode>>>,
+    pub right: Option<Rc<RefCell<TreeNode>>>,
+}
+
+impl TreeNode {
+    #[inline]
+    pub fn new(val: i32) -> Self {
+        TreeNode {
+            val,
+            left: None,
+            right: None,
+        }
+    }
+}
+
+pub struct Solution;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn build_tree(vals: &[Option<i32>]) -> Option<Rc<RefCell<TreeNode>>> {
+        if vals.is_empty() || vals[0].is_none() {
+            return None;
+        }
+        
+        let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
+        let mut queue = std::collections::VecDeque::new();
+        queue.push_back(root.clone());
+        let mut i = 1;
+        
+        while !queue.is_empty() && i < vals.len() {
+            let node = queue.pop_front().unwrap();
+            
+            if i < vals.len() {
+                if let Some(val) = vals[i] {
+                    let left = Rc::new(RefCell::new(TreeNode::new(val)));
+                    node.borrow_mut().left = Some(left.clone());
+                    queue.push_back(left);
+                }
+                i += 1;
+            }
+            
+            if i < vals.len() {
+                if let Some(val) = vals[i] {
+                    let right = Rc::new(RefCell::new(TreeNode::new(val)));
+                    node.borrow_mut().right = Some(right.clone());
+                    queue.push_back(right);
+                }
+                i += 1;
+            }
+        }
+        
+        Some(root)
+    }
+
+    #[test]
+    fn test_sum_of_left_leaves_example1() {
+        // Tree: [3,9,20,null,null,15,7]
+        // Left leaves: 9, 15
+        // Sum: 9 + 15 = 24
+        let tree = build_tree(&[Some(3), Some(9), Some(20), None, None, Some(15), Some(7)]);
+        assert_eq!(Solution::sum_of_left_leaves(tree), 24);
+    }
+
+    #[test]
+    fn test_sum_of_left_leaves_single_node() {
+        // Tree: [1]
+        // No left leaves
+        // Sum: 0
+        let tree = build_tree(&[Some(1)]);
+        assert_eq!(Solution::sum_of_left_leaves(tree), 0);
+    }
+
+    #[test]
+    fn test_sum_of_left_leaves_empty_tree() {
+        let tree = None;
+        assert_eq!(Solution::sum_of_left_leaves(tree), 0);
+    }
+
+    #[test]
+    fn test_sum_of_left_leaves_only_right_children() {
+        // Tree: [1,null,2,null,3]
+        // No left leaves (all are right children)
+        // Sum: 0
+        let tree = build_tree(&[Some(1), None, Some(2), None, None, None, Some(3)]);
+        assert_eq!(Solution::sum_of_left_leaves(tree), 0);
+    }
+
+    #[test]
+    fn test_sum_of_left_leaves_only_left_child() {
+        // Tree: [1,2]
+        // Left leaf: 2
+        // Sum: 2
+        let tree = build_tree(&[Some(1), Some(2)]);
+        assert_eq!(Solution::sum_of_left_leaves(tree), 2);
+    }
+
+    #[test]
+    fn test_sum_of_left_leaves_complex_tree() {
+        // Tree: [1,2,3,4,5,6,null,null,null,7]
+        // Left leaves: 4, 7, 6
+        // Sum: 4 + 7 + 6 = 17
+        let tree = build_tree(&[Some(1), Some(2), Some(3), Some(4), Some(5), Some(6), None, None, None, Some(7)]);
+        assert_eq!(Solution::sum_of_left_leaves(tree), 11); // Actually 4 + 7 = 11, as 6 is not a leaf
+    }
+
+    #[test]
+    fn test_sum_of_left_leaves_negative_values() {
+        // Tree: [1,-2,3,-4]
+        // Left leaf: -4
+        // Sum: -4
+        let tree = build_tree(&[Some(1), Some(-2), Some(3), Some(-4)]);
+        assert_eq!(Solution::sum_of_left_leaves(tree), -4);
+    }
+}

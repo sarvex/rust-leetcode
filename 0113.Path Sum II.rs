@@ -64,3 +64,95 @@ impl Solution {
         }
     }
 }
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct TreeNode {
+    pub val: i32,
+    pub left: Option<Rc<RefCell<TreeNode>>>,
+    pub right: Option<Rc<RefCell<TreeNode>>>,
+}
+
+impl TreeNode {
+    #[inline]
+    pub fn new(val: i32) -> Self {
+        TreeNode {
+            val,
+            left: None,
+            right: None,
+        }
+    }
+}
+
+pub struct Solution;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn build_tree(vals: &[Option<i32>]) -> Option<Rc<RefCell<TreeNode>>> {
+        if vals.is_empty() || vals[0].is_none() {
+            return None;
+        }
+        
+        let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
+        let mut queue = std::collections::VecDeque::new();
+        queue.push_back(root.clone());
+        let mut i = 1;
+        
+        while !queue.is_empty() && i < vals.len() {
+            if let Some(node) = queue.pop_front() {
+                if i < vals.len() {
+                    if let Some(val) = vals[i] {
+                        let left = Rc::new(RefCell::new(TreeNode::new(val)));
+                        node.borrow_mut().left = Some(left.clone());
+                        queue.push_back(left);
+                    }
+                    i += 1;
+                }
+                
+                if i < vals.len() {
+                    if let Some(val) = vals[i] {
+                        let right = Rc::new(RefCell::new(TreeNode::new(val)));
+                        node.borrow_mut().right = Some(right.clone());
+                        queue.push_back(right);
+                    }
+                    i += 1;
+                }
+            }
+        }
+        
+        Some(root)
+    }
+
+    #[test]
+    fn test_path_sum_example1() {
+        // Tree: [5,4,8,11,null,13,4,7,2,null,null,5,1]
+        // Target: 22
+        // Expected: [[5,4,11,2],[5,8,4,5]]
+        let tree = build_tree(&[
+            Some(5), Some(4), Some(8), Some(11), None, Some(13), Some(4),
+            Some(7), Some(2), None, None, Some(5), Some(1)
+        ]);
+        
+        let mut result = Solution::path_sum(tree, 22);
+        result.sort();
+        let mut expected = vec![vec![5, 4, 11, 2], vec![5, 8, 4, 5]];
+        expected.sort();
+        
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_path_sum_empty_tree() {
+        let tree = None;
+        let result = Solution::path_sum(tree, 0);
+        assert_eq!(result, Vec::<Vec<i32>>::new());
+    }
+
+    #[test]
+    fn test_path_sum_single_node_match() {
+        let tree = build_tree(&[Some(1)]);
+        let result = Solution::path_sum(tree, 1);
+        assert_eq!(result, vec![vec![1]]);
+    }
+}

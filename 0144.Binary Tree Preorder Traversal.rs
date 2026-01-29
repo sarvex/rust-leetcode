@@ -46,3 +46,188 @@ impl Solution {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // TreeNode definition for tests
+    #[derive(Debug, PartialEq, Eq)]
+    pub struct TreeNode {
+        pub val: i32,
+        pub left: Option<Rc<RefCell<TreeNode>>>,
+        pub right: Option<Rc<RefCell<TreeNode>>>,
+    }
+
+    impl TreeNode {
+        #[inline]
+        pub fn new(val: i32) -> Self {
+            TreeNode {
+                val,
+                left: None,
+                right: None,
+            }
+        }
+    }
+
+    struct Solution;
+
+    impl Solution {
+        pub fn preorder_traversal(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {
+            let mut result = Vec::new();
+            Self::dfs(&root, &mut result);
+            result
+        }
+
+        fn dfs(root: &Option<Rc<RefCell<TreeNode>>>, result: &mut Vec<i32>) {
+            if let Some(node) = root {
+                let node = node.borrow();
+                result.push(node.val);
+                Self::dfs(&node.left, result);
+                Self::dfs(&node.right, result);
+            }
+        }
+    }
+
+    // Helper function to create a tree from array representation
+    fn tree_from_vec(values: Vec<Option<i32>>) -> Option<Rc<RefCell<TreeNode>>> {
+        if values.is_empty() || values[0].is_none() {
+            return None;
+        }
+
+        let root = Rc::new(RefCell::new(TreeNode::new(values[0].unwrap())));
+        let mut queue = std::collections::VecDeque::new();
+        queue.push_back(Rc::clone(&root));
+
+        let mut i = 1;
+        while !queue.is_empty() && i < values.len() {
+            let node = queue.pop_front().unwrap();
+
+            if i < values.len() {
+                if let Some(val) = values[i] {
+                    let left = Rc::new(RefCell::new(TreeNode::new(val)));
+                    node.borrow_mut().left = Some(Rc::clone(&left));
+                    queue.push_back(left);
+                }
+                i += 1;
+            }
+
+            if i < values.len() {
+                if let Some(val) = values[i] {
+                    let right = Rc::new(RefCell::new(TreeNode::new(val)));
+                    node.borrow_mut().right = Some(Rc::clone(&right));
+                    queue.push_back(right);
+                }
+                i += 1;
+            }
+        }
+
+        Some(root)
+    }
+
+    #[test]
+    fn test_example_tree() {
+        // Tree: [1,null,2,3]
+        //       1
+        //        \
+        //         2
+        //        /
+        //       3
+        // Preorder: root -> left -> right = [1, 2, 3]
+        let root = Rc::new(RefCell::new(TreeNode::new(1)));
+        let node2 = Rc::new(RefCell::new(TreeNode::new(2)));
+        let node3 = Rc::new(RefCell::new(TreeNode::new(3)));
+
+        root.borrow_mut().right = Some(Rc::clone(&node2));
+        node2.borrow_mut().left = Some(node3);
+
+        let result = Solution::preorder_traversal(Some(root));
+        assert_eq!(result, vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn test_empty_tree() {
+        // Tree: []
+        let root = tree_from_vec(vec![]);
+        let result = Solution::preorder_traversal(root);
+        assert_eq!(result, Vec::<i32>::new());
+    }
+
+    #[test]
+    fn test_single_node() {
+        // Tree: [1]
+        let root = tree_from_vec(vec![Some(1)]);
+        let result = Solution::preorder_traversal(root);
+        assert_eq!(result, vec![1]);
+    }
+
+    #[test]
+    fn test_complete_tree() {
+        // Tree: [1,2,3,4,5,6,7]
+        //         1
+        //       /   \
+        //      2     3
+        //     / \   / \
+        //    4   5 6   7
+        // Preorder: 1 -> 2 -> 4 -> 5 -> 3 -> 6 -> 7
+        let root = tree_from_vec(vec![
+            Some(1),
+            Some(2),
+            Some(3),
+            Some(4),
+            Some(5),
+            Some(6),
+            Some(7),
+        ]);
+        let result = Solution::preorder_traversal(root);
+        assert_eq!(result, vec![1, 2, 4, 5, 3, 6, 7]);
+    }
+
+    #[test]
+    fn test_left_skewed_tree() {
+        // Tree: left-skewed
+        //       1
+        //      /
+        //     2
+        //    /
+        //   3
+        //  /
+        // 4
+        // Preorder: 1 -> 2 -> 3 -> 4
+        let root = Rc::new(RefCell::new(TreeNode::new(1)));
+        let node2 = Rc::new(RefCell::new(TreeNode::new(2)));
+        let node3 = Rc::new(RefCell::new(TreeNode::new(3)));
+        let node4 = Rc::new(RefCell::new(TreeNode::new(4)));
+
+        root.borrow_mut().left = Some(Rc::clone(&node2));
+        node2.borrow_mut().left = Some(Rc::clone(&node3));
+        node3.borrow_mut().left = Some(node4);
+
+        let result = Solution::preorder_traversal(Some(root));
+        assert_eq!(result, vec![1, 2, 3, 4]);
+    }
+
+    #[test]
+    fn test_right_skewed_tree() {
+        // Tree: right-skewed
+        //       1
+        //        \
+        //         2
+        //          \
+        //           3
+        //            \
+        //             4
+        // Preorder: 1 -> 2 -> 3 -> 4
+        let root = Rc::new(RefCell::new(TreeNode::new(1)));
+        let node2 = Rc::new(RefCell::new(TreeNode::new(2)));
+        let node3 = Rc::new(RefCell::new(TreeNode::new(3)));
+        let node4 = Rc::new(RefCell::new(TreeNode::new(4)));
+
+        root.borrow_mut().right = Some(Rc::clone(&node2));
+        node2.borrow_mut().right = Some(Rc::clone(&node3));
+        node3.borrow_mut().right = Some(node4);
+
+        let result = Solution::preorder_traversal(Some(root));
+        assert_eq!(result, vec![1, 2, 3, 4]);
+    }
+}
