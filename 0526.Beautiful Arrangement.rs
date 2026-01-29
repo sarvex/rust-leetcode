@@ -50,17 +50,38 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_two() {
-        assert_eq!(Solution::count_arrangement(2), 2);
-    }
-
-    #[test]
     fn test_one() {
         assert_eq!(Solution::count_arrangement(1), 1);
     }
 
     #[test]
+    fn test_two() {
+        assert_eq!(Solution::count_arrangement(2), 2);
+    }
+
+    #[test]
     fn test_three() {
         assert_eq!(Solution::count_arrangement(3), 3);
+    }
+
+    #[test]
+    fn test_four() {
+        assert_eq!(Solution::count_arrangement(4), 8);
+    }
+
+    #[test]
+    fn test_five() {
+        assert_eq!(Solution::count_arrangement(5), 10);
+    }
+
+    #[test]
+    fn test_six() {
+        assert_eq!(Solution::count_arrangement(6), 36);
+    }
+
+    #[test]
+    fn test_fifteen() {
+        // Known result for n=15
+        assert_eq!(Solution::count_arrangement(15), 24679);
     }
 }

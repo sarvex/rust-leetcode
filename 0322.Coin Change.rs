@@ -23,11 +23,7 @@ impl Solution {
                 dp[j] = dp[j].min(dp[j - c] + 1);
             }
         }
-        if dp[n] > n {
-            -1
-        } else {
-            dp[n] as i32
-        }
+        if dp[n] > n { -1 } else { dp[n] as i32 }
     }
 }
 
@@ -48,5 +44,29 @@ mod tests {
     #[test]
     fn zero_amount() {
         assert_eq!(Solution::coin_change(vec![1], 0), 0);
+    }
+
+    #[test]
+    fn single_coin() {
+        assert_eq!(Solution::coin_change(vec![1], 5), 5);
+    }
+
+    #[test]
+    fn exact_match() {
+        assert_eq!(Solution::coin_change(vec![5], 5), 1);
+    }
+
+    #[test]
+    fn multiple_ways() {
+        // 6 = 2+2+2 or 1+1+1+1+1+1 or 2+1+1+1+1 etc. Min is 3 coins (2+2+2)
+        assert_eq!(Solution::coin_change(vec![1, 2], 6), 3);
+    }
+
+    #[test]
+    fn large_amount() {
+        // 186 = 37 * 5 + 1, but better: 186 = 9 * 20 + 6 = 9 + 3 = 12 coins
+        // Actually: 186 = 4 * 41 + 22 is not possible, need to check
+        // 186 = 41 * 4 + 2 = 4 + 1 = 5 coins (41+41+41+41+22)
+        assert_eq!(Solution::coin_change(vec![41, 22, 20, 5, 1], 186), 5);
     }
 }

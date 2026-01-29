@@ -64,4 +64,41 @@ mod tests {
             vec![vec![0, 0, 0], vec![0, 1, 0], vec![1, 2, 1]]
         );
     }
+
+    #[test]
+    fn test_all_zeros() {
+        assert_eq!(
+            Solution::update_matrix(vec![vec![0, 0], vec![0, 0]]),
+            vec![vec![0, 0], vec![0, 0]]
+        );
+    }
+
+    #[test]
+    fn test_single_zero() {
+        assert_eq!(
+            Solution::update_matrix(vec![vec![1, 1, 1], vec![1, 0, 1], vec![1, 1, 1]]),
+            vec![vec![2, 1, 2], vec![1, 0, 1], vec![2, 1, 2]]
+        );
+    }
+
+    #[test]
+    fn test_corner_zeros() {
+        assert_eq!(
+            Solution::update_matrix(vec![vec![0, 1, 1], vec![1, 1, 1], vec![1, 1, 0]]),
+            vec![vec![0, 1, 2], vec![1, 2, 1], vec![2, 1, 0]]
+        );
+    }
+
+    #[test]
+    fn test_single_element_zero() {
+        assert_eq!(Solution::update_matrix(vec![vec![0]]), vec![vec![0]]);
+    }
+
+    #[test]
+    fn test_row_matrix() {
+        assert_eq!(
+            Solution::update_matrix(vec![vec![0, 1, 1, 0, 1]]),
+            vec![vec![0, 1, 1, 0, 1]]
+        );
+    }
 }

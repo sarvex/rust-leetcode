@@ -18,7 +18,7 @@ impl Solution {
     /// - Time: O(n log k)
     /// - Space: O(n) for the frequency map
     pub fn top_k_frequent(nums: Vec<i32>, k: i32) -> Vec<i32> {
-        let mut counts = HashMap::new();
+        let mut counts = HashMap::with_capacity(nums.len());
         for x in nums {
             *counts.entry(x).or_insert(0) += 1;
         }
@@ -48,5 +48,33 @@ mod tests {
     #[test]
     fn single_element() {
         assert_eq!(Solution::top_k_frequent(vec![1], 1), vec![1]);
+    }
+
+    #[test]
+    fn all_same_frequency() {
+        let mut result = Solution::top_k_frequent(vec![1, 2, 3, 4], 2);
+        result.sort();
+        // Any two elements are valid since all have frequency 1
+        assert_eq!(result.len(), 2);
+    }
+
+    #[test]
+    fn k_equals_unique_count() {
+        let mut result = Solution::top_k_frequent(vec![1, 2, 2, 3, 3, 3], 3);
+        result.sort();
+        assert_eq!(result, vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn negative_numbers() {
+        let mut result = Solution::top_k_frequent(vec![-1, -1, -2, -2, -2], 1);
+        assert_eq!(result, vec![-2]);
+    }
+
+    #[test]
+    fn large_k() {
+        let mut result = Solution::top_k_frequent(vec![1, 1, 2, 2, 3, 3], 3);
+        result.sort();
+        assert_eq!(result, vec![1, 2, 3]);
     }
 }

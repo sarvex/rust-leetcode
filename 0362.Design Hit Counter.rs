@@ -49,4 +49,51 @@ mod tests {
         assert_eq!(counter.get_hits(300), 4);
         assert_eq!(counter.get_hits(301), 3);
     }
+
+    #[test]
+    fn no_hits() {
+        let counter = HitCounter::new();
+        assert_eq!(counter.get_hits(1), 0);
+    }
+
+    #[test]
+    fn hits_expire() {
+        let mut counter = HitCounter::new();
+        counter.hit(1);
+        assert_eq!(counter.get_hits(300), 1);
+        assert_eq!(counter.get_hits(301), 0);
+    }
+
+    #[test]
+    fn multiple_hits_same_timestamp() {
+        let mut counter = HitCounter::new();
+        counter.hit(1);
+        counter.hit(1);
+        counter.hit(1);
+        assert_eq!(counter.get_hits(1), 3);
+        assert_eq!(counter.get_hits(300), 3);
+        assert_eq!(counter.get_hits(301), 0);
+    }
+
+    #[test]
+    fn hits_at_boundary() {
+        let mut counter = HitCounter::new();
+        counter.hit(1);
+        counter.hit(299);
+        counter.hit(300);
+        assert_eq!(counter.get_hits(300), 3);
+        assert_eq!(counter.get_hits(301), 2);
+        assert_eq!(counter.get_hits(599), 1);
+        assert_eq!(counter.get_hits(600), 0);
+    }
+
+    #[test]
+    fn large_gap_between_hits() {
+        let mut counter = HitCounter::new();
+        counter.hit(1);
+        counter.hit(1000);
+        assert_eq!(counter.get_hits(1000), 1);
+        assert_eq!(counter.get_hits(1299), 1);
+        assert_eq!(counter.get_hits(1300), 0);
+    }
 }

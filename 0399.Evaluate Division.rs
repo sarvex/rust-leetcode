@@ -61,7 +61,7 @@ impl Solution {
     /// # Intuition
     /// Each equation a/b = v establishes a ratio relationship. Union-Find with
     /// weights tracks the cumulative ratio from each variable to its root,
-    /// enabling O(α(n)) query evaluation.
+    /// enabling O(alpha(n)) query evaluation.
     ///
     /// # Approach
     /// 1. Build a weighted Union-Find from the equations.
@@ -69,7 +69,7 @@ impl Solution {
     /// 3. Return -1.0 for disconnected or unknown variables.
     ///
     /// # Complexity
-    /// - Time: O((E + Q) · α(N)) where E = equations, Q = queries
+    /// - Time: O((E + Q) * alpha(N)) where E = equations, Q = queries
     /// - Space: O(N) for the Union-Find structure
     pub fn calc_equation(
         equations: Vec<Vec<String>>,
@@ -105,5 +105,52 @@ mod tests {
         for (r, e) in result.iter().zip(expected.iter()) {
             assert!((r - e).abs() < 1e-5, "expected {e}, got {r}");
         }
+    }
+
+    #[test]
+    fn test_single_equation() {
+        let equations = make_eq(&[("a", "b")]);
+        let values = vec![2.0];
+        let queries = make_eq(&[("a", "b"), ("b", "a")]);
+        let result = Solution::calc_equation(equations, values, queries);
+        assert!((result[0] - 2.0).abs() < 1e-5);
+        assert!((result[1] - 0.5).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_chain() {
+        let equations = make_eq(&[("a", "b"), ("b", "c"), ("c", "d")]);
+        let values = vec![2.0, 3.0, 4.0];
+        let queries = make_eq(&[("a", "d")]);
+        let result = Solution::calc_equation(equations, values, queries);
+        assert!((result[0] - 24.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_disconnected() {
+        let equations = make_eq(&[("a", "b"), ("c", "d")]);
+        let values = vec![2.0, 3.0];
+        let queries = make_eq(&[("a", "c")]);
+        let result = Solution::calc_equation(equations, values, queries);
+        assert!((result[0] - (-1.0)).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_same_variable() {
+        let equations = make_eq(&[("a", "b")]);
+        let values = vec![2.0];
+        let queries = make_eq(&[("a", "a"), ("b", "b")]);
+        let result = Solution::calc_equation(equations, values, queries);
+        assert!((result[0] - 1.0).abs() < 1e-5);
+        assert!((result[1] - 1.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_unknown_variable() {
+        let equations = make_eq(&[("a", "b")]);
+        let values = vec![2.0];
+        let queries = make_eq(&[("x", "y")]);
+        let result = Solution::calc_equation(equations, values, queries);
+        assert!((result[0] - (-1.0)).abs() < 1e-5);
     }
 }

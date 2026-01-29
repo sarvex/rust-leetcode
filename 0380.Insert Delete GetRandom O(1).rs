@@ -76,4 +76,59 @@ mod tests {
         assert!(!set.insert(2));
         assert_eq!(set.get_random(), 2);
     }
+
+    #[test]
+    fn insert_duplicate() {
+        let mut set = RandomizedSet::new();
+        assert!(set.insert(1));
+        assert!(!set.insert(1));
+    }
+
+    #[test]
+    fn remove_nonexistent() {
+        let mut set = RandomizedSet::new();
+        assert!(!set.remove(1));
+    }
+
+    #[test]
+    fn insert_after_remove() {
+        let mut set = RandomizedSet::new();
+        assert!(set.insert(1));
+        assert!(set.remove(1));
+        assert!(set.insert(1));
+    }
+
+    #[test]
+    fn multiple_elements() {
+        let mut set = RandomizedSet::new();
+        assert!(set.insert(1));
+        assert!(set.insert(2));
+        assert!(set.insert(3));
+        assert!(set.remove(2));
+        let val = set.get_random();
+        assert!(val == 1 || val == 3);
+    }
+
+    #[test]
+    fn insert_remove_sequence() {
+        let mut set = RandomizedSet::new();
+        for i in 1..=10 {
+            assert!(set.insert(i));
+        }
+        for i in 1..=5 {
+            assert!(set.remove(i));
+        }
+        // Should only contain 6-10
+        let val = set.get_random();
+        assert!((6..=10).contains(&val));
+    }
+
+    #[test]
+    fn negative_values() {
+        let mut set = RandomizedSet::new();
+        assert!(set.insert(-1));
+        assert!(set.insert(-2));
+        let val = set.get_random();
+        assert!(val == -1 || val == -2);
+    }
 }

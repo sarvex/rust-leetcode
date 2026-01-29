@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+pub struct Solution;
+
 impl Solution {
     /// Finds the longest Fibonacci-like subsequence using DP with index lookup.
     ///

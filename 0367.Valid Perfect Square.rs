@@ -16,7 +16,7 @@ impl Solution {
         let num = num as i64;
         let (mut left, mut right) = (1i64, num);
         while left < right {
-            let mid = (left + right) / 2;
+            let mid = left + (right - left) / 2;
             if mid * mid >= num {
                 right = mid;
             } else {
@@ -32,17 +32,48 @@ mod tests {
     use super::*;
 
     #[test]
-    fn perfect_square() {
+    fn perfect_square_16() {
         assert!(Solution::is_perfect_square(16));
     }
 
     #[test]
-    fn not_perfect_square() {
+    fn not_perfect_square_14() {
         assert!(!Solution::is_perfect_square(14));
     }
 
     #[test]
     fn one_is_perfect() {
         assert!(Solution::is_perfect_square(1));
+    }
+
+    #[test]
+    fn four_is_perfect() {
+        assert!(Solution::is_perfect_square(4));
+    }
+
+    #[test]
+    fn nine_is_perfect() {
+        assert!(Solution::is_perfect_square(9));
+    }
+
+    #[test]
+    fn large_perfect_square() {
+        // 46340^2 = 2147395600 (largest perfect square within i32)
+        assert!(Solution::is_perfect_square(2147395600));
+    }
+
+    #[test]
+    fn large_non_perfect() {
+        assert!(!Solution::is_perfect_square(2147483647));
+    }
+
+    #[test]
+    fn two_is_not_perfect() {
+        assert!(!Solution::is_perfect_square(2));
+    }
+
+    #[test]
+    fn three_is_not_perfect() {
+        assert!(!Solution::is_perfect_square(3));
     }
 }

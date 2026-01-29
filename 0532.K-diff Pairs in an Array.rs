@@ -64,4 +64,32 @@ mod tests {
     fn test_k0() {
         assert_eq!(Solution::find_pairs(vec![1, 3, 1, 5, 4], 0), 1);
     }
+
+    #[test]
+    fn test_k0_multiple_duplicates() {
+        // Multiple pairs with k=0: (1,1), (2,2), (3,3)
+        assert_eq!(Solution::find_pairs(vec![1, 1, 2, 2, 3, 3], 0), 3);
+    }
+
+    #[test]
+    fn test_no_pairs() {
+        assert_eq!(Solution::find_pairs(vec![1, 2, 3, 4, 5], 10), 0);
+    }
+
+    #[test]
+    fn test_two_elements() {
+        assert_eq!(Solution::find_pairs(vec![1, 3], 2), 1);
+        assert_eq!(Solution::find_pairs(vec![1, 3], 1), 0);
+    }
+
+    #[test]
+    fn test_all_same() {
+        // Only one unique k=0 pair
+        assert_eq!(Solution::find_pairs(vec![5, 5, 5, 5], 0), 1);
+    }
+
+    #[test]
+    fn test_negative_numbers() {
+        assert_eq!(Solution::find_pairs(vec![-1, -2, -3], 1), 2);
+    }
 }

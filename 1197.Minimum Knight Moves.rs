@@ -54,3 +54,41 @@ impl Solution {
         }
     }
 }
+
+pub struct Solution;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_origin() {
+        // Already at target
+        assert_eq!(Solution::min_knight_moves(0, 0), 0);
+    }
+
+    #[test]
+    fn test_one_move() {
+        // One knight move away
+        assert_eq!(Solution::min_knight_moves(2, 1), 1);
+        assert_eq!(Solution::min_knight_moves(1, 2), 1);
+    }
+
+    #[test]
+    fn test_example() {
+        // Example from problem
+        assert_eq!(Solution::min_knight_moves(5, 5), 4);
+    }
+
+    #[test]
+    fn test_negative_coordinates() {
+        assert_eq!(Solution::min_knight_moves(-2, -1), 1);
+        assert_eq!(Solution::min_knight_moves(-5, -5), 4);
+    }
+
+    #[test]
+    fn test_straight_line() {
+        // Target on axis
+        assert_eq!(Solution::min_knight_moves(1, 0), 3);
+    }
+}

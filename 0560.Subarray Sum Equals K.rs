@@ -49,4 +49,33 @@ mod tests {
     fn test_single() {
         assert_eq!(Solution::subarray_sum(vec![1], 0), 0);
     }
+
+    #[test]
+    fn test_single_match() {
+        assert_eq!(Solution::subarray_sum(vec![5], 5), 1);
+    }
+
+    #[test]
+    fn test_negative_numbers() {
+        // [-1, -1, 1] -> subarrays summing to 0: [-1, -1, 1, 1] not possible
+        // Actually: [-1,-1,1] = -1, [-1,1] = 0, [1] = 1, [-1] = -1, etc
+        assert_eq!(Solution::subarray_sum(vec![-1, -1, 1], 0), 1);
+    }
+
+    #[test]
+    fn test_all_zeros() {
+        // [0, 0, 0] with k=0: [0], [0], [0], [0,0], [0,0], [0,0,0] = 6 subarrays
+        assert_eq!(Solution::subarray_sum(vec![0, 0, 0], 0), 6);
+    }
+
+    #[test]
+    fn test_no_match() {
+        assert_eq!(Solution::subarray_sum(vec![1, 2, 3], 100), 0);
+    }
+
+    #[test]
+    fn test_entire_array() {
+        // Sum of entire array equals k
+        assert_eq!(Solution::subarray_sum(vec![1, 2, 3, 4], 10), 1);
+    }
 }

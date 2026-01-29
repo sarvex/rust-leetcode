@@ -21,7 +21,7 @@ impl Solution {
         let mut pairs: Vec<(usize, u8)> = freq
             .iter()
             .enumerate()
-            .filter(|(_, count)| **count > 0)
+            .filter(|(_, count)| *count > 0)
             .map(|(i, count)| (*count, i as u8))
             .collect();
         pairs.sort_unstable_by(|a, b| b.0.cmp(&a.0));

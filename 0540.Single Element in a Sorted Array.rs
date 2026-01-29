@@ -51,4 +51,28 @@ mod tests {
     fn test_single() {
         assert_eq!(Solution::single_non_duplicate(vec![1]), 1);
     }
+
+    #[test]
+    fn test_at_beginning() {
+        assert_eq!(Solution::single_non_duplicate(vec![1, 2, 2, 3, 3, 4, 4]), 1);
+    }
+
+    #[test]
+    fn test_at_very_end() {
+        assert_eq!(Solution::single_non_duplicate(vec![1, 1, 2, 2, 3, 3, 4]), 4);
+    }
+
+    #[test]
+    fn test_three_elements() {
+        assert_eq!(Solution::single_non_duplicate(vec![1, 1, 2]), 2);
+        assert_eq!(Solution::single_non_duplicate(vec![1, 2, 2]), 1);
+    }
+
+    #[test]
+    fn test_middle() {
+        assert_eq!(
+            Solution::single_non_duplicate(vec![1, 1, 2, 2, 3, 4, 4, 5, 5]),
+            3
+        );
+    }
 }

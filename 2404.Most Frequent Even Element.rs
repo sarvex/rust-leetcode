@@ -25,8 +25,8 @@ impl Solution {
 
         cnt.iter()
             .fold((-1, 0), |(ans, mx), (&x, &v)| {
-                if *v > mx || (v == mx && (ans == -1 || x < ans)) {
-                    (*x, *v)
+                if v > mx || (v == mx && (ans == -1 || x < ans)) {
+                    (x, v)
                 } else {
                     (ans, mx)
                 }

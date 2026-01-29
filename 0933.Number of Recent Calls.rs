@@ -43,7 +43,7 @@ mod tests {
         assert_eq!(counter.ping(1), 1);     // [1]
         assert_eq!(counter.ping(100), 2);   // [1, 100]
         assert_eq!(counter.ping(3001), 3);  // [1, 100, 3001]
-        assert_eq!(counter.ping(3002), 3);  // [100, 3001, 3002] (1 is removed)
+        assert_eq!(counter.ping(3002), 3);  // [100, 3001, 3002] (1 is removed as 1 < 3002-3000=2)
     }
 
     #[test]
@@ -59,11 +59,15 @@ mod tests {
         assert_eq!(counter.ping(2500), 6);
         assert_eq!(counter.ping(3000), 7);
         
-        // Now at t=3001, ping(1) should be removed
-        assert_eq!(counter.ping(3001), 7);
+        // Now at t=3001, ping(1) at t=1 should be kept (1 >= 3001-3000=1)
+        assert_eq!(counter.ping(3001), 8);
         
-        // At t=3500, pings at 1 and 500 should be removed
-        assert_eq!(counter.ping(3500), 6);
+        // At t=3002, ping at t=1 should be removed (1 < 3002-3000=2)
+        assert_eq!(counter.ping(3002), 8);
+        
+        // At t=3500, pings before t=500 should be removed
+        // Remaining: [500, 1000, 1500, 2000, 2500, 3000, 3001, 3002, 3500]
+        assert_eq!(counter.ping(3500), 9);
     }
 
     #[test]
@@ -90,10 +94,10 @@ mod tests {
         assert_eq!(counter.ping(3000), 3);
         assert_eq!(counter.ping(4000), 4);
         
-        // At t=4000, ping at 1000 should still be included (4000 - 3000 = 1000)
+        // At t=4000, ping at 1000 should still be included (1000 >= 4000 - 3000 = 1000)
         // So we have pings at [1000, 2000, 3000, 4000]
         
-        // At t=4001, ping at 1000 should be removed
+        // At t=4001, ping at 1000 should be removed (1000 < 4001 - 3000 = 1001)
         assert_eq!(counter.ping(4001), 4); // [2000, 3000, 4000, 4001]
     }
 
@@ -107,12 +111,17 @@ mod tests {
             assert_eq!(count, i);
         }
         
-        // After 3000ms, older pings start getting removed
-        assert_eq!(counter.ping(3001), 3001);
-        assert_eq!(counter.ping(3002), 3002);
+        // At t=3001, pings before t=1 should be removed (none)
+        // All 100 pings plus the new one = 101
+        assert_eq!(counter.ping(3001), 101);
         
-        // Jump to 5000ms - only pings from 2000-5000 remain
-        assert_eq!(counter.ping(5000), 3001);
+        // At t=3002, ping at t=1 should be removed
+        assert_eq!(counter.ping(3002), 101);
+        
+        // Jump to 5000ms - only pings from 2000 onwards remain
+        // All pings < 2000 are removed, so we lose pings 1-1999
+        // Only ping at 5000 remains since all others are < 2000
+        assert_eq!(counter.ping(5000), 3);
     }
 
     #[test]
@@ -123,7 +132,10 @@ mod tests {
         assert_eq!(counter.ping(1), 1);
         assert_eq!(counter.ping(2), 2);
         assert_eq!(counter.ping(3000), 3);
-        assert_eq!(counter.ping(3001), 3);
+        // At t=3001, ping at t=1 is kept (1 >= 3001-3000=1)
+        assert_eq!(counter.ping(3001), 4);
+        // At t=3002, ping at t=1 is removed (1 < 3002-3000=2)
+        assert_eq!(counter.ping(3002), 4);
     }
 
     #[test]
@@ -138,7 +150,22 @@ mod tests {
         // All 3001 pings should be in the window
         assert_eq!(counter.queue.len(), 3001);
         
-        // Next ping should remove the oldest
+        // Next ping at 3001: removes ping at 0 (0 < 3001-3000=1)
+        // Keeps pings from 1 to 3000, plus new ping at 3001
         assert_eq!(counter.ping(3001), 3001);
+    }
+
+    #[test]
+    fn test_window_boundary() {
+        let mut counter = RecentCounter::new();
+        
+        // Test exact boundary conditions
+        assert_eq!(counter.ping(1), 1);
+        assert_eq!(counter.ping(3001), 2);  // 1 is kept (1 >= 3001-3000=1)
+        
+        counter = RecentCounter::new();
+        assert_eq!(counter.ping(0), 1);
+        assert_eq!(counter.ping(3000), 2);  // 0 is kept (0 >= 3000-3000=0)
+        assert_eq!(counter.ping(3001), 2);  // 0 is removed (0 < 3001-3000=1)
     }
 }

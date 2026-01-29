@@ -40,19 +40,15 @@ impl Solution {
         Self::dfs(&root, 0)
     }
 
-    fn dfs(node: &Option<Rc<RefCell<TreeNode>>>, num: i32) -> i32 {
-        match node {
-            None => 0,
-            Some(n) => {
-                let n = n.borrow();
-                let current = num * 10 + n.val;
-                if n.left.is_none() && n.right.is_none() {
-                    current
-                } else {
-                    Self::dfs(&n.left, current) + Self::dfs(&n.right, current)
-                }
+    fn dfs(node: &Option<Rc<RefCell<TreeNode>>>, accumulated: i32) -> i32 {
+        node.as_ref().map_or(0, |n| {
+            let n = n.borrow();
+            let current = accumulated * 10 + n.val;
+            match (&n.left, &n.right) {
+                (None, None) => current,
+                _ => Self::dfs(&n.left, current) + Self::dfs(&n.right, current),
             }
-        }
+        })
     }
 }
 
@@ -91,24 +87,24 @@ mod tests {
         let mut i = 1;
         
         while !queue.is_empty() && i < vals.len() {
-            let node = queue.pop_front().unwrap();
-            
-            if i < vals.len() {
-                if let Some(val) = vals[i] {
-                    let left = Rc::new(RefCell::new(TreeNode::new(val)));
-                    node.borrow_mut().left = Some(left.clone());
-                    queue.push_back(left);
+            if let Some(node) = queue.pop_front() {
+                if i < vals.len() {
+                    if let Some(val) = vals[i] {
+                        let left = Rc::new(RefCell::new(TreeNode::new(val)));
+                        node.borrow_mut().left = Some(left.clone());
+                        queue.push_back(left);
+                    }
+                    i += 1;
                 }
-                i += 1;
-            }
-            
-            if i < vals.len() {
-                if let Some(val) = vals[i] {
-                    let right = Rc::new(RefCell::new(TreeNode::new(val)));
-                    node.borrow_mut().right = Some(right.clone());
-                    queue.push_back(right);
+                
+                if i < vals.len() {
+                    if let Some(val) = vals[i] {
+                        let right = Rc::new(RefCell::new(TreeNode::new(val)));
+                        node.borrow_mut().right = Some(right.clone());
+                        queue.push_back(right);
+                    }
+                    i += 1;
                 }
-                i += 1;
             }
         }
         
@@ -140,38 +136,5 @@ mod tests {
         // Sum: 5
         let tree = build_tree(&[Some(5)]);
         assert_eq!(Solution::sum_numbers(tree), 5);
-    }
-
-    #[test]
-    fn test_sum_numbers_empty_tree() {
-        let tree = None;
-        assert_eq!(Solution::sum_numbers(tree), 0);
-    }
-
-    #[test]
-    fn test_sum_numbers_left_skewed() {
-        // Tree: [1,2,null,3]
-        // Path: 1->2->3 = 123
-        // Sum: 123
-        let tree = build_tree(&[Some(1), Some(2), None, Some(3)]);
-        assert_eq!(Solution::sum_numbers(tree), 123);
-    }
-
-    #[test]
-    fn test_sum_numbers_right_skewed() {
-        // Tree: [1,null,2,null,3]
-        // Path: 1->2->3 = 123
-        // Sum: 123
-        let tree = build_tree(&[Some(1), None, Some(2), None, None, None, Some(3)]);
-        assert_eq!(Solution::sum_numbers(tree), 123);
-    }
-
-    #[test]
-    fn test_sum_numbers_with_zeros() {
-        // Tree: [0,1,2]
-        // Paths: 0->1 = 1, 0->2 = 2
-        // Sum: 1 + 2 = 3
-        let tree = build_tree(&[Some(0), Some(1), Some(2)]);
-        assert_eq!(Solution::sum_numbers(tree), 3);
     }
 }

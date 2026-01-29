@@ -51,4 +51,35 @@ mod tests {
         let mut result = Solution::kill_process(vec![1], vec![0], 1);
         assert_eq!(result, vec![1]);
     }
+
+    #[test]
+    fn test_kill_root() {
+        // Kill root process, should kill all
+        let mut result = Solution::kill_process(vec![1, 2, 3], vec![0, 1, 1], 1);
+        result.sort_unstable();
+        assert_eq!(result, vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn test_leaf_process() {
+        // Kill a leaf process with no children
+        let result = Solution::kill_process(vec![1, 2, 3, 4], vec![0, 1, 1, 2], 3);
+        assert_eq!(result, vec![3]);
+    }
+
+    #[test]
+    fn test_deep_tree() {
+        // Chain: 1 -> 2 -> 3 -> 4 -> 5
+        let mut result = Solution::kill_process(vec![1, 2, 3, 4, 5], vec![0, 1, 2, 3, 4], 2);
+        result.sort_unstable();
+        assert_eq!(result, vec![2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn test_wide_tree() {
+        // Process 1 has many children: 2, 3, 4, 5
+        let mut result = Solution::kill_process(vec![1, 2, 3, 4, 5], vec![0, 1, 1, 1, 1], 1);
+        result.sort_unstable();
+        assert_eq!(result, vec![1, 2, 3, 4, 5]);
+    }
 }

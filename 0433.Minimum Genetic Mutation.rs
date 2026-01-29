@@ -30,8 +30,8 @@ impl Solution {
                 if !visited.contains(next) {
                     let diff = next
                         .bytes()
-                        .zip(gene_bytes.iter())
-                        .filter(|(a, b)| a != *b)
+                        .zip(gene_bytes.iter().copied())
+                        .filter(|(a, b)| a != b)
                         .count();
                     if diff == 1 {
                         visited.insert(next.clone());

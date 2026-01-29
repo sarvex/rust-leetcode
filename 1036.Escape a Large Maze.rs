@@ -1,5 +1,7 @@
 use std::collections::{HashSet, VecDeque};
 
+pub struct Solution;
+
 impl Solution {
     /// Determines if source can reach target in a large grid with blocked cells.
     ///

@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// 2D dynamic programming for counting distinct subsequences.
     ///
@@ -12,15 +14,15 @@ impl Solution {
     /// Otherwise `dp[i][j] = dp[i-1][j]`. Use u64 to avoid overflow.
     ///
     /// # Complexity
-    /// - Time: O(n × m) — filling the DP table
-    /// - Space: O(n × m) — the DP table
+    /// - Time: O(n * m) - filling the DP table
+    /// - Space: O(n * m) - the DP table
     pub fn num_distinct(s: String, t: String) -> i32 {
         let (s, t) = (s.as_bytes(), t.as_bytes());
         let (n, m) = (s.len(), t.len());
         let mut dp = vec![vec![0u64; m + 1]; n + 1];
 
-        for i in 0..=n {
-            dp[i][0] = 1;
+        for row in dp.iter_mut() {
+            row[0] = 1;
         }
 
         for i in 1..=n {
@@ -64,5 +66,39 @@ mod tests {
     #[test]
     fn empty_target() {
         assert_eq!(Solution::num_distinct("abc".to_string(), String::new()), 1);
+    }
+
+    #[test]
+    fn empty_source() {
+        assert_eq!(Solution::num_distinct(String::new(), "a".to_string()), 0);
+    }
+
+    #[test]
+    fn both_empty() {
+        assert_eq!(Solution::num_distinct(String::new(), String::new()), 1);
+    }
+
+    #[test]
+    fn identical_strings() {
+        assert_eq!(
+            Solution::num_distinct("abc".to_string(), "abc".to_string()),
+            1
+        );
+    }
+
+    #[test]
+    fn source_shorter_than_target() {
+        assert_eq!(
+            Solution::num_distinct("ab".to_string(), "abc".to_string()),
+            0
+        );
+    }
+
+    #[test]
+    fn repeated_characters() {
+        assert_eq!(
+            Solution::num_distinct("aaa".to_string(), "a".to_string()),
+            3
+        );
     }
 }

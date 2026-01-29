@@ -50,4 +50,33 @@ mod tests {
             vec![vec![1, 2], vec![3, 4]]
         );
     }
+
+    #[test]
+    fn test_same_shape() {
+        assert_eq!(
+            Solution::matrix_reshape(vec![vec![1, 2], vec![3, 4]], 2, 2),
+            vec![vec![1, 2], vec![3, 4]]
+        );
+    }
+
+    #[test]
+    fn test_to_column() {
+        assert_eq!(
+            Solution::matrix_reshape(vec![vec![1, 2, 3, 4]], 4, 1),
+            vec![vec![1], vec![2], vec![3], vec![4]]
+        );
+    }
+
+    #[test]
+    fn test_single_element() {
+        assert_eq!(Solution::matrix_reshape(vec![vec![1]], 1, 1), vec![vec![1]]);
+    }
+
+    #[test]
+    fn test_3x2_to_2x3() {
+        assert_eq!(
+            Solution::matrix_reshape(vec![vec![1, 2], vec![3, 4], vec![5, 6]], 2, 3),
+            vec![vec![1, 2, 3], vec![4, 5, 6]]
+        );
+    }
 }

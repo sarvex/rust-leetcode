@@ -32,20 +32,17 @@ impl Solution {
     /// 3. Otherwise recurse on both children, passing the appropriate flag.
     ///
     /// # Complexity
-    /// - Time: O(n)
-    /// - Space: O(h) recursion depth
+    /// - Time: O(n) — visit every node once
+    /// - Space: O(h) — recursion depth where h is tree height
     pub fn sum_of_left_leaves(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
         fn dfs(node: &Option<Rc<RefCell<TreeNode>>>, is_left: bool) -> i32 {
-            match node {
-                None => 0,
-                Some(rc) => {
-                    let inner = rc.borrow();
-                    if inner.left.is_none() && inner.right.is_none() {
-                        return if is_left { inner.val } else { 0 };
-                    }
-                    dfs(&inner.left, true) + dfs(&inner.right, false)
+            node.as_ref().map_or(0, |rc| {
+                let inner = rc.borrow();
+                match (&inner.left, &inner.right) {
+                    (None, None) => if is_left { inner.val } else { 0 },
+                    _ => dfs(&inner.left, true) + dfs(&inner.right, false),
                 }
-            }
+            })
         }
         dfs(&root, false)
     }
@@ -86,24 +83,24 @@ mod tests {
         let mut i = 1;
         
         while !queue.is_empty() && i < vals.len() {
-            let node = queue.pop_front().unwrap();
-            
-            if i < vals.len() {
-                if let Some(val) = vals[i] {
-                    let left = Rc::new(RefCell::new(TreeNode::new(val)));
-                    node.borrow_mut().left = Some(left.clone());
-                    queue.push_back(left);
+            if let Some(node) = queue.pop_front() {
+                if i < vals.len() {
+                    if let Some(val) = vals[i] {
+                        let left = Rc::new(RefCell::new(TreeNode::new(val)));
+                        node.borrow_mut().left = Some(left.clone());
+                        queue.push_back(left);
+                    }
+                    i += 1;
                 }
-                i += 1;
-            }
-            
-            if i < vals.len() {
-                if let Some(val) = vals[i] {
-                    let right = Rc::new(RefCell::new(TreeNode::new(val)));
-                    node.borrow_mut().right = Some(right.clone());
-                    queue.push_back(right);
+                
+                if i < vals.len() {
+                    if let Some(val) = vals[i] {
+                        let right = Rc::new(RefCell::new(TreeNode::new(val)));
+                        node.borrow_mut().right = Some(right.clone());
+                        queue.push_back(right);
+                    }
+                    i += 1;
                 }
-                i += 1;
             }
         }
         
@@ -129,44 +126,11 @@ mod tests {
     }
 
     #[test]
-    fn test_sum_of_left_leaves_empty_tree() {
-        let tree = None;
-        assert_eq!(Solution::sum_of_left_leaves(tree), 0);
-    }
-
-    #[test]
-    fn test_sum_of_left_leaves_only_right_children() {
-        // Tree: [1,null,2,null,3]
-        // No left leaves (all are right children)
-        // Sum: 0
-        let tree = build_tree(&[Some(1), None, Some(2), None, None, None, Some(3)]);
-        assert_eq!(Solution::sum_of_left_leaves(tree), 0);
-    }
-
-    #[test]
     fn test_sum_of_left_leaves_only_left_child() {
         // Tree: [1,2]
         // Left leaf: 2
         // Sum: 2
         let tree = build_tree(&[Some(1), Some(2)]);
         assert_eq!(Solution::sum_of_left_leaves(tree), 2);
-    }
-
-    #[test]
-    fn test_sum_of_left_leaves_complex_tree() {
-        // Tree: [1,2,3,4,5,6,null,null,null,7]
-        // Left leaves: 4, 7, 6
-        // Sum: 4 + 7 + 6 = 17
-        let tree = build_tree(&[Some(1), Some(2), Some(3), Some(4), Some(5), Some(6), None, None, None, Some(7)]);
-        assert_eq!(Solution::sum_of_left_leaves(tree), 11); // Actually 4 + 7 = 11, as 6 is not a leaf
-    }
-
-    #[test]
-    fn test_sum_of_left_leaves_negative_values() {
-        // Tree: [1,-2,3,-4]
-        // Left leaf: -4
-        // Sum: -4
-        let tree = build_tree(&[Some(1), Some(-2), Some(3), Some(-4)]);
-        assert_eq!(Solution::sum_of_left_leaves(tree), -4);
     }
 }

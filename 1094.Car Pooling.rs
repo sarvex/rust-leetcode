@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Checks if all trips can be completed within vehicle capacity.
     ///

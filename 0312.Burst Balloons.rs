@@ -22,8 +22,9 @@ impl Solution {
             arr[i + 1] = v;
         }
         let mut dp = vec![vec![0; n + 2]; n + 2];
-        for i in (0..n).rev() {
-            for j in i + 2..n + 2 {
+        for len in 2..=n + 1 {
+            for i in 0..=n + 1 - len {
+                let j = i + len;
                 for k in i + 1..j {
                     dp[i][j] = dp[i][j].max(dp[i][k] + dp[k][j] + arr[i] * arr[k] * arr[j]);
                 }
@@ -45,5 +46,23 @@ mod tests {
     #[test]
     fn single_balloon() {
         assert_eq!(Solution::max_coins(vec![5]), 5);
+    }
+
+    #[test]
+    fn two_balloons() {
+        // [3, 1] -> burst 1 first: 3*1*1 + 1*3*1 = 3 + 3 = 6
+        // or burst 3 first: 1*3*1 + 1*1*1 = 3 + 1 = 4
+        assert_eq!(Solution::max_coins(vec![3, 1]), 6);
+    }
+
+    #[test]
+    fn all_ones() {
+        // [1, 1, 1] -> always 1*1*1 = 3
+        assert_eq!(Solution::max_coins(vec![1, 1, 1]), 3);
+    }
+
+    #[test]
+    fn empty_input() {
+        assert_eq!(Solution::max_coins(vec![]), 0);
     }
 }

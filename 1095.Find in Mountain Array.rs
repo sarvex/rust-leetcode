@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Finds target in a mountain array using three binary searches.
     ///

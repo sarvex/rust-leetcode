@@ -65,3 +65,41 @@ impl Solution {
         total
     }
 }
+
+pub struct Solution;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_example_1() {
+        // 3 houses, wells cost [1,2,2], pipes connect them
+        let wells = vec![1, 2, 2];
+        let pipes = vec![vec![1, 2, 1], vec![2, 3, 1]];
+        assert_eq!(Solution::min_cost_to_supply_water(3, wells, pipes), 3);
+    }
+
+    #[test]
+    fn test_wells_only() {
+        // Cheaper to dig wells than lay pipes
+        let wells = vec![1, 1];
+        let pipes = vec![vec![1, 2, 100]];
+        assert_eq!(Solution::min_cost_to_supply_water(2, wells, pipes), 2);
+    }
+
+    #[test]
+    fn test_pipes_cheaper() {
+        // One well + pipe is cheaper than two wells
+        let wells = vec![5, 5];
+        let pipes = vec![vec![1, 2, 1]];
+        assert_eq!(Solution::min_cost_to_supply_water(2, wells, pipes), 6);
+    }
+
+    #[test]
+    fn test_single_house() {
+        let wells = vec![10];
+        let pipes: Vec<Vec<i32>> = vec![];
+        assert_eq!(Solution::min_cost_to_supply_water(1, wells, pipes), 10);
+    }
+}

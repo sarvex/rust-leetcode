@@ -16,7 +16,7 @@ impl Solution {
     /// - Time: O(n + m)
     /// - Space: O(min(n, m)) for the map
     pub fn intersect(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
-        let mut counts = HashMap::new();
+        let mut counts = HashMap::with_capacity(nums1.len().min(nums2.len()));
         for &x in &nums1 {
             *counts.entry(x).or_insert(0) += 1;
         }
@@ -49,5 +49,43 @@ mod tests {
         let mut result = Solution::intersect(vec![4, 9, 5], vec![9, 4, 9, 8, 4]);
         result.sort();
         assert_eq!(result, vec![4, 9]);
+    }
+
+    #[test]
+    fn no_intersection() {
+        let result = Solution::intersect(vec![1, 2, 3], vec![4, 5, 6]);
+        assert_eq!(result, vec![]);
+    }
+
+    #[test]
+    fn one_empty() {
+        let result = Solution::intersect(vec![], vec![1, 2, 3]);
+        assert_eq!(result, vec![]);
+    }
+
+    #[test]
+    fn both_empty() {
+        let result = Solution::intersect(vec![], vec![]);
+        assert_eq!(result, vec![]);
+    }
+
+    #[test]
+    fn all_duplicates() {
+        let mut result = Solution::intersect(vec![1, 1, 1], vec![1, 1]);
+        result.sort();
+        assert_eq!(result, vec![1, 1]);
+    }
+
+    #[test]
+    fn single_element_match() {
+        let result = Solution::intersect(vec![1], vec![1]);
+        assert_eq!(result, vec![1]);
+    }
+
+    #[test]
+    fn complete_overlap() {
+        let mut result = Solution::intersect(vec![1, 2, 3], vec![1, 2, 3]);
+        result.sort();
+        assert_eq!(result, vec![1, 2, 3]);
     }
 }

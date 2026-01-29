@@ -1,5 +1,7 @@
 use std::collections::BinaryHeap;
 
+pub struct Solution;
+
 impl Solution {
     /// Finds minimum refueling stops to reach target using a greedy max-heap.
     ///
@@ -20,7 +22,8 @@ impl Solution {
         let mut stops = 0;
         let mut prev = 0;
 
-        let all_stops = stations.iter().chain(std::iter::once(&vec![target, 0]));
+        let sentinel = vec![target, 0];
+        let all_stops = stations.iter().chain(std::iter::once(&sentinel));
 
         for station in all_stops {
             let (pos, f) = (station[0], station[1]);

@@ -17,6 +17,9 @@ struct NumMatrix {
 
 impl NumMatrix {
     fn new(matrix: Vec<Vec<i32>>) -> Self {
+        if matrix.is_empty() || matrix[0].is_empty() {
+            return Self { prefix: vec![vec![0]] };
+        }
         let m = matrix.len();
         let n = matrix[0].len();
         let mut prefix = vec![vec![0; n + 1]; m + 1];
@@ -52,5 +55,48 @@ mod tests {
         assert_eq!(matrix.sum_region(2, 1, 4, 3), 8);
         assert_eq!(matrix.sum_region(1, 1, 2, 2), 11);
         assert_eq!(matrix.sum_region(1, 2, 2, 4), 12);
+    }
+
+    #[test]
+    fn single_cell() {
+        let matrix = NumMatrix::new(vec![
+            vec![1, 2, 3],
+            vec![4, 5, 6],
+            vec![7, 8, 9],
+        ]);
+        assert_eq!(matrix.sum_region(0, 0, 0, 0), 1);
+        assert_eq!(matrix.sum_region(1, 1, 1, 1), 5);
+        assert_eq!(matrix.sum_region(2, 2, 2, 2), 9);
+    }
+
+    #[test]
+    fn full_matrix() {
+        let matrix = NumMatrix::new(vec![
+            vec![1, 2],
+            vec![3, 4],
+        ]);
+        assert_eq!(matrix.sum_region(0, 0, 1, 1), 10);
+    }
+
+    #[test]
+    fn single_row() {
+        let matrix = NumMatrix::new(vec![vec![1, 2, 3, 4, 5]]);
+        assert_eq!(matrix.sum_region(0, 0, 0, 4), 15);
+        assert_eq!(matrix.sum_region(0, 1, 0, 3), 9);
+    }
+
+    #[test]
+    fn single_column() {
+        let matrix = NumMatrix::new(vec![vec![1], vec![2], vec![3]]);
+        assert_eq!(matrix.sum_region(0, 0, 2, 0), 6);
+    }
+
+    #[test]
+    fn negative_values() {
+        let matrix = NumMatrix::new(vec![
+            vec![-1, -2],
+            vec![-3, -4],
+        ]);
+        assert_eq!(matrix.sum_region(0, 0, 1, 1), -10);
     }
 }

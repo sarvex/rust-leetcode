@@ -31,4 +31,25 @@ mod tests {
     fn test_six_elements() {
         assert_eq!(Solution::array_pair_sum(vec![6, 2, 6, 5, 1, 2]), 9);
     }
+
+    #[test]
+    fn test_two_elements() {
+        assert_eq!(Solution::array_pair_sum(vec![1, 2]), 1);
+    }
+
+    #[test]
+    fn test_all_same() {
+        assert_eq!(Solution::array_pair_sum(vec![5, 5, 5, 5]), 10);
+    }
+
+    #[test]
+    fn test_negative_numbers() {
+        assert_eq!(Solution::array_pair_sum(vec![-1, -2, -3, -4]), -6);
+    }
+
+    #[test]
+    fn test_mixed_positive_negative() {
+        // Sorted: [-2, -1, 1, 2] -> pairs: (-2,-1), (1,2) -> min sum: -2 + 1 = -1
+        assert_eq!(Solution::array_pair_sum(vec![1, 2, -1, -2]), -1);
+    }
 }

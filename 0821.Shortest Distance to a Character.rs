@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Computes shortest distance from each position to nearest target char.
     ///

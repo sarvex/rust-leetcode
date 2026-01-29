@@ -59,4 +59,34 @@ mod tests {
     fn test_single() {
         assert_eq!(Solution::find_unsorted_subarray(vec![1]), 0);
     }
+
+    #[test]
+    fn test_reverse_sorted() {
+        assert_eq!(Solution::find_unsorted_subarray(vec![5, 4, 3, 2, 1]), 5);
+    }
+
+    #[test]
+    fn test_two_elements_sorted() {
+        assert_eq!(Solution::find_unsorted_subarray(vec![1, 2]), 0);
+    }
+
+    #[test]
+    fn test_two_elements_unsorted() {
+        assert_eq!(Solution::find_unsorted_subarray(vec![2, 1]), 2);
+    }
+
+    #[test]
+    fn test_unsorted_at_beginning() {
+        assert_eq!(Solution::find_unsorted_subarray(vec![3, 2, 1, 4, 5]), 3);
+    }
+
+    #[test]
+    fn test_unsorted_at_end() {
+        assert_eq!(Solution::find_unsorted_subarray(vec![1, 2, 5, 4, 3]), 3);
+    }
+
+    #[test]
+    fn test_duplicate_values() {
+        assert_eq!(Solution::find_unsorted_subarray(vec![1, 3, 2, 2, 2]), 4);
+    }
 }

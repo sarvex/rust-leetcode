@@ -36,3 +36,63 @@ impl MyCalendar {
         true
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic_booking() {
+        let mut calendar = MyCalendar::new();
+        assert!(calendar.book(10, 20));
+        assert!(!calendar.book(15, 25)); // Overlaps with [10, 20)
+        assert!(calendar.book(20, 30)); // No overlap, starts at end of first
+    }
+
+    #[test]
+    fn test_no_overlap() {
+        let mut calendar = MyCalendar::new();
+        assert!(calendar.book(10, 20));
+        assert!(calendar.book(20, 30));
+        assert!(calendar.book(30, 40));
+    }
+
+    #[test]
+    fn test_complete_overlap() {
+        let mut calendar = MyCalendar::new();
+        assert!(calendar.book(10, 20));
+        assert!(!calendar.book(5, 25)); // Completely overlaps
+    }
+
+    #[test]
+    fn test_contained_interval() {
+        let mut calendar = MyCalendar::new();
+        assert!(calendar.book(10, 30));
+        assert!(!calendar.book(15, 20)); // Contained within [10, 30)
+    }
+
+    #[test]
+    fn test_adjacent_bookings() {
+        let mut calendar = MyCalendar::new();
+        assert!(calendar.book(0, 10));
+        assert!(calendar.book(10, 20));
+        assert!(calendar.book(20, 30));
+        assert!(!calendar.book(5, 15)); // Overlaps first and second
+    }
+
+    #[test]
+    fn test_single_time_unit() {
+        let mut calendar = MyCalendar::new();
+        assert!(calendar.book(1, 2));
+        assert!(calendar.book(2, 3));
+        assert!(!calendar.book(1, 2)); // Same interval again
+    }
+
+    #[test]
+    fn test_booking_before_existing() {
+        let mut calendar = MyCalendar::new();
+        assert!(calendar.book(20, 30));
+        assert!(calendar.book(10, 20));
+        assert!(calendar.book(0, 10));
+    }
+}

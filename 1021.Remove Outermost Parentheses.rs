@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Removes the outermost parentheses of each primitive decomposition.
     ///

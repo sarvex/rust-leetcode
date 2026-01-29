@@ -60,4 +60,53 @@ mod tests {
             0
         );
     }
+
+    #[test]
+    fn test_same_time() {
+        assert_eq!(
+            Solution::find_min_difference(vec!["12:00".to_string(), "12:00".to_string()]),
+            0
+        );
+    }
+
+    #[test]
+    fn test_noon_and_midnight() {
+        // 12:00 and 00:00 -> difference is 720 minutes (12 hours)
+        assert_eq!(
+            Solution::find_min_difference(vec!["12:00".to_string(), "00:00".to_string()]),
+            720
+        );
+    }
+
+    #[test]
+    fn test_adjacent_minutes() {
+        assert_eq!(
+            Solution::find_min_difference(vec!["05:30".to_string(), "05:31".to_string()]),
+            1
+        );
+    }
+
+    #[test]
+    fn test_multiple_times() {
+        // Times: 01:00 (60), 02:00 (120), 03:00 (180)
+        // Min diff = 60
+        assert_eq!(
+            Solution::find_min_difference(vec![
+                "01:00".to_string(),
+                "02:00".to_string(),
+                "03:00".to_string()
+            ]),
+            60
+        );
+    }
+
+    #[test]
+    fn test_wrap_around() {
+        // 23:00 (1380) and 01:00 (60)
+        // Direct diff: 1320, wrap around: 1440 - 1380 + 60 = 120
+        assert_eq!(
+            Solution::find_min_difference(vec!["23:00".to_string(), "01:00".to_string()]),
+            120
+        );
+    }
 }

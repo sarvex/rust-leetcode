@@ -78,3 +78,40 @@ impl Solution {
         0
     }
 }
+
+pub struct Solution;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_example_1() {
+        let grid = vec![vec![5, 4, 5], vec![1, 2, 6], vec![7, 4, 6]];
+        assert_eq!(Solution::maximum_minimum_path(grid), 4);
+    }
+
+    #[test]
+    fn test_example_2() {
+        let grid = vec![vec![2, 2, 1, 2, 2, 2], vec![1, 2, 2, 2, 1, 2]];
+        assert_eq!(Solution::maximum_minimum_path(grid), 2);
+    }
+
+    #[test]
+    fn test_single_cell() {
+        let grid = vec![vec![5]];
+        assert_eq!(Solution::maximum_minimum_path(grid), 5);
+    }
+
+    #[test]
+    fn test_two_cells_horizontal() {
+        let grid = vec![vec![3, 7]];
+        assert_eq!(Solution::maximum_minimum_path(grid), 3);
+    }
+
+    #[test]
+    fn test_two_cells_vertical() {
+        let grid = vec![vec![3], vec![7]];
+        assert_eq!(Solution::maximum_minimum_path(grid), 3);
+    }
+}

@@ -16,10 +16,12 @@ struct NumArray {
 
 impl NumArray {
     fn new(nums: Vec<i32>) -> Self {
-        let n = nums.len();
-        let mut prefix = vec![0; n + 1];
-        for i in 0..n {
-            prefix[i + 1] = prefix[i] + nums[i];
+        let mut prefix = Vec::with_capacity(nums.len() + 1);
+        prefix.push(0);
+        let mut sum = 0;
+        for num in nums {
+            sum += num;
+            prefix.push(sum);
         }
         Self { prefix }
     }
@@ -39,5 +41,38 @@ mod tests {
         assert_eq!(arr.sum_range(0, 2), 1);
         assert_eq!(arr.sum_range(2, 5), -1);
         assert_eq!(arr.sum_range(0, 5), -3);
+    }
+
+    #[test]
+    fn single_element_query() {
+        let arr = NumArray::new(vec![5, -3, 7]);
+        assert_eq!(arr.sum_range(0, 0), 5);
+        assert_eq!(arr.sum_range(1, 1), -3);
+        assert_eq!(arr.sum_range(2, 2), 7);
+    }
+
+    #[test]
+    fn full_range() {
+        let arr = NumArray::new(vec![1, 2, 3, 4, 5]);
+        assert_eq!(arr.sum_range(0, 4), 15);
+    }
+
+    #[test]
+    fn single_element_array() {
+        let arr = NumArray::new(vec![42]);
+        assert_eq!(arr.sum_range(0, 0), 42);
+    }
+
+    #[test]
+    fn negative_numbers() {
+        let arr = NumArray::new(vec![-1, -2, -3, -4]);
+        assert_eq!(arr.sum_range(0, 3), -10);
+        assert_eq!(arr.sum_range(1, 2), -5);
+    }
+
+    #[test]
+    fn all_zeros() {
+        let arr = NumArray::new(vec![0, 0, 0, 0]);
+        assert_eq!(arr.sum_range(0, 3), 0);
     }
 }

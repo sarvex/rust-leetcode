@@ -64,4 +64,40 @@ mod tests {
             6
         );
     }
+
+    #[test]
+    fn test_one_empty() {
+        assert_eq!(Solution::min_distance("abc".to_string(), "".to_string()), 3);
+        assert_eq!(Solution::min_distance("".to_string(), "abc".to_string()), 3);
+    }
+
+    #[test]
+    fn test_both_empty() {
+        assert_eq!(Solution::min_distance("".to_string(), "".to_string()), 0);
+    }
+
+    #[test]
+    fn test_subsequence() {
+        // "leetcode" contains "leet" as a subsequence
+        assert_eq!(
+            Solution::min_distance("leetcode".to_string(), "leet".to_string()),
+            4 // delete "code" from first string
+        );
+    }
+
+    #[test]
+    fn test_single_chars() {
+        assert_eq!(Solution::min_distance("a".to_string(), "a".to_string()), 0);
+        assert_eq!(Solution::min_distance("a".to_string(), "b".to_string()), 2);
+    }
+
+    #[test]
+    fn test_leetcode_etco() {
+        // LCS of "leetcode" and "etco" is "etc" (length 3)
+        // Delete: 8 - 3 + 4 - 3 = 6
+        assert_eq!(
+            Solution::min_distance("leetcode".to_string(), "etco".to_string()),
+            6
+        );
+    }
 }

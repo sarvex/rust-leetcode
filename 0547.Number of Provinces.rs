@@ -55,4 +55,40 @@ mod tests {
             3
         );
     }
+
+    #[test]
+    fn test_single_city() {
+        assert_eq!(Solution::find_circle_num(vec![vec![1]]), 1);
+    }
+
+    #[test]
+    fn test_all_connected() {
+        assert_eq!(
+            Solution::find_circle_num(vec![vec![1, 1, 1], vec![1, 1, 1], vec![1, 1, 1]]),
+            1
+        );
+    }
+
+    #[test]
+    fn test_transitive_connection() {
+        // Cities 0-1 connected, 1-2 connected, so all in one province
+        assert_eq!(
+            Solution::find_circle_num(vec![vec![1, 1, 0], vec![1, 1, 1], vec![0, 1, 1]]),
+            1
+        );
+    }
+
+    #[test]
+    fn test_two_pairs() {
+        // Cities 0-1 connected, 2-3 connected, forming two provinces
+        assert_eq!(
+            Solution::find_circle_num(vec![
+                vec![1, 1, 0, 0],
+                vec![1, 1, 0, 0],
+                vec![0, 0, 1, 1],
+                vec![0, 0, 1, 1]
+            ]),
+            2
+        );
+    }
 }

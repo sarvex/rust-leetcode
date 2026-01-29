@@ -1,3 +1,9 @@
+#[derive(Default)]
+struct ListNode {
+    val: i32,
+    next: Option<Box<ListNode>>,
+}
+
 /// Singly linked list implementation using boxed nodes.
 ///
 /// # Intuition
@@ -92,5 +98,73 @@ impl MyLinkedList {
         }
         cur.next = cur.next.take().and_then(|n| n.next);
         self.head = dummy.next;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic_operations() {
+        let mut list = MyLinkedList::new();
+        list.add_at_head(1);
+        list.add_at_tail(3);
+        list.add_at_index(1, 2);
+        assert_eq!(list.get(1), 2);
+        list.delete_at_index(1);
+        assert_eq!(list.get(1), 3);
+    }
+
+    #[test]
+    fn test_empty_list() {
+        let list = MyLinkedList::new();
+        assert_eq!(list.get(0), -1);
+    }
+
+    #[test]
+    fn test_add_at_head_multiple() {
+        let mut list = MyLinkedList::new();
+        list.add_at_head(3);
+        list.add_at_head(2);
+        list.add_at_head(1);
+        assert_eq!(list.get(0), 1);
+        assert_eq!(list.get(1), 2);
+        assert_eq!(list.get(2), 3);
+    }
+
+    #[test]
+    fn test_add_at_tail_multiple() {
+        let mut list = MyLinkedList::new();
+        list.add_at_tail(1);
+        list.add_at_tail(2);
+        list.add_at_tail(3);
+        assert_eq!(list.get(0), 1);
+        assert_eq!(list.get(1), 2);
+        assert_eq!(list.get(2), 3);
+    }
+
+    #[test]
+    fn test_delete_head() {
+        let mut list = MyLinkedList::new();
+        list.add_at_head(1);
+        list.add_at_head(0);
+        list.delete_at_index(0);
+        assert_eq!(list.get(0), 1);
+    }
+
+    #[test]
+    fn test_out_of_bounds_get() {
+        let mut list = MyLinkedList::new();
+        list.add_at_head(1);
+        assert_eq!(list.get(1), -1);
+        assert_eq!(list.get(100), -1);
+    }
+
+    #[test]
+    fn test_add_at_invalid_index() {
+        let mut list = MyLinkedList::new();
+        list.add_at_index(1, 10); // Should do nothing
+        assert_eq!(list.get(0), -1);
     }
 }

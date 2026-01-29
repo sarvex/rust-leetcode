@@ -48,4 +48,39 @@ mod tests {
             'a'
         );
     }
+
+    #[test]
+    fn test_added_at_beginning() {
+        assert_eq!(
+            Solution::find_the_difference("abc".to_string(), "xabc".to_string()),
+            'x'
+        );
+    }
+
+    #[test]
+    fn test_added_in_middle() {
+        assert_eq!(
+            Solution::find_the_difference("abc".to_string(), "abxc".to_string()),
+            'x'
+        );
+    }
+
+    #[test]
+    fn test_longer_string() {
+        assert_eq!(
+            Solution::find_the_difference(
+                "aabbcc".to_string(),
+                "aabbccd".to_string()
+            ),
+            'd'
+        );
+    }
+
+    #[test]
+    fn test_all_same_letters() {
+        assert_eq!(
+            Solution::find_the_difference("aaaa".to_string(), "aaaaa".to_string()),
+            'a'
+        );
+    }
 }

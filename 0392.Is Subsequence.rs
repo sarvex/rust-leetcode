@@ -54,4 +54,38 @@ mod tests {
     fn test_both_empty() {
         assert!(Solution::is_subsequence(String::new(), String::new()));
     }
+
+    #[test]
+    fn test_s_longer_than_t() {
+        assert!(!Solution::is_subsequence(
+            "abcd".to_string(),
+            "abc".to_string()
+        ));
+    }
+
+    #[test]
+    fn test_equal_strings() {
+        assert!(Solution::is_subsequence(
+            "abc".to_string(),
+            "abc".to_string()
+        ));
+    }
+
+    #[test]
+    fn test_single_char_match() {
+        assert!(Solution::is_subsequence("b".to_string(), "abc".to_string()));
+    }
+
+    #[test]
+    fn test_single_char_no_match() {
+        assert!(!Solution::is_subsequence("z".to_string(), "abc".to_string()));
+    }
+
+    #[test]
+    fn test_consecutive_chars() {
+        assert!(Solution::is_subsequence(
+            "ace".to_string(),
+            "abcde".to_string()
+        ));
+    }
 }

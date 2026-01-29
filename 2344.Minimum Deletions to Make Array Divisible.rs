@@ -17,7 +17,7 @@ impl Solution {
         let target_gcd = nums_divide.into_iter().fold(0, Self::gcd);
 
         nums.iter()
-            .filter(|num| **target_gcd % **num == 0)
+            .filter(|num| target_gcd % **num == 0)
             .min()
             .map_or(-1, |&min_val| {
                 nums.iter().filter(|num| **num < min_val).count() as i32

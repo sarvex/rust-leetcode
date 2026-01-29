@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Removes adjacent duplicates using a stack.
     ///

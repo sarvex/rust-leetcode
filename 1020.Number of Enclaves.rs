@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Counts land cells not reachable from the boundary.
     ///

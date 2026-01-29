@@ -67,4 +67,37 @@ mod tests {
             "a"
         );
     }
+
+    #[test]
+    fn test_no_match() {
+        assert_eq!(
+            Solution::find_longest_word("abc".to_string(), vec!["xyz".to_string()]),
+            ""
+        );
+    }
+
+    #[test]
+    fn test_empty_dictionary() {
+        assert_eq!(Solution::find_longest_word("abc".to_string(), vec![]), "");
+    }
+
+    #[test]
+    fn test_lexicographic_order() {
+        // Both "ba" and "ab" are valid, "ab" should win due to lexicographic order
+        assert_eq!(
+            Solution::find_longest_word(
+                "abba".to_string(),
+                vec!["ba".to_string(), "ab".to_string()],
+            ),
+            "ab"
+        );
+    }
+
+    #[test]
+    fn test_exact_match() {
+        assert_eq!(
+            Solution::find_longest_word("word".to_string(), vec!["word".to_string()]),
+            "word"
+        );
+    }
 }
