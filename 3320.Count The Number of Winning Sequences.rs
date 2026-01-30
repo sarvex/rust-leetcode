@@ -17,61 +17,104 @@ impl Solution {
     pub fn count_winning_sequences(s: String) -> i32 {
         const MOD: i64 = 1_000_000_007;
         let n = s.len();
+        if n == 0 {
+            return 0;
+        }
 
-        // Map characters: F=0, W=1, E=2
-        let alice: Vec<usize> = s
-            .bytes()
-            .map(|c| match c {
-                b'F' => 0,
-                b'W' => 1,
-                _ => 2,
-            })
-            .collect();
+        let bytes = s.as_bytes();
 
         // outcome[alice][bob] = Bob's point change
         // F beats E, W beats F, E beats W
         let outcome: [[i32; 3]; 3] = [[0, 1, -1], [-1, 0, 1], [1, -1, 0]];
+        const NEXT_BOBS: [[usize; 2]; 3] = [[1, 2], [0, 2], [0, 1]];
 
         let offset = n as i32;
         let size = 2 * n + 1;
+        let stride = size;
 
         // dp[bob's last move][score difference + offset]
-        let mut dp = vec![vec![0i64; size]; 3];
+        let mut dp = vec![0i64; 3 * stride];
+        let mut next = vec![0i64; 3 * stride];
 
         // Initialize first round
+        let first_alice = match bytes[0] {
+            b'F' => 0,
+            b'W' => 1,
+            _ => 2,
+        };
         for bob in 0..3 {
-            let diff = outcome[alice[0]][bob];
-            dp[bob][(offset + diff) as usize] = 1;
+            let diff = outcome[first_alice][bob];
+            let idx = (offset + diff) as usize;
+            dp[bob * stride + idx] = 1;
         }
 
         // Process remaining rounds
+        let mut min_index = offset - 1;
+        let mut max_index = offset + 1;
         for i in 1..n {
-            let mut next = vec![vec![0i64; size]; 3];
-            for (last, dp_last) in dp.iter().enumerate() {
-                for (d, &count) in dp_last.iter().enumerate() {
+            let alice_move = match bytes[i] {
+                b'F' => 0,
+                b'W' => 1,
+                _ => 2,
+            };
+            let delta = outcome[alice_move];
+
+            let next_min = min_index - 1;
+            let next_max = max_index + 1;
+            let next_min_usize = next_min as usize;
+            let next_max_usize = next_max as usize;
+            for bob in 0..3 {
+                let base = bob * stride;
+                next[base + next_min_usize..=base + next_max_usize].fill(0);
+            }
+
+            let min_usize = min_index as usize;
+            let max_usize = max_index as usize;
+            for last in 0..3 {
+                let base = last * stride;
+                let [bob1, bob2] = NEXT_BOBS[last];
+                let delta1 = delta[bob1];
+                let delta2 = delta[bob2];
+                let next_base1 = bob1 * stride;
+                let next_base2 = bob2 * stride;
+                for d in min_usize..=max_usize {
+                    let count = dp[base + d];
                     if count == 0 {
                         continue;
                     }
-                    for bob in 0..3 {
-                        if bob == last {
-                            continue;
-                        }
-                        let delta = outcome[alice[i]][bob];
-                        let new_d = d as i32 + delta;
-                        if new_d >= 0 && new_d < size as i32 {
-                            next[bob][new_d as usize] =
-                                (next[bob][new_d as usize] + count) % MOD;
-                        }
+                    let idx1 = next_base1 + (d as i32 + delta1) as usize;
+                    let mut value1 = next[idx1] + count;
+                    if value1 >= MOD {
+                        value1 -= MOD;
                     }
+                    next[idx1] = value1;
+
+                    let idx2 = next_base2 + (d as i32 + delta2) as usize;
+                    let mut value2 = next[idx2] + count;
+                    if value2 >= MOD {
+                        value2 -= MOD;
+                    }
+                    next[idx2] = value2;
                 }
             }
-            dp = next;
+            std::mem::swap(&mut dp, &mut next);
+            min_index = next_min;
+            max_index = next_max;
         }
 
         // Sum winning states (diff > 0 means index > offset)
-        dp.iter()
-            .flat_map(|row| row.iter().skip(offset as usize + 1))
-            .fold(0i64, |acc, &x| (acc + x) % MOD) as i32
+        let mut total = 0i64;
+        let start = (offset + 1) as usize;
+        for bob in 0..3 {
+            let base = bob * stride;
+            for idx in start..size {
+                total += dp[base + idx];
+                if total >= MOD {
+                    total -= MOD;
+                }
+            }
+        }
+        total as i32
     }
 }
 

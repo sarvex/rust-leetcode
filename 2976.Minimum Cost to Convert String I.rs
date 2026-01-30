@@ -30,20 +30,32 @@ impl Solution {
         }
 
         // Build graph from conversion rules
-        for ((&o, &c), &co) in original.iter().zip(&changed).zip(&cost) {
-            let from = (o as u8 - b'a') as usize;
-            let to = (c as u8 - b'a') as usize;
-            dist[from][to] = dist[from][to].min(co as i64);
+        let rules_len = original.len();
+        for idx in 0..rules_len {
+            let from = (original[idx] as u8 - b'a') as usize;
+            let to = (changed[idx] as u8 - b'a') as usize;
+            let co = cost[idx] as i64;
+            if co < dist[from][to] {
+                dist[from][to] = co;
+            }
         }
 
         // Floyd-Warshall with early pruning
         for k in 0..N {
+            let row_k = dist[k];
             for i in 0..N {
-                if dist[i][k] < INF {
-                    for j in 0..N {
-                        if dist[k][j] < INF {
-                            dist[i][j] = dist[i][j].min(dist[i][k] + dist[k][j]);
-                        }
+                let dik = dist[i][k];
+                if dik >= INF {
+                    continue;
+                }
+                for j in 0..N {
+                    let dkj = row_k[j];
+                    if dkj >= INF {
+                        continue;
+                    }
+                    let cand = dik + dkj;
+                    if cand < dist[i][j] {
+                        dist[i][j] = cand;
                     }
                 }
             }
@@ -54,14 +66,15 @@ impl Solution {
         let tgt = target.as_bytes();
 
         let mut total = 0i64;
-        for i in 0..src.len() {
-            if src[i] != tgt[i] {
-                let d = dist[(src[i] - b'a') as usize][(tgt[i] - b'a') as usize];
-                if d >= INF {
-                    return -1;
-                }
-                total += d;
+        for (&s, &t) in src.iter().zip(tgt.iter()) {
+            if s == t {
+                continue;
             }
+            let d = dist[(s - b'a') as usize][(t - b'a') as usize];
+            if d >= INF {
+                return -1;
+            }
+            total += d;
         }
 
         total

@@ -12,22 +12,27 @@ impl Solution {
     ///
     /// # Complexity
     /// - Time: O(n × min(n,x))
-    /// - Space: O(n × min(n,x))
+    /// - Space: O(min(n,x))
     pub fn number_of_ways(n: i32, x: i32, y: i32) -> i32 {
         const MOD: i64 = 1_000_000_007;
         let n = n as usize;
         let x = x as usize;
-        let y = y as i64;
+        let y = (y as i64) % MOD;
 
         let max_k = n.min(x);
+        if max_k == 0 || y == 0 {
+            return 0;
+        }
 
-        // Precompute Stirling numbers of the second kind S(n, k)
+        // Rolling DP for Stirling numbers of the second kind S(n, k)
         // S(n, k) = k * S(n-1, k) + S(n-1, k-1)
-        let mut stirling = vec![vec![0i64; max_k + 1]; n + 1];
-        stirling[0][0] = 1;
+        let mut stirling = vec![0i64; max_k + 1];
+        stirling[0] = 1;
         for i in 1..=n {
-            for j in 1..=i.min(max_k) {
-                stirling[i][j] = (j as i64 * stirling[i - 1][j] + stirling[i - 1][j - 1]) % MOD;
+            let upper = if i < max_k { i } else { max_k };
+            for j in (1..=upper).rev() {
+                let j_i64 = j as i64;
+                stirling[j] = (j_i64 * stirling[j] + stirling[j - 1]) % MOD;
             }
         }
 
@@ -38,8 +43,11 @@ impl Solution {
         for k in 1..=max_k {
             perm = perm * (x - k + 1) as i64 % MOD;
             pow_y = pow_y * y % MOD;
-            let contribution = perm * stirling[n][k] % MOD * pow_y % MOD;
-            result = (result + contribution) % MOD;
+            let contribution = perm * stirling[k] % MOD * pow_y % MOD;
+            result += contribution;
+            if result >= MOD {
+                result -= MOD;
+            }
         }
 
         result as i32
