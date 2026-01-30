@@ -30,13 +30,12 @@ impl Solution {
         }
 
         // Build graph from conversion rules
-        let rules_len = original.len();
-        for idx in 0..rules_len {
-            let from = (original[idx] as u8 - b'a') as usize;
-            let to = (changed[idx] as u8 - b'a') as usize;
-            let co = cost[idx] as i64;
-            if co < dist[from][to] {
-                dist[from][to] = co;
+        for ((from, to), co) in original.into_iter().zip(changed).zip(cost) {
+            let from_idx = (from as u8 - b'a') as usize;
+            let to_idx = (to as u8 - b'a') as usize;
+            let co = co as i64;
+            if co < dist[from_idx][to_idx] {
+                dist[from_idx][to_idx] = co;
             }
         }
 
@@ -44,7 +43,8 @@ impl Solution {
         for k in 0..N {
             let row_k = dist[k];
             for i in 0..N {
-                let dik = dist[i][k];
+                let dist_i = &mut dist[i];
+                let dik = dist_i[k];
                 if dik >= INF {
                     continue;
                 }
@@ -54,8 +54,8 @@ impl Solution {
                         continue;
                     }
                     let cand = dik + dkj;
-                    if cand < dist[i][j] {
-                        dist[i][j] = cand;
+                    if cand < dist_i[j] {
+                        dist_i[j] = cand;
                     }
                 }
             }
@@ -66,11 +66,15 @@ impl Solution {
         let tgt = target.as_bytes();
 
         let mut total = 0i64;
-        for (&s, &t) in src.iter().zip(tgt.iter()) {
+        for idx in 0..src.len() {
+            let s = src[idx];
+            let t = tgt[idx];
             if s == t {
                 continue;
             }
-            let d = dist[(s - b'a') as usize][(t - b'a') as usize];
+            let s_idx = (s - b'a') as usize;
+            let t_idx = (t - b'a') as usize;
+            let d = dist[s_idx][t_idx];
             if d >= INF {
                 return -1;
             }

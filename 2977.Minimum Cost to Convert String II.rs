@@ -3,7 +3,8 @@ use std::collections::{hash_map::Entry, HashMap};
 struct LengthGraph {
     len: usize,
     index: HashMap<Vec<u8>, usize>,
-    dist: Vec<Vec<i64>>,
+    node_count: usize,
+    dist: Vec<i64>,
 }
 
 impl Solution {
@@ -41,37 +42,44 @@ impl Solution {
         let src = source.as_bytes();
         let tgt = target.as_bytes();
 
-        let mut rules_by_len: HashMap<usize, Vec<(Vec<u8>, Vec<u8>, i64)>> =
-            HashMap::with_capacity(original.len());
+        let max_len = original.iter().map(|s| s.len()).max().unwrap_or(0);
+        let mut counts = vec![0usize; max_len + 1];
+        for s in &original {
+            counts[s.len()] += 1;
+        }
+        let mut rules_by_len: Vec<Vec<(Vec<u8>, Vec<u8>, i64)>> = counts
+            .iter()
+            .map(|&count| Vec::with_capacity(count))
+            .collect();
         for ((orig, chg), co) in original.into_iter().zip(changed).zip(cost) {
             let len = orig.len();
-            rules_by_len
-                .entry(len)
-                .or_default()
-                .push((orig.into_bytes(), chg.into_bytes(), co as i64));
+            rules_by_len[len].push((orig.into_bytes(), chg.into_bytes(), co as i64));
         }
 
         let mut graphs: Vec<LengthGraph> = Vec::with_capacity(rules_by_len.len());
-        for (len, rules) in rules_by_len.into_iter() {
+        for (len, rules) in rules_by_len.into_iter().enumerate() {
+            if rules.is_empty() {
+                continue;
+            }
             let mut index: HashMap<Vec<u8>, usize> = HashMap::with_capacity(rules.len() * 2);
             let mut edges: Vec<(usize, usize, i64)> = Vec::with_capacity(rules.len());
 
             for (o, c, co) in rules {
-                let from_id = index.len();
                 let from = match index.entry(o) {
                     Entry::Occupied(entry) => *entry.get(),
                     Entry::Vacant(entry) => {
-                        entry.insert(from_id);
-                        from_id
+                        let id = index.len();
+                        entry.insert(id);
+                        id
                     }
                 };
 
-                let to_id = index.len();
                 let to = match index.entry(c) {
                     Entry::Occupied(entry) => *entry.get(),
                     Entry::Vacant(entry) => {
-                        entry.insert(to_id);
-                        to_id
+                        let id = index.len();
+                        entry.insert(id);
+                        id
                     }
                 };
 
@@ -79,52 +87,68 @@ impl Solution {
             }
 
             let m = index.len();
-            let mut dist = vec![vec![INF; m]; m];
+            let mut dist = vec![INF; m * m];
             for i in 0..m {
-                dist[i][i] = 0;
+                dist[i * m + i] = 0;
             }
 
             for (from, to, co) in edges {
-                if co < dist[from][to] {
-                    dist[from][to] = co;
+                let idx = from * m + to;
+                if co < dist[idx] {
+                    dist[idx] = co;
                 }
             }
 
             for k in 0..m {
+                let k_row = k * m;
                 for i in 0..m {
-                    if dist[i][k] >= INF {
+                    let ik = i * m + k;
+                    let dik = dist[ik];
+                    if dik >= INF {
                         continue;
                     }
-                    let dik = dist[i][k];
+                    let i_row = i * m;
                     for j in 0..m {
-                        if dist[k][j] >= INF {
+                        let dkj = dist[k_row + j];
+                        if dkj >= INF {
                             continue;
                         }
-                        let nd = dik + dist[k][j];
-                        if nd < dist[i][j] {
-                            dist[i][j] = nd;
+                        let nd = dik + dkj;
+                        let ij = i_row + j;
+                        if nd < dist[ij] {
+                            dist[ij] = nd;
                         }
                     }
                 }
             }
 
-            graphs.push(LengthGraph { len, index, dist });
+            graphs.push(LengthGraph {
+                len,
+                index,
+                node_count: m,
+                dist,
+            });
         }
-
-        graphs.sort_unstable_by_key(|graph| graph.len);
 
         let mut dp = vec![INF; n + 1];
         dp[n] = 0;
 
         for i in (0..n).rev() {
-            if src[i] == tgt[i] {
-                dp[i] = dp[i + 1];
-            }
+            let mut best = if src[i] == tgt[i] {
+                dp[i + 1]
+            } else {
+                INF
+            };
 
             for graph in graphs.iter() {
                 let len = graph.len;
                 if i + len > n {
                     break;
+                }
+
+                let next_cost = dp[i + len];
+                if next_cost >= INF {
+                    continue;
                 }
 
                 let src_slice = &src[i..i + len];
@@ -133,15 +157,16 @@ impl Solution {
                 if let (Some(from), Some(to)) =
                     (graph.index.get(src_slice), graph.index.get(tgt_slice))
                 {
-                    let cost_seg = graph.dist[*from][*to];
+                    let cost_seg = graph.dist[*from * graph.node_count + *to];
                     if cost_seg < INF {
-                        let candidate = cost_seg + dp[i + len];
-                        if candidate < dp[i] {
-                            dp[i] = candidate;
+                        let candidate = cost_seg + next_cost;
+                        if candidate < best {
+                            best = candidate;
                         }
                     }
                 }
             }
+            dp[i] = best;
         }
 
         if dp[0] >= INF {

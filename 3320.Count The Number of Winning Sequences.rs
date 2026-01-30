@@ -61,11 +61,11 @@ impl Solution {
 
             let next_min = min_index - 1;
             let next_max = max_index + 1;
-            let next_min_usize = next_min as usize;
-            let next_max_usize = next_max as usize;
+            let next_start = next_min as usize;
+            let next_len = (next_max - next_min + 1) as usize;
             for bob in 0..3 {
-                let base = bob * stride;
-                next[base + next_min_usize..=base + next_max_usize].fill(0);
+                let base = bob * stride + next_start;
+                next[base..base + next_len].fill(0);
             }
 
             let min_usize = min_index as usize;
@@ -75,26 +75,29 @@ impl Solution {
                 let [bob1, bob2] = NEXT_BOBS[last];
                 let delta1 = delta[bob1];
                 let delta2 = delta[bob2];
+                let dp_row = &dp[base..base + stride];
                 let next_base1 = bob1 * stride;
                 let next_base2 = bob2 * stride;
-                for d in min_usize..=max_usize {
-                    let count = dp[base + d];
-                    if count == 0 {
-                        continue;
-                    }
-                    let idx1 = next_base1 + (d as i32 + delta1) as usize;
-                    let mut value1 = next[idx1] + count;
-                    if value1 >= MOD {
-                        value1 -= MOD;
-                    }
-                    next[idx1] = value1;
+                let mut d = min_usize;
+                while d <= max_usize {
+                    let count = dp_row[d];
+                    if count != 0 {
+                        let d_i32 = d as i32;
+                        let idx1 = next_base1 + (d_i32 + delta1) as usize;
+                        let mut value1 = next[idx1] + count;
+                        if value1 >= MOD {
+                            value1 -= MOD;
+                        }
+                        next[idx1] = value1;
 
-                    let idx2 = next_base2 + (d as i32 + delta2) as usize;
-                    let mut value2 = next[idx2] + count;
-                    if value2 >= MOD {
-                        value2 -= MOD;
+                        let idx2 = next_base2 + (d_i32 + delta2) as usize;
+                        let mut value2 = next[idx2] + count;
+                        if value2 >= MOD {
+                            value2 -= MOD;
+                        }
+                        next[idx2] = value2;
                     }
-                    next[idx2] = value2;
+                    d += 1;
                 }
             }
             std::mem::swap(&mut dp, &mut next);
@@ -106,12 +109,14 @@ impl Solution {
         let mut total = 0i64;
         let start = (offset + 1) as usize;
         for bob in 0..3 {
-            let base = bob * stride;
-            for idx in start..size {
-                total += dp[base + idx];
+            let row = &dp[bob * stride..(bob + 1) * stride];
+            let mut idx = start;
+            while idx < size {
+                total += row[idx];
                 if total >= MOD {
                     total -= MOD;
                 }
+                idx += 1;
             }
         }
         total as i32
