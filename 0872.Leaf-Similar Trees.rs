@@ -53,7 +53,8 @@ impl Solution {
             }
         }
 
-        let (mut leaves1, mut leaves2) = (Vec::new(), Vec::new());
+        // Estimate capacity based on typical binary tree leaf count
+        let (mut leaves1, mut leaves2) = (Vec::with_capacity(32), Vec::with_capacity(32));
         collect_leaves(&root1, &mut leaves1);
         collect_leaves(&root2, &mut leaves2);
         leaves1 == leaves2
@@ -76,7 +77,7 @@ mod tests {
 
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() && vals[i].is_some() {
                 let left = Rc::new(RefCell::new(TreeNode::new(vals[i].unwrap())));
                 node.borrow_mut().left = Some(left.clone());
@@ -101,12 +102,34 @@ mod tests {
         // Tree2: [3, 5, 1, 6, 7, 4, 2, null, null, null, null, null, null, 9, 8]
         // Both have leaf sequence: [6, 7, 4, 9, 8]
         let root1 = build_tree(&[
-            Some(3), Some(5), Some(1), Some(6), Some(2), Some(9), Some(8),
-            None, None, Some(7), Some(4)
+            Some(3),
+            Some(5),
+            Some(1),
+            Some(6),
+            Some(2),
+            Some(9),
+            Some(8),
+            None,
+            None,
+            Some(7),
+            Some(4),
         ]);
         let root2 = build_tree(&[
-            Some(3), Some(5), Some(1), Some(6), Some(7), Some(4), Some(2),
-            None, None, None, None, None, None, Some(9), Some(8)
+            Some(3),
+            Some(5),
+            Some(1),
+            Some(6),
+            Some(7),
+            Some(4),
+            Some(2),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(9),
+            Some(8),
         ]);
         assert!(Solution::leaf_similar(root1, root2));
     }

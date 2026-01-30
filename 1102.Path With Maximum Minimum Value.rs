@@ -1,3 +1,5 @@
+pub struct Solution;
+
 struct UnionFind {
     parent: Vec<usize>,
     size: Vec<usize>,
@@ -5,8 +7,10 @@ struct UnionFind {
 
 impl UnionFind {
     fn new(n: usize) -> Self {
+        let mut parent = Vec::with_capacity(n);
+        parent.extend(0..n);
         Self {
-            parent: (0..n).collect(),
+            parent,
             size: vec![1; n],
         }
     }
@@ -54,11 +58,12 @@ impl Solution {
     pub fn maximum_minimum_path(grid: Vec<Vec<i32>>) -> i32 {
         let (m, n) = (grid.len(), grid[0].len());
         let mut uf = UnionFind::new(m * n);
-        let mut cells: Vec<(i32, usize, usize)> = grid
-            .iter()
-            .enumerate()
-            .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, v)| (*v, i, j)))
-            .collect();
+        let mut cells = Vec::with_capacity(m * n);
+        cells.extend(
+            grid.iter()
+                .enumerate()
+                .flat_map(|(i, row)| row.iter().enumerate().map(move |(j, v)| (*v, i, j))),
+        );
         cells.sort_unstable_by(|a, b| b.0.cmp(&a.0));
 
         let mut visited = vec![vec![false; n]; m];
@@ -78,8 +83,6 @@ impl Solution {
         0
     }
 }
-
-pub struct Solution;
 
 #[cfg(test)]
 mod tests {

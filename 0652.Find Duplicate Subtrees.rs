@@ -66,7 +66,7 @@ impl Solution {
             serial
         }
 
-        let mut freq = HashMap::new();
+        let mut freq = HashMap::with_capacity(100);
         let mut result = Vec::new();
         dfs(&root, &mut freq, &mut result);
         result
@@ -82,15 +82,15 @@ mod tests {
         if vals.is_empty() || vals[0].is_none() {
             return None;
         }
-        
+
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
         let mut queue = VecDeque::new();
         queue.push_back(root.clone());
-        
+
         let mut i = 1;
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() {
                 if let Some(val) = vals[i] {
                     let left = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -99,7 +99,7 @@ mod tests {
                 }
                 i += 1;
             }
-            
+
             if i < vals.len() {
                 if let Some(val) = vals[i] {
                     let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -109,7 +109,7 @@ mod tests {
                 i += 1;
             }
         }
-        
+
         Some(root)
     }
 
@@ -121,18 +121,18 @@ mod tests {
         //    /   /
         //   4   4
         let root = Rc::new(RefCell::new(TreeNode::new(1)));
-        
+
         let left = Rc::new(RefCell::new(TreeNode::new(2)));
         let left_left = Rc::new(RefCell::new(TreeNode::new(4)));
         left.borrow_mut().left = Some(left_left);
-        
+
         let right = Rc::new(RefCell::new(TreeNode::new(2)));
         let right_left = Rc::new(RefCell::new(TreeNode::new(4)));
         right.borrow_mut().left = Some(right_left);
-        
+
         root.borrow_mut().left = Some(left);
         root.borrow_mut().right = Some(right);
-        
+
         Some(root)
     }
 
@@ -148,17 +148,27 @@ mod tests {
         //      /
         //     4
         let root = create_tree(&[
-            Some(1), Some(2), Some(3), Some(4), None, Some(2), Some(4), 
-            None, None, None, None, Some(4)
+            Some(1),
+            Some(2),
+            Some(3),
+            Some(4),
+            None,
+            Some(2),
+            Some(4),
+            None,
+            None,
+            None,
+            None,
+            Some(4),
         ]);
         let result = Solution::find_duplicate_subtrees(root);
-        
+
         // The actual LeetCode example would find [4] and [2,4] as duplicates
         // But based on the tree structure, only [4] appears multiple times
         assert!(result.len() >= 1);
     }
 
-    #[test] 
+    #[test]
     fn test_manual_duplicate_subtrees() {
         // Manually created tree with actual [2,4] duplicates
         //       1
@@ -168,8 +178,8 @@ mod tests {
         //   4   4
         let root = create_tree_manual();
         let result = Solution::find_duplicate_subtrees(root);
-        
-        // Should find duplicates: [4] and [2,4] 
+
+        // Should find duplicates: [4] and [2,4]
         assert_eq!(result.len(), 2);
     }
 
@@ -181,7 +191,7 @@ mod tests {
         //     1   1
         let root = create_tree(&[Some(2), Some(1), Some(1)]);
         let result = Solution::find_duplicate_subtrees(root);
-        
+
         // Should find one duplicate subtree [1]
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].as_ref().unwrap().borrow().val, 1);
@@ -197,7 +207,7 @@ mod tests {
         //   3   3
         let root = create_tree(&[Some(2), Some(2), Some(2), Some(3), None, Some(3), None]);
         let result = Solution::find_duplicate_subtrees(root);
-        
+
         // Should find duplicate subtrees [3] and [2,3]
         assert_eq!(result.len(), 2);
     }
@@ -210,9 +220,17 @@ mod tests {
         //     2   3
         //    / \ / \
         //   4  5 6  7
-        let root = create_tree(&[Some(1), Some(2), Some(3), Some(4), Some(5), Some(6), Some(7)]);
+        let root = create_tree(&[
+            Some(1),
+            Some(2),
+            Some(3),
+            Some(4),
+            Some(5),
+            Some(6),
+            Some(7),
+        ]);
         let result = Solution::find_duplicate_subtrees(root);
-        
+
         // No duplicates should be found
         assert_eq!(result.len(), 0);
     }
@@ -222,7 +240,7 @@ mod tests {
         // Tree: [1]
         let root = create_tree(&[Some(1)]);
         let result = Solution::find_duplicate_subtrees(root);
-        
+
         // No duplicates in a single node tree
         assert_eq!(result.len(), 0);
     }
@@ -238,7 +256,7 @@ mod tests {
         //   1       1
         let root = create_tree(&[Some(1), Some(1), Some(1), Some(1), None, None, Some(1)]);
         let result = Solution::find_duplicate_subtrees(root);
-        
+
         // Should find some duplicate leaf nodes with value 1
         assert!(result.len() >= 1);
     }

@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Finds the minimum time difference between any two time points.
     ///
@@ -17,15 +19,13 @@ impl Solution {
         if time_points.len() > 1440 {
             return 0;
         }
-        let mut minutes: Vec<i32> = time_points
-            .iter()
-            .map(|t| {
-                let b = t.as_bytes();
-                ((b[0] - b'0') as i32 * 10 + (b[1] - b'0') as i32) * 60
-                    + (b[3] - b'0') as i32 * 10
-                    + (b[4] - b'0') as i32
-            })
-            .collect();
+        let mut minutes: Vec<i32> = Vec::with_capacity(time_points.len());
+        for t in &time_points {
+            let b = t.as_bytes();
+            let hour = ((b[0] - b'0') as i32 * 10 + (b[1] - b'0') as i32) * 60;
+            let minute = (b[3] - b'0') as i32 * 10 + (b[4] - b'0') as i32;
+            minutes.push(hour + minute);
+        }
         minutes.sort_unstable();
         let wrap = 1440 - minutes.last().unwrap() + minutes[0];
         minutes

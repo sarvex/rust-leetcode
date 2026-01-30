@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Finds the longest dictionary word that is a subsequence of `s`.
     ///

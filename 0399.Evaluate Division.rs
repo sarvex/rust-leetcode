@@ -7,8 +7,9 @@ struct UnionFind {
 
 impl UnionFind {
     fn new(equations: &[Vec<String>]) -> Self {
-        let mut parent = HashMap::new();
-        let mut weight = HashMap::new();
+        let capacity = equations.len() * 2;
+        let mut parent = HashMap::with_capacity(capacity);
+        let mut weight = HashMap::with_capacity(capacity);
         for eq in equations {
             for var in eq {
                 parent.entry(var.clone()).or_insert_with(|| var.clone());
@@ -54,6 +55,8 @@ impl UnionFind {
         }
     }
 }
+
+pub struct Solution;
 
 impl Solution {
     /// Evaluates division queries using a weighted Union-Find.

@@ -1,6 +1,8 @@
 // The rand7() API is already defined for you.
 // fn rand7() -> i32;
 
+pub struct Solution;
+
 impl Solution {
     /// Implements rand10() using rejection sampling with rand7().
     ///

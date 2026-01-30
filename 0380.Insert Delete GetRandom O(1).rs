@@ -22,8 +22,8 @@ struct RandomizedSet {
 impl RandomizedSet {
     fn new() -> Self {
         Self {
-            vals: Vec::new(),
-            indices: HashMap::new(),
+            vals: Vec::with_capacity(16),
+            indices: HashMap::with_capacity(16),
         }
     }
 

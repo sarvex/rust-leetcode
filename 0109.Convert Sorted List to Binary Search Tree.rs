@@ -50,7 +50,15 @@ impl Solution {
     /// - Time: O(n) for list traversal plus O(n) for tree construction
     /// - Space: O(n) for the values vector plus O(log n) recursion stack
     pub fn sorted_list_to_bst(head: Option<Box<ListNode>>) -> Option<Rc<RefCell<TreeNode>>> {
-        let mut vals = Vec::new();
+        // Count nodes first for optimal capacity
+        let mut count = 0;
+        let mut cur = &head;
+        while let Some(node) = cur {
+            count += 1;
+            cur = &node.next;
+        }
+
+        let mut vals = Vec::with_capacity(count);
         let mut cur = &head;
         while let Some(node) = cur {
             vals.push(node.val);

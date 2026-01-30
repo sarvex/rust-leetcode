@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Sorts characters by descending frequency using a frequency array.
     ///
@@ -18,12 +20,13 @@ impl Solution {
         for &b in s.as_bytes() {
             freq[b as usize] += 1;
         }
-        let mut pairs: Vec<(usize, u8)> = freq
-            .iter()
-            .enumerate()
-            .filter(|(_, count)| *count > 0)
-            .map(|(i, count)| (*count, i as u8))
-            .collect();
+        let mut pairs: Vec<(usize, u8)> = Vec::with_capacity(128);
+        pairs.extend(
+            freq.iter()
+                .enumerate()
+                .filter(|(_, count)| **count > 0)
+                .map(|(i, count)| (*count, i as u8)),
+        );
         pairs.sort_unstable_by(|a, b| b.0.cmp(&a.0));
         let mut result = String::with_capacity(s.len());
         for (count, byte) in pairs {

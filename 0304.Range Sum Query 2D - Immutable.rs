@@ -18,11 +18,14 @@ struct NumMatrix {
 impl NumMatrix {
     fn new(matrix: Vec<Vec<i32>>) -> Self {
         if matrix.is_empty() || matrix[0].is_empty() {
-            return Self { prefix: vec![vec![0]] };
+            return Self {
+                prefix: vec![vec![0]],
+            };
         }
         let m = matrix.len();
         let n = matrix[0].len();
-        let mut prefix = vec![vec![0; n + 1]; m + 1];
+        let mut prefix = Vec::with_capacity(m + 1);
+        prefix.resize(m + 1, vec![0; n + 1]);
         for i in 0..m {
             for j in 0..n {
                 prefix[i + 1][j + 1] =
@@ -59,11 +62,7 @@ mod tests {
 
     #[test]
     fn single_cell() {
-        let matrix = NumMatrix::new(vec![
-            vec![1, 2, 3],
-            vec![4, 5, 6],
-            vec![7, 8, 9],
-        ]);
+        let matrix = NumMatrix::new(vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]]);
         assert_eq!(matrix.sum_region(0, 0, 0, 0), 1);
         assert_eq!(matrix.sum_region(1, 1, 1, 1), 5);
         assert_eq!(matrix.sum_region(2, 2, 2, 2), 9);
@@ -71,10 +70,7 @@ mod tests {
 
     #[test]
     fn full_matrix() {
-        let matrix = NumMatrix::new(vec![
-            vec![1, 2],
-            vec![3, 4],
-        ]);
+        let matrix = NumMatrix::new(vec![vec![1, 2], vec![3, 4]]);
         assert_eq!(matrix.sum_region(0, 0, 1, 1), 10);
     }
 
@@ -93,10 +89,7 @@ mod tests {
 
     #[test]
     fn negative_values() {
-        let matrix = NumMatrix::new(vec![
-            vec![-1, -2],
-            vec![-3, -4],
-        ]);
+        let matrix = NumMatrix::new(vec![vec![-1, -2], vec![-3, -4]]);
         assert_eq!(matrix.sum_region(0, 0, 1, 1), -10);
     }
 }

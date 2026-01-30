@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Reverses only the vowels in a string using two pointers on a byte vector.
     ///
@@ -18,8 +20,7 @@ impl Solution {
         if bytes.len() <= 1 {
             return String::from_utf8(bytes).unwrap();
         }
-        let is_vowel =
-            |c: u8| matches!(c.to_ascii_lowercase(), b'a' | b'e' | b'i' | b'o' | b'u');
+        let is_vowel = |c: u8| matches!(c.to_ascii_lowercase(), b'a' | b'e' | b'i' | b'o' | b'u');
         let (mut left, mut right) = (0, bytes.len() - 1);
         while left < right {
             while left < right && !is_vowel(bytes[left]) {
@@ -86,18 +87,12 @@ mod tests {
 
     #[test]
     fn empty_string() {
-        assert_eq!(
-            Solution::reverse_vowels(String::new()),
-            String::new()
-        );
+        assert_eq!(Solution::reverse_vowels(String::new()), String::new());
     }
 
     #[test]
     fn mixed_case_vowels() {
-        assert_eq!(
-            Solution::reverse_vowels("aA".to_string()),
-            "Aa".to_string()
-        );
+        assert_eq!(Solution::reverse_vowels("aA".to_string()), "Aa".to_string());
     }
 
     #[test]

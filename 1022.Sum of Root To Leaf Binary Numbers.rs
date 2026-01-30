@@ -61,7 +61,7 @@ mod tests {
         }
 
         let root = Rc::new(RefCell::new(TreeNode::new(values[0].unwrap())));
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = std::collections::VecDeque::with_capacity(values.len());
         queue.push_back(root.clone());
 
         let mut i = 1;

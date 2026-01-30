@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Finds the added character using XOR of all bytes.
     ///
@@ -68,10 +70,7 @@ mod tests {
     #[test]
     fn test_longer_string() {
         assert_eq!(
-            Solution::find_the_difference(
-                "aabbcc".to_string(),
-                "aabbccd".to_string()
-            ),
+            Solution::find_the_difference("aabbcc".to_string(), "aabbccd".to_string()),
             'd'
         );
     }

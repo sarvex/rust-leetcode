@@ -1,5 +1,7 @@
 use std::collections::{HashSet, VecDeque};
 
+pub struct Solution;
+
 impl Solution {
     /// Finds the minimum mutations from start to end gene using BFS.
     ///
@@ -16,9 +18,9 @@ impl Solution {
     /// - Time: O(B² · L) where B = bank size, L = gene length (8)
     /// - Space: O(B)
     pub fn min_mutation(start_gene: String, end_gene: String, bank: Vec<String>) -> i32 {
-        let mut visited = HashSet::new();
+        let mut visited = HashSet::with_capacity(bank.len() + 1);
         visited.insert(start_gene.clone());
-        let mut queue = VecDeque::new();
+        let mut queue = VecDeque::with_capacity(bank.len());
         queue.push_back((start_gene, 0));
 
         while let Some((gene, depth)) = queue.pop_front() {

@@ -16,7 +16,15 @@ impl Solution {
     /// - Space: O(n + e)
     pub fn possible_bipartition(n: i32, dislikes: Vec<Vec<i32>>) -> bool {
         let n = n as usize;
-        let mut graph = vec![Vec::new(); n + 1];
+        // Pre-compute capacities for each node's adjacency list
+        let mut degrees = vec![0usize; n + 1];
+        for d in &dislikes {
+            degrees[d[0] as usize] += 1;
+            degrees[d[1] as usize] += 1;
+        }
+
+        let mut graph: Vec<Vec<usize>> = (0..=n).map(|i| Vec::with_capacity(degrees[i])).collect();
+
         for d in &dislikes {
             let (u, v) = (d[0] as usize, d[1] as usize);
             graph[u].push(v);

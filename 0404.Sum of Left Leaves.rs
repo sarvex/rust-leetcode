@@ -19,6 +19,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+pub struct Solution;
+
 impl Solution {
     /// Sums all left leaves in a binary tree via recursive DFS.
     ///
@@ -39,7 +41,13 @@ impl Solution {
             node.as_ref().map_or(0, |rc| {
                 let inner = rc.borrow();
                 match (&inner.left, &inner.right) {
-                    (None, None) => if is_left { inner.val } else { 0 },
+                    (None, None) => {
+                        if is_left {
+                            inner.val
+                        } else {
+                            0
+                        }
+                    }
                     _ => dfs(&inner.left, true) + dfs(&inner.right, false),
                 }
             })
@@ -66,8 +74,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -76,12 +82,12 @@ mod tests {
         if vals.is_empty() || vals[0].is_none() {
             return None;
         }
-        
+
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = std::collections::VecDeque::with_capacity(vals.len());
         queue.push_back(root.clone());
         let mut i = 1;
-        
+
         while !queue.is_empty() && i < vals.len() {
             if let Some(node) = queue.pop_front() {
                 if i < vals.len() {
@@ -92,7 +98,7 @@ mod tests {
                     }
                     i += 1;
                 }
-                
+
                 if i < vals.len() {
                     if let Some(val) = vals[i] {
                         let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -103,7 +109,7 @@ mod tests {
                 }
             }
         }
-        
+
         Some(root)
     }
 

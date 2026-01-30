@@ -17,7 +17,8 @@ impl Solution {
     pub fn can_visit_all_rooms(rooms: Vec<Vec<i32>>) -> bool {
         let n = rooms.len();
         let mut visited = vec![false; n];
-        let mut stack = vec![0usize];
+        let mut stack = Vec::with_capacity(n);
+        stack.push(0usize);
 
         while let Some(room) = stack.pop() {
             if visited[room] {

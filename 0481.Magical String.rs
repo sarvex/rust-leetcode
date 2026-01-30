@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Counts the number of 1s in the first n characters of the magical string.
     ///
@@ -24,7 +26,7 @@ impl Solution {
             let prev = *s.last().unwrap();
             let cur = 3 - prev;
             let count = s[i] as usize;
-            s.extend(std::iter::repeat(cur).take(count));
+            s.extend((0..count).map(|_| cur));
             i += 1;
         }
         s.iter().take(n).filter(|x| *x == 1).count() as i32

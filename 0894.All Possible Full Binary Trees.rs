@@ -50,7 +50,9 @@ impl Solution {
             return cached.clone();
         }
 
-        let mut result = Vec::new();
+        // Estimate capacity based on Catalan number growth pattern
+        let capacity = if n <= 7 { 5 } else { 20 };
+        let mut result = Vec::with_capacity(capacity);
         if n == 1 {
             result.push(Some(Rc::new(RefCell::new(TreeNode::new(0)))));
         } else {
@@ -94,12 +96,12 @@ mod tests {
                 let n = node.borrow();
                 let has_left = n.left.is_some();
                 let has_right = n.right.is_some();
-                
+
                 // Must have either 0 or 2 children
                 if has_left != has_right {
                     return false;
                 }
-                
+
                 is_full_binary_tree(&n.left) && is_full_binary_tree(&n.right)
             }
         }
@@ -152,7 +154,7 @@ mod tests {
         // Even n cannot form a full binary tree
         let trees = Solution::all_possible_fbt(2);
         assert_eq!(trees.len(), 0);
-        
+
         let trees = Solution::all_possible_fbt(4);
         assert_eq!(trees.len(), 0);
     }

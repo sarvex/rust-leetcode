@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Maximizes the rotation function using an incremental formula.
     ///

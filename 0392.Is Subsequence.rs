@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Checks if `s` is a subsequence of `t` using a two-pointer scan.
     ///
@@ -78,7 +80,10 @@ mod tests {
 
     #[test]
     fn test_single_char_no_match() {
-        assert!(!Solution::is_subsequence("z".to_string(), "abc".to_string()));
+        assert!(!Solution::is_subsequence(
+            "z".to_string(),
+            "abc".to_string()
+        ));
     }
 
     #[test]

@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Counts beautiful arrangements using backtracking with precomputed divisibility.
     ///
@@ -15,15 +17,15 @@ impl Solution {
     /// - Space: O(n²) for precomputed candidates + O(n) recursion
     pub fn count_arrangement(n: i32) -> i32 {
         let n = n as usize;
-        let candidates: Vec<Vec<usize>> = (0..=n)
-            .map(|i| {
-                if i == 0 {
-                    vec![]
-                } else {
-                    (1..=n).filter(|&j| i % j == 0 || j % i == 0).collect()
-                }
-            })
-            .collect();
+        let mut candidates: Vec<Vec<usize>> = Vec::with_capacity(n + 1);
+        for i in 0..=n {
+            if i == 0 {
+                candidates.push(vec![]);
+            } else {
+                let valid: Vec<usize> = (1..=n).filter(|&j| i % j == 0 || j % i == 0).collect();
+                candidates.push(valid);
+            }
+        }
 
         fn backtrack(pos: usize, n: usize, candidates: &[Vec<usize>], used: &mut Vec<bool>) -> i32 {
             if pos > n {

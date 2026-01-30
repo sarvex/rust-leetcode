@@ -68,7 +68,7 @@ mod tests {
         }
 
         let root = Rc::new(RefCell::new(TreeNode::new(values[0].unwrap())));
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = std::collections::VecDeque::with_capacity(values.len());
         queue.push_back(root.clone());
 
         let mut i = 1;
@@ -98,7 +98,7 @@ mod tests {
             return vec![];
         }
 
-        let mut result = vec![];
+        let mut result = Vec::with_capacity(values.len() * 2); // Account for potential nulls
         let mut queue = std::collections::VecDeque::new();
         queue.push_back(root);
 
@@ -128,7 +128,16 @@ mod tests {
         // Expected: [5,4,null,1,3,null,null,2]
         let root = build_tree(vec![Some(4), Some(1), Some(3), None, None, Some(2)]);
         let result = Solution::insert_into_max_tree(root, 5);
-        let expected = vec![Some(5), Some(4), None, Some(1), Some(3), None, None, Some(2)];
+        let expected = vec![
+            Some(5),
+            Some(4),
+            None,
+            Some(1),
+            Some(3),
+            None,
+            None,
+            Some(2),
+        ];
         assert_eq!(tree_to_vec(result), expected);
     }
 

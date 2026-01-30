@@ -2,6 +2,8 @@
 // isBadVersion(version:i32)-> bool;
 // to call it use self.isBadVersion(version)
 
+pub struct Solution;
+
 impl Solution {
     /// Finds the first bad version using binary search.
     ///
@@ -83,7 +85,9 @@ mod tests {
 
     #[test]
     fn test_large_input() {
-        let solution = TestSolution { bad_version: 1702766719 };
+        let solution = TestSolution {
+            bad_version: 1702766719,
+        };
         assert_eq!(solution.first_bad_version(2126753390), 1702766719);
     }
 

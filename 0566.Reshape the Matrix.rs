@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Reshapes a matrix to the given dimensions if element count matches.
     ///

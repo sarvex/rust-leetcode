@@ -1,5 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
+pub struct Solution;
+
 impl Solution {
     /// Finds the maximum area rectangle formed by four points with no interior points.
     ///
@@ -31,7 +33,7 @@ impl Solution {
             .collect();
 
         // Group y-coordinates by x-coordinate
-        let mut x_to_ys: HashMap<i32, Vec<i32>> = HashMap::new();
+        let mut x_to_ys: HashMap<i32, Vec<i32>> = HashMap::with_capacity(n);
         for (&x, &y) in x_coord.iter().zip(y_coord.iter()) {
             x_to_ys.entry(x).or_default().push(y);
         }
@@ -42,7 +44,7 @@ impl Solution {
         }
 
         // Map (y1, y2) pairs to list of x-values where both y1 and y2 exist
-        let mut y_pair_to_xs: HashMap<(i32, i32), Vec<i32>> = HashMap::new();
+        let mut y_pair_to_xs: HashMap<(i32, i32), Vec<i32>> = HashMap::with_capacity(n * n / 4);
         for (&x, ys) in &x_to_ys {
             let m = ys.len();
             for i in 0..m {

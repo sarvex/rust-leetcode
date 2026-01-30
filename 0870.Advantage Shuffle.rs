@@ -19,7 +19,8 @@ impl Solution {
     /// - Space: O(n) for index array and result
     pub fn advantage_count(mut nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
         let n = nums1.len();
-        let mut idx: Vec<usize> = (0..n).collect();
+        let mut idx: Vec<usize> = Vec::with_capacity(n);
+        idx.extend(0..n);
         idx.sort_unstable_by_key(|&i| nums2[i]);
         nums1.sort_unstable();
 

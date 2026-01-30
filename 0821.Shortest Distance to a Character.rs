@@ -19,7 +19,8 @@ impl Solution {
         let bytes = s.as_bytes();
         let target = c as u8;
         let n = bytes.len();
-        let mut result = vec![n as i32; n];
+        let mut result = Vec::with_capacity(n);
+        result.resize(n, n as i32);
 
         let mut prev = -(n as i32);
         for i in 0..n {

@@ -18,7 +18,11 @@ impl Solution {
     /// - Space: O(n) for position lists
     pub fn unique_letter_string(s: String) -> i32 {
         let n = s.len();
-        let mut positions: Vec<Vec<i32>> = vec![vec![-1]; 26];
+        let mut positions: Vec<Vec<i32>> =
+            (0..26).map(|_| Vec::with_capacity(n / 26 + 2)).collect();
+        for pos in &mut positions {
+            pos.push(-1);
+        }
 
         for (i, b) in s.bytes().enumerate() {
             positions[(b - b'A') as usize].push(i as i32);

@@ -17,23 +17,23 @@ impl Solution {
     /// - Space: O(n * k) for the output
     pub fn to_goat_latin(sentence: String) -> String {
         const VOWELS: &[u8] = b"aeiouAEIOU";
-        sentence
+        let words: Vec<_> = sentence
             .split_whitespace()
             .enumerate()
             .map(|(i, word)| {
-                let mut result = if VOWELS.contains(&word.as_bytes()[0]) {
-                    word.to_string()
+                let mut result = String::with_capacity(word.len() + 3 + i);
+                if VOWELS.contains(&word.as_bytes()[0]) {
+                    result.push_str(word);
                 } else {
-                    let mut s = word[1..].to_string();
-                    s.push(word.as_bytes()[0] as char);
-                    s
-                };
+                    result.push_str(&word[1..]);
+                    result.push(word.as_bytes()[0] as char);
+                }
                 result.push_str("ma");
                 result.extend(std::iter::repeat('a').take(i + 1));
                 result
             })
-            .collect::<Vec<_>>()
-            .join(" ")
+            .collect();
+        words.join(" ")
     }
 }
 

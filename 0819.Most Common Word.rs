@@ -20,7 +20,7 @@ impl Solution {
     pub fn most_common_word(paragraph: String, banned: Vec<String>) -> String {
         let paragraph = paragraph.to_ascii_lowercase();
         let banned: HashSet<&str> = banned.iter().map(String::as_str).collect();
-        let mut freq: HashMap<&str, usize> = HashMap::new();
+        let mut freq: HashMap<&str, usize> = HashMap::with_capacity(paragraph.len() / 5);
 
         for word in paragraph.split(|c: char| !c.is_ascii_lowercase()) {
             if !word.is_empty() && !banned.contains(word) {

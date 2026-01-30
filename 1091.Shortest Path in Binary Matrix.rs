@@ -21,7 +21,7 @@ impl Solution {
         if grid[0][0] == 1 || grid[n - 1][n - 1] == 1 {
             return -1;
         }
-        let mut queue = VecDeque::new();
+        let mut queue = VecDeque::with_capacity(n * n);
         queue.push_back((0, 0));
         grid[0][0] = 1;
         let mut steps = 1;

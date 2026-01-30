@@ -22,15 +22,12 @@ impl Solution {
             "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-",
             "-.--", "--..",
         ];
-        words
-            .iter()
-            .map(|word| {
-                word.bytes()
-                    .map(|b| CODES[(b - b'a') as usize])
-                    .collect::<String>()
-            })
-            .collect::<HashSet<_>>()
-            .len() as i32
+        let mut morse_codes = HashSet::with_capacity(words.len());
+        for word in &words {
+            let morse: String = word.bytes().map(|b| CODES[(b - b'a') as usize]).collect();
+            morse_codes.insert(morse);
+        }
+        morse_codes.len() as i32
     }
 }
 

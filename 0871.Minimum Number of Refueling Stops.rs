@@ -18,7 +18,7 @@ impl Solution {
     /// - Time: O(n log n) for heap operations
     /// - Space: O(n) for the heap
     pub fn min_refuel_stops(target: i32, mut fuel: i32, stations: Vec<Vec<i32>>) -> i32 {
-        let mut heap = BinaryHeap::new();
+        let mut heap = BinaryHeap::with_capacity(stations.len());
         let mut stops = 0;
         let mut prev = 0;
 

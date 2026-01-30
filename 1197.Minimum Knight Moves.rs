@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 
+pub struct Solution;
+
 impl Solution {
     /// Finds minimum knight moves to reach (x, y) from origin using BFS.
     ///
@@ -27,7 +29,7 @@ impl Solution {
             (-1, -2),
         ];
         let mut visited = vec![vec![false; 618]; 618];
-        let mut queue = VecDeque::new();
+        let mut queue = VecDeque::with_capacity(618 * 618);
         queue.push_back((300usize, 300usize));
         visited[300][300] = true;
         let mut steps = 0;
@@ -54,8 +56,6 @@ impl Solution {
         }
     }
 }
-
-pub struct Solution;
 
 #[cfg(test)]
 mod tests {

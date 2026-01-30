@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Maximizes the product of integers that sum to n using mathematical insight.
     ///

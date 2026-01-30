@@ -39,8 +39,9 @@ impl Solution {
     /// - Time: O(n) where n is the number of descriptions
     /// - Space: O(n) for the node map and children set
     pub fn create_binary_tree(descriptions: Vec<Vec<i32>>) -> Option<Rc<RefCell<TreeNode>>> {
-        let mut nodes: HashMap<i32, Rc<RefCell<TreeNode>>> = HashMap::new();
-        let mut children = HashSet::new();
+        let mut nodes: HashMap<i32, Rc<RefCell<TreeNode>>> =
+            HashMap::with_capacity(descriptions.len() * 2);
+        let mut children = HashSet::with_capacity(descriptions.len());
 
         for d in &descriptions {
             let (parent_val, child_val, is_left) = (d[0], d[1], d[2]);
@@ -87,19 +88,19 @@ mod tests {
                 if node_borrow.val != expected_val {
                     return false;
                 }
-                
+
                 let left_ok = match (expected_left, &node_borrow.left) {
                     (None, None) => true,
                     (Some(val), Some(left)) => left.borrow().val == val,
                     _ => false,
                 };
-                
+
                 let right_ok = match (expected_right, &node_borrow.right) {
                     (None, None) => true,
                     (Some(val), Some(right)) => right.borrow().val == val,
                     _ => false,
                 };
-                
+
                 left_ok && right_ok
             }
         }
@@ -122,17 +123,27 @@ mod tests {
             vec![80, 19, 1],
         ];
         let root = Solution::create_binary_tree(descriptions);
-        
+
         // Verify root is 50
         assert!(verify_tree_structure(&root, 50, Some(20), Some(80)));
-        
+
         // Verify structure
         if let Some(node) = root {
             let node_borrow = node.borrow();
             // Check left subtree (20)
-            assert!(verify_tree_structure(&node_borrow.left, 20, Some(15), Some(17)));
+            assert!(verify_tree_structure(
+                &node_borrow.left,
+                20,
+                Some(15),
+                Some(17)
+            ));
             // Check right subtree (80)
-            assert!(verify_tree_structure(&node_borrow.right, 80, Some(19), None));
+            assert!(verify_tree_structure(
+                &node_borrow.right,
+                80,
+                Some(19),
+                None
+            ));
         }
     }
 
@@ -147,21 +158,17 @@ mod tests {
         //     3
         //    /
         //   4
-        let descriptions = vec![
-            vec![1, 2, 1],
-            vec![2, 3, 0],
-            vec![3, 4, 1],
-        ];
+        let descriptions = vec![vec![1, 2, 1], vec![2, 3, 0], vec![3, 4, 1]];
         let root = Solution::create_binary_tree(descriptions);
-        
+
         // Verify root is 1
         assert!(verify_tree_structure(&root, 1, Some(2), None));
-        
+
         // Verify the chain structure
         if let Some(node) = root {
             let left = &node.borrow().left;
             assert!(verify_tree_structure(left, 2, None, Some(3)));
-            
+
             if let Some(left_node) = left {
                 let right = &left_node.borrow().right;
                 assert!(verify_tree_structure(right, 3, Some(4), None));
@@ -178,7 +185,7 @@ mod tests {
         // 5
         let descriptions = vec![vec![10, 5, 1]];
         let root = Solution::create_binary_tree(descriptions);
-        
+
         assert!(verify_tree_structure(&root, 10, Some(5), None));
     }
 
@@ -193,19 +200,15 @@ mod tests {
         //         3
         //          \
         //           4
-        let descriptions = vec![
-            vec![1, 2, 0],
-            vec![2, 3, 0],
-            vec![3, 4, 0],
-        ];
+        let descriptions = vec![vec![1, 2, 0], vec![2, 3, 0], vec![3, 4, 0]];
         let root = Solution::create_binary_tree(descriptions);
-        
+
         assert!(verify_tree_structure(&root, 1, None, Some(2)));
-        
+
         if let Some(node) = root {
             let right = &node.borrow().right;
             assert!(verify_tree_structure(right, 2, None, Some(3)));
-            
+
             if let Some(right_node) = right {
                 let right_right = &right_node.borrow().right;
                 assert!(verify_tree_structure(right_right, 3, None, Some(4)));
@@ -231,13 +234,23 @@ mod tests {
             vec![3, 7, 0],
         ];
         let root = Solution::create_binary_tree(descriptions);
-        
+
         assert!(verify_tree_structure(&root, 1, Some(2), Some(3)));
-        
+
         if let Some(node) = root {
             let node_borrow = node.borrow();
-            assert!(verify_tree_structure(&node_borrow.left, 2, Some(4), Some(5)));
-            assert!(verify_tree_structure(&node_borrow.right, 3, Some(6), Some(7)));
+            assert!(verify_tree_structure(
+                &node_borrow.left,
+                2,
+                Some(4),
+                Some(5)
+            ));
+            assert!(verify_tree_structure(
+                &node_borrow.right,
+                3,
+                Some(6),
+                Some(7)
+            ));
         }
     }
 }

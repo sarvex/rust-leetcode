@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+pub struct Solution;
+
 impl Solution {
     /// Counts subarrays summing to k using prefix sum frequency tracking.
     ///
@@ -16,7 +18,7 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn subarray_sum(nums: Vec<i32>, k: i32) -> i32 {
-        let mut freq = HashMap::new();
+        let mut freq = HashMap::with_capacity(nums.len());
         freq.insert(0, 1);
         let mut sum = 0;
         let mut count = 0;

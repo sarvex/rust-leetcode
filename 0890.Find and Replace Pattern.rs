@@ -23,8 +23,9 @@ impl Solution {
             .into_iter()
             .filter(|word| {
                 let wb = word.as_bytes();
-                let mut w_map: HashMap<u8, usize> = HashMap::new();
-                let mut p_map: HashMap<u8, usize> = HashMap::new();
+                // Most patterns have limited unique characters
+                let mut w_map: HashMap<u8, usize> = HashMap::with_capacity(26);
+                let mut p_map: HashMap<u8, usize> = HashMap::with_capacity(26);
                 (0..n).all(|i| {
                     let w_prev = w_map.insert(wb[i], i);
                     let p_prev = p_map.insert(pat[i], i);

@@ -19,7 +19,7 @@ impl Solution {
     /// - Space: O(n * L) for the hash map
     pub fn longest_str_chain(mut words: Vec<String>) -> i32 {
         words.sort_unstable_by_key(|w| w.len());
-        let mut dp: HashMap<String, i32> = HashMap::new();
+        let mut dp: HashMap<String, i32> = HashMap::with_capacity(words.len());
         let mut max_chain = 1;
 
         for word in &words {

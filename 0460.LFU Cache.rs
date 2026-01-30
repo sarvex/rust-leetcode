@@ -110,11 +110,12 @@ struct LFUCache {
 impl LFUCache {
     /// Creates a new LFU cache with the given capacity.
     fn new(capacity: i32) -> Self {
+        let capacity = capacity as usize;
         Self {
-            cache: HashMap::new(),
-            freq_map: HashMap::new(),
+            cache: HashMap::with_capacity(capacity),
+            freq_map: HashMap::with_capacity(capacity),
             min_freq: 0,
-            capacity: capacity as usize,
+            capacity,
         }
     }
 
@@ -192,9 +193,9 @@ mod tests {
         assert_eq!(cache.get(2), -1);
         assert_eq!(cache.get(3), 3);
         cache.put(4, 4); // evicts key 1 (or 3, depends on LRU within same freq)
-        // After put(3,3): freq(1)=2, freq(3)=1
-        // After get(3): freq(1)=2, freq(3)=2
-        // So put(4,4) should evict key 1 (older with same freq)
+                         // After put(3,3): freq(1)=2, freq(3)=1
+                         // After get(3): freq(1)=2, freq(3)=2
+                         // So put(4,4) should evict key 1 (older with same freq)
         assert_eq!(cache.get(1), -1);
         assert_eq!(cache.get(3), 3);
         assert_eq!(cache.get(4), 4);

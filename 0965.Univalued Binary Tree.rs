@@ -49,8 +49,7 @@ impl Solution {
             })
         }
 
-        root.as_ref()
-            .map_or(true, |r| dfs(&root, r.borrow().val))
+        root.as_ref().map_or(true, |r| dfs(&root, r.borrow().val))
     }
 }
 
@@ -64,13 +63,13 @@ mod tests {
         }
 
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = std::collections::VecDeque::with_capacity(vals.len());
         queue.push_back(root.clone());
         let mut i = 1;
 
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() && vals[i].is_some() {
                 let left = Rc::new(RefCell::new(TreeNode::new(vals[i].unwrap())));
                 node.borrow_mut().left = Some(left.clone());

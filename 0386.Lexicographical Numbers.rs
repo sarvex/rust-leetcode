@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Generates 1..n in lexicographical order using iterative DFS.
     ///

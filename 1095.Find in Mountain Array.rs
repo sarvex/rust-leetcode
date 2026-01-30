@@ -1,5 +1,20 @@
 pub struct Solution;
 
+// MountainArray's API interface.
+pub struct MountainArray {
+    arr: Vec<i32>,
+}
+
+impl MountainArray {
+    pub fn get(&self, index: i32) -> i32 {
+        self.arr[index as usize]
+    }
+
+    pub fn length(&self) -> i32 {
+        self.arr.len() as i32
+    }
+}
+
 impl Solution {
     /// Finds target in a mountain array using three binary searches.
     ///

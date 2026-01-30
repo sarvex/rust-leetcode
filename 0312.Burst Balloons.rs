@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Maximizes coins from bursting balloons using interval DP.
     ///
@@ -17,10 +19,10 @@ impl Solution {
     /// - Space: O(n^2)
     pub fn max_coins(nums: Vec<i32>) -> i32 {
         let n = nums.len();
-        let mut arr = vec![1; n + 2];
-        for (i, &v) in nums.iter().enumerate() {
-            arr[i + 1] = v;
-        }
+        let mut arr = Vec::with_capacity(n + 2);
+        arr.push(1);
+        arr.extend(&nums);
+        arr.push(1);
         let mut dp = vec![vec![0; n + 2]; n + 2];
         for len in 2..=n + 1 {
             for i in 0..=n + 1 - len {

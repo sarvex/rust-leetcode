@@ -43,9 +43,7 @@ impl Solution {
                 (None, None) => true,
                 (Some(a), Some(b)) => {
                     let (a, b) = (a.borrow(), b.borrow());
-                    a.val == b.val
-                        && is_mirror(&a.left, &b.right)
-                        && is_mirror(&a.right, &b.left)
+                    a.val == b.val && is_mirror(&a.left, &b.right) && is_mirror(&a.right, &b.left)
                 }
                 _ => false,
             }
@@ -72,7 +70,7 @@ mod tests {
         }
 
         let root = Rc::new(RefCell::new(TreeNode::new(values[0].unwrap())));
-        let mut queue = VecDeque::new();
+        let mut queue = VecDeque::with_capacity(values.len());
         queue.push_back(Rc::clone(&root));
 
         let mut i = 1;

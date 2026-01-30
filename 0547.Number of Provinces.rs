@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Counts the number of connected components (provinces) using DFS.
     ///

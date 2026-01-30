@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 
+pub struct Solution;
+
 impl Solution {
     /// Computes the distance of each cell to the nearest zero using multi-source BFS.
     ///
@@ -18,7 +20,7 @@ impl Solution {
     pub fn update_matrix(mat: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
         let (m, n) = (mat.len(), mat[0].len());
         let mut dist = vec![vec![-1i32; n]; m];
-        let mut queue = VecDeque::new();
+        let mut queue = VecDeque::with_capacity(m * n);
         for i in 0..m {
             for j in 0..n {
                 if mat[i][j] == 0 {

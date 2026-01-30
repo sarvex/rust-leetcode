@@ -67,7 +67,7 @@ mod tests {
         }
 
         let root = Rc::new(RefCell::new(TreeNode::new(values[0].unwrap())));
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = std::collections::VecDeque::with_capacity(values.len());
         queue.push_back(root.clone());
 
         let mut i = 1;
@@ -97,7 +97,7 @@ mod tests {
             return vec![];
         }
 
-        let mut result = vec![];
+        let mut result = Vec::with_capacity(values.len() * 2); // Account for potential nulls
         let mut queue = std::collections::VecDeque::new();
         queue.push_back(root);
 

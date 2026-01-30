@@ -68,13 +68,13 @@ mod tests {
         }
 
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = std::collections::VecDeque::with_capacity(vals.len());
         queue.push_back(root.clone());
         let mut i = 1;
 
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() && vals[i].is_some() {
                 let left = Rc::new(RefCell::new(TreeNode::new(vals[i].unwrap())));
                 node.borrow_mut().left = Some(left.clone());
@@ -127,7 +127,18 @@ mod tests {
         //   49
         //    \
         //     52
-        let root = build_tree(&[Some(90), Some(69), None, Some(49), None, None, None, None, None, Some(52)]);
+        let root = build_tree(&[
+            Some(90),
+            Some(69),
+            None,
+            Some(49),
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(52),
+        ]);
         assert_eq!(Solution::min_diff_in_bst(root), 3); // 52-49=3
     }
 

@@ -98,7 +98,7 @@ mod tests {
         }
 
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
-        let mut queue = VecDeque::new();
+        let mut queue = VecDeque::with_capacity(vals.len());
         queue.push_back(root.clone());
         let mut i = 1;
 
@@ -128,8 +128,8 @@ mod tests {
     }
 
     fn tree_to_vec(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<Option<i32>> {
-        let mut result = Vec::new();
-        let mut queue = VecDeque::new();
+        let mut result = Vec::with_capacity(32);
+        let mut queue = VecDeque::with_capacity(32);
         queue.push_back(root);
 
         while let Some(node_opt) = queue.pop_front() {

@@ -58,7 +58,7 @@ impl Solution {
         for i in 0..n {
             for j in 0..n {
                 if grid[i][j] == 0 {
-                    let mut seen = HashSet::new();
+                    let mut seen = HashSet::with_capacity(4);
                     let mut total = 1;
                     for (dr, dc) in [(!0usize, 0), (1, 0), (0, !0usize), (0, 1)] {
                         let nr = i.wrapping_add(dr);

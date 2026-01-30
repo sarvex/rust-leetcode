@@ -59,13 +59,13 @@ mod tests {
         }
 
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = std::collections::VecDeque::with_capacity(vals.len());
         queue.push_back(root.clone());
         let mut i = 1;
 
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() && vals[i].is_some() {
                 let left = Rc::new(RefCell::new(TreeNode::new(vals[i].unwrap())));
                 node.borrow_mut().left = Some(left.clone());
@@ -90,7 +90,7 @@ mod tests {
         }
 
         let mut result = Vec::new();
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = std::collections::VecDeque::with_capacity(16);
         queue.push_back(root);
 
         while !queue.is_empty() {
@@ -133,7 +133,15 @@ mod tests {
         //     0   1              1
         //    / \ / \              \
         //   0  0 0  1              1
-        let root = build_tree(&[Some(1), Some(0), Some(1), Some(0), Some(0), Some(0), Some(1)]);
+        let root = build_tree(&[
+            Some(1),
+            Some(0),
+            Some(1),
+            Some(0),
+            Some(0),
+            Some(0),
+            Some(1),
+        ]);
         let pruned = Solution::prune_tree(root);
         let expected = vec![Some(1), None, Some(1), None, Some(1)];
         assert_eq!(tree_to_vec(pruned), expected);

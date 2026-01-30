@@ -17,7 +17,9 @@ impl Solution {
     /// - Time: O(n + m) where n and m are sentence lengths
     /// - Space: O(n + m) for the frequency map
     pub fn uncommon_from_sentences(s1: String, s2: String) -> Vec<String> {
-        let mut freq: HashMap<&str, usize> = HashMap::new();
+        // Estimate capacity based on typical word count
+        let estimated_words = (s1.len() + s2.len()) / 5; // Average word length ~5 chars
+        let mut freq: HashMap<&str, usize> = HashMap::with_capacity(estimated_words);
         for word in s1.split_whitespace().chain(s2.split_whitespace()) {
             *freq.entry(word).or_default() += 1;
         }

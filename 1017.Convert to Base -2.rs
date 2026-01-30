@@ -20,7 +20,7 @@ impl Solution {
         if n == 0 {
             return "0".to_string();
         }
-        let mut bits = Vec::new();
+        let mut bits = Vec::with_capacity(32); // Maximum bits needed for i32
         let mut sign = 1;
         while n != 0 {
             if n % 2 != 0 {

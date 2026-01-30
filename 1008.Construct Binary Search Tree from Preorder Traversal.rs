@@ -72,7 +72,7 @@ mod tests {
                 dfs(&n.right, result);
             }
         }
-        let mut result = vec![];
+        let mut result = Vec::with_capacity(16); // Typical tree size
         dfs(root, &mut result);
         result
     }

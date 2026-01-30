@@ -26,8 +26,8 @@ impl Solution {
     fn bfs(block: &HashSet<(i32, i32)>, source: &[i32], target: &[i32]) -> bool {
         const LIMIT: usize = 20000;
         const BOUND: i32 = 1_000_000;
-        let mut visited = HashSet::new();
-        let mut queue = VecDeque::new();
+        let mut visited = HashSet::with_capacity(LIMIT);
+        let mut queue = VecDeque::with_capacity(LIMIT);
         queue.push_back((source[0], source[1]));
         visited.insert((source[0], source[1]));
 

@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Finds the minimum number of perfect squares summing to n using 1D DP.
     ///
@@ -15,7 +17,8 @@ impl Solution {
     /// - Space: O(n)
     pub fn num_squares(n: i32) -> i32 {
         let n = n as usize;
-        let mut dp = vec![i32::MAX; n + 1];
+        let mut dp = Vec::with_capacity(n + 1);
+        dp.resize(n + 1, i32::MAX);
         dp[0] = 0;
 
         for i in 1..=n {

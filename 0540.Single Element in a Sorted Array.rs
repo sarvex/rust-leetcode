@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Finds the single non-duplicate element in a sorted array using binary search.
     ///

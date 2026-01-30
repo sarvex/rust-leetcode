@@ -21,7 +21,7 @@ impl Solution {
         let n = graph.len();
         let full_mask = (1 << n) - 1;
         let mut visited = vec![vec![false; 1 << n]; n];
-        let mut queue = VecDeque::new();
+        let mut queue = VecDeque::with_capacity(n * (1 << n));
 
         for i in 0..n {
             let mask = 1 << i;

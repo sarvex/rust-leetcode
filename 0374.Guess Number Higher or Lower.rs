@@ -1,3 +1,10 @@
+// Forward declaration - the actual implementation is provided by the system
+extern "C" {
+    fn guess(num: i32) -> i32;
+}
+
+pub struct Solution;
+
 impl Solution {
     /// Finds the picked number using binary search with the guess API.
     ///
@@ -20,7 +27,7 @@ impl Solution {
     /// - Time: O(log n) - binary search halves the search space each iteration
     /// - Space: O(1) - only uses two pointer variables
     #[allow(non_snake_case)]
-    fn guessNumber(n: i32) -> i32 {
+    pub fn guessNumber(n: i32) -> i32 {
         let (mut left, mut right) = (1, n);
         loop {
             let mid = left + (right - left) / 2;

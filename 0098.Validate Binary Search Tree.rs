@@ -16,6 +16,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+pub struct Solution;
+
 impl Solution {
     /// Inorder traversal with predecessor tracking for BST validation.
     ///
@@ -70,8 +72,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -81,7 +81,7 @@ mod tests {
             return None;
         }
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = std::collections::VecDeque::with_capacity(vals.len());
         queue.push_back(Rc::clone(&root));
         let mut i = 1;
         while i < vals.len() {

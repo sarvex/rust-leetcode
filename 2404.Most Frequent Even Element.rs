@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+pub struct Solution;
+
 impl Solution {
     /// Finds the most frequent even element, returning the smallest on ties.
     ///
@@ -15,13 +17,13 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn most_frequent_even(nums: Vec<i32>) -> i32 {
-        let cnt: HashMap<i32, i32> =
-            nums.iter()
-                .filter(|x| **x % 2 == 0)
-                .fold(HashMap::new(), |mut acc, &x| {
-                    *acc.entry(x).or_insert(0) += 1;
-                    acc
-                });
+        let cnt: HashMap<i32, i32> = nums.iter().filter(|x| **x % 2 == 0).fold(
+            HashMap::with_capacity(nums.len() / 2),
+            |mut acc, &x| {
+                *acc.entry(x).or_insert(0) += 1;
+                acc
+            },
+        );
 
         cnt.iter()
             .fold((-1, 0), |(ans, mx), (&x, &v)| {

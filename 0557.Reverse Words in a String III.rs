@@ -1,3 +1,5 @@
+pub struct Solution;
+
 impl Solution {
     /// Reverses each word in a sentence while preserving word order.
     ///

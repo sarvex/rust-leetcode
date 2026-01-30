@@ -1,3 +1,5 @@
+pub struct Solution;
+
 struct UnionFind {
     parent: Vec<usize>,
     size: Vec<usize>,
@@ -5,8 +7,10 @@ struct UnionFind {
 
 impl UnionFind {
     fn new(n: usize) -> Self {
+        let mut parent = Vec::with_capacity(n);
+        parent.extend(0..n);
         Self {
-            parent: (0..n).collect(),
+            parent,
             size: vec![1; n],
         }
     }
@@ -65,8 +69,6 @@ impl Solution {
         total
     }
 }
-
-pub struct Solution;
 
 #[cfg(test)]
 mod tests {

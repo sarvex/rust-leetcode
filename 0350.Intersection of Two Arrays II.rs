@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+pub struct Solution;
+
 impl Solution {
     /// Finds the intersection of two arrays including duplicates using a frequency map.
     ///
@@ -20,7 +22,7 @@ impl Solution {
         for &x in &nums1 {
             *counts.entry(x).or_insert(0) += 1;
         }
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(nums2.len().min(counts.len()));
         for &x in &nums2 {
             if let Some(count) = counts.get_mut(&x) {
                 if *count > 0 {

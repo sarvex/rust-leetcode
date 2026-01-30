@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+pub struct Solution;
+
 impl Solution {
     /// Finds all processes to kill using DFS on the process tree.
     ///
@@ -15,7 +17,7 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn kill_process(pid: Vec<i32>, ppid: Vec<i32>, kill: i32) -> Vec<i32> {
-        let mut children: HashMap<i32, Vec<i32>> = HashMap::new();
+        let mut children: HashMap<i32, Vec<i32>> = HashMap::with_capacity(pid.len());
         for (&p, &pp) in pid.iter().zip(ppid.iter()) {
             children.entry(pp).or_default().push(p);
         }
@@ -29,7 +31,7 @@ impl Solution {
             }
         }
 
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(pid.len());
         dfs(kill, &children, &mut result);
         result
     }
