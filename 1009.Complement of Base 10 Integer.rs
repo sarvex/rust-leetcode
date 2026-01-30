@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Computes the bitwise complement of a base-10 integer.

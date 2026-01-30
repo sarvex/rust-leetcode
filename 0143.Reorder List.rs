@@ -13,7 +13,6 @@ impl ListNode {
 
 use std::collections::VecDeque;
 
-pub struct Solution;
 
 impl Solution {
     /// Reorders a linked list by interleaving from both ends using a deque.

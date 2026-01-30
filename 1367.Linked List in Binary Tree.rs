@@ -34,7 +34,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// DFS matching linked list as a downward path in the binary tree.

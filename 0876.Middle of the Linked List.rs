@@ -11,7 +11,6 @@ impl ListNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the middle node using the slow/fast pointer technique.

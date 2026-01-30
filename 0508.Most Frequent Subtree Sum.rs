@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the most frequent subtree sums via DFS.

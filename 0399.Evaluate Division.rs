@@ -56,7 +56,6 @@ impl UnionFind {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Evaluates division queries using a weighted Union-Find.

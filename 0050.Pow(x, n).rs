@@ -7,19 +7,27 @@ impl Solution {
     /// squaring the base.
     ///
     /// # Approach
-    /// Convert `n` to `i64` to handle `i32::MIN`. If negative, compute
-    /// the reciprocal. Iteratively square the base and multiply into the
-    /// result when the current bit of the exponent is set.
+    /// Convert `n` to its unsigned absolute value to handle `i32::MIN`.
+    /// If `n` is negative, invert the base once. Iteratively square the
+    /// base and multiply into the result when the current bit of the
+    /// exponent is set.
     ///
     /// # Complexity
     /// - Time: O(log n) — halving the exponent each iteration
     /// - Space: O(1) — scalar variables only
     pub fn my_pow(x: f64, n: i32) -> f64 {
-        let mut base = x;
-        let mut exp = (n as i64).abs();
-        let mut result = 1.0;
+        if n == 0 {
+            return 1.0;
+        }
 
-        while exp > 0 {
+        let mut base = x;
+        let mut exp = n.unsigned_abs() as u64;
+        if n < 0 {
+            base = 1.0 / base;
+        }
+
+        let mut result = 1.0;
+        while exp != 0 {
             if exp & 1 == 1 {
                 result *= base;
             }
@@ -27,11 +35,7 @@ impl Solution {
             exp >>= 1;
         }
 
-        if n < 0 {
-            1.0 / result
-        } else {
-            result
-        }
+        result
     }
 }
 

@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Computes the total projection area of 3D shapes on three planes.

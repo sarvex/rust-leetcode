@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Checks if an array is monotonically increasing or decreasing.

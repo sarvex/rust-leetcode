@@ -1,6 +1,5 @@
 use std::collections::{HashMap, HashSet};
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the maximum area rectangle formed by four points with no interior points.

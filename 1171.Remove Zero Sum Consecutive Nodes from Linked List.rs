@@ -12,7 +12,6 @@ impl ListNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Removes consecutive nodes that sum to zero using prefix sums.

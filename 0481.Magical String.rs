@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Counts the number of 1s in the first n characters of the magical string.

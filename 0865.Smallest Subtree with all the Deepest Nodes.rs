@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 type TreeLink = Option<Rc<RefCell<TreeNode>>>;
 

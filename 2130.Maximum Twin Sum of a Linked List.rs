@@ -12,7 +12,6 @@ impl ListNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the maximum twin sum by collecting values and pairing from ends.

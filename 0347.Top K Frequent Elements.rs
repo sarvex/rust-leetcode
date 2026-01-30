@@ -1,7 +1,6 @@
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap};
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the k most frequent elements using a min-heap of size k.

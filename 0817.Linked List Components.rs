@@ -14,7 +14,6 @@ impl ListNode {
 
 use std::collections::HashSet;
 
-pub struct Solution;
 
 impl Solution {
     /// Counts connected components in a linked list subset.

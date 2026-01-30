@@ -55,49 +55,66 @@ impl LRUCache {
     }
 
     fn get(&mut self, key: i32) -> i32 {
-        match self.cache.get(&key) {
-            Some(node) => {
-                let node = Rc::clone(node);
-                self.remove(&node);
-                self.push_front(&node);
-                node.borrow().value
+        if let Some(node) = self.cache.get(&key) {
+            if self
+                .head
+                .as_ref()
+                .map_or(false, |head| Rc::ptr_eq(head, node))
+            {
+                return node.borrow().value;
             }
-            None => -1,
+            let node = Rc::clone(node);
+            self.remove(&node);
+            self.push_front(&node);
+            return node.borrow().value;
         }
+        -1
     }
 
     fn put(&mut self, key: i32, value: i32) {
         if let Some(node) = self.cache.get(&key) {
-            let node = Rc::clone(node);
             node.borrow_mut().value = value;
+            if self
+                .head
+                .as_ref()
+                .map_or(false, |head| Rc::ptr_eq(head, node))
+            {
+                return;
+            }
+            let node = Rc::clone(node);
             self.remove(&node);
             self.push_front(&node);
-        } else {
-            let node = Rc::new(RefCell::new(Node::new(key, value)));
-            self.cache.insert(key, Rc::clone(&node));
-            self.push_front(&node);
+            return;
+        }
 
-            if self.cache.len() > self.capacity {
-                if let Some(evicted) = self.pop_back() {
-                    self.cache.remove(&evicted.borrow().key);
-                }
+        let node = Rc::new(RefCell::new(Node::new(key, value)));
+        self.push_front(&node);
+        self.cache.insert(key, node);
+
+        if self.cache.len() > self.capacity {
+            if let Some(evicted) = self.pop_back() {
+                self.cache.remove(&evicted.borrow().key);
             }
         }
     }
 
     #[inline]
     fn push_front(&mut self, node: &Rc<RefCell<Node>>) {
-        node.borrow_mut().prev = None;
         match self.head.take() {
             Some(head) => {
                 head.borrow_mut().prev = Some(Rc::clone(node));
-                node.borrow_mut().next = Some(head);
+                let mut node_ref = node.borrow_mut();
+                node_ref.prev = None;
+                node_ref.next = Some(head);
                 self.head = Some(Rc::clone(node));
             }
             None => {
-                node.borrow_mut().next = None;
-                self.head = Some(Rc::clone(node));
-                self.tail = Some(Rc::clone(node));
+                let mut node_ref = node.borrow_mut();
+                node_ref.prev = None;
+                node_ref.next = None;
+                let node_rc = Rc::clone(node);
+                self.head = Some(Rc::clone(&node_rc));
+                self.tail = Some(node_rc);
             }
         }
     }
@@ -105,31 +122,28 @@ impl LRUCache {
     #[inline]
     fn remove(&mut self, node: &Rc<RefCell<Node>>) {
         let (prev, next) = {
-            let borrowed = node.borrow();
-            (borrowed.prev.clone(), borrowed.next.clone())
+            let mut borrowed = node.borrow_mut();
+            (borrowed.prev.take(), borrowed.next.take())
         };
 
-        match (&prev, &next) {
+        match (prev, next) {
             (None, None) => {
                 self.head = None;
                 self.tail = None;
             }
             (None, Some(next_node)) => {
-                self.head = Some(Rc::clone(next_node));
                 next_node.borrow_mut().prev = None;
+                self.head = Some(next_node);
             }
             (Some(prev_node), None) => {
-                self.tail = Some(Rc::clone(prev_node));
                 prev_node.borrow_mut().next = None;
+                self.tail = Some(prev_node);
             }
             (Some(prev_node), Some(next_node)) => {
-                next_node.borrow_mut().prev = Some(Rc::clone(prev_node));
-                prev_node.borrow_mut().next = Some(Rc::clone(next_node));
+                next_node.borrow_mut().prev = Some(Rc::clone(&prev_node));
+                prev_node.borrow_mut().next = Some(Rc::clone(&next_node));
             }
         }
-
-        node.borrow_mut().prev = None;
-        node.borrow_mut().next = None;
     }
 
     #[inline]

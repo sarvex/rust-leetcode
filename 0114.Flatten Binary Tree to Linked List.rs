@@ -20,55 +20,59 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 impl Solution {
-    /// Flattens a binary tree to a linked list in-place using preorder collection.
+    /// Flattens a binary tree to a linked list in-place using rightmost rewiring.
     ///
     /// # Intuition
-    /// Collect all nodes in preorder, then relink each node's right to the next
-    /// node in the sequence while clearing left pointers.
+    /// When a node has a left subtree, the rightmost node of that subtree is the
+    /// predecessor in preorder. Move the current right subtree there, then promote
+    /// the left subtree to the right.
     ///
     /// # Approach
-    /// 1. Perform a preorder traversal collecting all node references.
-    /// 2. Iterate through collected nodes, setting each node's right to the next
-    ///    and left to None.
+    /// 1. Walk down the tree using right pointers.
+    /// 2. If a node has a left subtree:
+    ///    - Find the rightmost node of that left subtree.
+    ///    - Attach the current right subtree to that rightmost node.
+    ///    - Move the left subtree to the right and clear the left.
     ///
     /// # Complexity
-    /// - Time: O(n) — two passes over all nodes
-    /// - Space: O(n) — storage for node references
+    /// - Time: O(n)
+    /// - Space: O(1) extra
     pub fn flatten(root: &mut Option<Rc<RefCell<TreeNode>>>) {
-        if root.is_none() {
-            return;
-        }
-        let mut nodes: Vec<Option<Rc<RefCell<TreeNode>>>> = Vec::new();
-        Self::preorder(&mut nodes, root);
-        for i in 0..nodes.len() - 1 {
-            let node = nodes[i].as_ref().unwrap();
-            node.borrow_mut().left = None;
-            node.borrow_mut().right = nodes[i + 1].clone();
-        }
-    }
+        let mut current = root.clone();
+        while let Some(node) = current {
+            let left_subtree = node.borrow_mut().left.take();
+            if let Some(left) = left_subtree {
+                let mut predecessor = left.clone();
+                loop {
+                    let next = predecessor.borrow().right.clone();
+                    match next {
+                        Some(next_node) => predecessor = next_node,
+                        None => break,
+                    }
+                }
 
-    fn preorder(
-        nodes: &mut Vec<Option<Rc<RefCell<TreeNode>>>>,
-        root: &Option<Rc<RefCell<TreeNode>>>,
-    ) {
-        if let Some(node) = root {
-            nodes.push(root.clone());
-            let left = node.borrow().left.clone();
-            let right = node.borrow().right.clone();
-            Self::preorder(nodes, &left);
-            Self::preorder(nodes, &right);
+                let right_subtree = node.borrow_mut().right.take();
+                predecessor.borrow_mut().right = right_subtree;
+                node.borrow_mut().right = Some(left);
+            }
+            current = node.borrow().right.clone();
         }
     }
 }
 
+/// Binary tree node used by the LeetCode harness.
 #[derive(Debug, PartialEq, Eq)]
 pub struct TreeNode {
+    /// Node value.
     pub val: i32,
+    /// Left child pointer.
     pub left: Option<Rc<RefCell<TreeNode>>>,
+    /// Right child pointer.
     pub right: Option<Rc<RefCell<TreeNode>>>,
 }
 
 impl TreeNode {
+    /// Creates a new tree node with empty children.
     #[inline]
     pub fn new(val: i32) -> Self {
         TreeNode {
@@ -79,7 +83,7 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
+/// LeetCode solution container.
 
 #[cfg(test)]
 mod tests {

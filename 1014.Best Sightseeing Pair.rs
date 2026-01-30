@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Finds the maximum score of a sightseeing pair in one pass.

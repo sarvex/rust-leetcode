@@ -21,7 +21,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Finds LCA of deepest leaves using DFS with depth tracking.

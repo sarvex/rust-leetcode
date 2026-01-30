@@ -1,4 +1,3 @@
-pub struct Solution;
 
 // MountainArray's API interface.
 pub struct MountainArray {

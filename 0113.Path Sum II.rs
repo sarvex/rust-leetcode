@@ -83,7 +83,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 #[cfg(test)]
 mod tests {

@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Calculates lines and last-line width for writing a string.

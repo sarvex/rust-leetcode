@@ -11,7 +11,6 @@ impl ListNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Reverses a singly linked list iteratively using pointer manipulation.

@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Minimizes total travel distance for a squirrel collecting nuts.

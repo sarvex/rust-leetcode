@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Checks for an increasing triplet subsequence using two running minimums.

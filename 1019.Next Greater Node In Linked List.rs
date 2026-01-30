@@ -12,7 +12,6 @@ impl ListNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the next greater value for each node using a monotonic stack.

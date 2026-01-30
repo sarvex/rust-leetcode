@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Determines if change can be made for every lemonade customer.

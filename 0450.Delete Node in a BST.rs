@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Deletes a node with the given key from a BST.

@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Finds the minimum coins to make an amount using unbounded knapsack DP.

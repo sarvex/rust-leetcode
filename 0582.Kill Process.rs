@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-pub struct Solution;
 
 impl Solution {
     /// Finds all processes to kill using DFS on the process tree.

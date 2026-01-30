@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Converts an integer to base -2 representation.

@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-pub struct Solution;
 
 impl Solution {
     /// Computes the average value of each tree level using BFS.

@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Compares two strings with backspace processing using O(1) space.

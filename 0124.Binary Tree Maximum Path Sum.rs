@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the maximum path sum in a binary tree using post-order DFS.

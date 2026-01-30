@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Inverts a binary tree by recursively swapping left and right children.

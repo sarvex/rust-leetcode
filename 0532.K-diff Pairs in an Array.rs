@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Counts unique k-diff pairs using a sorted two-pointer approach.

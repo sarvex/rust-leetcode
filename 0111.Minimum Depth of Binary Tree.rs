@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Finds minimum depth of a binary tree using recursive DFS with leaf-awareness.

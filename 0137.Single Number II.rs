@@ -1,23 +1,27 @@
 impl Solution {
-    /// Finds the element appearing once when all others appear three times using bit counting.
+    /// Finds the element appearing once using two-bit masks.
     ///
     /// # Intuition
-    /// For each bit position, sum the bits across all numbers. The single number's
-    /// bit at that position equals the sum modulo 3.
+    /// Track which bits have appeared once and twice. When a bit appears a third
+    /// time, it is cleared from both masks.
     ///
     /// # Approach
-    /// 1. For each of the 32 bit positions, sum the corresponding bit across all numbers.
-    /// 2. Take the sum modulo 3 to isolate the single number's bit.
-    /// 3. Combine bits with OR to reconstruct the result.
+    /// 1. Maintain `ones` for bits seen once and `twos` for bits seen twice.
+    /// 2. For each value, update masks with XOR and clear bits present in the other mask.
+    /// 3. After processing all numbers, `ones` holds the unique value.
     ///
     /// # Complexity
-    /// - Time: O(32n) = O(n)
+    /// - Time: O(n)
     /// - Space: O(1)
     pub fn single_number(nums: Vec<i32>) -> i32 {
-        (0..32).fold(0, |ans, i| {
-            let count: i32 = nums.iter().map(|v| (v >> i) & 1).sum();
-            ans | ((count % 3) << i)
-        })
+        let (mut ones, mut twos) = (0_i32, 0_i32);
+
+        for &value in &nums {
+            ones = (ones ^ value) & !twos;
+            twos = (twos ^ value) & !ones;
+        }
+
+        ones
     }
 }
 

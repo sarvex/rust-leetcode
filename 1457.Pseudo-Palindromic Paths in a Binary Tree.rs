@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Bitmask DFS counting pseudo-palindromic root-to-leaf paths.

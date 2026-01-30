@@ -2,32 +2,49 @@ impl Solution {
     /// Stack-based simplification of Unix-style file paths.
     ///
     /// # Intuition
-    /// Split the path by '/' to extract components. A stack naturally handles
-    /// directory traversal: push on valid names, pop on '..', and ignore
-    /// '.' and empty segments.
+    /// Treat the output path as a stack of segments. Appending a segment
+    /// pushes, and ".." pops by truncating back to the previous length.
     ///
     /// # Approach
-    /// Split the path string on '/'. For each component, match against
-    /// ".." (pop), "." or "" (skip), and anything else (push). Join the
-    /// stack with '/' and prepend the root.
+    /// Preallocate an output buffer and a stack of segment start offsets.
+    /// Split the path on '/'. Skip "" and ".", pop on ".." via `truncate`,
+    /// and otherwise push the current length then append "/segment". If no
+    /// segments were added, return "/".
     ///
     /// # Complexity
-    /// - Time: O(n) — single pass through the path
-    /// - Space: O(n) — stack and split components
+    /// - Time: O(n) — linear scans for capacity and parsing
+    /// - Space: O(n) — output buffer and segment stack
     pub fn simplify_path(path: String) -> String {
-        let mut stack: Vec<&str> = Vec::new();
+        let segment_capacity = path
+            .as_bytes()
+            .iter()
+            .filter(|&&byte| byte == b'/')
+            .count()
+            .saturating_add(1);
+        let mut segment_starts: Vec<usize> = Vec::with_capacity(segment_capacity);
+        let mut result = String::with_capacity(path.len().saturating_add(1));
 
         for component in path.split('/') {
             match component {
-                ".." => {
-                    stack.pop();
-                }
                 "" | "." => {}
-                name => stack.push(name),
+                ".." => {
+                    if let Some(start) = segment_starts.pop() {
+                        result.truncate(start);
+                    }
+                }
+                name => {
+                    segment_starts.push(result.len());
+                    result.push('/');
+                    result.push_str(name);
+                }
             }
         }
 
-        format!("/{}", stack.join("/"))
+        if result.is_empty() {
+            "/".to_string()
+        } else {
+            result
+        }
     }
 }
 

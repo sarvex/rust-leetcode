@@ -16,21 +16,24 @@ impl Solution {
     pub fn shortest_palindrome(s: String) -> String {
         let base: u64 = 131;
         let (mut idx, mut prefix, mut suffix, mut mul) = (0usize, 0u64, 0u64, 1u64);
-        for (i, c) in s.chars().enumerate() {
-            let t = (c as u64) - (b'0' as u64) + 1;
+        for (byte_idx, c) in s.char_indices() {
+            let t = (c as u64) + 1;
             prefix = prefix.wrapping_mul(base).wrapping_add(t);
             suffix = suffix.wrapping_add(t.wrapping_mul(mul));
             mul = mul.wrapping_mul(base);
             if prefix == suffix {
-                idx = i + 1;
+                idx = byte_idx + c.len_utf8();
             }
         }
-        if idx == s.len() {
-            s
-        } else {
-            let reversed: String = s[idx..].chars().rev().collect();
-            reversed + &s
+        let s_len = s.len();
+        if idx == s_len {
+            return s;
         }
+        let suffix_len = s_len - idx;
+        let mut result = String::with_capacity(s_len + suffix_len);
+        result.extend(s[idx..].chars().rev());
+        result.push_str(&s);
+        result
     }
 }
 

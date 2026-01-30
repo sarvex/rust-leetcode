@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the intersection of two arrays including duplicates using a frequency map.

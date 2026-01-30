@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Inserts a value into a maximum binary tree as the last appended element.

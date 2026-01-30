@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the longest path where all nodes have the same value.

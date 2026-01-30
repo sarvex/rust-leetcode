@@ -11,7 +11,6 @@ impl ListNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Adds two numbers represented as linked lists in reverse order.

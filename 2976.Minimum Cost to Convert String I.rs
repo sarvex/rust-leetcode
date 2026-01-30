@@ -66,9 +66,9 @@ impl Solution {
         let tgt = target.as_bytes();
 
         let mut total = 0i64;
-        for idx in 0..src.len() {
-            let s = src[idx];
-            let t = tgt[idx];
+        for (s, t) in src.iter().zip(tgt.iter()) {
+            let s = *s;
+            let t = *t;
             if s == t {
                 continue;
             }

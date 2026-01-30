@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Bottom-up height check with early termination for balanced tree validation.

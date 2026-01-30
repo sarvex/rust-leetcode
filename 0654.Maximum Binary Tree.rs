@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-pub struct Solution;
 
 impl Solution {
     /// Constructs a maximum binary tree from the array recursively.

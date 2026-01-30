@@ -1,40 +1,44 @@
-pub struct Solution;
+/// LeetCode solution container.
 
 impl Solution {
-    /// 2D dynamic programming for counting distinct subsequences.
+    /// 1D dynamic programming for counting distinct subsequences.
     ///
     /// # Intuition
-    /// `dp[i][j]` represents the number of ways to form `t[0..j]` from
-    /// `s[0..i]`. If `s[i-1] == t[j-1]`, we can either use or skip this
-    /// character; otherwise we must skip it.
+    /// `dp[j]` represents the number of ways to form `t[0..j]` from the
+    /// processed prefix of `s`. If `s[i] == t[j-1]`, we can either use or
+    /// skip this character; otherwise we must skip it.
     ///
     /// # Approach
-    /// Initialize `dp[i][0] = 1` for all i (empty t matches any prefix).
-    /// For each (i, j), if characters match, `dp[i][j] = dp[i-1][j-1] + dp[i-1][j]`.
-    /// Otherwise `dp[i][j] = dp[i-1][j]`. Use u64 to avoid overflow.
+    /// Initialize `dp[0] = 1` (empty t matches any prefix).
+    /// For each character in `s`, iterate `j` backward:
+    /// if `s[i] == t[j-1]`, then `dp[j] += dp[j-1]`.
+    /// Use u64 to avoid overflow.
     ///
     /// # Complexity
-    /// - Time: O(n * m) - filling the DP table
-    /// - Space: O(n * m) - the DP table
+    /// - Time: O(n * m) - updating DP state
+    /// - Space: O(m) - the DP array
     pub fn num_distinct(s: String, t: String) -> i32 {
         let (s, t) = (s.as_bytes(), t.as_bytes());
         let (n, m) = (s.len(), t.len());
-        let mut dp = vec![vec![0u64; m + 1]; n + 1];
-
-        for row in dp.iter_mut() {
-            row[0] = 1;
+        if m == 0 {
+            return 1;
+        }
+        if n == 0 || m > n {
+            return 0;
         }
 
-        for i in 1..=n {
-            for j in 1..=m {
-                dp[i][j] = dp[i - 1][j];
-                if s[i - 1] == t[j - 1] {
-                    dp[i][j] += dp[i - 1][j - 1];
+        let mut dp = vec![0u64; m + 1];
+        dp[0] = 1;
+
+        for s_char in s.iter().copied() {
+            for (j, t_char) in t.iter().enumerate().rev() {
+                if s_char == *t_char {
+                    dp[j + 1] += dp[j];
                 }
             }
         }
 
-        dp[n][m] as i32
+        dp[m] as i32
     }
 }
 

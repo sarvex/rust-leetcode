@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Two-pass DFS to maximize the product of split subtree sums.

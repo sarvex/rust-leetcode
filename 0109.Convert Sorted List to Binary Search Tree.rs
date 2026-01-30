@@ -32,7 +32,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Converts a sorted linked list to a height-balanced BST via array conversion and recursive midpoint splitting.

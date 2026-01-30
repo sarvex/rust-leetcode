@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Merges two binary trees by summing overlapping nodes.

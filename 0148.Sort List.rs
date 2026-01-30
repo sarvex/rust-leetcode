@@ -1,6 +1,9 @@
+/// Singly linked list node used by `sort_list`.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct ListNode {
+    /// Node value.
     pub val: i32,
+    /// Next node in the list.
     pub next: Option<Box<ListNode>>,
 }
 
@@ -11,7 +14,6 @@ impl ListNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Sorts a linked list in O(n log n) time using merge sort.
@@ -29,39 +31,60 @@ impl Solution {
     /// - Time: O(n log n)
     /// - Space: O(log n) recursion stack
     pub fn sort_list(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
-        fn merge(l1: Option<Box<ListNode>>, l2: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
-            match (l1, l2) {
-                (None, Some(node)) | (Some(node), None) => Some(node),
-                (Some(mut n1), Some(mut n2)) => {
-                    if n1.val < n2.val {
-                        n1.next = merge(n1.next.take(), Some(n2));
-                        Some(n1)
-                    } else {
-                        n2.next = merge(Some(n1), n2.next.take());
-                        Some(n2)
-                    }
+        fn split_at_mid(head: &mut Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+            let mut slow = head.as_mut();
+            let mut fast = head.as_ref();
+
+            while let (Some(slow_node), Some(fast_node)) = (slow, fast) {
+                let fast_next = fast_node.next.as_ref();
+                let fast_next_next = fast_next.and_then(|node| node.next.as_ref());
+                if fast_next_next.is_none() {
+                    break;
                 }
-                _ => None,
+                slow = slow_node.next.as_mut();
+                fast = fast_next_next;
             }
+
+            slow.and_then(|node| node.next.take())
         }
 
-        fn sort(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
-            if head.is_none() || head.as_ref().unwrap().next.is_none() {
-                return head;
+        fn merge(
+            mut left: Option<Box<ListNode>>,
+            mut right: Option<Box<ListNode>>,
+        ) -> Option<Box<ListNode>> {
+            let mut dummy = Box::new(ListNode::new(0));
+            let mut tail = &mut dummy;
+
+            while left.is_some() && right.is_some() {
+                let take_left = left.as_ref().unwrap().val <= right.as_ref().unwrap().val;
+                let node = if take_left {
+                    let mut node = left.take().unwrap();
+                    left = node.next.take();
+                    node
+                } else {
+                    let mut node = right.take().unwrap();
+                    right = node.next.take();
+                    node
+                };
+                tail.next = Some(node);
+                tail = tail.next.as_mut().unwrap();
             }
-            let mut head = head;
-            let mut length = 0;
-            let mut cur = &head;
-            while cur.is_some() {
-                length += 1;
-                cur = &cur.as_ref().unwrap().next;
+
+            tail.next = if left.is_some() { left } else { right };
+            dummy.next
+        }
+
+        fn sort(mut head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+            match head.as_ref() {
+                None => return None,
+                Some(node) if node.next.is_none() => return head,
+                _ => {}
             }
-            let mut cur = &mut head;
-            for _ in 0..length / 2 - 1 {
-                cur = &mut cur.as_mut().unwrap().next;
-            }
-            let right = cur.as_mut().unwrap().next.take();
-            merge(sort(head), sort(right))
+
+            let right = split_at_mid(&mut head);
+            let left_sorted = sort(head);
+            let right_sorted = sort(right);
+            merge(left_sorted, right_sorted)
         }
 
         sort(head)

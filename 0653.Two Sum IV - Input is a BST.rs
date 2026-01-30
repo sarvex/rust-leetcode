@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::{HashSet, VecDeque};
 use std::rc::Rc;
 
-pub struct Solution;
 
 impl Solution {
     /// Checks if two nodes in a BST sum to k using BFS with a complement set.

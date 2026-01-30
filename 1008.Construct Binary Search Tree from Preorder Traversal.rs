@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Constructs a BST from preorder traversal using upper-bound constraint.

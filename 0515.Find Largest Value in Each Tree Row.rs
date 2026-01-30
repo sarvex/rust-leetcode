@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the largest value in each tree row using BFS.

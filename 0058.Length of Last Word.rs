@@ -14,11 +14,17 @@ impl Solution {
     /// - Time: O(n) — worst case scans the entire string
     /// - Space: O(1) — no additional allocation
     pub fn length_of_last_word(s: String) -> i32 {
-        s.trim_end()
-            .bytes()
-            .rev()
-            .take_while(|&b| b != b' ')
-            .count() as i32
+        let trimmed = s.trim_end();
+        let bytes = trimmed.as_bytes();
+        let mut index = bytes.len();
+        let mut count = 0usize;
+
+        while index > 0 && bytes[index - 1] != b' ' {
+            count += 1;
+            index -= 1;
+        }
+
+        count as i32
     }
 }
 

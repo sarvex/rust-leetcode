@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Reverses a string in-place using two pointers.

@@ -139,10 +139,13 @@ impl Solution {
             } else {
                 INF
             };
+            let remaining = n - i;
+            let src_tail = &src[i..];
+            let tgt_tail = &tgt[i..];
 
             for graph in graphs.iter() {
                 let len = graph.len;
-                if i + len > n {
+                if len > remaining {
                     break;
                 }
 
@@ -151,18 +154,19 @@ impl Solution {
                     continue;
                 }
 
-                let src_slice = &src[i..i + len];
-                let tgt_slice = &tgt[i..i + len];
-
-                if let (Some(from), Some(to)) =
-                    (graph.index.get(src_slice), graph.index.get(tgt_slice))
-                {
-                    let cost_seg = graph.dist[*from * graph.node_count + *to];
-                    if cost_seg < INF {
-                        let candidate = cost_seg + next_cost;
-                        if candidate < best {
-                            best = candidate;
-                        }
+                let src_slice = &src_tail[..len];
+                let Some(from) = graph.index.get(src_slice) else {
+                    continue;
+                };
+                let tgt_slice = &tgt_tail[..len];
+                let Some(to) = graph.index.get(tgt_slice) else {
+                    continue;
+                };
+                let cost_seg = graph.dist[*from * graph.node_count + *to];
+                if cost_seg < INF {
+                    let candidate = cost_seg + next_cost;
+                    if candidate < best {
+                        best = candidate;
                     }
                 }
             }

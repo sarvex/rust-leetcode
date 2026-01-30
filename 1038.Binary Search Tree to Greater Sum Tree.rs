@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-pub struct Solution;
 
 impl Solution {
     /// Converts BST to Greater Sum Tree using reverse in-order traversal.

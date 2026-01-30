@@ -1,6 +1,5 @@
 use std::collections::BinaryHeap;
 
-pub struct Solution;
 
 impl Solution {
     /// Finds minimum refueling stops to reach target using a greedy max-heap.

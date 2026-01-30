@@ -15,7 +15,7 @@ impl Solution {
     /// - Time: O(n² × 9) = O(n²)
     /// - Space: O(n × 3) = O(n)
     pub fn count_winning_sequences(s: String) -> i32 {
-        const MOD: i64 = 1_000_000_007;
+        const MOD: u32 = 1_000_000_007;
         let n = s.len();
         if n == 0 {
             return 0;
@@ -33,8 +33,8 @@ impl Solution {
         let stride = size;
 
         // dp[bob's last move][score difference + offset]
-        let mut dp = vec![0i64; 3 * stride];
-        let mut next = vec![0i64; 3 * stride];
+        let mut dp = vec![0u32; 3 * stride];
+        let mut next = vec![0u32; 3 * stride];
 
         // Initialize first round
         let first_alice = match bytes[0] {
@@ -106,7 +106,7 @@ impl Solution {
         }
 
         // Sum winning states (diff > 0 means index > offset)
-        let mut total = 0i64;
+        let mut total = 0u32;
         let start = (offset + 1) as usize;
         for bob in 0..3 {
             let row = &dp[bob * stride..(bob + 1) * stride];

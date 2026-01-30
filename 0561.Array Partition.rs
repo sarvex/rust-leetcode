@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Maximizes the sum of min(a, b) pairs by sorting.

@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Finds the shortest subarray that, when sorted, sorts the entire array.

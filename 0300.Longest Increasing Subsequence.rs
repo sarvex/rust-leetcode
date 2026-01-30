@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Finds the length of the longest increasing subsequence using binary search.

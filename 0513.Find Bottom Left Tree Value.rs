@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-pub struct Solution;
 
 impl Solution {
     /// Finds the leftmost value in the bottom row using BFS.

@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Checks if people can be split into two groups where no dislikes are in the same group.

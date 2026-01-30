@@ -1,38 +1,51 @@
 impl Solution {
-    /// Two-pass marker approach for setting matrix rows and columns to zero.
+    /// In-place marker approach using the first row and column.
     ///
     /// # Intuition
-    /// First identify which rows and columns contain a zero, then apply
-    /// the zeroing in a second pass. Boolean marker arrays avoid modifying
-    /// the matrix prematurely.
+    /// Use the first row and first column as marker storage to track which
+    /// rows and columns should be zeroed, while keeping two flags for whether
+    /// the first row or column originally contained a zero.
     ///
     /// # Approach
-    /// Scan the matrix to record which rows and columns contain zeros in
-    /// boolean vectors. Then iterate again, setting any cell to zero if
-    /// its row or column is marked.
+    /// Scan the inner submatrix to write markers into the first row/column.
+    /// Then zero cells based on those markers and finally zero the first
+    /// row/column if their original flags were set.
     ///
     /// # Complexity
-    /// - Time: O(m × n) — two full scans
-    /// - Space: O(m + n) — marker arrays for rows and columns
+    /// - Time: O(m × n)
+    /// - Space: O(1) — in-place markers plus constant flags
     pub fn set_zeroes(matrix: &mut Vec<Vec<i32>>) {
+        if matrix.is_empty() || matrix[0].is_empty() {
+            return;
+        }
         let (m, n) = (matrix.len(), matrix[0].len());
-        let mut zero_rows = vec![false; m];
-        let mut zero_cols = vec![false; n];
+        let first_row_has_zero = matrix[0].iter().any(|value| *value == 0);
+        let first_col_has_zero = matrix.iter().any(|row| row[0] == 0);
 
-        for i in 0..m {
-            for j in 0..n {
+        for i in 1..m {
+            for j in 1..n {
                 if matrix[i][j] == 0 {
-                    zero_rows[i] = true;
-                    zero_cols[j] = true;
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
                 }
             }
         }
 
-        for i in 0..m {
-            for j in 0..n {
-                if zero_rows[i] || zero_cols[j] {
+        for i in 1..m {
+            for j in 1..n {
+                if matrix[i][0] == 0 || matrix[0][j] == 0 {
                     matrix[i][j] = 0;
                 }
+            }
+        }
+
+        if first_row_has_zero {
+            matrix[0].fill(0);
+        }
+
+        if first_col_has_zero {
+            for row in matrix.iter_mut() {
+                row[0] = 0;
             }
         }
     }

@@ -1,4 +1,3 @@
-pub struct Solution;
 
 impl Solution {
     /// Finds the longest distance between consecutive 1s in binary representation.

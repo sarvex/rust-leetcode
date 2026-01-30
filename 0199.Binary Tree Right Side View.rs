@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-pub struct Solution;
 
 impl Solution {
     /// Returns the right side view of a binary tree using BFS level-order traversal.
