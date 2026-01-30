@@ -55,8 +55,8 @@ impl Solution {
             let mut dummy = Box::new(ListNode::new(0));
             let mut tail = &mut dummy;
 
-            while left.is_some() && right.is_some() {
-                let take_left = left.as_ref().unwrap().val <= right.as_ref().unwrap().val;
+            while let (Some(left_node), Some(right_node)) = (left.as_ref(), right.as_ref()) {
+                let take_left = left_node.val <= right_node.val;
                 let node = if take_left {
                     let mut node = left.take().unwrap();
                     left = node.next.take();
@@ -70,7 +70,7 @@ impl Solution {
                 tail = tail.next.as_mut().unwrap();
             }
 
-            tail.next = if left.is_some() { left } else { right };
+            tail.next = left.or(right);
             dummy.next
         }
 

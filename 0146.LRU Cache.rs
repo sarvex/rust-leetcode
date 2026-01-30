@@ -54,31 +54,34 @@ impl LRUCache {
         }
     }
 
+    #[inline]
+    fn is_head(&self, node: &Rc<RefCell<Node>>) -> bool {
+        self.head
+            .as_ref()
+            .map_or(false, |head| Rc::ptr_eq(head, node))
+    }
+
     fn get(&mut self, key: i32) -> i32 {
-        if let Some(node) = self.cache.get(&key) {
-            if self
-                .head
-                .as_ref()
-                .map_or(false, |head| Rc::ptr_eq(head, node))
-            {
-                return node.borrow().value;
-            }
-            let node = Rc::clone(node);
-            self.remove(&node);
-            self.push_front(&node);
-            return node.borrow().value;
+        let node = match self.cache.get(&key) {
+            Some(node) => node,
+            None => return -1,
+        };
+
+        let value = node.borrow().value;
+        if self.is_head(node) {
+            return value;
         }
-        -1
+
+        let node = Rc::clone(node);
+        self.remove(&node);
+        self.push_front(&node);
+        value
     }
 
     fn put(&mut self, key: i32, value: i32) {
         if let Some(node) = self.cache.get(&key) {
             node.borrow_mut().value = value;
-            if self
-                .head
-                .as_ref()
-                .map_or(false, |head| Rc::ptr_eq(head, node))
-            {
+            if self.is_head(node) {
                 return;
             }
             let node = Rc::clone(node);
@@ -140,8 +143,11 @@ impl LRUCache {
                 self.tail = Some(prev_node);
             }
             (Some(prev_node), Some(next_node)) => {
-                next_node.borrow_mut().prev = Some(Rc::clone(&prev_node));
-                prev_node.borrow_mut().next = Some(Rc::clone(&next_node));
+                {
+                    let mut prev_ref = prev_node.borrow_mut();
+                    prev_ref.next = Some(Rc::clone(&next_node));
+                }
+                next_node.borrow_mut().prev = Some(prev_node);
             }
         }
     }
