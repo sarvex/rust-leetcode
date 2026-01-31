@@ -20,7 +20,6 @@ impl Solution {
 
         let mut cand_n: i32 = 0;
         let mut n_cnt: i32 = 0;
-        let mut not_n: i32 = 0;
         let mut all_forb: i32 = 0;
 
         // Boyer-Moore majority vote among bad indices
@@ -39,8 +38,13 @@ impl Solution {
             }
         }
 
+        if all_forb == 0 {
+            return 0;
+        }
+
         // Count actual frequency and available positions for candidate
         n_cnt = 0;
+        let mut not_n: i32 = 0;
         for (&n, &f) in nums.iter().zip(forbidden.iter()) {
             if n == cand_n && n == f {
                 n_cnt += 1;

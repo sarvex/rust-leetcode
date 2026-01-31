@@ -16,21 +16,27 @@ fn get_tables() -> &'static Tables {
         w[0][0][OFF] = 1;
         w[1][0][OFF] = 1;
 
+        let sz_i32 = SZ as i32;
         for r in 0..16 {
+            let next_parity = (r + 1) & 1;
             for i in 0..SZ {
-                for d in 0..10i32 {
-                    if w[0][r][i] > 0 {
-                        let delta = if (r + 1) & 1 == 1 { d } else { -d };
+                let w0 = w[0][r][i];
+                if w0 != 0 {
+                    for d in 0..10i32 {
+                        let delta = if next_parity == 1 { d } else { -d };
                         let j = i as i32 + delta;
-                        if (0..SZ as i32).contains(&j) {
-                            w[0][r + 1][j as usize] += w[0][r][i];
+                        if j >= 0 && j < sz_i32 {
+                            w[0][r + 1][j as usize] += w0;
                         }
                     }
-                    if w[1][r][i] > 0 {
-                        let delta = if (r + 1) & 1 == 0 { d } else { -d };
+                }
+                let w1 = w[1][r][i];
+                if w1 != 0 {
+                    for d in 0..10i32 {
+                        let delta = if next_parity == 0 { d } else { -d };
                         let j = i as i32 + delta;
-                        if (0..SZ as i32).contains(&j) {
-                            w[1][r + 1][j as usize] += w[1][r][i];
+                        if j >= 0 && j < sz_i32 {
+                            w[1][r + 1][j as usize] += w1;
                         }
                     }
                 }
@@ -45,14 +51,15 @@ fn get_tables() -> &'static Tables {
                 let mut np = [0i64; SZ];
                 let lo = if p == 0 { 1 } else { 0 };
                 for i in 0..SZ {
-                    if dp[i] == 0 {
+                    let dp_i = dp[i];
+                    if dp_i == 0 {
                         continue;
                     }
                     for d in lo..10i32 {
                         let delta = if (p + 1) & 1 == 1 { d } else { -d };
                         let j = i as i32 + delta;
-                        if (0..SZ as i32).contains(&j) {
-                            np[j as usize] += dp[i];
+                        if j >= 0 && j < sz_i32 {
+                            np[j as usize] += dp_i;
                         }
                     }
                 }
@@ -88,22 +95,23 @@ impl Solution {
             if x < 10 {
                 return 0;
             }
-            let mut digits = Vec::with_capacity(16);
+            let mut a = [0i32; 16];
+            let mut n = 0usize;
             let mut v = x;
             while v > 0 {
-                digits.push((v % 10) as i32);
+                a[n] = (v % 10) as i32;
+                n += 1;
                 v /= 10;
             }
-            digits.reverse();
-            let n = digits.len();
-            let a = {
-                let mut a = [0i32; 16];
-                a[..n].copy_from_slice(&digits);
-                a
-            };
+            a[..n].reverse();
 
-            let mut ans: i64 = (2..n).map(|i| f[i]).sum();
-            let mut cur = OFF as i32;
+            let mut ans: i64 = 0;
+            for i in 2..n {
+                ans += f[i];
+            }
+            let off_i32 = OFF as i32;
+            let sz_i32 = SZ as i32;
+            let mut cur = off_i32;
 
             for p in 0..n {
                 let lim = a[p];
@@ -114,11 +122,11 @@ impl Solution {
                     let delta = if (p + 1) & 1 == 1 { d } else { -d };
                     let nxt = cur + delta;
                     if rem == 0 {
-                        if nxt == OFF as i32 {
+                        if nxt == off_i32 {
                             ans += 1;
                         }
                     } else {
-                        let t = (2 * OFF as i32 - nxt) as usize;
+                        let t = (2 * off_i32 - nxt) as usize;
                         if t < SZ {
                             ans += w[((p + 2) & 1) ^ 1][rem][t];
                         }
@@ -127,12 +135,12 @@ impl Solution {
 
                 let delta = if (p + 1) & 1 == 1 { lim } else { -lim };
                 cur += delta;
-                if cur < 0 || cur >= SZ as i32 {
+                if cur < 0 || cur >= sz_i32 {
                     return ans;
                 }
             }
 
-            if cur == OFF as i32 {
+            if cur == off_i32 {
                 ans += 1;
             }
             ans

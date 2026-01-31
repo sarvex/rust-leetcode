@@ -2,17 +2,17 @@ use std::sync::OnceLock;
 
 const MAX_N: usize = 50;
 
-static BINOMIAL: OnceLock<Vec<Vec<u64>>> = OnceLock::new();
+static BINOMIAL: OnceLock<[[u64; MAX_N + 1]; MAX_N + 1]> = OnceLock::new();
 
-fn get_binomial() -> &'static Vec<Vec<u64>> {
+fn get_binomial() -> &'static [[u64; MAX_N + 1]; MAX_N + 1] {
     BINOMIAL.get_or_init(|| {
-        let mut binomial = vec![vec![0u64; MAX_N + 1]; MAX_N + 1];
-        (0..=MAX_N).for_each(|i| {
+        let mut binomial = [[0u64; MAX_N + 1]; MAX_N + 1];
+        for i in 0..=MAX_N {
             binomial[i][0] = 1;
-            (1..=i).for_each(|j| {
+            for j in 1..=i {
                 binomial[i][j] = binomial[i - 1][j - 1] + binomial[i - 1][j];
-            });
-        });
+            }
+        }
         binomial
     })
 }
@@ -42,14 +42,15 @@ impl Solution {
         let mut remaining_ones = k;
         let mut remaining_n = n;
 
-        for bit_pos in (0..50).rev() {
+        for bit_pos in (0..MAX_N).rev() {
             if remaining_ones == 0 {
                 break;
             }
 
-            let count_if_skip = match bit_pos >= remaining_ones {
-                true => binomial[bit_pos][remaining_ones],
-                false => 0,
+            let count_if_skip = if bit_pos >= remaining_ones {
+                binomial[bit_pos][remaining_ones]
+            } else {
+                0
             };
 
             if count_if_skip < remaining_n {

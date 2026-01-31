@@ -59,22 +59,31 @@ impl Solution {
         }
 
         // Powers of 2
-        let pow2: Vec<u64> = (0..=n)
-            .scan(1u64, |state, _| {
-                let val = *state;
-                *state = *state * 2 % MOD;
-                Some(val)
-            })
-            .collect();
+        let mut pow2 = Vec::with_capacity(n + 1);
+        pow2.push(1u64);
+        for _ in 0..n {
+            let next = (pow2.last().copied().unwrap() * 2) % MOD;
+            pow2.push(next);
+        }
 
         // Inclusion-exclusion for f[full]
-        let non_eff = (0..=full).fold(0u64, |acc, s| {
-            let pc = (full ^ s).count_ones();
-            match pc & 1 {
-                0 => (acc + pow2[cnt[s]]) % MOD,
-                _ => (acc + MOD - pow2[cnt[s]]) % MOD,
+        let k_u32 = k as u32;
+        let mut non_eff = 0u64;
+        for s in 0..=full {
+            let pc = k_u32 - s.count_ones();
+            let val = pow2[cnt[s]];
+            if pc & 1 == 0 {
+                non_eff += val;
+                if non_eff >= MOD {
+                    non_eff -= MOD;
+                }
+            } else {
+                non_eff += MOD - val;
+                if non_eff >= MOD {
+                    non_eff -= MOD;
+                }
             }
-        });
+        }
 
         ((pow2[n] + MOD - non_eff) % MOD) as i32
     }

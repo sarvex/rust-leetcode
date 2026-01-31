@@ -21,17 +21,17 @@ impl Solution {
         }
 
         let mut degree = vec![0u32; n];
-        edges.iter().for_each(|e| {
-            degree[e[0] as usize] += 1;
-            degree[e[1] as usize] += 1;
-        });
+        for e in &edges {
+            let u = e[0] as usize;
+            let v = e[1] as usize;
+            degree[u] += 1;
+            degree[v] += 1;
+        }
 
-        let head: Vec<u32> = std::iter::once(0u32)
-            .chain(degree.iter().scan(0u32, |acc, &d| {
-                *acc += d;
-                Some(*acc)
-            }))
-            .collect();
+        let mut head = vec![0u32; n + 1];
+        for i in 0..n {
+            head[i + 1] = head[i] + degree[i];
+        }
 
         let mut adj = vec![0u32; 2 * (n - 1)];
         let mut pos = head[..n].to_vec();
@@ -61,7 +61,10 @@ impl Solution {
             }
         }
 
-        let mut dp: Vec<i32> = good.iter().map(|&g| (g << 1) - 1).collect();
+        let mut dp = Vec::with_capacity(n);
+        for &g in &good {
+            dp.push((g << 1) - 1);
+        }
 
         for i in (1..n).rev() {
             let u = order[i] as usize;

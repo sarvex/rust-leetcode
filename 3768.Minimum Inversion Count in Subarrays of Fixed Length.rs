@@ -11,7 +11,8 @@ impl BIT {
 
     fn update(&mut self, mut i: usize, delta: i64) {
         i += 1;
-        while i < self.tree.len() {
+        let len = self.tree.len();
+        while i < len {
             self.tree[i] += delta;
             i += i & i.wrapping_neg();
         }
@@ -55,22 +56,23 @@ impl Solution {
         sorted.sort_unstable();
         sorted.dedup();
 
-        let rank: Vec<usize> = nums
-            .iter()
-            .map(|&x| sorted.partition_point(|&v| v < x))
-            .collect();
+        let mut rank = Vec::with_capacity(n);
+        for &x in &nums {
+            let r = sorted.binary_search(&x).unwrap();
+            rank.push(r);
+        }
 
         let max_rank = sorted.len();
         let mut bit = BIT::new(max_rank);
         let mut inversions: i64 = 0;
 
-        for i in 0..k {
-            let r = rank[i];
+        for (i, &r) in rank[..k].iter().enumerate() {
             inversions += (i as i64) - bit.query(r);
             bit.update(r, 1);
         }
 
         let mut min_inversions = inversions;
+        let k_minus_one = (k - 1) as i64;
 
         for i in k..n {
             let out_rank = rank[i - k];
@@ -81,7 +83,7 @@ impl Solution {
                 inversions -= bit.query(out_rank - 1);
             }
 
-            inversions += ((k - 1) as i64) - bit.query(in_rank);
+            inversions += k_minus_one - bit.query(in_rank);
             bit.update(in_rank, 1);
 
             min_inversions = min_inversions.min(inversions);

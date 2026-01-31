@@ -27,11 +27,11 @@ impl Solution {
         let mut from_left = true;
 
         while count > 1 {
-            if !from_left && count % 2 == 0 {
+            if !from_left && (count & 1) == 0 {
                 left += step;
             }
-            step *= 2;
-            count = (count + 1) / 2;
+            step <<= 1;
+            count = (count + 1) >> 1;
             from_left = !from_left;
         }
 

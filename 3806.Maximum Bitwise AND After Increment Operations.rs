@@ -33,6 +33,7 @@ impl Solution {
 
         let max_bit = 64 - (max_val as u64).leading_zeros() as i32;
         let mut result = 0i64;
+        let start = n - m;
 
         let mut buf = vec![0i64; n];
         let mut psum = vec![0i64; n + 1];
@@ -44,30 +45,34 @@ impl Solution {
 
             let clamp_idx = a.partition_point(|&x| x <= mask);
             if clamp_idx < n {
-                a[clamp_idx..].iter_mut().for_each(|v| *v &= mask);
-
                 let suffix_len = n - clamp_idx;
-                match suffix_len <= 64 || suffix_len * 4 <= n {
-                    true => {
-                        a[clamp_idx..].sort_unstable();
-                        Self::merge(&a[..clamp_idx], &a[clamp_idx..], &mut buf);
-                        a.copy_from_slice(&buf);
+                if suffix_len <= 64 || suffix_len * 4 <= n {
+                    let (left, right) = a.split_at_mut(clamp_idx);
+                    for v in right.iter_mut() {
+                        *v &= mask;
                     }
-                    false => a.sort_unstable(),
+                    right.sort_unstable();
+                    Self::merge(left, right, &mut buf);
+                    a.copy_from_slice(&buf);
+                } else {
+                    for v in a[clamp_idx..].iter_mut() {
+                        *v &= mask;
+                    }
+                    a.sort_unstable();
                 }
                 psum_valid = false;
             }
 
             if !psum_valid {
                 psum[0] = 0;
-                a.iter().enumerate().for_each(|(i, &val)| {
+                for (i, &val) in a.iter().enumerate() {
                     psum[i + 1] = psum[i] + val;
-                });
+                }
                 psum_valid = true;
             }
 
-            let start = n - m;
-            let target_idx = start + a[start..].partition_point(|&x| x < target);
+            let slice = &a[start..];
+            let target_idx = start + slice.partition_point(|&x| x < target);
             let below_count = (target_idx - start) as i64;
             let cost = target * below_count - (psum[target_idx] - psum[start]);
 

@@ -71,9 +71,18 @@ impl Solution {
         order.reverse();
 
         let mut group_size = [0i32; 21];
-        group.iter().for_each(|&g| group_size[g as usize] += 1);
+        for &g in &group {
+            group_size[g as usize] += 1;
+        }
 
-        let mut group_nodes: [Vec<u32>; 21] = Default::default();
+        let mut group_nodes: [Vec<u32>; 21] = std::array::from_fn(|i| {
+            let sz = group_size[i];
+            if sz >= 2 {
+                Vec::with_capacity(sz as usize)
+            } else {
+                Vec::new()
+            }
+        });
         for (i, &g) in group.iter().enumerate() {
             let gi = g as usize;
             if group_size[gi] >= 2 {

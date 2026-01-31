@@ -1,3 +1,4 @@
+/// Fenwick tree supporting point updates and prefix sums.
 pub struct Fenwick {
     nums: Vec<i32>,
     sums: Vec<i32>,
@@ -9,6 +10,7 @@ const fn lowbit(i: usize) -> usize {
 }
 
 impl Fenwick {
+    /// Build a Fenwick tree in O(n) from a slice.
     pub fn from_slice(nums: &[i32]) -> Self {
         let len = nums.len() + 1;
         let nums = nums.to_vec();
@@ -23,6 +25,7 @@ impl Fenwick {
         Self { nums, sums }
     }
 
+    /// Set index to a new value and propagate the delta.
     pub fn update(&mut self, index: usize, val: i32) {
         let delta = val - self.nums[index];
         self.nums[index] = val;
@@ -44,6 +47,7 @@ impl Fenwick {
         val
     }
 
+    /// Query inclusive range sum [left, right].
     pub fn query_range(&self, left: usize, right: usize) -> i32 {
         self.query(right) - if left > 0 { self.query(left - 1) } else { 0 }
     }
@@ -67,9 +71,11 @@ impl Solution {
     pub fn min_deletions(s: String, queries: Vec<Vec<i32>>) -> Vec<i32> {
         let len = s.len();
         let mut bytes = s.as_bytes().to_vec();
-        let values: Vec<i32> = std::iter::once(0)
-            .chain(bytes.windows(2).map(|w| i32::from(w[0] == w[1])))
-            .collect();
+        let mut values = Vec::with_capacity(len);
+        values.push(0);
+        for i in 1..len {
+            values.push(i32::from(bytes[i - 1] == bytes[i]));
+        }
         let mut tree = Fenwick::from_slice(&values);
         let mut ans = Vec::with_capacity(queries.len());
         for query in &queries {

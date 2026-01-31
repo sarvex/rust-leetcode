@@ -17,12 +17,19 @@ impl Solution {
         let n = lists.len();
         let nmask = 1usize << n;
 
-        let mut values: Vec<i32> = lists.iter().flat_map(|a| a.iter().copied()).collect();
+        let total_values_len: usize = lists.iter().map(|a| a.len()).sum();
+        let mut values: Vec<i32> = Vec::with_capacity(total_values_len);
+        for a in &lists {
+            values.extend_from_slice(a);
+        }
         values.sort_unstable();
         values.dedup();
         let v = values.len();
 
-        let lens: Vec<u16> = lists.iter().map(|a| a.len() as u16).collect();
+        let mut lens: Vec<u16> = Vec::with_capacity(n);
+        for a in &lists {
+            lens.push(a.len() as u16);
+        }
 
         let mut cnt = vec![0u16; n * v];
         for (i, a) in lists.iter().enumerate() {
@@ -63,31 +70,30 @@ impl Solution {
             let (mut lo, mut hi) = (0usize, v - 1);
             while lo < hi {
                 let mid = (lo + hi) >> 1;
-                let s: usize = (0..cnt_bases)
-                    .map(|t| cnt[bases[t] as usize + mid] as usize)
-                    .sum();
-                match s > k {
-                    true => hi = mid,
-                    false => lo = mid + 1,
+                let mut s: usize = 0;
+                for t in 0..cnt_bases {
+                    s += cnt[bases[t] as usize + mid] as usize;
+                }
+                if s > k {
+                    hi = mid;
+                } else {
+                    lo = mid + 1;
                 }
             }
             lo
         };
 
-        let median: Vec<i32> = (0..nmask)
-            .map(|mask| match mask {
-                0 => 0,
-                _ => {
-                    let idx =
-                        median_for_mask(&members_base[mask], mcount[mask] as usize, k_mask[mask]);
-                    values[idx]
-                }
-            })
-            .collect();
+        let mut median: Vec<i32> = vec![0; nmask];
+        for mask in 1..nmask {
+            let idx = median_for_mask(&members_base[mask], mcount[mask] as usize, k_mask[mask]);
+            median[mask] = values[idx];
+        }
 
         let inf: i64 = i64::MAX / 4;
         let mut dp = vec![inf; nmask];
-        (0..n).for_each(|i| dp[1usize << i] = 0);
+        for i in 0..n {
+            dp[1usize << i] = 0;
+        }
 
         for mask in 1..nmask {
             if mask & (mask - 1) == 0 {

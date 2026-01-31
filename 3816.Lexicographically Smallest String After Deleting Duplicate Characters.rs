@@ -17,18 +17,17 @@ impl Solution {
     /// - Space: O(n) for the result buffers
     pub fn lex_smallest_after_deletion(s: String) -> String {
         let bytes = s.as_bytes();
-        let n = bytes.len();
-        if n == 0 {
+        if bytes.is_empty() {
             return String::new();
         }
 
         let mut remaining = [0u32; 26];
-        bytes
-            .iter()
-            .for_each(|&b| remaining[(b - b'a') as usize] += 1);
+        for &b in bytes {
+            remaining[(b - b'a') as usize] += 1;
+        }
 
         let mut in_stack = [0u32; 26];
-        let mut result: Vec<u8> = Vec::with_capacity(n);
+        let mut result: Vec<u8> = Vec::with_capacity(bytes.len());
 
         for &b in bytes {
             let idx = (b - b'a') as usize;
@@ -48,27 +47,43 @@ impl Solution {
             in_stack[idx] += 1;
         }
 
-        let mut final_result: Vec<u8> = Vec::with_capacity(result.len());
-        let mut kept = [false; 26];
         let mut result_remaining = [0u32; 26];
-        result
-            .iter()
-            .for_each(|&b| result_remaining[(b - b'a') as usize] += 1);
-
+        let mut remaining_mask = 0u32;
         for &b in &result {
             let idx = (b - b'a') as usize;
-            result_remaining[idx] -= 1;
+            if result_remaining[idx] == 0 {
+                remaining_mask |= 1u32 << idx;
+            }
+            result_remaining[idx] += 1;
+        }
 
-            let must_keep = result_remaining[idx] == 0 && !kept[idx];
-            let larger_unkept_after = ((idx + 1)..26).any(|c| !kept[c] && result_remaining[c] > 0);
+        let mut kept_mask = 0u32;
+        let mut write = 0usize;
+        let result_len = result.len();
+
+        for i in 0..result_len {
+            let b = result[i];
+            let idx = (b - b'a') as usize;
+            let bit = 1u32 << idx;
+
+            result_remaining[idx] -= 1;
+            if result_remaining[idx] == 0 {
+                remaining_mask &= !bit;
+            }
+
+            let must_keep = result_remaining[idx] == 0 && (kept_mask & bit == 0);
+            let larger_unkept_after = (remaining_mask & (!0u32 << (idx + 1))) != 0;
 
             if must_keep || larger_unkept_after {
-                final_result.push(b);
-                kept[idx] = true;
+                result[write] = b;
+                write += 1;
+                kept_mask |= bit;
+                remaining_mask &= !bit;
             }
         }
 
-        String::from_utf8(final_result).unwrap()
+        result.truncate(write);
+        String::from_utf8(result).unwrap()
     }
 }
 

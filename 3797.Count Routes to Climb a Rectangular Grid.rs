@@ -40,52 +40,56 @@ impl Solution {
         let mut dp0 = vec![0u32; m];
         let mut dp1 = vec![0u32; m];
         let mut new0 = vec![0u32; m];
-        let mut pref = vec![0u64; m + 1];
+        let mut pref = vec![0u32; m + 1];
 
         let bottom = grid[n - 1];
-        (0..m).for_each(|j| {
+        for j in 0..m {
             if bottom[j] == b'.' {
                 dp0[j] = 1;
             }
-        });
+        }
 
         Self::build_prefix(&dp0, &mut pref);
-        (0..m).for_each(|j| {
+        for j in 0..m {
             if bottom[j] == b'.' {
                 let sum = Self::range_sum(&pref, ld[j], rd1[j]);
                 dp1[j] = Self::sub_mod(sum, dp0[j]);
             }
-        });
+        }
 
         for row in (0..n - 1).rev() {
             let cur_row = grid[row];
 
             Self::build_prefix_combined(&dp0, &dp1, &mut pref);
-            (0..m).for_each(|j| {
-                new0[j] = match cur_row[j] == b'.' {
-                    true => Self::range_sum(&pref, lu[j], ru1[j]),
-                    false => 0,
+            for j in 0..m {
+                new0[j] = if cur_row[j] == b'.' {
+                    Self::range_sum(&pref, lu[j], ru1[j])
+                } else {
+                    0
                 };
-            });
+            }
 
             std::mem::swap(&mut dp0, &mut new0);
 
             Self::build_prefix(&dp0, &mut pref);
-            (0..m).for_each(|j| {
-                dp1[j] = match cur_row[j] == b'.' {
-                    true => {
-                        let sum = Self::range_sum(&pref, ld[j], rd1[j]);
-                        Self::sub_mod(sum, dp0[j])
-                    }
-                    false => 0,
+            for j in 0..m {
+                dp1[j] = if cur_row[j] == b'.' {
+                    let sum = Self::range_sum(&pref, ld[j], rd1[j]);
+                    Self::sub_mod(sum, dp0[j])
+                } else {
+                    0
                 };
-            });
+            }
         }
 
         let top = grid[0];
-        (0..m).filter(|&j| top[j] == b'.').fold(0u32, |ans, j| {
-            Self::add_mod(ans, Self::add_mod(dp0[j], dp1[j]))
-        }) as i32
+        let mut ans = 0u32;
+        for j in 0..m {
+            if top[j] == b'.' {
+                ans = Self::add_mod(ans, Self::add_mod(dp0[j], dp1[j]));
+            }
+        }
+        ans as i32
     }
 
     #[inline(always)]
@@ -120,27 +124,28 @@ impl Solution {
     }
 
     #[inline(always)]
-    fn build_prefix(arr: &[u32], pref: &mut [u64]) {
+    fn build_prefix(arr: &[u32], pref: &mut [u32]) {
         pref[0] = 0;
-        arr.iter().enumerate().for_each(|(j, &val)| {
-            pref[j + 1] = pref[j] + val as u64;
-        });
+        for (j, &val) in arr.iter().enumerate() {
+            pref[j + 1] = Self::add_mod(pref[j], val);
+        }
     }
 
     #[inline(always)]
-    fn build_prefix_combined(a: &[u32], b: &[u32], pref: &mut [u64]) {
+    fn build_prefix_combined(a: &[u32], b: &[u32], pref: &mut [u32]) {
         pref[0] = 0;
-        a.iter()
-            .zip(b.iter())
-            .enumerate()
-            .for_each(|(j, (&av, &bv))| {
-                pref[j + 1] = pref[j] + av as u64 + bv as u64;
-            });
+        for j in 0..a.len() {
+            let mut sum = a[j] + b[j];
+            if sum >= MOD {
+                sum -= MOD;
+            }
+            pref[j + 1] = Self::add_mod(pref[j], sum);
+        }
     }
 
     #[inline(always)]
-    fn range_sum(pref: &[u64], l: usize, r1: usize) -> u32 {
-        ((pref[r1] - pref[l]) % (MOD as u64)) as u32
+    fn range_sum(pref: &[u32], l: usize, r1: usize) -> u32 {
+        Self::sub_mod(pref[r1], pref[l])
     }
 }
 

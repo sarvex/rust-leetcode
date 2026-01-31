@@ -26,27 +26,36 @@ impl Solution {
     pub fn min_operations(nums: Vec<i32>, k: i32, queries: Vec<Vec<i32>>) -> Vec<i64> {
         let num_elements = nums.len();
 
-        let remainders: Vec<i32> = nums.iter().map(|&x| x % k).collect();
-        let quotients: Vec<i64> = nums.iter().map(|&x| (x / k) as i64).collect();
-
-        let remainder_changes: Vec<i32> = std::iter::once(0i32)
-            .chain(remainders.windows(2).scan(0i32, |acc, w| {
-                *acc += i32::from(w[0] != w[1]);
-                Some(*acc)
-            }))
-            .collect();
+        let mut quotients = Vec::with_capacity(num_elements);
+        let mut remainder_changes = Vec::with_capacity(num_elements);
+        if let Some((&first, rest)) = nums.split_first() {
+            let mut prev_remainder = first % k;
+            let mut changes = 0i32;
+            quotients.push((first / k) as i64);
+            remainder_changes.push(0);
+            for &value in rest {
+                let remainder = value % k;
+                changes += i32::from(remainder != prev_remainder);
+                remainder_changes.push(changes);
+                prev_remainder = remainder;
+                quotients.push((value / k) as i64);
+            }
+        }
 
         let mut compressed_values: Vec<i64> = quotients.clone();
         compressed_values.sort_unstable();
         compressed_values.dedup();
         let value_range = compressed_values.len();
 
-        let compressed_indices: Vec<u32> = quotients
-            .iter()
-            .map(|&v| (compressed_values.binary_search(&v).unwrap() + 1) as u32)
-            .collect();
+        let mut compressed_indices = Vec::with_capacity(num_elements);
+        for &value in &quotients {
+            let index = compressed_values.binary_search(&value).unwrap() + 1;
+            compressed_indices.push(index as u32);
+        }
 
-        let tree_height = (u32::BITS - (value_range.max(1) as u32).leading_zeros()) as usize + 1;
+        let value_range_u32 = value_range as u32;
+        let tree_height =
+            (u32::BITS - value_range_u32.max(1).leading_zeros()) as usize + 1;
         let max_nodes = (num_elements + 1) * (tree_height + 1) + 10;
 
         let mut nodes: Vec<SegmentNode> = vec![SegmentNode::default(); max_nodes];
@@ -115,7 +124,7 @@ impl Solution {
         for i in 0..num_elements {
             version_roots[i + 1] = insert_value(
                 version_roots[i],
-                value_range as u32,
+                value_range_u32,
                 compressed_indices[i],
                 quotients[i],
                 &mut nodes,
@@ -140,17 +149,19 @@ impl Solution {
                 let left_node = &nodes[left_version as usize];
                 let right_node = &nodes[right_version as usize];
 
-                let left_subtree_count = nodes[right_node.left_child as usize].count
-                    - nodes[left_node.left_child as usize].count;
+                let left_left = left_node.left_child;
+                let right_left = right_node.left_child;
+                let left_subtree_count =
+                    nodes[right_left as usize].count - nodes[left_left as usize].count;
                 let mid = (range_left + range_right) >> 1;
 
                 if rank <= left_subtree_count {
-                    left_version = left_node.left_child;
-                    right_version = right_node.left_child;
+                    left_version = left_left;
+                    right_version = right_left;
                     range_right = mid;
                 } else {
-                    let left_subtree_sum = nodes[right_node.left_child as usize].sum
-                        - nodes[left_node.left_child as usize].sum;
+                    let left_subtree_sum =
+                        nodes[right_left as usize].sum - nodes[left_left as usize].sum;
                     prefix_count += left_subtree_count;
                     prefix_sum += left_subtree_sum;
                     rank -= left_subtree_count;
@@ -194,7 +205,7 @@ impl Solution {
             let (median_index, count_up_to_median, sum_up_to_median) = find_kth_with_prefix_stats(
                 left_root,
                 right_root,
-                value_range as u32,
+                value_range_u32,
                 median_rank,
                 &nodes,
             );

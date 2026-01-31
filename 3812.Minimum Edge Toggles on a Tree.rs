@@ -25,26 +25,60 @@ impl Solution {
 
         let start_bytes = start.as_bytes();
         let target_bytes = target.as_bytes();
-        let mut mismatch: Vec<bool> = (0..n).map(|i| start_bytes[i] != target_bytes[i]).collect();
+        let mut mismatch = Vec::with_capacity(n);
+        for i in 0..n {
+            mismatch.push(start_bytes[i] != target_bytes[i]);
+        }
 
-        let mut graph: Vec<Vec<(usize, usize)>> = vec![Vec::new(); n];
-        let mut degree: Vec<usize> = vec![0; n];
-
-        for (i, edge) in edges.iter().enumerate() {
+        let mut degree = vec![0usize; n];
+        for edge in &edges {
             let (u, v) = (edge[0] as usize, edge[1] as usize);
-            graph[u].push((i, v));
-            graph[v].push((i, u));
             degree[u] += 1;
             degree[v] += 1;
         }
 
-        let mut stack: Vec<usize> = (0..n).filter(|&v| degree[v] == 1).collect();
+        let mut graph: Vec<Vec<(usize, usize)>> = Vec::with_capacity(n);
+        for &deg in &degree {
+            graph.push(Vec::with_capacity(deg));
+        }
+        for (i, edge) in edges.iter().enumerate() {
+            let (u, v) = (edge[0] as usize, edge[1] as usize);
+            graph[u].push((i, v));
+            graph[v].push((i, u));
+        }
+
+        let mut stack = Vec::with_capacity(n);
+        for v in 0..n {
+            if degree[v] == 1 {
+                stack.push(v);
+            }
+        }
         let mut toggle = vec![false; m];
 
         while let Some(v) = stack.pop() {
+            if degree[v] == 0 {
+                if mismatch[v] {
+                    return vec![-1];
+                }
+                continue;
+            }
+
+            let mut neighbor: Option<(usize, usize)> = None;
+            for &(edge_idx, u) in &graph[v] {
+                if degree[u] > 0 {
+                    if neighbor.is_none() {
+                        neighbor = Some((edge_idx, u));
+                    }
+                    degree[u] -= 1;
+                    if degree[u] == 1 {
+                        stack.push(u);
+                    }
+                }
+            }
+
             if mismatch[v] {
-                match graph[v].iter().find(|(_, u)| degree[*u] > 0) {
-                    Some(&(edge_idx, u)) => {
+                match neighbor {
+                    Some((edge_idx, u)) => {
                         mismatch[u] = !mismatch[u];
                         toggle[edge_idx] = true;
                     }
@@ -52,22 +86,16 @@ impl Solution {
                 }
             }
 
-            for &(_, u) in &graph[v] {
-                if degree[u] > 0 {
-                    degree[u] -= 1;
-                    if degree[u] == 1 {
-                        stack.push(u);
-                    }
-                }
-            }
             degree[v] = 0;
         }
 
-        toggle
-            .iter()
-            .enumerate()
-            .filter_map(|(i, &t)| t.then_some(i as i32))
-            .collect()
+        let mut result = Vec::with_capacity(m);
+        for (i, &t) in toggle.iter().enumerate() {
+            if t {
+                result.push(i as i32);
+            }
+        }
+        result
     }
 }
 
