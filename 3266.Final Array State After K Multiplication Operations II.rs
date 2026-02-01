@@ -12,12 +12,13 @@ impl Solution {
     ///
     /// # Approach
     /// - If `multiplier == 1`, return the original array.
-    /// - Phase 1: use a packed min-heap to simulate while `min * multiplier <= max`.
-    /// - Phase 2: distribute the remaining operations as full cycles plus a prefix.
+    /// - Precompute how many multiplications each element needs to exceed `max / multiplier`.
+    /// - If `k` covers that total, apply them directly (no heap), then fast-forward cycles.
+    /// - Otherwise, simulate the `k` operations with a packed min-heap.
     /// - Apply modular exponentiation to compute final values.
     ///
     /// # Complexity
-    /// - Time: O(n log n + t log n + n), with t operations in phase 1.
+    /// - Time: O(n log_m(max) + min(k, total_need) log n + n).
     /// - Space: O(n)
     pub fn get_final_state(mut nums: Vec<i32>, k: i32, multiplier: i32) -> Vec<i32> {
         let n = nums.len();
@@ -25,6 +26,7 @@ impl Solution {
             return nums;
         }
 
+        let k_u64 = k as u64;
         let multiplier_u64 = multiplier as u64;
         let mut max_value: u64 = 0;
         for &value in nums.iter() {
@@ -36,33 +38,39 @@ impl Solution {
 
         let max_div = max_value / multiplier_u64;
 
-        let mut packed_keys: Vec<u64> = Vec::with_capacity(n);
-        for (index, &value) in nums.iter().enumerate() {
-            let packed = ((value as u64) << 32) | (index as u64);
-            packed_keys.push(!packed);
+        let mut after_phase_one: Vec<u64> = Vec::with_capacity(n);
+        let mut total_need: u64 = 0;
+        for &value in nums.iter() {
+            let mut current = value as u64;
+            let mut need = 0_u64;
+            while current <= max_div {
+                current *= multiplier_u64;
+                need += 1;
+            }
+            after_phase_one.push(current);
+            total_need += need;
         }
-        let mut heap: BinaryHeap<u64> = BinaryHeap::from(packed_keys);
 
-        let mut remaining = k as i64;
-        while remaining > 0 {
-            let key = *heap.peek().expect("heap always contains all elements");
-            let packed = !key;
-            let value = packed >> 32;
+        if k_u64 < total_need {
+            let mut packed_keys: Vec<u64> = Vec::with_capacity(n);
+            for (index, &value) in nums.iter().enumerate() {
+                let packed = ((value as u64) << 32) | (index as u64);
+                packed_keys.push(!packed);
+            }
+            let mut heap: BinaryHeap<u64> = BinaryHeap::from(packed_keys);
 
-            if value > max_div {
-                break;
+            let mut remaining = k_u64;
+            while remaining > 0 {
+                let key = heap.pop().expect("heap always contains all elements");
+                let packed = !key;
+                let value = packed >> 32;
+                let index = (packed as u32) as usize;
+                let multiplied = value * multiplier_u64;
+                let new_packed = (multiplied << 32) | (index as u64);
+                heap.push(!new_packed);
+                remaining -= 1;
             }
 
-            let index = (packed as u32) as usize;
-            heap.pop();
-
-            let multiplied = value * multiplier_u64;
-            let new_packed = (multiplied << 32) | (index as u64);
-            heap.push(!new_packed);
-            remaining -= 1;
-        }
-
-        if remaining == 0 {
             for key in heap.into_vec() {
                 let packed = !key;
                 let value = (packed >> 32) as i32;
@@ -72,31 +80,39 @@ impl Solution {
             return nums;
         }
 
-        let n_i64 = n as i64;
-        let full_cycles = (remaining / n_i64) as u64;
-        let prefix = (remaining % n_i64) as usize;
+        let remaining = k_u64 - total_need;
+        if remaining == 0 {
+            for (index, value) in after_phase_one.into_iter().enumerate() {
+                nums[index] = value as i32;
+            }
+            return nums;
+        }
+
+        let full_cycles = remaining / n as u64;
+        let prefix = (remaining % n as u64) as usize;
 
         let base = mod_pow(multiplier_u64, full_cycles);
         let extra = (base * multiplier_u64) % MOD;
 
-        let mut keys = heap.into_vec();
+        let mut keys: Vec<u64> = Vec::with_capacity(n);
+        for (index, value) in after_phase_one.iter().enumerate() {
+            let packed = (value << 32) | (index as u64);
+            keys.push(packed);
+        }
         if prefix > 0 {
-            keys.select_nth_unstable_by(prefix, |a, b| b.cmp(a));
-            for &key in &keys[..prefix] {
-                let packed = !key;
+            keys.select_nth_unstable_by(prefix, |a, b| a.cmp(b));
+            for &packed in &keys[..prefix] {
                 let value = packed >> 32;
                 let index = (packed as u32) as usize;
                 nums[index] = ((value * extra) % MOD) as i32;
             }
-            for &key in &keys[prefix..] {
-                let packed = !key;
+            for &packed in &keys[prefix..] {
                 let value = packed >> 32;
                 let index = (packed as u32) as usize;
                 nums[index] = ((value * base) % MOD) as i32;
             }
         } else {
-            for key in keys {
-                let packed = !key;
+            for packed in keys {
                 let value = packed >> 32;
                 let index = (packed as u32) as usize;
                 nums[index] = ((value * base) % MOD) as i32;
