@@ -1,40 +1,38 @@
-use std::collections::HashMap;
-
 impl Solution {
-    /// Count prefix-suffix pairs by enumerating KMP borders.
+    /// Count prefix-suffix pairs using KMP borders and a trie.
     ///
     /// # Intuition
-    /// For any word `w`, a previous word `p` is both a prefix and suffix of `w`
-    /// exactly when `p` equals one of `w`'s border strings (including `w` itself).
+    /// A previous word matches iff it is a border (prefix = suffix) of the
+    /// current word. Borders are obtained from the KMP prefix function.
     ///
     /// # Approach
-    /// Process words in order while tracking how many times each previous word
-    /// appears. For each word:
-    /// - Build the KMP prefix function to obtain all border lengths in O(n).
-    /// - Traverse borders starting from full length, then follow `pi[len-1]`.
-    /// - Sum frequencies for each border via `&word[..len]`.
-    /// - Insert the current word into the frequency map.
+    /// Maintain a trie of all prior words with an end counter at each node.
+    /// For each word:
+    /// - Build the KMP prefix function and mark all border lengths.
+    /// - Walk the trie along the word's prefix once; at each position, if the
+    ///   prefix length is a border, add the stored end count.
+    /// - Insert the word into the trie.
     ///
     /// # Complexity
     /// - Time: O(total_length)
     /// - Space: O(total_length)
     pub fn count_prefix_suffix_pairs(words: Vec<String>) -> i64 {
-        let mut freq: HashMap<String, i64> = HashMap::with_capacity(words.len() * 2);
+        let mut trie = Trie::new();
         let mut answer = 0i64;
 
         for word in words {
-            answer += Self::count_borders(&word, &freq);
-            *freq.entry(word).or_insert(0) += 1;
+            let prefix = Self::build_prefix(word.as_bytes());
+            let borders = Self::build_borders(&prefix);
+            answer += trie.count_borders(&word, &borders);
+            trie.insert(&word);
         }
 
         answer
     }
 
-    fn count_borders(word: &str, freq: &HashMap<String, i64>) -> i64 {
-        let bytes = word.as_bytes();
+    fn build_prefix(bytes: &[u8]) -> Vec<usize> {
         let n = bytes.len();
         let mut prefix = vec![0usize; n];
-
         for i in 1..n {
             let mut j = prefix[i - 1];
             while j > 0 && bytes[i] != bytes[j] {
@@ -45,20 +43,66 @@ impl Solution {
             }
             prefix[i] = j;
         }
+        prefix
+    }
 
-        let mut total = 0i64;
+    fn build_borders(prefix: &[usize]) -> Vec<bool> {
+        let n = prefix.len();
+        let mut borders = vec![false; n + 1];
         let mut len = n;
         while len > 0 {
-            if let Some(count) = freq.get(&word[..len]) {
-                total += *count;
-            }
-            len = if len == n {
-                prefix[n - 1]
-            } else {
-                prefix[len - 1]
-            };
+            borders[len] = true;
+            len = prefix[len - 1];
         }
+        borders
+    }
+}
 
+struct Trie {
+    next: Vec<[i32; 26]>,
+    end_count: Vec<i64>,
+}
+
+impl Trie {
+    fn new() -> Self {
+        Self {
+            next: vec![[-1; 26]],
+            end_count: vec![0],
+        }
+    }
+
+    fn insert(&mut self, word: &str) {
+        let mut node = 0usize;
+        for &byte in word.as_bytes() {
+            let idx = (byte - b'a') as usize;
+            let child = self.next[node][idx];
+            if child == -1 {
+                let new_index = self.next.len() as i32;
+                self.next[node][idx] = new_index;
+                self.next.push([-1; 26]);
+                self.end_count.push(0);
+                node = new_index as usize;
+            } else {
+                node = child as usize;
+            }
+        }
+        self.end_count[node] += 1;
+    }
+
+    fn count_borders(&self, word: &str, borders: &[bool]) -> i64 {
+        let mut node = 0usize;
+        let mut total = 0i64;
+        for (i, &byte) in word.as_bytes().iter().enumerate() {
+            let idx = (byte - b'a') as usize;
+            let child = self.next[node][idx];
+            if child == -1 {
+                break;
+            }
+            node = child as usize;
+            if borders[i + 1] {
+                total += self.end_count[node];
+            }
+        }
         total
     }
 }
