@@ -7,7 +7,7 @@ impl Solution {
     /// after the most recent greater element.
     ///
     /// # Approach
-    /// Traverse left to right while keeping parallel decreasing stacks of values and counts.
+    /// Traverse left to right while keeping a decreasing stack of `(value, count)`.
     /// - Pop smaller values because a larger right boundary invalidates them.
     /// - If the top differs, push `(value, 0)` so the next increment counts the single element.
     /// - Increment the top count and add it to the answer.
@@ -17,25 +17,25 @@ impl Solution {
     /// - Space: O(n)
     pub fn number_of_subarrays(nums: Vec<i32>) -> i64 {
         let mut result = 0i64;
-        let mut values: Vec<i32> = Vec::with_capacity(nums.len());
-        let mut counts: Vec<i32> = Vec::with_capacity(nums.len());
+        let mut stack: Vec<(i32, i64)> = Vec::with_capacity(nums.len());
+        let mut len = 0usize;
 
         for value in nums {
-            let mut len = values.len();
-            while len > 0 && values[len - 1] < value {
-                values.pop();
-                counts.pop();
+            while len > 0 && stack[len - 1].0 < value {
                 len -= 1;
             }
 
-            if len == 0 || values[len - 1] > value {
-                values.push(value);
-                counts.push(0);
+            if len == 0 || stack[len - 1].0 > value {
+                if len == stack.len() {
+                    stack.push((value, 0));
+                } else {
+                    stack[len] = (value, 0);
+                }
                 len += 1;
             }
 
-            counts[len - 1] += 1;
-            result += i64::from(counts[len - 1]);
+            stack[len - 1].1 += 1;
+            result += stack[len - 1].1;
         }
 
         result
