@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 impl Solution {
     /// Groups indices by square-free kernel and picks the largest sum.
     ///
@@ -13,7 +11,7 @@ impl Solution {
     /// - Sum values by kernel and return the maximum sum.
     ///
     /// # Complexity
-    /// - Time: O(n log n)
+    /// - Time: O(n log log n)
     /// - Space: O(n)
     pub fn maximum_sum(nums: Vec<i32>) -> i64 {
         let n = nums.len();
@@ -22,15 +20,21 @@ impl Solution {
         }
 
         let smallest_prime_factor = Self::smallest_prime_factors(n);
-        let mut sums: HashMap<usize, i64> = HashMap::with_capacity(n);
+        let kernels = Self::square_free_kernels(&smallest_prime_factor);
+        let mut sums = vec![0_i64; n + 1];
+        let mut best = 0_i64;
 
         for (idx, &value) in nums.iter().enumerate() {
             let index = idx + 1;
-            let kernel = Self::square_free_kernel(index, &smallest_prime_factor);
-            *sums.entry(kernel).or_insert(0) += value as i64;
+            let kernel = kernels[index];
+            let sum = &mut sums[kernel];
+            *sum += value as i64;
+            if *sum > best {
+                best = *sum;
+            }
         }
 
-        sums.values().copied().max().unwrap_or(0)
+        best
     }
 
     fn smallest_prime_factors(limit: usize) -> Vec<usize> {
@@ -56,20 +60,21 @@ impl Solution {
         spf
     }
 
-    fn square_free_kernel(mut value: usize, spf: &[usize]) -> usize {
-        let mut kernel = 1_usize;
-        while value > 1 {
+    fn square_free_kernels(spf: &[usize]) -> Vec<usize> {
+        let limit = spf.len() - 1;
+        let mut kernels = vec![1_usize; limit + 1];
+
+        for value in 2..=limit {
             let prime = spf[value];
-            let mut is_odd = false;
-            while value % prime == 0 {
-                value /= prime;
-                is_odd = !is_odd;
-            }
-            if is_odd {
-                kernel *= prime;
+            let reduced = value / prime;
+            if reduced % prime == 0 {
+                kernels[value] = kernels[reduced / prime];
+            } else {
+                kernels[value] = kernels[reduced] * prime;
             }
         }
-        kernel
+
+        kernels
     }
 }
 
