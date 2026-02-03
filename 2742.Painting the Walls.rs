@@ -1,43 +1,41 @@
 impl Solution {
-    /// Minimum cost to paint all walls using paid and free painters.
+    /// Minimum cost using a 1D knapsack over covered walls.
     ///
     /// # Intuition
-    /// The paid painter paints wall `i` in `time[i]` units at `cost[i]`, during
-    /// which the free painter can paint `time[i]` walls. This is a knapsack-like
-    /// problem: pick a subset of walls for the paid painter such that total time
-    /// covers all remaining walls, minimizing total cost.
+    /// Paying for wall `i` occupies the paid painter for `time[i]` units, which
+    /// lets the free painter paint `time[i]` other walls. So paying for wall `i`
+    /// effectively covers `time[i] + 1` walls. We want the cheapest set of paid
+    /// walls whose total coverage reaches `n`.
     ///
     /// # Approach
-    /// 1. Use top-down DP with memoization: `dfs(i, j)` where `i` is current wall
-    ///    index and `j` tracks remaining capacity offset.
-    /// 2. If remaining walls can all be painted for free, return 0.
-    /// 3. If out of walls, return infinity.
-    /// 4. Choose to pay for wall `i` (gaining `time[i]` free capacity) or skip it.
+    /// Use a 0/1 knapsack DP where `dp[k]` is the minimum cost to cover `k` walls.
+    /// For each wall, decide to pay for it and update coverage in reverse to avoid
+    /// reusing the same wall. Clamp coverage at `n`.
     ///
     /// # Complexity
     /// - Time: O(n²)
-    /// - Space: O(n²)
+    /// - Space: O(n)
     pub fn paint_walls(cost: Vec<i32>, time: Vec<i32>) -> i32 {
         let n = cost.len();
-        let mut memo = vec![vec![-1i32; n << 1 | 1]; n];
-        Self::dfs(&mut memo, 0, n as i32, n as i32, &time, &cost)
-    }
+        let inf = i64::from(i32::MAX);
+        let mut dp = vec![inf; n + 1];
+        dp[0] = 0;
 
-    fn dfs(memo: &mut [Vec<i32>], i: i32, j: i32, n: i32, time: &[i32], cost: &[i32]) -> i32 {
-        if n - i <= j - n {
-            return 0;
+        for (&wall_cost, &wall_time) in cost.iter().zip(time.iter()) {
+            let coverage = wall_time as usize + 1;
+            for covered in (0..=n).rev() {
+                if dp[covered] == inf {
+                    continue;
+                }
+                let next = (covered + coverage).min(n);
+                let candidate = dp[covered] + i64::from(wall_cost);
+                if candidate < dp[next] {
+                    dp[next] = candidate;
+                }
+            }
         }
-        if i >= n {
-            return 1 << 30;
-        }
-        let (ui, uj) = (i as usize, j as usize);
-        if memo[ui][uj] != -1 {
-            return memo[ui][uj];
-        }
-        let pay = Self::dfs(memo, i + 1, j + time[ui], n, time, cost) + cost[ui];
-        let skip = Self::dfs(memo, i + 1, j - 1, n, time, cost);
-        memo[ui][uj] = pay.min(skip);
-        memo[ui][uj]
+
+        dp[n] as i32
     }
 }
 
@@ -53,5 +51,20 @@ mod tests {
     #[test]
     fn expensive_but_time_efficient() {
         assert_eq!(Solution::paint_walls(vec![2, 3, 4, 2], vec![1, 1, 1, 1]), 4);
+    }
+
+    #[test]
+    fn single_wall_requires_paid_painter() {
+        assert_eq!(Solution::paint_walls(vec![7], vec![3]), 7);
+    }
+
+    #[test]
+    fn choose_cheapest_paid_walls() {
+        assert_eq!(Solution::paint_walls(vec![10, 1, 1], vec![3, 1, 1]), 2);
+    }
+
+    #[test]
+    fn one_paid_wall_covers_all() {
+        assert_eq!(Solution::paint_walls(vec![8, 5, 2], vec![2, 2, 3]), 2);
     }
 }
