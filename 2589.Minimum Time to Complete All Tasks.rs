@@ -22,7 +22,7 @@ impl Solution {
         for task in &tasks {
             let start = task[0] as usize;
             let end = task[1] as usize;
-            let existing: i32 = active[start..=end].iter().filter(|&&v| v).count() as i32;
+            let existing: i32 = active[start..=end].iter().filter(|v| **v).count() as i32;
             let mut remaining = task[2] - existing;
             let mut i = end;
 
