@@ -6,36 +6,37 @@ impl Solution {
     /// subsequence must lie entirely in the elements that share at least one common set bit.
     ///
     /// # Approach
-    /// For each bit position (0..=30), filter elements that have the bit set and compute the
-    /// length of the strictly increasing subsequence via the patience (tails) method. The best
-    /// answer across all bits is the result. If no bit is present in any element, the maximum
-    /// remains zero.
+    /// Single pass: maintain 30 LIS tails (one per bit; 10^9 < 2^30). For each value, update
+    /// only tails for bits set. Fast path: if value > last tail, push without binary search;
+    /// else patience-sort replace. Best length over all bits wins.
     ///
     /// # Complexity
-    /// - Time: O(31 * n log n)
+    /// - Time: O(n * B * log L) with B = bits set per value; append case O(1) per bit.
     /// - Space: O(n)
     pub fn longest_subsequence(nums: Vec<i32>) -> i32 {
-        const MAX_BITS: usize = 31;
+        const MAX_BITS: usize = 30; // 10^9 < 2^30
+        let mut tails: [Vec<i32>; MAX_BITS] = std::array::from_fn(|_| Vec::new());
         let mut best = 0usize;
 
-        for bit in 0..MAX_BITS {
-            let mut tails: Vec<i32> = Vec::new();
-
-            for &value in &nums {
-                if ((value as u32) >> bit) & 1 == 0 {
+        for &value in &nums {
+            let v = value as u32;
+            for bit in 0..MAX_BITS {
+                if (v >> bit) & 1 == 0 {
                     continue;
                 }
-                let idx = tails.partition_point(|v| *v < value);
-                if idx == tails.len() {
-                    tails.push(value);
+                let t = &mut tails[bit];
+                if t.last().map_or(true, |&last| last < value) {
+                    t.push(value);
                 } else {
-                    tails[idx] = value;
+                    let pos = t.partition_point(|x| *x < value);
+                    t[pos] = value;
                 }
             }
-
-            best = best.max(tails.len());
         }
 
+        for t in &tails {
+            best = best.max(t.len());
+        }
         best as i32
     }
 }
