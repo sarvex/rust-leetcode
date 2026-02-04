@@ -6,34 +6,23 @@ impl Solution {
     /// sum of ceil(nums[i] / k). We want the smallest k with that sum ≤ k².
     ///
     /// # Approach
-    /// For each k, total ops = Σ ceil(nums[i]/k). Binary search on k in [1, high]:
-    /// if ops(k) ≤ k², k is valid and we try smaller k; otherwise we need larger k.
-    /// Upper bound: when k ≥ max(nums), each element needs 1 op, so ops = n and
-    /// we need k ≥ ceil(√n); thus a safe high is max(nums) or √n, we use 10^5+1.
+    /// Binary search on k. For each candidate, compute total ops in O(n).
+    /// Upper bound analysis: worst case is n=10^5 elements all equal to 10^5,
+    /// requiring k ≈ 2170 (where k³ ≈ 10^10). Using 3001 is safe.
     ///
     /// # Complexity
-    /// - Time: O(n log M) with M = max(nums), from binary search and summing ops per k.
+    /// - Time: O(n log K) where K ≈ 3000 is the search range.
     /// - Space: O(1)
     pub fn minimum_k(nums: Vec<i32>) -> i32 {
-        let max_val = *nums.iter().max().unwrap_or(&1);
-        let n = nums.len();
-        let sqrt_bound = (n as f64).sqrt().ceil() as i32 + 1;
-        let high = max_val.max(sqrt_bound).max(1) + 1;
-
-        let ops = |k: i32| {
-            let k = k as i64;
-            nums.iter()
-                .map(|&x| ((x as i64) + k - 1) / k)
-                .sum::<i64>()
-        };
-
-        let (mut lo, mut hi) = (1i32, high);
+        let (mut lo, mut hi) = (1, 3001);
         while lo < hi {
-            let mid = lo + (hi - lo) / 2;
-            if ops(mid) <= (mid as i64) * (mid as i64) {
-                hi = mid;
+            let k = lo + (hi - lo) / 2;
+            let k2 = (k as i64) * (k as i64);
+            let ops: i64 = nums.iter().map(|&x| ((x + k - 1) / k) as i64).sum();
+            if ops <= k2 {
+                hi = k;
             } else {
-                lo = mid + 1;
+                lo = k + 1;
             }
         }
         lo
