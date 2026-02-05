@@ -1,52 +1,68 @@
-use std::collections::HashMap;
-
 const MOD: i32 = 1_000_000_007;
 
 impl Solution {
     /// Count valid partitions where block XORs alternate target1, target2, starting with target1.
     ///
     /// # Intuition
-    /// A partition is valid iff block XORs are target1, target2, target1, ... Prefix XOR gives
-    /// xor(nums[j..i]) = prefix_xor[i] ^ prefix_xor[j]. So we can aggregate by prefix XOR and
-    /// use DP with two states (last block target1 vs target2) and hash maps for O(1) transition.
+    /// Valid cut positions have prefix XOR in a 4-cycle: 0 → target1 → (target1^target2) →
+    /// target2 → 0. So we only need four DP states instead of indexing by all possible XOR values.
     ///
     /// # Approach
-    /// 1. `dp[i][0]` = ways to partition nums[0..i] ending with XOR target1; `dp[i][1]` = ending
-    ///    with target2. To extend with a block [j..i] with XOR target1 we need previous state
-    ///    target2, so dp[i][0] = sum of dp[j][1] over j with prefix_xor[j] = prefix_xor[i]^target1.
-    /// 2. Maintain `cum0`, `cum1`: for each prefix XOR value v, cumulative sums of dp[j][0] and
-    ///    dp[j][1]. Then dp[i][0] = cum1[prefix_xor[i]^target1], dp[i][1] = cum0[prefix_xor[i]^target2].
-    /// 3. Base: empty prefix counts as one way to be "ready for target1", so cum1[0]=1 initially.
+    /// 1. States: cycle of prefix XORs at cuts: 0 → target1 → (target1^target2) → target2 → 0.
+    /// 2. ways_for_state[k] = number of ways to partition the current prefix with that state.
+    /// 3. When running_prefix_xor equals the next cycle value, we can cut and transition.
+    /// 4. Single pass with rolling prefix XOR; no extra allocation.
     ///
     /// # Complexity
     /// - Time: O(n)
-    /// - Space: O(n) for prefix XOR and maps
+    /// - Space: O(1)
     pub fn alternating_xor(nums: Vec<i32>, target1: i32, target2: i32) -> i32 {
-        let n = nums.len();
-        let mut prefix_xor = vec![0i32; n + 1];
-        for (i, &x) in nums.iter().enumerate() {
-            prefix_xor[i + 1] = prefix_xor[i] ^ x;
-        }
+        let length = nums.len();
+        let cycle_prefix_xors: [i32; 4] = [
+            0,
+            target1,
+            target1 ^ target2,
+            target2,
+        ];
 
-        let mut cum0: HashMap<i32, i32> = HashMap::new();
-        let mut cum1: HashMap<i32, i32> = HashMap::new();
-        *cum1.entry(0).or_insert(0) = 1;
-
-        let mut full_array_ways = 0i32;
-        for i in 1..=n {
-            let px = prefix_xor[i];
-            let ways_end_target1 = *cum1.get(&(px ^ target1)).unwrap_or(&0) % MOD;
-            let ways_end_target2 = *cum0.get(&(px ^ target2)).unwrap_or(&0) % MOD;
-
-            *cum0.entry(px).or_insert(0) =
-                (*cum0.get(&px).unwrap_or(&0) + ways_end_target1) % MOD;
-            *cum1.entry(px).or_insert(0) =
-                (*cum1.get(&px).unwrap_or(&0) + ways_end_target2) % MOD;
-            if i == n {
-                full_array_ways = (ways_end_target1 + ways_end_target2) % MOD;
+        let mut ways_for_state = [0i32; 4];
+        ways_for_state[0] = 1;
+        let mut running_prefix_xor = 0i32;
+        for index in 0..length - 1 {
+            running_prefix_xor ^= nums[index];
+            let mut transition_ways = [0i32; 4];
+            if running_prefix_xor == cycle_prefix_xors[1] {
+                transition_ways[1] = ways_for_state[0];
+            }
+            if running_prefix_xor == cycle_prefix_xors[2] {
+                transition_ways[2] = ways_for_state[1];
+            }
+            if running_prefix_xor == cycle_prefix_xors[3] {
+                transition_ways[3] = ways_for_state[2];
+            }
+            if running_prefix_xor == cycle_prefix_xors[0] {
+                transition_ways[0] = ways_for_state[3];
+            }
+            for state_index in 0..4 {
+                ways_for_state[state_index] =
+                    (ways_for_state[state_index] + transition_ways[state_index]) % MOD;
             }
         }
-        full_array_ways
+        running_prefix_xor ^= nums[length - 1];
+        let mut result = 0i32;
+        if running_prefix_xor == cycle_prefix_xors[1] {
+            result = (result + ways_for_state[0]) % MOD;
+        }
+        if running_prefix_xor == cycle_prefix_xors[2] {
+            result = (result + ways_for_state[1]) % MOD;
+        }
+        if running_prefix_xor == cycle_prefix_xors[3] {
+            result = (result + ways_for_state[2]) % MOD;
+        }
+        if running_prefix_xor == cycle_prefix_xors[0] {
+            result = (result + ways_for_state[3]) % MOD;
+        }
+        result
     }
 }
 
