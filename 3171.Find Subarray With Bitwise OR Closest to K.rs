@@ -71,6 +71,9 @@ mod tests {
 
     #[test]
     fn test_large_k() {
-        assert_eq!(Solution::minimum_difference(vec![1, 2, 3], 1_000_000_000), 999_999_997);
+        assert_eq!(
+            Solution::minimum_difference(vec![1, 2, 3], 1_000_000_000),
+            999_999_997
+        );
     }
 }

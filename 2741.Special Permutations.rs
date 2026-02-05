@@ -32,13 +32,12 @@ impl Solution {
                     f[mask][j] = 1;
                     continue;
                 }
-                for k in 0..n {
-                    if (prev_mask >> k) & 1 == 1
-                        && (nums[j] % nums[k] == 0 || nums[k] % nums[j] == 0)
-                    {
-                        f[mask][j] = (f[mask][j] + f[prev_mask][k]) % MOD;
-                    }
-                }
+                f[mask][j] = (0..n)
+                    .filter(|&k| {
+                        (prev_mask >> k) & 1 == 1
+                            && (nums[j] % nums[k] == 0 || nums[k] % nums[j] == 0)
+                    })
+                    .fold(f[mask][j], |acc, k| (acc + f[prev_mask][k]) % MOD);
             }
         }
 

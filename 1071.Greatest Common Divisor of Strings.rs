@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds the greatest common divisor of two strings.
     ///

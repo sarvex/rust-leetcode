@@ -1,6 +1,5 @@
 use std::collections::{HashMap, HashSet};
 
-
 impl Solution {
     /// Finds the maximum area rectangle formed by four points with no interior points.
     ///
@@ -32,15 +31,16 @@ impl Solution {
             .collect();
 
         // Group y-coordinates by x-coordinate
-        let mut x_to_ys: HashMap<i32, Vec<i32>> = HashMap::with_capacity(n);
-        for (&x, &y) in x_coord.iter().zip(y_coord.iter()) {
-            x_to_ys.entry(x).or_default().push(y);
-        }
+        let mut x_to_ys: HashMap<i32, Vec<i32>> = x_coord.iter().zip(y_coord.iter()).fold(
+            HashMap::with_capacity(n),
+            |mut acc, (&x, &y)| {
+                acc.entry(x).or_default().push(y);
+                acc
+            },
+        );
 
         // Sort y-values for each x
-        for ys in x_to_ys.values_mut() {
-            ys.sort_unstable();
-        }
+        x_to_ys.values_mut().for_each(|ys| ys.sort_unstable());
 
         // Map (y1, y2) pairs to list of x-values where both y1 and y2 exist
         let mut y_pair_to_xs: HashMap<(i32, i32), Vec<i32>> = HashMap::with_capacity(n * n / 4);
@@ -54,9 +54,7 @@ impl Solution {
         }
 
         // Sort x-values for each y-pair
-        for xs in y_pair_to_xs.values_mut() {
-            xs.sort_unstable();
-        }
+        y_pair_to_xs.values_mut().for_each(|xs| xs.sort_unstable());
 
         let mut max_area: i64 = -1;
 
@@ -175,7 +173,9 @@ mod tests {
                 vec![
                     32, 100, 32, 100, 85, 12, 59, 84, 3, 68, 31, 75, 87, 83, 30, 22, 85, 71, 92, 69
                 ],
-                vec![0, 11, 11, 0, 42, 83, 80, 0, 18, 43, 18, 25, 12, 62, 94, 27, 76, 19, 14, 33]
+                vec![
+                    0, 11, 11, 0, 42, 83, 80, 0, 18, 43, 18, 25, 12, 62, 94, 27, 76, 19, 14, 33
+                ]
             ),
             -1
         );

@@ -46,8 +46,8 @@ impl Solution {
 
             // Forward pass: accumulate increasing transitions (must come from decreasing)
             (1..num_values).for_each(|value| {
-                let mut sum = current_counts[value - 1][INCREASING]
-                    + previous_counts[value - 1][DECREASING];
+                let mut sum =
+                    current_counts[value - 1][INCREASING] + previous_counts[value - 1][DECREASING];
                 if sum >= MODULO {
                     sum -= MODULO;
                 }
@@ -56,8 +56,8 @@ impl Solution {
 
             // Backward pass: accumulate decreasing transitions (must come from increasing)
             (0..num_values - 1).rev().for_each(|value| {
-                let mut sum = current_counts[value + 1][DECREASING]
-                    + previous_counts[value + 1][INCREASING];
+                let mut sum =
+                    current_counts[value + 1][DECREASING] + previous_counts[value + 1][INCREASING];
                 if sum >= MODULO {
                     sum -= MODULO;
                 }

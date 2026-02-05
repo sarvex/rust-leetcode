@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds minimum eating speed to finish all bananas in h hours via binary search.
     ///

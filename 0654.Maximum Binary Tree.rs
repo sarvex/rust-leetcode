@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Constructs a maximum binary tree from the array recursively.
     ///
@@ -100,7 +99,20 @@ mod tests {
         let nums = vec![3, 2, 1, 6, 0, 5];
         let result = Solution::construct_maximum_binary_tree(nums);
         let output = tree_to_vec(&result);
-        assert_eq!(output, vec![Some(6), Some(3), Some(5), None, Some(2), Some(0), None, None, Some(1)]);
+        assert_eq!(
+            output,
+            vec![
+                Some(6),
+                Some(3),
+                Some(5),
+                None,
+                Some(2),
+                Some(0),
+                None,
+                None,
+                Some(1)
+            ]
+        );
     }
 
     #[test]
@@ -133,7 +145,19 @@ mod tests {
         let nums = vec![1, 2, 3, 4, 5];
         let result = Solution::construct_maximum_binary_tree(nums);
         let output = tree_to_vec(&result);
-        assert_eq!(output, vec![Some(5), Some(4), None, Some(3), None, Some(2), None, Some(1)]);
+        assert_eq!(
+            output,
+            vec![
+                Some(5),
+                Some(4),
+                None,
+                Some(3),
+                None,
+                Some(2),
+                None,
+                Some(1)
+            ]
+        );
     }
 
     #[test]
@@ -142,7 +166,20 @@ mod tests {
         let nums = vec![5, 4, 3, 2, 1];
         let result = Solution::construct_maximum_binary_tree(nums);
         let output = tree_to_vec(&result);
-        assert_eq!(output, vec![Some(5), None, Some(4), None, Some(3), None, Some(2), None, Some(1)]);
+        assert_eq!(
+            output,
+            vec![
+                Some(5),
+                None,
+                Some(4),
+                None,
+                Some(3),
+                None,
+                Some(2),
+                None,
+                Some(1)
+            ]
+        );
     }
 
     #[test]
@@ -150,7 +187,18 @@ mod tests {
         let nums = vec![1, 2];
         let result = Solution::construct_maximum_binary_tree(nums);
         assert_eq!(result.as_ref().unwrap().borrow().val, 2);
-        assert_eq!(result.as_ref().unwrap().borrow().left.as_ref().unwrap().borrow().val, 1);
+        assert_eq!(
+            result
+                .as_ref()
+                .unwrap()
+                .borrow()
+                .left
+                .as_ref()
+                .unwrap()
+                .borrow()
+                .val,
+            1
+        );
         assert!(result.as_ref().unwrap().borrow().right.is_none());
     }
 

@@ -15,17 +15,17 @@ impl Solution {
     pub fn corp_flight_bookings(bookings: Vec<Vec<i32>>, n: i32) -> Vec<i32> {
         let n = n as usize;
         let mut diff = vec![0i32; n + 1];
-        for b in &bookings {
+        bookings.iter().for_each(|b| {
             diff[(b[0] - 1) as usize] += b[2];
             diff[b[1] as usize] -= b[2];
-        }
-        let mut result = Vec::with_capacity(n);
-        let mut acc = 0;
-        for i in 0..n {
-            acc += diff[i];
-            result.push(acc);
-        }
-        result
+        });
+        diff.into_iter()
+            .take(n)
+            .scan(0, |acc, d| {
+                *acc += d;
+                Some(*acc)
+            })
+            .collect()
     }
 }
 

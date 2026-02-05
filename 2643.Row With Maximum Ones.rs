@@ -17,11 +17,7 @@ impl Solution {
             .enumerate()
             .map(|(i, row)| (i as i32, row.iter().filter(|&&v| v == 1).count() as i32))
             .fold(vec![0, 0], |best, (idx, cnt)| {
-                if cnt > best[1] {
-                    vec![idx, cnt]
-                } else {
-                    best
-                }
+                if cnt > best[1] { vec![idx, cnt] } else { best }
             })
     }
 }

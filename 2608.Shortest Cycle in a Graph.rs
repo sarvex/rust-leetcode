@@ -21,12 +21,11 @@ impl Solution {
     pub fn find_shortest_cycle(n: i32, edges: Vec<Vec<i32>>) -> i32 {
         let node_count = n as usize;
         let mut adjacency = vec![Vec::<usize>::new(); node_count];
-        for edge in edges {
-            let u = edge[0] as usize;
-            let v = edge[1] as usize;
+        edges.iter().for_each(|edge| {
+            let (u, v) = (edge[0] as usize, edge[1] as usize);
             adjacency[u].push(v);
             adjacency[v].push(u);
-        }
+        });
 
         let mut best = i32::MAX;
         let mut dist = vec![-1; node_count];
@@ -58,11 +57,7 @@ impl Solution {
             }
         }
 
-        if best == i32::MAX {
-            -1
-        } else {
-            best
-        }
+        if best == i32::MAX { -1 } else { best }
     }
 }
 

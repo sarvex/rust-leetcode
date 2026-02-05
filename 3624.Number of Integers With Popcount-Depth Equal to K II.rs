@@ -95,16 +95,16 @@ impl Solution {
             }
         });
 
-        let mut result = Vec::with_capacity(queries.len());
-        for query in &queries {
-            match query[0] {
+        queries
+            .iter()
+            .filter_map(|query| match query[0] {
                 1 => {
                     let (left, right, target_depth) =
                         (query[1] as usize, query[2] as usize, query[3] as usize);
-                    result.push(match target_depth < depth_trees.len() {
+                    Some(match target_depth < depth_trees.len() {
                         true => depth_trees[target_depth].range_sum(left, right) as i32,
                         false => 0,
-                    });
+                    })
                 }
                 _ => {
                     let (index, new_value) = (query[1] as usize, query[2]);
@@ -120,10 +120,10 @@ impl Solution {
                             depth_trees[new_depth].update(index, 1);
                         }
                     }
+                    None
                 }
-            }
-        }
-        result
+            })
+            .collect()
     }
 }
 

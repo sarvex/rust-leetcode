@@ -68,7 +68,11 @@ impl Solution {
         let mut total = 0i64;
         for idx in 0..diffs.len() {
             let current = counts[idx];
-            let next = if idx + 1 < counts.len() { counts[idx + 1] } else { 0 };
+            let next = if idx + 1 < counts.len() {
+                counts[idx + 1]
+            } else {
+                0
+            };
             let mut diff = current - next;
             diff %= MOD;
             if diff < 0 {

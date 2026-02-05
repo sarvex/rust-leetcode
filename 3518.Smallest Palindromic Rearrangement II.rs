@@ -19,25 +19,25 @@ impl Solution {
     pub fn smallest_palindrome(s: String, k: i32) -> String {
         let n = s.len();
         let mut freq = [0i64; 26];
-
-        for b in s.bytes() {
-            freq[(b - b'a') as usize] += 1;
-        }
+        s.bytes().for_each(|b| freq[(b - b'a') as usize] += 1);
 
         let mut mid_char: Option<u8> = None;
         let mut half_freq = [0i64; 26];
-        let mut half_len: i64 = 0;
 
-        for i in 0..26 {
-            if freq[i] % 2 == 1 {
-                if mid_char.is_some() {
-                    return String::new();
-                }
-                mid_char = Some(b'a' + i as u8);
-            }
-            half_freq[i] = freq[i] / 2;
-            half_len += half_freq[i];
+        // Check for valid palindrome structure and compute half frequencies
+        let odd_count = freq.iter().filter(|&&f| f % 2 == 1).count();
+        if odd_count > 1 {
+            return String::new();
         }
+
+        mid_char = freq
+            .iter()
+            .enumerate()
+            .find(|(_, &f)| f % 2 == 1)
+            .map(|(i, _)| b'a' + i as u8);
+
+        (0..26).for_each(|i| half_freq[i] = freq[i] / 2);
+        let half_len: i64 = half_freq.iter().sum();
 
         if n % 2 == 0 && mid_char.is_some() {
             return String::new();
@@ -180,18 +180,12 @@ mod tests {
 
     #[test]
     fn test_example_1() {
-        assert_eq!(
-            Solution::smallest_palindrome("abba".to_string(), 2),
-            "baab"
-        );
+        assert_eq!(Solution::smallest_palindrome("abba".to_string(), 2), "baab");
     }
 
     #[test]
     fn test_example_2() {
-        assert_eq!(
-            Solution::smallest_palindrome("aa".to_string(), 2),
-            ""
-        );
+        assert_eq!(Solution::smallest_palindrome("aa".to_string(), 2), "");
     }
 
     #[test]
@@ -204,37 +198,22 @@ mod tests {
 
     #[test]
     fn test_single_permutation() {
-        assert_eq!(
-            Solution::smallest_palindrome("aa".to_string(), 1),
-            "aa"
-        );
+        assert_eq!(Solution::smallest_palindrome("aa".to_string(), 1), "aa");
     }
 
     #[test]
     fn test_first_permutation() {
-        assert_eq!(
-            Solution::smallest_palindrome("abba".to_string(), 1),
-            "abba"
-        );
+        assert_eq!(Solution::smallest_palindrome("abba".to_string(), 1), "abba");
     }
 
     #[test]
     fn test_single_character() {
-        assert_eq!(
-            Solution::smallest_palindrome("o".to_string(), 1),
-            "o"
-        );
+        assert_eq!(Solution::smallest_palindrome("o".to_string(), 1), "o");
     }
 
     #[test]
     fn test_multiple_same_chars() {
-        assert_eq!(
-            Solution::smallest_palindrome("aabb".to_string(), 1),
-            "abba"
-        );
-        assert_eq!(
-            Solution::smallest_palindrome("aabb".to_string(), 2),
-            "baab"
-        );
+        assert_eq!(Solution::smallest_palindrome("aabb".to_string(), 1), "abba");
+        assert_eq!(Solution::smallest_palindrome("aabb".to_string(), 2), "baab");
     }
 }

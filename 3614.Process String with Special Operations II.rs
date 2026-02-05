@@ -23,30 +23,30 @@ impl Solution {
 
         const CAP: i64 = 2_000_000_000_000_000;
 
-        let mut lens = vec![0i64; n + 1];
-
-        // Forward pass: compute length after each operation
-        for (i, &c) in s.iter().enumerate() {
-            let prev = lens[i];
-            lens[i + 1] = match c {
-                b'*' => (prev - 1).max(0),
-                b'#' => {
-                    if prev > CAP / 2 {
-                        CAP
-                    } else {
-                        prev * 2
+        // Forward pass: compute length after each operation using scan
+        let lens: Vec<i64> = std::iter::once(0i64)
+            .chain(s.iter().scan(0i64, |prev, &c| {
+                *prev = match c {
+                    b'*' => (*prev - 1).max(0),
+                    b'#' => {
+                        if *prev > CAP / 2 {
+                            CAP
+                        } else {
+                            *prev * 2
+                        }
                     }
-                }
-                b'%' => prev,
-                _ => {
-                    if prev >= CAP {
-                        CAP
-                    } else {
-                        prev + 1
+                    b'%' => *prev,
+                    _ => {
+                        if *prev >= CAP {
+                            CAP
+                        } else {
+                            *prev + 1
+                        }
                     }
-                }
-            };
-        }
+                };
+                Some(*prev)
+            }))
+            .collect();
 
         if k >= lens[n] {
             return '.';

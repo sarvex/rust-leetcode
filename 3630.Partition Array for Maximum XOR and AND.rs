@@ -35,14 +35,12 @@ impl Solution {
             };
         });
 
-        let mut best = 0i64;
-
-        for mask_b in 0..size {
+        (0..size).fold(0i64, |best, mask_b| {
             let mask_s = full ^ mask_b;
             let and_b = and_val[mask_b] as i64;
 
             if and_b + 2 * or_val[mask_s] as i64 - xor_val[mask_s] as i64 <= best {
-                continue;
+                return best;
             }
 
             let xor_s = xor_val[mask_s];
@@ -68,10 +66,8 @@ impl Solution {
                 v => acc.max(acc ^ v),
             });
 
-            best = best.max(and_b + xor_s as i64 + 2 * max_extra as i64);
-        }
-
-        best
+            best.max(and_b + xor_s as i64 + 2 * max_extra as i64)
+        })
     }
 
     #[inline]

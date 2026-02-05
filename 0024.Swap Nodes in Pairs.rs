@@ -49,13 +49,11 @@ mod tests {
     use super::*;
 
     fn to_list(vec: &[i32]) -> Option<Box<ListNode>> {
-        vec.iter()
-            .rev()
-            .fold(None, |next, &val| {
-                let mut node = Box::new(ListNode::new(val));
-                node.next = next;
-                Some(node)
-            })
+        vec.iter().rev().fold(None, |next, &val| {
+            let mut node = Box::new(ListNode::new(val));
+            node.next = next;
+            Some(node)
+        })
     }
 
     fn from_list(list: Option<Box<ListNode>>) -> Vec<i32> {

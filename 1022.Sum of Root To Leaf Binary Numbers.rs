@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Sums all root-to-leaf binary numbers via DFS.
     ///

@@ -14,7 +14,6 @@ impl ListNode {
 
 use std::collections::HashSet;
 
-
 impl Solution {
     /// Counts connected components in a linked list subset.
     ///
@@ -37,7 +36,7 @@ impl Solution {
         let mut count = 0;
         let mut in_component = false;
         let mut cur = &head;
-        
+
         while let Some(node) = cur {
             if set.contains(&node.val) {
                 if !in_component {

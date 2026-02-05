@@ -76,11 +76,7 @@ impl SegmentTree {
     }
 
     fn total_ones(&self) -> i64 {
-        if self.n == 0 {
-            0
-        } else {
-            self.ones[1] as i64
-        }
+        if self.n == 0 { 0 } else { self.ones[1] as i64 }
     }
 
     fn flip_range(&mut self, left: usize, right: usize) {

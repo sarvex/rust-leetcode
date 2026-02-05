@@ -41,21 +41,30 @@ impl Solution {
         let mut memo: HashMap<u32, i8> = HashMap::with_capacity(1 << 18);
 
         // Odd length palindromes
-        for center in 0..n {
-            let val = Self::dfs(&adj, &by_label, center, center, 1u16 << center, n, &mut memo, &mut result);
-            result = result.max(val);
-        }
+        result = (0..n)
+            .map(|center| {
+                Self::dfs(
+                    &adj,
+                    &by_label,
+                    center,
+                    center,
+                    1u16 << center,
+                    n,
+                    &mut memo,
+                    &mut result,
+                )
+            })
+            .fold(result, i32::max);
 
         // Even length palindromes
-        for u in 0..n {
-            for v in (u + 1)..n {
-                if adj[u] & (1 << v) != 0 && label[u] == label[v] {
-                    let mask = (1u16 << u) | (1u16 << v);
-                    let val = Self::dfs(&adj, &by_label, u, v, mask, n, &mut memo, &mut result);
-                    result = result.max(val);
-                }
-            }
-        }
+        result = (0..n)
+            .flat_map(|u| ((u + 1)..n).map(move |v| (u, v)))
+            .filter(|&(u, v)| adj[u] & (1 << v) != 0 && label[u] == label[v])
+            .map(|(u, v)| {
+                let mask = (1u16 << u) | (1u16 << v);
+                Self::dfs(&adj, &by_label, u, v, mask, n, &mut memo, &mut result)
+            })
+            .fold(result, i32::max);
 
         result
     }
@@ -78,7 +87,11 @@ impl Solution {
             return current;
         }
 
-        let (l, r) = if left <= right { (left, right) } else { (right, left) };
+        let (l, r) = if left <= right {
+            (left, right)
+        } else {
+            (right, left)
+        };
         let key = ((l as u32) << 18) | ((r as u32) << 14) | (mask as u32);
 
         if let Some(&v) = memo.get(&key) {
@@ -89,34 +102,36 @@ impl Solution {
         let left_avail = adj[left] & !mask;
         let right_avail = adj[right] & !mask;
 
-        for c in 0..26 {
-            let candidates = by_label[c];
-            let left_cands = left_avail & candidates;
-            let right_cands = right_avail & candidates;
-
-            if left_cands != 0 && right_cands != 0 {
-                let mut lc = left_cands;
-                while lc != 0 {
-                    let nl = lc.trailing_zeros() as usize;
-                    lc &= lc - 1;
-
-                    let mut rc = right_cands;
-                    while rc != 0 {
-                        let nr = rc.trailing_zeros() as usize;
-                        rc &= rc - 1;
-
-                        if nl != nr {
-                            let new_mask = mask | (1 << nl) | (1 << nr);
-                            let extended = Self::dfs(adj, by_label, nl, nr, new_mask, n, memo, best) as i8;
-                            if extended > max_len {
-                                max_len = extended;
-                                *best = (*best).max(extended as i32);
-                            }
-                        }
-                    }
+        let bit_positions = |mut bits: u16| {
+            std::iter::from_fn(move || {
+                if bits == 0 {
+                    None
+                } else {
+                    let pos = bits.trailing_zeros() as usize;
+                    bits &= bits - 1;
+                    Some(pos)
                 }
-            }
-        }
+            })
+        };
+
+        max_len = (0..26)
+            .map(|c| (by_label[c] & left_avail, by_label[c] & right_avail))
+            .filter(|&(left_cands, right_cands)| left_cands != 0 && right_cands != 0)
+            .flat_map(|(left_cands, right_cands)| {
+                bit_positions(left_cands)
+                    .flat_map(move |nl| bit_positions(right_cands).map(move |nr| (nl, nr)))
+            })
+            .filter(|&(nl, nr)| nl != nr)
+            .fold(max_len, |acc, (nl, nr)| {
+                let new_mask = mask | (1 << nl) | (1 << nr);
+                let extended = Self::dfs(adj, by_label, nl, nr, new_mask, n, memo, best) as i8;
+                if extended > acc {
+                    *best = (*best).max(extended as i32);
+                    extended
+                } else {
+                    acc
+                }
+            });
 
         memo.insert(key, max_len);
         max_len as i32
@@ -178,12 +193,12 @@ mod tests {
     #[test]
     fn test_complete_graph_same_labels() {
         // K14 with all 'a' except one 'z'
-        let mut edges = vec![];
-        for i in 0..14 {
-            for j in (i + 1)..14 {
-                edges.push(vec![i, j]);
-            }
-        }
-        assert_eq!(Solution::max_len(14, edges, "aaaaaaaaaaaaaz".to_string()), 13);
+        let edges: Vec<Vec<i32>> = (0..14)
+            .flat_map(|i| ((i + 1)..14).map(move |j| vec![i, j]))
+            .collect();
+        assert_eq!(
+            Solution::max_len(14, edges, "aaaaaaaaaaaaaz".to_string()),
+            13
+        );
     }
 }

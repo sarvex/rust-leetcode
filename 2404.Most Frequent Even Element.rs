@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-
 impl Solution {
     /// Finds the most frequent even element, returning the smallest on ties.
     ///

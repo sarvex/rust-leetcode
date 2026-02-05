@@ -18,35 +18,37 @@ impl Solution {
     pub fn max_stability(n: i32, edges: Vec<Vec<i32>>, k: i32) -> i32 {
         let n = n as usize;
 
-        let mut mandatory = Vec::new();
-        let mut optional = Vec::new();
-
-        for e in &edges {
-            let (u, v, s, must) = (e[0] as usize, e[1] as usize, e[2], e[3]);
-            if must == 1 {
-                mandatory.push((u, v, s));
-            } else {
-                optional.push((u, v, s));
-            }
-        }
+        let (mandatory, optional): (Vec<_>, Vec<_>) = edges
+            .iter()
+            .map(|e| (e[0] as usize, e[1] as usize, e[2], e[3]))
+            .partition(|&(_, _, _, must)| must == 1);
+        let mandatory: Vec<_> = mandatory
+            .into_iter()
+            .map(|(u, v, s, _)| (u, v, s))
+            .collect();
+        let optional: Vec<_> = optional.into_iter().map(|(u, v, s, _)| (u, v, s)).collect();
 
         // Check mandatory edges for cycles
         let mut uf_check = UnionFind::new(n);
-        let mut mandatory_min = i32::MAX;
-
-        for &(u, v, s) in &mandatory {
+        let has_cycle = mandatory.iter().any(|&(u, v, _)| {
             if uf_check.find(u) == uf_check.find(v) {
-                return -1; // Cycle in mandatory edges
+                true
+            } else {
+                uf_check.union(u, v);
+                false
             }
-            uf_check.union(u, v);
-            mandatory_min = mandatory_min.min(s);
+        });
+        if has_cycle {
+            return -1;
         }
+        let mandatory_min = mandatory
+            .iter()
+            .map(|&(_, _, s)| s)
+            .min()
+            .unwrap_or(i32::MAX);
 
         // Generate candidate target values
-        let mut candidates: Vec<i32> = edges
-            .iter()
-            .flat_map(|e| [e[2], e[2] * 2])
-            .collect();
+        let mut candidates: Vec<i32> = edges.iter().flat_map(|e| [e[2], e[2] * 2]).collect();
         candidates.sort_unstable();
         candidates.dedup();
 
@@ -63,25 +65,33 @@ impl Solution {
             let mut uf = UnionFind::new(n);
 
             // Add mandatory edges
-            for &(u, v, _) in &mandatory {
+            mandatory.iter().for_each(|&(u, v, _)| {
                 uf.union(u, v);
-            }
+            });
 
             // Add strong optional edges (no upgrade needed)
-            for &(u, v, s) in &optional {
-                if s >= target && uf.find(u) != uf.find(v) {
-                    uf.union(u, v);
-                }
-            }
+            optional
+                .iter()
+                .filter(|&&(_, _, s)| s >= target)
+                .for_each(|&(u, v, _)| {
+                    if uf.find(u) != uf.find(v) {
+                        uf.union(u, v);
+                    }
+                });
 
             // Add weak optional edges (need upgrade)
-            let mut upgrades = 0;
-            for &(u, v, s) in &optional {
-                if s < target && 2 * s >= target && uf.find(u) != uf.find(v) {
-                    uf.union(u, v);
-                    upgrades += 1;
-                }
-            }
+            let upgrades = optional
+                .iter()
+                .filter(|&&(_, _, s)| s < target && 2 * s >= target)
+                .filter(|&&(u, v, _)| {
+                    if uf.find(u) != uf.find(v) {
+                        uf.union(u, v);
+                        true
+                    } else {
+                        false
+                    }
+                })
+                .count() as i32;
 
             // Check connectivity and budget
             let root = uf.find(0);

@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Maximizes satisfied customers using a sliding window for the secret technique.
     ///

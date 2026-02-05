@@ -118,11 +118,7 @@ impl Solution {
             )
         };
 
-        if found {
-            result
-        } else {
-            vec![]
-        }
+        if found { result } else { vec![] }
     }
 }
 

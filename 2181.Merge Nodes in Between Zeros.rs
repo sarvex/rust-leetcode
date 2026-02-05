@@ -12,7 +12,6 @@ impl ListNode {
     }
 }
 
-
 impl Solution {
     /// Merge linked list nodes between consecutive zeros into their sums.
     ///

@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Generates 1..n in lexicographical order using iterative DFS.
     ///
@@ -66,7 +65,9 @@ mod tests {
     fn test_twenty() {
         assert_eq!(
             Solution::lexical_order(20),
-            vec![1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 2, 20, 3, 4, 5, 6, 7, 8, 9]
+            vec![
+                1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 2, 20, 3, 4, 5, 6, 7, 8, 9
+            ]
         );
     }
 

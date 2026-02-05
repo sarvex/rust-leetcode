@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Counts unique characters across all substrings using contribution technique.
     ///

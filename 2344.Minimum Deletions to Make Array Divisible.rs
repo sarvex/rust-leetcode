@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds minimum deletions so the smallest remaining element divides all of numsDivide.
     ///

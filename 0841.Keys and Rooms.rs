@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Determines if all rooms can be visited starting from room 0.
     ///

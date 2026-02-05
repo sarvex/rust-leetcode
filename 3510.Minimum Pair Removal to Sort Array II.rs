@@ -31,13 +31,10 @@ impl Solution {
         let mut unsorted_cnt = 0i32;
         let mut heap: BinaryHeap<Reverse<(i64, u32)>> = BinaryHeap::with_capacity(n * 2);
 
-        for i in 0..n - 1 {
-            let (a, b) = (vals[i], vals[i + 1]);
-            if a > b {
-                unsorted_cnt += 1;
-            }
-            heap.push(Reverse((a + b, i as u32)));
-        }
+        unsorted_cnt = vals.windows(2).filter(|w| w[0] > w[1]).count() as i32;
+        vals.windows(2).enumerate().for_each(|(i, w)| {
+            heap.push(Reverse((w[0] + w[1], i as u32)));
+        });
 
         if unsorted_cnt == 0 {
             return 0;

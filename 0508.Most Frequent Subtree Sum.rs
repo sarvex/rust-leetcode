@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Finds the most frequent subtree sums via DFS.
     ///
@@ -76,7 +75,7 @@ mod tests {
 
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() && vals[i].is_some() {
                 let left = Rc::new(RefCell::new(TreeNode::new(vals[i].unwrap())));
                 node.borrow_mut().left = Some(left.clone());

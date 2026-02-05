@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Merges two binary trees by summing overlapping nodes.
     ///
@@ -72,7 +71,7 @@ mod tests {
 
         while !queue.is_empty() && i < values.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < values.len() {
                 if let Some(val) = values[i] {
                     let left = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -81,7 +80,7 @@ mod tests {
                 }
                 i += 1;
             }
-            
+
             if i < values.len() {
                 if let Some(val) = values[i] {
                     let right = Rc::new(RefCell::new(TreeNode::new(val)));

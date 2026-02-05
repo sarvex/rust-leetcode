@@ -15,12 +15,14 @@ impl<T: Copy, F: Fn(T, T) -> T> SparseTable<T, F> {
         for level in 1..=log_levels {
             let step = 1 << (level - 1);
             let range_size = 1 << level;
-            table.push(Vec::with_capacity(n + 1 - range_size));
-            for i in 0..=n - range_size {
-                let left_value = table[level - 1][i];
-                let right_value = table[level - 1][i + step];
-                table[level].push(operation(left_value, right_value));
-            }
+            let level_values: Vec<T> = (0..=n - range_size)
+                .map(|i| {
+                    let left_value = table[level - 1][i];
+                    let right_value = table[level - 1][i + step];
+                    operation(left_value, right_value)
+                })
+                .collect();
+            table.push(level_values);
         }
 
         Self { table, operation }
@@ -100,9 +102,14 @@ impl Solution {
         Self::build_euler_tour(0, 0, 0, &adjacency_list, &mut euler_context);
 
         // Build prefix sum array for path weights
-        for i in 1..euler_context.weight_prefix_sum.len() {
-            euler_context.weight_prefix_sum[i] += euler_context.weight_prefix_sum[i - 1];
-        }
+        euler_context.weight_prefix_sum = euler_context
+            .weight_prefix_sum
+            .iter()
+            .scan(0i32, |acc, &x| {
+                *acc += x;
+                Some(*acc)
+            })
+            .collect();
 
         // Build sparse table for O(1) LCA queries via RMQ
         let sparse_table = SparseTable::new(euler_context.euler_path.clone(), |a, b| a.min(b));

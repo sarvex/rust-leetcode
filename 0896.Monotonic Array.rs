@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Checks if an array is monotonically increasing or decreasing.
     ///

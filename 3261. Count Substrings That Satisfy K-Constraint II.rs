@@ -42,7 +42,12 @@ impl Solution {
             }
 
             let valid_ending = (right - left + 1) as i64;
-            prefix_valid[right] = valid_ending + if right > 0 { prefix_valid[right - 1] } else { 0 };
+            prefix_valid[right] = valid_ending
+                + if right > 0 {
+                    prefix_valid[right - 1]
+                } else {
+                    0
+                };
         }
 
         let mut answers = vec![0_i64; queries.len()];
@@ -90,7 +95,10 @@ mod tests {
         let s = "0001111".to_string();
         let k = 2;
         let queries = vec![vec![0, 6]];
-        assert_eq!(Solution::count_k_constraint_substrings(s, k, queries), vec![26]);
+        assert_eq!(
+            Solution::count_k_constraint_substrings(s, k, queries),
+            vec![26]
+        );
     }
 
     #[test]
@@ -120,6 +128,9 @@ mod tests {
         let s = "0101".to_string();
         let k = 10;
         let queries = vec![vec![0, 3]];
-        assert_eq!(Solution::count_k_constraint_substrings(s, k, queries), vec![10]);
+        assert_eq!(
+            Solution::count_k_constraint_substrings(s, k, queries),
+            vec![10]
+        );
     }
 }

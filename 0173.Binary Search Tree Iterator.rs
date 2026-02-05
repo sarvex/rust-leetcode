@@ -81,7 +81,7 @@ mod tests {
         let mut i = 1;
         while !queue.is_empty() && i < values.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < values.len() {
                 if let Some(val) = values[i] {
                     let left = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -114,7 +114,7 @@ mod tests {
         //       9  20
         let tree = build_tree(&[Some(7), Some(3), Some(15), None, None, Some(9), Some(20)]);
         let mut iterator = BSTIterator::new(tree);
-        
+
         assert!(iterator.has_next());
         assert_eq!(iterator.next(), 3);
         assert!(iterator.has_next());
@@ -132,7 +132,7 @@ mod tests {
     fn test_single_node_tree() {
         let tree = build_tree(&[Some(42)]);
         let mut iterator = BSTIterator::new(tree);
-        
+
         assert!(iterator.has_next());
         assert_eq!(iterator.next(), 42);
         assert!(!iterator.has_next());
@@ -158,13 +158,13 @@ mod tests {
         let node3 = Rc::new(RefCell::new(TreeNode::new(3)));
         let node2 = Rc::new(RefCell::new(TreeNode::new(2)));
         let node1 = Rc::new(RefCell::new(TreeNode::new(1)));
-        
+
         root.borrow_mut().left = Some(Rc::clone(&node3));
         node3.borrow_mut().left = Some(Rc::clone(&node2));
         node2.borrow_mut().left = Some(node1);
-        
+
         let mut iterator = BSTIterator::new(Some(root));
-        
+
         assert_eq!(iterator.next(), 1);
         assert_eq!(iterator.next(), 2);
         assert_eq!(iterator.next(), 3);
@@ -186,13 +186,13 @@ mod tests {
         let node2 = Rc::new(RefCell::new(TreeNode::new(2)));
         let node3 = Rc::new(RefCell::new(TreeNode::new(3)));
         let node4 = Rc::new(RefCell::new(TreeNode::new(4)));
-        
+
         root.borrow_mut().right = Some(Rc::clone(&node2));
         node2.borrow_mut().right = Some(Rc::clone(&node3));
         node3.borrow_mut().right = Some(node4);
-        
+
         let mut iterator = BSTIterator::new(Some(root));
-        
+
         assert_eq!(iterator.next(), 1);
         assert_eq!(iterator.next(), 2);
         assert_eq!(iterator.next(), 3);

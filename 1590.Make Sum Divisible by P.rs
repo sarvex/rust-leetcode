@@ -40,11 +40,7 @@ impl Solution {
             last.insert(prefix, i as i32);
         }
 
-        if result >= n as i32 {
-            -1
-        } else {
-            result
-        }
+        if result >= n as i32 { -1 } else { result }
     }
 }
 

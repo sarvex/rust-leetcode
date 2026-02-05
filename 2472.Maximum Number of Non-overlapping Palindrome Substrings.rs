@@ -21,7 +21,7 @@ impl Solution {
         let bytes = s.as_bytes();
         let mut counts = vec![0; n + 1];
 
-        for i in (0..n).rev() {
+        (0..n).rev().for_each(|i| {
             Self::expand_from(bytes, k, &mut counts, i, i);
 
             if i + 1 < n && bytes[i + 1] == bytes[i] {
@@ -29,7 +29,7 @@ impl Solution {
             }
 
             counts[i] = counts[i].max(counts[i + 1]);
-        }
+        });
 
         counts[0]
     }

@@ -38,9 +38,10 @@ impl Solution {
             })
             .collect();
 
-        if circles.iter().any(|c| {
-            Self::point_in_circle(0, 0, c) || Self::point_in_circle(x_corner, y_corner, c)
-        }) {
+        if circles
+            .iter()
+            .any(|c| Self::point_in_circle(0, 0, c) || Self::point_in_circle(x_corner, y_corner, c))
+        {
             return false;
         }
 
@@ -155,7 +156,11 @@ impl Solution {
 
         let r_diff = (circle_a.r - circle_b.r).abs();
         if dist_sq <= Self::sq_i128(r_diff) {
-            let smaller = if circle_a.r <= circle_b.r { circle_a } else { circle_b };
+            let smaller = if circle_a.r <= circle_b.r {
+                circle_a
+            } else {
+                circle_b
+            };
             return Self::circle_intersects_rect(smaller, x_corner, y_corner);
         }
 
@@ -205,10 +210,7 @@ impl Solution {
     fn point_in_rect(x: f64, y: f64, x_corner: i64, y_corner: i64) -> bool {
         let x_corner = x_corner as f64;
         let y_corner = y_corner as f64;
-        x >= -Self::EPS
-            && y >= -Self::EPS
-            && x <= x_corner + Self::EPS
-            && y <= y_corner + Self::EPS
+        x >= -Self::EPS && y >= -Self::EPS && x <= x_corner + Self::EPS && y <= y_corner + Self::EPS
     }
 
     fn edges_overlap_in_rect(

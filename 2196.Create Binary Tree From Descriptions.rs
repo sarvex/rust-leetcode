@@ -21,7 +21,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Build a binary tree from parent-child-direction descriptions.
     ///

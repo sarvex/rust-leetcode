@@ -11,7 +11,6 @@ impl ListNode {
     }
 }
 
-
 impl Solution {
     /// Adds two numbers represented as linked lists in reverse order.
     ///
@@ -36,9 +35,7 @@ impl Solution {
         let mut carry = 0;
 
         while l1.is_some() || l2.is_some() || carry != 0 {
-            let sum =
-                l1.as_ref().map_or(0, |n| n.val) +
-                l2.as_ref().map_or(0, |n| n.val) + carry;
+            let sum = l1.as_ref().map_or(0, |n| n.val) + l2.as_ref().map_or(0, |n| n.val) + carry;
             carry = sum / 10;
             tail.next = Some(Box::new(ListNode::new(sum % 10)));
             tail = tail.next.as_mut().unwrap();

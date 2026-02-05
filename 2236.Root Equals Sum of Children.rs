@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Checks whether root value equals sum of its two children.
     ///
@@ -52,10 +51,10 @@ mod tests {
         let root = Rc::new(RefCell::new(TreeNode::new(root_val)));
         let left = Rc::new(RefCell::new(TreeNode::new(left_val)));
         let right = Rc::new(RefCell::new(TreeNode::new(right_val)));
-        
+
         root.borrow_mut().left = Some(left);
         root.borrow_mut().right = Some(right);
-        
+
         Some(root)
     }
 

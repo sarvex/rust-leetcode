@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Recursive target subtraction for root-to-leaf path sum detection.
     ///
@@ -67,7 +66,7 @@ mod tests {
 
         while !queue.is_empty() && i < values.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < values.len() {
                 if let Some(val) = values[i] {
                     let left = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -76,7 +75,7 @@ mod tests {
                 }
                 i += 1;
             }
-            
+
             if i < values.len() {
                 if let Some(val) = values[i] {
                     let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -102,8 +101,19 @@ mod tests {
         //  7   2      1
         // Target: 22 (path: 5->4->11->2)
         let root = build_tree(&[
-            Some(5), Some(4), Some(8), Some(11), None, Some(13), Some(4),
-            Some(7), Some(2), None, None, None, Some(1)
+            Some(5),
+            Some(4),
+            Some(8),
+            Some(11),
+            None,
+            Some(13),
+            Some(4),
+            Some(7),
+            Some(2),
+            None,
+            None,
+            None,
+            Some(1),
         ]);
         assert!(Solution::has_path_sum(root, 22));
     }
@@ -155,8 +165,16 @@ mod tests {
         //         -2
         // Target: -1 (path: 1->-3->4->-2)
         let root = build_tree(&[
-            Some(1), Some(2), Some(-3), Some(-5), None, Some(4), None,
-            None, None, Some(-2)
+            Some(1),
+            Some(2),
+            Some(-3),
+            Some(-5),
+            None,
+            Some(4),
+            None,
+            None,
+            None,
+            Some(-2),
         ]);
         assert!(Solution::has_path_sum(root, 0));
     }

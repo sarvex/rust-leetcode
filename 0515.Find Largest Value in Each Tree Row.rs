@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Finds the largest value in each tree row using BFS.
     ///
@@ -78,7 +77,7 @@ mod tests {
 
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() && vals[i].is_some() {
                 let left = Rc::new(RefCell::new(TreeNode::new(vals[i].unwrap())));
                 node.borrow_mut().left = Some(left.clone());
@@ -107,9 +106,13 @@ mod tests {
         //    5   3     9
         // Level maximums: [1, 3, 9]
         let root = create_tree(vec![
-            Some(1), 
-            Some(3), Some(2), 
-            Some(5), Some(3), None, Some(9)
+            Some(1),
+            Some(3),
+            Some(2),
+            Some(5),
+            Some(3),
+            None,
+            Some(9),
         ]);
         assert_eq!(Solution::largest_values(root), vec![1, 3, 9]);
     }
@@ -149,9 +152,13 @@ mod tests {
         //   -6  -2  -4  -10
         // Level maximums: [-1, -3, -2]
         let root = create_tree(vec![
-            Some(-1), 
-            Some(-5), Some(-3), 
-            Some(-6), Some(-2), Some(-4), Some(-10)
+            Some(-1),
+            Some(-5),
+            Some(-3),
+            Some(-6),
+            Some(-2),
+            Some(-4),
+            Some(-10),
         ]);
         assert_eq!(Solution::largest_values(root), vec![-1, -3, -2]);
     }

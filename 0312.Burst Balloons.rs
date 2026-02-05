@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Maximizes coins from bursting balloons using interval DP.
     ///

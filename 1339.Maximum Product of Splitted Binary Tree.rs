@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Two-pass DFS to maximize the product of split subtree sums.
     ///
@@ -81,13 +80,13 @@ mod tests {
         if vals.is_empty() || vals[0].is_none() {
             return None;
         }
-        
+
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
         let mut queue = VecDeque::new();
         queue.push_back(root.clone());
-        
+
         let mut i = 1;
-        
+
         while !queue.is_empty() && i < vals.len() {
             if let Some(node) = queue.pop_front() {
                 if i < vals.len() {
@@ -98,7 +97,7 @@ mod tests {
                     }
                     i += 1;
                 }
-                
+
                 if i < vals.len() {
                     if let Some(val) = vals[i] {
                         let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -109,7 +108,7 @@ mod tests {
                 }
             }
         }
-        
+
         Some(root)
     }
 
@@ -141,7 +140,17 @@ mod tests {
         //         5   6
         // Total sum = 21
         // Best split: remove edge between 2 and 4 -> 6 * 15 = 90
-        let root = build_tree(&[Some(1), None, Some(2), Some(3), Some(4), None, None, Some(5), Some(6)]);
+        let root = build_tree(&[
+            Some(1),
+            None,
+            Some(2),
+            Some(3),
+            Some(4),
+            None,
+            None,
+            Some(5),
+            Some(6),
+        ]);
         assert_eq!(Solution::max_product(root), 90);
     }
 

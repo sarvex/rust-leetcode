@@ -50,19 +50,13 @@ impl Solution {
                 digits = next;
             }
             result.reverse();
-            if result.is_empty() {
-                vec![0]
-            } else {
-                result
-            }
+            if result.is_empty() { vec![0] } else { result }
         }
 
         // dp[i][d] = count of i-digit non-decreasing numbers where first digit is d
         fn build_dp(max_len: usize, base: usize) -> Vec<Vec<u64>> {
             let mut dp = vec![vec![0u64; base + 1]; max_len + 1];
-            for d in 0..=base {
-                dp[0][d] = 1;
-            }
+            (0..=base).for_each(|d| dp[0][d] = 1);
             for len in 1..=max_len {
                 dp[len][base] = 0;
                 for d in (0..base).rev() {
@@ -81,11 +75,9 @@ impl Solution {
             let mut result = 0u64;
 
             // Count numbers with fewer digits (1 to n-1 digits)
-            for len in 1..n {
-                for d in 1..base {
-                    result = (result + dp[len - 1][d]) % MOD;
-                }
-            }
+            result = (1..n)
+                .flat_map(|len| (1..base).map(move |d| dp[len - 1][d]))
+                .fold(result, |acc, x| (acc + x) % MOD);
 
             // Count n-digit numbers <= digits
             let mut last = 0;

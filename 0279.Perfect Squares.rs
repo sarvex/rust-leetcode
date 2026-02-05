@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds the minimum number of perfect squares summing to n using 1D DP.
     ///

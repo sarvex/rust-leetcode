@@ -1,6 +1,5 @@
 use std::collections::VecDeque;
 
-
 impl Solution {
     /// Finds shortest clear path in a binary matrix using BFS.
     ///

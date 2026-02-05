@@ -31,66 +31,79 @@ impl Solution {
         let mut sums = vec![0i64; k];
         sums[0] = 1;
 
-        let mut result = 0i64;
-        let mut sum = 0usize;
-
-        let n = nums.len();
-        let mut i = 0;
-
-        while i < n {
-            let x = (nums[i] as usize) % k;
-            let start = i;
-            while i < n && nums[i] == nums[start] {
-                i += 1;
+        // Group consecutive identical elements into chunks: (value % k, count)
+        let chunks: Vec<(usize, usize)> = {
+            let mut result = Vec::new();
+            let mut i = 0;
+            while i < nums.len() {
+                let x = (nums[i] as usize) % k;
+                let start = i;
+                while i < nums.len() && nums[i] == nums[start] {
+                    i += 1;
+                }
+                result.push((x, i - start));
             }
-            let cnt = i - start;
+            result
+        };
 
-            let mut s = sum;
-            for _ in 0..cnt {
-                s = (s + x) % k;
-                result += sums[s];
-            }
+        chunks
+            .iter()
+            .fold((0i64, 0usize), |(result, sum), &(x, cnt)| {
+                // Count matches: sum up sums[(sum + i*x) % k] for i in 1..=cnt
+                let match_count: i64 = (1..=cnt).map(|i| sums[(sum + i * x) % k]).sum();
 
-            for _ in 0..cnt {
-                sum = (sum + x) % k;
-                sums[sum] += 1;
-            }
-        }
+                // Update sums and compute new sum
+                let new_sum = (1..=cnt).fold(sum, |s, _| {
+                    let next_s = (s + x) % k;
+                    sums[next_s] += 1;
+                    next_s
+                });
 
-        result
+                (result + match_count, new_sum)
+            })
+            .0
     }
 
     fn solve_with_map(nums: &[i32], k: i32) -> i64 {
         let mut sums: HashMap<i32, i64> = HashMap::new();
         sums.insert(0, 1);
 
-        let mut result = 0i64;
-        let mut sum = 0i32;
-
-        let n = nums.len();
-        let mut i = 0;
-
-        while i < n {
-            let x = ((nums[i] % k) + k) % k;
-            let start = i;
-            while i < n && nums[i] == nums[start] {
-                i += 1;
+        // Group consecutive identical elements into chunks: (value % k, count)
+        let chunks: Vec<(i32, usize)> = {
+            let mut result = Vec::new();
+            let mut i = 0;
+            while i < nums.len() {
+                let x = ((nums[i] % k) + k) % k;
+                let start = i;
+                while i < nums.len() && nums[i] == nums[start] {
+                    i += 1;
+                }
+                result.push((x, i - start));
             }
-            let cnt = i - start;
+            result
+        };
 
-            let mut s = sum;
-            for _ in 0..cnt {
-                s = (s + x) % k;
-                result += sums.get(&s).copied().unwrap_or(0);
-            }
+        chunks
+            .iter()
+            .fold((0i64, 0i32), |(result, sum), &(x, cnt)| {
+                // Count matches
+                let match_count: i64 = (1..=cnt)
+                    .map(|i| {
+                        let target = (sum + (i as i32) * x) % k;
+                        sums.get(&target).copied().unwrap_or(0)
+                    })
+                    .sum();
 
-            for _ in 0..cnt {
-                sum = (sum + x) % k;
-                *sums.entry(sum).or_insert(0) += 1;
-            }
-        }
+                // Update sums and compute new sum
+                let new_sum = (1..=cnt).fold(sum, |s, _| {
+                    let next_s = (s + x) % k;
+                    *sums.entry(next_s).or_insert(0) += 1;
+                    next_s
+                });
 
-        result
+                (result + match_count, new_sum)
+            })
+            .0
     }
 }
 

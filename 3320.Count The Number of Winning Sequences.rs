@@ -42,11 +42,11 @@ impl Solution {
             b'W' => 1,
             _ => 2,
         };
-        for bob in 0..3 {
+        (0..3).for_each(|bob| {
             let diff = outcome[first_alice][bob];
             let idx = (offset + diff) as usize;
             dp[bob * stride + idx] = 1;
-        }
+        });
 
         // Process remaining rounds
         let mut min_index = offset - 1;
@@ -63,10 +63,10 @@ impl Solution {
             let next_max = max_index + 1;
             let next_start = next_min as usize;
             let next_len = (next_max - next_min + 1) as usize;
-            for bob in 0..3 {
+            (0..3).for_each(|bob| {
                 let base = bob * stride + next_start;
                 next[base..base + next_len].fill(0);
-            }
+            });
 
             let min_usize = min_index as usize;
             let max_usize = max_index as usize;
@@ -106,19 +106,16 @@ impl Solution {
         }
 
         // Sum winning states (diff > 0 means index > offset)
-        let mut total = 0u32;
         let start = (offset + 1) as usize;
-        for bob in 0..3 {
-            let row = &dp[bob * stride..(bob + 1) * stride];
-            let mut idx = start;
-            while idx < size {
-                total += row[idx];
-                if total >= MOD {
-                    total -= MOD;
+        let total = (0..3)
+            .flat_map(|bob| dp[bob * stride + start..(bob + 1) * stride].iter())
+            .fold(0u32, |mut acc, &val| {
+                acc += val;
+                if acc >= MOD {
+                    acc -= MOD;
                 }
-                idx += 1;
-            }
-        }
+                acc
+            });
         total as i32
     }
 }

@@ -20,13 +20,12 @@ impl Solution {
             return nums[0];
         }
         let rob_range = |left: usize, right: usize| -> i32 {
-            let (mut prev2, mut prev1) = (0, 0);
-            for i in left..right {
-                let current = prev1.max(prev2 + nums[i]);
-                prev2 = prev1;
-                prev1 = current;
-            }
-            prev1
+            nums[left..right]
+                .iter()
+                .fold((0, 0), |(prev2, prev1), &num| {
+                    (prev1, prev1.max(prev2 + num))
+                })
+                .1
         };
         rob_range(0, n - 1).max(rob_range(1, n))
     }

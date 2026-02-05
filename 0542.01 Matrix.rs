@@ -1,6 +1,5 @@
 use std::collections::VecDeque;
 
-
 impl Solution {
     /// Computes the distance of each cell to the nearest zero using multi-source BFS.
     ///

@@ -55,10 +55,13 @@ impl Solution {
         }
 
         // Precompute powers of 2
-        let mut pow2 = vec![1u64; n + 1];
-        for i in 1..=n {
-            pow2[i] = (pow2[i - 1] << 1) % MOD;
-        }
+        let pow2: Vec<u64> = (0..=n)
+            .scan(1u64, |acc, _| {
+                let val = *acc;
+                *acc = (*acc << 1) % MOD;
+                Some(val)
+            })
+            .collect();
 
         // Inline LCA computation
         let lca = |mut u: usize, mut v: usize| -> usize {
@@ -91,15 +94,15 @@ impl Solution {
         };
 
         // Process queries
-        let mut result = Vec::with_capacity(queries.len());
-        for q in &queries {
-            let (u, v) = (q[0] as usize, q[1] as usize);
-            let l = lca(u, v);
-            let dist = (depth[u] + depth[v] - 2 * depth[l]) as usize;
-            result.push(if dist == 0 { 0 } else { pow2[dist - 1] as i32 });
-        }
-
-        result
+        queries
+            .iter()
+            .map(|q| {
+                let (u, v) = (q[0] as usize, q[1] as usize);
+                let l = lca(u, v);
+                let dist = (depth[u] + depth[v] - 2 * depth[l]) as usize;
+                if dist == 0 { 0 } else { pow2[dist - 1] as i32 }
+            })
+            .collect()
     }
 }
 

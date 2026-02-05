@@ -24,19 +24,14 @@ impl Solution {
 
         let max_value = *nums.iter().max().unwrap() as usize;
         let mut largest_square = vec![1_i32; max_value + 1];
-        let mut base = 2;
-        loop {
-            let square = base * base;
-            if square > max_value {
-                break;
-            }
-            let mut multiple = square;
-            while multiple <= max_value {
-                largest_square[multiple] = largest_square[multiple].max(square as i32);
-                multiple += square;
-            }
-            base += 1;
-        }
+        (2..)
+            .map(|base| base * base)
+            .take_while(|&square| square <= max_value)
+            .for_each(|square| {
+                (square..=max_value).step_by(square).for_each(|multiple| {
+                    largest_square[multiple] = largest_square[multiple].max(square as i32);
+                });
+            });
 
         nums.iter_mut()
             .for_each(|value| *value /= largest_square[*value as usize]);
@@ -53,11 +48,10 @@ impl Solution {
                 let entry = &mut count[nums[index] as usize];
                 result += i64::from(*entry);
                 *entry += 1;
-                for &child in &adjacency[index] {
-                    if child != parent {
-                        stack.push((child, node));
-                    }
-                }
+                adjacency[index]
+                    .iter()
+                    .filter(|&&child| child != parent)
+                    .for_each(|&child| stack.push((child, node)));
             } else {
                 count[nums[index] as usize] -= 1;
             }

@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Recursive partitioning with inorder index map for postorder tree construction.
     ///

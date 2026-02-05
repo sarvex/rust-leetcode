@@ -40,18 +40,19 @@ impl Solution {
         };
 
         // Precompute which divisors are needed
-        let mut needs_bit = vec![false; max_val + 1];
-        for &num in &nums {
-            let v = num as usize;
-            let mut d = 1;
-            while d * d <= v {
-                if v % d == 0 {
-                    needs_bit[d] = true;
-                    needs_bit[v / d] = true;
-                }
-                d += 1;
-            }
-        }
+        let needs_bit = nums
+            .iter()
+            .fold(vec![false; max_val + 1], |mut needs, &num| {
+                let v = num as usize;
+                (1..)
+                    .take_while(|d| d * d <= v)
+                    .filter(|d| v % d == 0)
+                    .for_each(|d| {
+                        needs[d] = true;
+                        needs[v / d] = true;
+                    });
+                needs
+            });
 
         // Batch allocate all needed BITs
         let mut bit: Vec<Vec<i64>> = (0..=max_val)

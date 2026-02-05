@@ -52,17 +52,18 @@ impl Solution {
                 color[start] = 0;
 
                 while let Some(u) = stack.pop() {
-                    for v in 0..n {
-                        if v != u && dist_matrix[u][v] < threshold {
-                            match color[v] {
-                                -1 => {
-                                    color[v] = 1 - color[u];
-                                    stack.push(v);
-                                }
-                                c if c == color[u] => return false,
-                                _ => {}
+                    let conflict = (0..n)
+                        .filter(|&v| v != u && dist_matrix[u][v] < threshold)
+                        .any(|v| match color[v] {
+                            -1 => {
+                                color[v] = 1 - color[u];
+                                stack.push(v);
+                                false
                             }
-                        }
+                            c => c == color[u],
+                        });
+                    if conflict {
+                        return false;
                     }
                 }
                 true

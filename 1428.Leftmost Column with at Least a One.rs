@@ -40,10 +40,6 @@ impl Solution {
             result = result.min(lo);
         }
 
-        if result >= n {
-            -1
-        } else {
-            result as i32
-        }
+        if result >= n { -1 } else { result as i32 }
     }
 }

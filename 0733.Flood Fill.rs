@@ -22,13 +22,13 @@ impl Solution {
         fn dfs(image: &mut Vec<Vec<i32>>, r: usize, c: usize, original: i32, color: i32) {
             image[r][c] = color;
             let (rows, cols) = (image.len(), image[0].len());
-            for (dr, dc) in [(!0usize, 0), (1, 0), (0, !0usize), (0, 1)] {
-                let nr = r.wrapping_add(dr);
-                let nc = c.wrapping_add(dc);
-                if nr < rows && nc < cols && image[nr][nc] == original {
-                    dfs(image, nr, nc, original, color);
-                }
-            }
+            [(!0usize, 0), (1, 0), (0, !0usize), (0, 1)]
+                .into_iter()
+                .map(|(dr, dc)| (r.wrapping_add(dr), c.wrapping_add(dc)))
+                .filter(|&(nr, nc)| nr < rows && nc < cols && image[nr][nc] == original)
+                .collect::<Vec<_>>()
+                .into_iter()
+                .for_each(|(nr, nc)| dfs(image, nr, nc, original, color));
         }
 
         dfs(&mut image, sr, sc, original, color);

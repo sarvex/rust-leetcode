@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Bitmask DFS counting pseudo-palindromic root-to-leaf paths.
     ///
@@ -66,13 +65,13 @@ mod tests {
         if vals.is_empty() || vals[0].is_none() {
             return None;
         }
-        
+
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
         let mut queue = VecDeque::new();
         queue.push_back(root.clone());
-        
+
         let mut i = 1;
-        
+
         while !queue.is_empty() && i < vals.len() {
             if let Some(node) = queue.pop_front() {
                 if i < vals.len() {
@@ -83,7 +82,7 @@ mod tests {
                     }
                     i += 1;
                 }
-                
+
                 if i < vals.len() {
                     if let Some(val) = vals[i] {
                         let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -94,7 +93,7 @@ mod tests {
                 }
             }
         }
-        
+
         Some(root)
     }
 
@@ -127,8 +126,17 @@ mod tests {
         // Pseudo-palindromic: [2,1,1] (can be 1,2,1), [2,1,3,1] (can be 1,3,2,1)
         // Count: 1
         let root = build_tree(&[
-            Some(2), Some(1), Some(1), Some(1), Some(3), None, None,
-            None, None, None, Some(1)
+            Some(2),
+            Some(1),
+            Some(1),
+            Some(1),
+            Some(3),
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(1),
         ]);
         assert_eq!(Solution::pseudo_palindromic_paths(root), 1);
     }
@@ -164,7 +172,15 @@ mod tests {
         //   4  5 6  7
         // Paths: [1,2,4], [1,2,5], [1,3,6], [1,3,7]
         // None are pseudo-palindromic (all have 3 different values)
-        let root = build_tree(&[Some(1), Some(2), Some(3), Some(4), Some(5), Some(6), Some(7)]);
+        let root = build_tree(&[
+            Some(1),
+            Some(2),
+            Some(3),
+            Some(4),
+            Some(5),
+            Some(6),
+            Some(7),
+        ]);
         assert_eq!(Solution::pseudo_palindromic_paths(root), 0);
     }
 }

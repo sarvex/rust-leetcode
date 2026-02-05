@@ -16,12 +16,12 @@ impl Solution {
         let mut bytes: Vec<u8> = s.into_bytes();
         let n = bytes.len();
 
-        for i in 0..n / 2 {
+        (0..n / 2).for_each(|i| {
             let j = n - 1 - i;
             let min_char = bytes[i].min(bytes[j]);
             bytes[i] = min_char;
             bytes[j] = min_char;
-        }
+        });
 
         String::from_utf8(bytes).unwrap_or_default()
     }

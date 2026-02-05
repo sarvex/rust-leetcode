@@ -42,13 +42,17 @@ impl Solution {
                 ops0.min(chars.len() - ops0) <= num_ops
             }
             _ => {
-                let mut total = 0;
-                let mut i = 0;
-                while i < chars.len() {
-                    let run_len = chars[i..].iter().take_while(|c| **c == chars[i]).count();
-                    total += run_len / (max_len + 1);
-                    i += run_len;
-                }
+                let total = std::iter::successors(Some(0usize), |&i| {
+                    (i < chars.len())
+                        .then(|| i + chars[i..].iter().take_while(|c| **c == chars[i]).count())
+                })
+                .skip(1)
+                .scan(0usize, |prev, i| {
+                    let run_len = i - *prev;
+                    *prev = i;
+                    Some(run_len / (max_len + 1))
+                })
+                .sum::<usize>();
                 total <= num_ops
             }
         }

@@ -31,14 +31,14 @@ impl Solution {
             }))
             .collect();
 
-        let mut first_greater = vec![num_elements; num_elements];
-        let mut pointer = 0usize;
-        for left_bound in 0..num_elements {
-            while pointer < num_elements && run_start[pointer] <= left_bound {
-                pointer += 1;
-            }
-            first_greater[left_bound] = pointer;
-        }
+        let first_greater: Vec<usize> = (0..num_elements)
+            .scan(0usize, |pointer, left_bound| {
+                while *pointer < num_elements && run_start[*pointer] <= left_bound {
+                    *pointer += 1;
+                }
+                Some(*pointer)
+            })
+            .collect();
 
         queries
             .iter()

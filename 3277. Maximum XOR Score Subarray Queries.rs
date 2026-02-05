@@ -61,14 +61,20 @@ mod tests {
     fn example_one() {
         let nums = vec![2, 8, 4, 32, 16, 1];
         let queries = vec![vec![0, 2], vec![1, 4], vec![0, 5]];
-        assert_eq!(Solution::maximum_subarray_xor(nums, queries), vec![12, 60, 60]);
+        assert_eq!(
+            Solution::maximum_subarray_xor(nums, queries),
+            vec![12, 60, 60]
+        );
     }
 
     #[test]
     fn example_two() {
         let nums = vec![0, 7, 3, 2, 8, 5, 1];
         let queries = vec![vec![0, 3], vec![1, 5], vec![2, 4], vec![2, 6], vec![5, 6]];
-        assert_eq!(Solution::maximum_subarray_xor(nums, queries), vec![7, 14, 11, 14, 5]);
+        assert_eq!(
+            Solution::maximum_subarray_xor(nums, queries),
+            vec![7, 14, 11, 14, 5]
+        );
     }
 
     #[test]

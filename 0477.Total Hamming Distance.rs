@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Computes the total Hamming distance between all pairs using bit counting.
     ///

@@ -24,12 +24,12 @@ impl Solution {
         let mut adj: Vec<Vec<(u32, u32)>> = vec![vec![]; n + 1];
         let mut edge_weights: Vec<i32> = vec![0; n];
 
-        for (idx, edge) in edges.iter().enumerate() {
+        edges.iter().enumerate().for_each(|(idx, edge)| {
             let (u, v) = (edge[0] as usize, edge[1] as usize);
             adj[u].push((v as u32, idx as u32));
             adj[v].push((u as u32, idx as u32));
             edge_weights[idx] = edge[2];
-        }
+        });
 
         // Euler tour arrays
         let mut in_time: Vec<u32> = vec![0; n + 1];

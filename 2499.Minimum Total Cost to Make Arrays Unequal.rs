@@ -51,11 +51,7 @@ impl Solution {
             }
         }
 
-        if excess > 0 {
-            -1
-        } else {
-            cost
-        }
+        if excess > 0 { -1 } else { cost }
     }
 }
 

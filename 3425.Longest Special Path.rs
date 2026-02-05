@@ -26,7 +26,7 @@ impl Solution {
         let mut to = Vec::with_capacity(m * 2);
         let mut weight = Vec::with_capacity(m * 2);
 
-        for e in &edges {
+        edges.iter().for_each(|e| {
             let (u, v, w) = (e[0] as usize, e[1] as usize, e[2]);
 
             next.push(head[u]);
@@ -38,7 +38,7 @@ impl Solution {
             head[v] = to.len() as i32;
             to.push(u as i32);
             weight.push(w);
-        }
+        });
 
         let max_val = nums.iter().fold(0, |a, &x| a.max(x)) as usize + 1;
         let mut last = vec![-1_i32; max_val];

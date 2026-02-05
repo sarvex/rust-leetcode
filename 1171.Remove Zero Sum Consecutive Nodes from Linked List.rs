@@ -12,7 +12,6 @@ impl ListNode {
     }
 }
 
-
 impl Solution {
     /// Removes consecutive nodes that sum to zero using prefix sums.
     ///
@@ -46,7 +45,7 @@ impl Solution {
             let mut seen = std::collections::HashMap::new();
             seen.insert(0, 0);
             let mut sum = 0;
-            
+
             for (idx, &v) in vals.iter().enumerate() {
                 sum += v;
                 if let Some(&prev_idx) = seen.get(&sum) {

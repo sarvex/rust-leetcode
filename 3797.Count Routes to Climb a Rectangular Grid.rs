@@ -43,53 +43,54 @@ impl Solution {
         let mut pref = vec![0u32; m + 1];
 
         let bottom = grid[n - 1];
-        for j in 0..m {
-            if bottom[j] == b'.' {
-                dp0[j] = 1;
-            }
-        }
+        bottom
+            .iter()
+            .enumerate()
+            .filter(|(_, &c)| c == b'.')
+            .for_each(|(j, _)| dp0[j] = 1);
 
         Self::build_prefix(&dp0, &mut pref);
-        for j in 0..m {
-            if bottom[j] == b'.' {
+        bottom
+            .iter()
+            .enumerate()
+            .filter(|(_, &c)| c == b'.')
+            .for_each(|(j, _)| {
                 let sum = Self::range_sum(&pref, ld[j], rd1[j]);
                 dp1[j] = Self::sub_mod(sum, dp0[j]);
-            }
-        }
+            });
 
         for row in (0..n - 1).rev() {
             let cur_row = grid[row];
 
             Self::build_prefix_combined(&dp0, &dp1, &mut pref);
-            for j in 0..m {
-                new0[j] = if cur_row[j] == b'.' {
+            cur_row.iter().enumerate().for_each(|(j, &c)| {
+                new0[j] = if c == b'.' {
                     Self::range_sum(&pref, lu[j], ru1[j])
                 } else {
                     0
                 };
-            }
+            });
 
             std::mem::swap(&mut dp0, &mut new0);
 
             Self::build_prefix(&dp0, &mut pref);
-            for j in 0..m {
-                dp1[j] = if cur_row[j] == b'.' {
+            cur_row.iter().enumerate().for_each(|(j, &c)| {
+                dp1[j] = if c == b'.' {
                     let sum = Self::range_sum(&pref, ld[j], rd1[j]);
                     Self::sub_mod(sum, dp0[j])
                 } else {
                     0
                 };
-            }
+            });
         }
 
         let top = grid[0];
-        let mut ans = 0u32;
-        for j in 0..m {
-            if top[j] == b'.' {
-                ans = Self::add_mod(ans, Self::add_mod(dp0[j], dp1[j]));
-            }
-        }
-        ans as i32
+        top.iter()
+            .enumerate()
+            .filter(|(_, &c)| c == b'.')
+            .fold(0u32, |ans, (j, _)| {
+                Self::add_mod(ans, Self::add_mod(dp0[j], dp1[j]))
+            }) as i32
     }
 
     #[inline(always)]
@@ -107,40 +108,36 @@ impl Solution {
     #[inline(always)]
     fn add_mod(a: u32, b: u32) -> u32 {
         let s = a + b;
-        if s >= MOD {
-            s - MOD
-        } else {
-            s
-        }
+        if s >= MOD { s - MOD } else { s }
     }
 
     #[inline(always)]
     fn sub_mod(a: u32, b: u32) -> u32 {
-        if a >= b {
-            a - b
-        } else {
-            a + MOD - b
-        }
+        if a >= b { a - b } else { a + MOD - b }
     }
 
     #[inline(always)]
     fn build_prefix(arr: &[u32], pref: &mut [u32]) {
         pref[0] = 0;
-        for (j, &val) in arr.iter().enumerate() {
+        arr.iter().enumerate().for_each(|(j, &val)| {
             pref[j + 1] = Self::add_mod(pref[j], val);
-        }
+        });
     }
 
     #[inline(always)]
     fn build_prefix_combined(a: &[u32], b: &[u32], pref: &mut [u32]) {
         pref[0] = 0;
-        for j in 0..a.len() {
-            let mut sum = a[j] + b[j];
-            if sum >= MOD {
-                sum -= MOD;
-            }
-            pref[j + 1] = Self::add_mod(pref[j], sum);
-        }
+        a.iter()
+            .zip(b.iter())
+            .enumerate()
+            .for_each(|(j, (&av, &bv))| {
+                let sum = if av + bv >= MOD {
+                    av + bv - MOD
+                } else {
+                    av + bv
+                };
+                pref[j + 1] = Self::add_mod(pref[j], sum);
+            });
     }
 
     #[inline(always)]

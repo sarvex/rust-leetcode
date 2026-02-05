@@ -1,6 +1,5 @@
 use std::collections::VecDeque;
 
-
 impl Solution {
     /// Finds shortest path visiting all nodes using BFS with bitmask state.
     ///

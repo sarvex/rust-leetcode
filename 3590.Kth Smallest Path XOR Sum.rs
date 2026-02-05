@@ -38,11 +38,13 @@ impl Solution {
 
     #[inline]
     fn build_children(par: &[i32], n: usize) -> Vec<Vec<usize>> {
-        let mut children = vec![vec![]; n];
-        for (i, &p) in par.iter().enumerate().skip(1) {
-            children[p as usize].push(i);
-        }
-        children
+        par.iter()
+            .enumerate()
+            .skip(1)
+            .fold(vec![vec![]; n], |mut children, (i, &p)| {
+                children[p as usize].push(i);
+                children
+            })
     }
 
     #[inline]
@@ -52,10 +54,10 @@ impl Solution {
         let mut stack = vec![0usize];
 
         while let Some(u) = stack.pop() {
-            for &v in &children[u] {
+            children[u].iter().for_each(|&v| {
                 path_xor[v] = path_xor[u] ^ vals[v];
                 stack.push(v);
-            }
+            });
         }
 
         path_xor
@@ -79,9 +81,7 @@ impl Solution {
                 sets[u] = Some(set);
             } else {
                 stack.push((u, true));
-                for &v in &children[u] {
-                    stack.push((v, false));
-                }
+                children[u].iter().for_each(|&v| stack.push((v, false)));
             }
         }
 
@@ -95,15 +95,12 @@ impl Solution {
         path_xor: &[i32],
         sets: &mut [Option<BTreeSet<i32>>],
     ) -> BTreeSet<i32> {
-        let mut set = BTreeSet::new();
-        set.insert(path_xor[u]);
+        let initial = std::iter::once(path_xor[u]).collect::<BTreeSet<_>>();
 
-        for &v in &children[u] {
+        children[u].iter().fold(initial, |acc, &v| {
             let child_set = sets[v].take().expect("Child set should exist");
-            set = Self::small_to_large_merge(set, child_set);
-        }
-
-        set
+            Self::small_to_large_merge(acc, child_set)
+        })
     }
 
     #[inline]
@@ -114,10 +111,7 @@ impl Solution {
             (set_a, set_b)
         };
 
-        for x in smaller {
-            larger.insert(x);
-        }
-
+        larger.extend(smaller);
         larger
     }
 
@@ -141,9 +135,9 @@ impl Solution {
         // Fast path: if all queries have k=1, use first() which is O(1)
         if queries_slice.iter().all(|&(_, k, _)| k == 1) {
             if let Some(&first) = set.first() {
-                for &(_, _, idx) in queries_slice {
-                    results[idx] = first;
-                }
+                queries_slice
+                    .iter()
+                    .for_each(|&(_, _, idx)| results[idx] = first);
             }
             return;
         }

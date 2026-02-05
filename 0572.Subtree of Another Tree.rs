@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Checks if one tree is a subtree of another via recursive comparison.
     ///
@@ -80,7 +79,7 @@ mod tests {
 
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() && vals[i].is_some() {
                 let left = Rc::new(RefCell::new(TreeNode::new(vals[i].unwrap())));
                 node.borrow_mut().left = Some(left.clone());
@@ -133,10 +132,16 @@ mod tests {
         //    1   2
         // Result: false (root's subtree has extra node 0)
         let root = create_tree(vec![
-            Some(3), 
-            Some(4), Some(5), 
-            Some(1), Some(2), None, None,
-            None, None, Some(0)
+            Some(3),
+            Some(4),
+            Some(5),
+            Some(1),
+            Some(2),
+            None,
+            None,
+            None,
+            None,
+            Some(0),
         ]);
         let sub_root = create_tree(vec![Some(4), Some(1), Some(2)]);
         assert!(!Solution::is_subtree(root, sub_root));
@@ -177,10 +182,10 @@ mod tests {
         //             2
         let root = Rc::new(RefCell::new(TreeNode::new(1)));
         root.borrow_mut().left = Some(Rc::new(RefCell::new(TreeNode::new(2))));
-        
+
         let sub_root = Rc::new(RefCell::new(TreeNode::new(1)));
         sub_root.borrow_mut().right = Some(Rc::new(RefCell::new(TreeNode::new(2))));
-        
+
         assert!(!Solution::is_subtree(Some(root), Some(sub_root)));
     }
 }

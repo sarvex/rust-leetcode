@@ -134,11 +134,7 @@ impl Solution {
             }
         }
 
-        if dp[n] >= inf {
-            -1
-        } else {
-            dp[n] as i32
-        }
+        if dp[n] >= inf { -1 } else { dp[n] as i32 }
     }
 }
 

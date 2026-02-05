@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Sorts characters by descending frequency using a frequency array.
     ///

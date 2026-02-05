@@ -1,3 +1,5 @@
+struct Solution;
+
 impl Solution {
     /// Computes sum of all good subsequences via hash-map DP.
     ///

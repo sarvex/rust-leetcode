@@ -36,20 +36,19 @@ impl Solution {
     }
 
     fn dfs(u: usize, parent: usize, adj: &[Vec<(usize, i64)>], k: usize) -> (i64, i64) {
-        let mut base_sum = 0i64;
-        let mut gains = Vec::new();
-
-        for &(v, w) in &adj[u] {
-            if v == parent {
-                continue;
-            }
-            let (child_dp0, child_dp1) = Self::dfs(v, u, adj, k);
-            base_sum += child_dp0;
-            let gain = w + child_dp1 - child_dp0;
-            if gain > 0 {
-                gains.push(gain);
-            }
-        }
+        let (base_sum, mut gains): (i64, Vec<i64>) = adj[u]
+            .iter()
+            .filter(|&&(v, _)| v != parent)
+            .map(|&(v, w)| {
+                let (child_dp0, child_dp1) = Self::dfs(v, u, adj, k);
+                (child_dp0, w + child_dp1 - child_dp0)
+            })
+            .fold((0, Vec::new()), |(sum, mut gains), (dp0, gain)| {
+                if gain > 0 {
+                    gains.push(gain);
+                }
+                (sum + dp0, gains)
+            });
 
         gains.sort_unstable_by(|a, b| b.cmp(a));
 

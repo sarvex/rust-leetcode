@@ -22,14 +22,15 @@ impl Solution {
     pub fn construct_grid_layout(n: i32, edges: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
         let node_count = n as usize;
         let mut adjacency = vec![Vec::<i32>::new(); node_count];
-        for edge in edges {
-            let u = edge[0] as usize;
-            let v = edge[1] as usize;
+        edges.into_iter().for_each(|edge| {
+            let (u, v) = (edge[0] as usize, edge[1] as usize);
             adjacency[u].push(v as i32);
             adjacency[v].push(u as i32);
-        }
+        });
 
-        let degree_one: Vec<usize> = (0..node_count).filter(|&i| adjacency[i].len() == 1).collect();
+        let degree_one: Vec<usize> = (0..node_count)
+            .filter(|&i| adjacency[i].len() == 1)
+            .collect();
         if !degree_one.is_empty() {
             let start = degree_one[0];
             let mut path = Vec::with_capacity(node_count);
@@ -52,7 +53,9 @@ impl Solution {
             return vec![path];
         }
 
-        let corners: Vec<usize> = (0..node_count).filter(|&i| adjacency[i].len() == 2).collect();
+        let corners: Vec<usize> = (0..node_count)
+            .filter(|&i| adjacency[i].len() == 2)
+            .collect();
         let start = corners[0];
 
         let mut dist = vec![-1_i32; node_count];
@@ -73,18 +76,13 @@ impl Solution {
             }
         }
 
-        let mut closest_corner = start;
-        let mut min_dist = i32::MAX;
-        for &corner in &corners {
-            if corner == start {
-                continue;
-            }
-            let d = dist[corner];
-            if d < min_dist {
-                min_dist = d;
-                closest_corner = corner;
-            }
-        }
+        let closest_corner = corners
+            .iter()
+            .filter(|&&corner| corner != start)
+            .min_by_key(|&&corner| dist[corner])
+            .copied()
+            .unwrap_or(start);
+        let min_dist = dist[closest_corner];
 
         let cols = (min_dist + 1) as usize;
         let rows = node_count / cols;
@@ -171,12 +169,20 @@ mod tests {
                 let node = grid[r][c];
                 if r + 1 < grid.len() {
                     let other = grid[r + 1][c];
-                    let pair = if node < other { (node, other) } else { (other, node) };
+                    let pair = if node < other {
+                        (node, other)
+                    } else {
+                        (other, node)
+                    };
                     grid_edges.insert(pair);
                 }
                 if c + 1 < cols {
                     let other = grid[r][c + 1];
-                    let pair = if node < other { (node, other) } else { (other, node) };
+                    let pair = if node < other {
+                        (node, other)
+                    } else {
+                        (other, node)
+                    };
                     grid_edges.insert(pair);
                 }
             }

@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 
-
 impl Solution {
     /// Counts unique Morse code representations of words.
     ///

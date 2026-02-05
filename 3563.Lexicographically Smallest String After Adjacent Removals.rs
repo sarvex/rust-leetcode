@@ -43,13 +43,11 @@ impl Solution {
 
         let mut sub = vec![String::new(); n + 1];
         for i in (0..n).rev() {
-            let mut r = format!("{}{}", s[i] as char, &sub[i + 1]);
-            for j in 1..=(n - i) / 2 {
-                if e[i][i + j * 2] {
-                    r = r.min(sub[i + j * 2].clone());
-                }
-            }
-            sub[i] = r;
+            let base = format!("{}{}", s[i] as char, &sub[i + 1]);
+            sub[i] = (1..=(n - i) / 2)
+                .filter(|&j| e[i][i + j * 2])
+                .map(|j| sub[i + j * 2].clone())
+                .fold(base, |acc, s| acc.min(s));
         }
 
         sub[0].clone()

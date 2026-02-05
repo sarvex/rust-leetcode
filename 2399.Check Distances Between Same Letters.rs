@@ -38,7 +38,9 @@ mod tests {
     fn test_example_1() {
         assert!(Solution::check_distances(
             "abaccb".to_string(),
-            vec![1, 3, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            vec![
+                1, 3, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ]
         ));
     }
 
@@ -46,7 +48,9 @@ mod tests {
     fn test_example_2() {
         assert!(!Solution::check_distances(
             "aa".to_string(),
-            vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            vec![
+                1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ]
         ));
     }
 
@@ -54,7 +58,9 @@ mod tests {
     fn test_adjacent_pair() {
         assert!(Solution::check_distances(
             "aa".to_string(),
-            vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            vec![
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ]
         ));
     }
 
@@ -62,7 +68,9 @@ mod tests {
     fn test_multiple_pairs() {
         assert!(Solution::check_distances(
             "abba".to_string(),
-            vec![2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            vec![
+                2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ]
         ));
     }
 }

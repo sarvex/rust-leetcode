@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds the minimum time difference between any two time points.
     ///

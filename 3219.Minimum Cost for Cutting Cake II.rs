@@ -13,12 +13,7 @@ impl Solution {
     /// # Complexity
     /// - Time: O((m + n) log(m + n)) for sorting
     /// - Space: O(1) extra (in-place sort)
-    pub fn minimum_cost(
-        m: i32,
-        n: i32,
-        horizontal_cut: Vec<i32>,
-        vertical_cut: Vec<i32>,
-    ) -> i64 {
+    pub fn minimum_cost(m: i32, n: i32, horizontal_cut: Vec<i32>, vertical_cut: Vec<i32>) -> i64 {
         let _ = (m, n);
         let mut horizontal = horizontal_cut;
         let mut vertical = vertical_cut;
@@ -71,7 +66,10 @@ mod tests {
         let n = 2;
         let horizontal_cut = vec![1, 3];
         let vertical_cut = vec![5];
-        assert_eq!(Solution::minimum_cost(m, n, horizontal_cut, vertical_cut), 13);
+        assert_eq!(
+            Solution::minimum_cost(m, n, horizontal_cut, vertical_cut),
+            13
+        );
     }
 
     #[test]
@@ -80,7 +78,10 @@ mod tests {
         let n = 2;
         let horizontal_cut = vec![7];
         let vertical_cut = vec![4];
-        assert_eq!(Solution::minimum_cost(m, n, horizontal_cut, vertical_cut), 15);
+        assert_eq!(
+            Solution::minimum_cost(m, n, horizontal_cut, vertical_cut),
+            15
+        );
     }
 
     #[test]
@@ -89,7 +90,10 @@ mod tests {
         let n = 1;
         let horizontal_cut = vec![];
         let vertical_cut = vec![];
-        assert_eq!(Solution::minimum_cost(m, n, horizontal_cut, vertical_cut), 0);
+        assert_eq!(
+            Solution::minimum_cost(m, n, horizontal_cut, vertical_cut),
+            0
+        );
     }
 
     #[test]
@@ -98,7 +102,10 @@ mod tests {
         let n = 4;
         let horizontal_cut = vec![];
         let vertical_cut = vec![2, 1, 3];
-        assert_eq!(Solution::minimum_cost(m, n, horizontal_cut, vertical_cut), 6);
+        assert_eq!(
+            Solution::minimum_cost(m, n, horizontal_cut, vertical_cut),
+            6
+        );
     }
 
     #[test]
@@ -107,6 +114,9 @@ mod tests {
         let n = 3;
         let horizontal_cut = vec![2];
         let vertical_cut = vec![1, 3];
-        assert_eq!(Solution::minimum_cost(m, n, horizontal_cut, vertical_cut), 9);
+        assert_eq!(
+            Solution::minimum_cost(m, n, horizontal_cut, vertical_cut),
+            9
+        );
     }
 }

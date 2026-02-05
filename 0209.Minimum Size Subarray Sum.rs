@@ -27,11 +27,7 @@ impl Solution {
                 left += 1;
             }
         }
-        if min_len == n + 1 {
-            0
-        } else {
-            min_len as i32
-        }
+        if min_len == n + 1 { 0 } else { min_len as i32 }
     }
 }
 

@@ -38,49 +38,31 @@ mod tests {
 
     #[test]
     fn test_example1() {
-        assert_eq!(
-            Solution::min_operations(vec![1, 2, 3], vec![2, 1, 3]),
-            2
-        );
+        assert_eq!(Solution::min_operations(vec![1, 2, 3], vec![2, 1, 3]), 2);
     }
 
     #[test]
     fn test_example2() {
-        assert_eq!(
-            Solution::min_operations(vec![4, 1, 4], vec![5, 1, 4]),
-            1
-        );
+        assert_eq!(Solution::min_operations(vec![4, 1, 4], vec![5, 1, 4]), 1);
     }
 
     #[test]
     fn test_example3() {
-        assert_eq!(
-            Solution::min_operations(vec![7, 3, 7], vec![5, 5, 9]),
-            2
-        );
+        assert_eq!(Solution::min_operations(vec![7, 3, 7], vec![5, 5, 9]), 2);
     }
 
     #[test]
     fn test_already_equal() {
-        assert_eq!(
-            Solution::min_operations(vec![1, 2, 3], vec![1, 2, 3]),
-            0
-        );
+        assert_eq!(Solution::min_operations(vec![1, 2, 3], vec![1, 2, 3]), 0);
     }
 
     #[test]
     fn test_single_wrong() {
-        assert_eq!(
-            Solution::min_operations(vec![1], vec![2]),
-            1
-        );
+        assert_eq!(Solution::min_operations(vec![1], vec![2]), 1);
     }
 
     #[test]
     fn test_same_value_many_wrong() {
-        assert_eq!(
-            Solution::min_operations(vec![4, 4, 4], vec![1, 2, 3]),
-            1
-        );
+        assert_eq!(Solution::min_operations(vec![4, 4, 4], vec![1, 2, 3]), 1);
     }
 }

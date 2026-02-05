@@ -1,6 +1,5 @@
 use std::collections::{HashSet, VecDeque};
 
-
 impl Solution {
     /// Finds the minimum mutations from start to end gene using BFS.
     ///

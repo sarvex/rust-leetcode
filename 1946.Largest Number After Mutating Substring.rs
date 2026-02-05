@@ -15,22 +15,35 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn maximum_number(num: String, change: Vec<i32>) -> String {
-        let mut bytes = num.into_bytes();
-        let mut mutating = false;
+        let bytes = num.into_bytes();
 
-        for b in &mut bytes {
-            let digit = (*b - b'0') as usize;
-            let mapped = change[digit] as u8 + b'0';
-            if mutating && mapped < *b {
-                break;
-            }
-            if mapped > *b {
-                mutating = true;
-                *b = mapped;
-            }
-        }
+        // Find the first position where mutation is beneficial
+        let start = bytes
+            .iter()
+            .position(|&b| change[(b - b'0') as usize] as u8 + b'0' > b);
 
-        String::from_utf8(bytes).unwrap()
+        let Some(start) = start else {
+            return String::from_utf8(bytes).unwrap();
+        };
+
+        // Find where mutation should stop (when mapped < original)
+        let end = bytes[start..]
+            .iter()
+            .position(|&b| change[(b - b'0') as usize] as u8 + b'0' < b)
+            .map_or(bytes.len(), |pos| start + pos);
+
+        // Build result: unchanged prefix + mutated segment + unchanged suffix
+        let result: Vec<u8> = bytes[..start]
+            .iter()
+            .copied()
+            .chain(bytes[start..end].iter().map(|&b| {
+                let digit = (b - b'0') as usize;
+                change[digit] as u8 + b'0'
+            }))
+            .chain(bytes[end..].iter().copied())
+            .collect();
+
+        String::from_utf8(result).unwrap()
     }
 }
 

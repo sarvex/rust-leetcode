@@ -12,11 +12,7 @@ impl Solution {
     /// - Time: O(1)
     /// - Space: O(1)
     pub fn add_digits(num: i32) -> i32 {
-        if num == 0 {
-            0
-        } else {
-            1 + (num - 1) % 9
-        }
+        if num == 0 { 0 } else { 1 + (num - 1) % 9 }
     }
 }
 

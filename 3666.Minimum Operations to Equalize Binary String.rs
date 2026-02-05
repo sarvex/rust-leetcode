@@ -35,23 +35,19 @@ impl Solution {
             return -1;
         }
 
-        let mut m = (zeros + k - 1) / k;
+        let start = (zeros + k - 1) / k;
 
-        loop {
-            let total = m * k;
-            let parity_ok = total % 2 == zeros % 2;
-            let upper_ok = if m % 2 == 1 {
-                total <= n * (m - 1) + zeros
-            } else {
-                total <= n * m - zeros
-            };
-
-            if parity_ok && upper_ok {
-                return m as i32;
-            }
-
-            m += 1;
-        }
+        (start..)
+            .find(|&m| {
+                let total = m * k;
+                let parity_ok = total % 2 == zeros % 2;
+                let upper_ok = match m % 2 == 1 {
+                    true => total <= n * (m - 1) + zeros,
+                    false => total <= n * m - zeros,
+                };
+                parity_ok && upper_ok
+            })
+            .unwrap() as i32
     }
 }
 

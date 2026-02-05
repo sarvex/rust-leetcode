@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Recursive midpoint selection for height-balanced BST construction.
     ///

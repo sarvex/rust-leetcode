@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Prints a binary tree in a 2-D grid layout.
     ///

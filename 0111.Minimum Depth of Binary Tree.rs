@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Finds minimum depth of a binary tree using recursive DFS with leaf-awareness.
     ///
@@ -71,7 +70,7 @@ mod tests {
 
         while !queue.is_empty() && i < values.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < values.len() {
                 if let Some(val) = values[i] {
                     let left = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -80,7 +79,7 @@ mod tests {
                 }
                 i += 1;
             }
-            
+
             if i < values.len() {
                 if let Some(val) = values[i] {
                     let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -120,7 +119,17 @@ mod tests {
         //            \
         //             6
         // Minimum depth = 5
-        let root = build_tree(&[Some(2), None, Some(3), None, Some(4), None, Some(5), None, Some(6)]);
+        let root = build_tree(&[
+            Some(2),
+            None,
+            Some(3),
+            None,
+            Some(4),
+            None,
+            Some(5),
+            None,
+            Some(6),
+        ]);
         assert_eq!(Solution::min_depth(root), 5);
     }
 

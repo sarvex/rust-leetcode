@@ -1,6 +1,5 @@
 use std::collections::VecDeque;
 
-
 impl Solution {
     /// Finds minimum knight moves to reach (x, y) from origin using BFS.
     ///

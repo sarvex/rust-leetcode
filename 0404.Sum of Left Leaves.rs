@@ -19,7 +19,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Sums all left leaves in a binary tree via recursive DFS.
     ///

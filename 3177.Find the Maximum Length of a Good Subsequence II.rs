@@ -26,7 +26,12 @@ impl Solution {
         let mut sorted: Vec<i32> = nums.iter().copied().collect();
         sorted.sort_unstable();
         sorted.dedup();
-        let val_to_idx: HashMap<i32, usize> = sorted.iter().copied().enumerate().map(|(i, v)| (v, i)).collect();
+        let val_to_idx: HashMap<i32, usize> = sorted
+            .iter()
+            .copied()
+            .enumerate()
+            .map(|(i, v)| (v, i))
+            .collect();
         let n_vals = sorted.len();
 
         let mut dp = vec![vec![0i32; k + 1]; n_vals];

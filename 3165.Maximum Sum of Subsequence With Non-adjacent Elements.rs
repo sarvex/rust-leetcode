@@ -41,13 +41,7 @@ impl Node {
     }
 
     fn best(self) -> i64 {
-        let mut best = 0;
-        for first_taken in 0..=1 {
-            for last_taken in 0..=1 {
-                best = best.max(self.dp[first_taken][last_taken]);
-            }
-        }
-        best
+        self.dp.iter().flatten().fold(0, |best, &val| best.max(val))
     }
 }
 
@@ -57,26 +51,23 @@ struct SegTree {
 
 impl SegTree {
     fn new(nums: &[i32]) -> Self {
-        let mut first_level = Vec::with_capacity(nums.len());
-        for &num in nums {
-            first_level.push(Node::leaf(num as i64));
-        }
+        let first_level: Vec<Node> = nums.iter().map(|&num| Node::leaf(num as i64)).collect();
 
         let mut levels = Vec::new();
         levels.push(first_level);
 
         while levels.last().unwrap().len() > 1 {
             let prev = levels.last().unwrap();
-            let mut next = Vec::with_capacity((prev.len() + 1) / 2);
-            let mut idx = 0usize;
-            while idx < prev.len() {
-                if idx + 1 < prev.len() {
-                    next.push(Node::merge(prev[idx], prev[idx + 1]));
-                } else {
-                    next.push(prev[idx]);
-                }
-                idx += 2;
-            }
+            let next: Vec<Node> = prev
+                .chunks(2)
+                .map(|chunk| {
+                    if chunk.len() == 2 {
+                        Node::merge(chunk[0], chunk[1])
+                    } else {
+                        chunk[0]
+                    }
+                })
+                .collect();
             levels.push(next);
         }
 

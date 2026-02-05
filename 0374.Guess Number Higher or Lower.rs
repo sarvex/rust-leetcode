@@ -3,7 +3,6 @@ extern "C" {
     fn guess(num: i32) -> i32;
 }
 
-
 impl Solution {
     /// Finds the picked number using binary search with the guess API.
     ///

@@ -14,30 +14,24 @@ impl Solution {
     /// - Space: O(1)
     pub fn count_no_zero_pairs(n: i64) -> i64 {
         let mut target_digits = [0u8; 16];
-        let mut num_digits = 0;
-        let mut remaining = n;
-        while remaining > 0 {
-            target_digits[num_digits] = (remaining % 10) as u8;
-            remaining /= 10;
-            num_digits += 1;
-        }
-        if num_digits == 0 {
-            num_digits = 1;
-        }
+        let num_digits = std::iter::successors(Some(n), |&x| (x >= 10).then(|| x / 10))
+            .enumerate()
+            .map(|(i, x)| {
+                target_digits[i] = (x % 10) as u8;
+                i + 1
+            })
+            .last()
+            .unwrap_or(1);
 
         // dp[carry][a_ended][b_ended] = count
         let mut dp = [[[0i64; 2]; 2]; 2];
 
         // Position 0: both must pick 1-9 (positive), neither ended
         let target = target_digits[0] as i32;
-        for digit_a in 1..=9 {
-            for digit_b in 1..=9 {
-                let sum = digit_a + digit_b;
-                if sum % 10 == target {
-                    dp[(sum / 10) as usize][0][0] += 1;
-                }
-            }
-        }
+        (1..=9)
+            .flat_map(|a| (1..=9).map(move |b| a + b))
+            .filter(|&sum| sum % 10 == target)
+            .for_each(|sum| dp[(sum / 10) as usize][0][0] += 1);
 
         // Process remaining positions
         for pos in 1..num_digits {

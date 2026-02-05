@@ -32,8 +32,7 @@ impl Solution {
         let mut restricted = [[0i64; 10]; MAX_SIZE];
         let mut unrestricted = [[0i64; 10]; MAX_SIZE];
 
-        let mut digit_sum = [0i64; 10];
-        for d in 0..10 {
+        let digit_sum: [i64; 10] = std::array::from_fn(|d| {
             let d_i = d as i64;
             let sum_greater = 45 - (d_i * (d_i + 1)) / 2;
             let sum_smaller = if d == 0 {
@@ -41,26 +40,25 @@ impl Solution {
             } else {
                 9 * d_i - (d_i * (d_i - 1)) / 2
             };
-            digit_sum[d] = sum_greater + sum_smaller;
-        }
+            sum_greater + sum_smaller
+        });
 
         unrestricted[3][0] = digit_sum[0];
-        for d in 1..10 {
+        (1..10).for_each(|d| {
             unrestricted[3][d] = unrestricted[3][d - 1] + digit_sum[d];
             restricted[3][d] = restricted[3][d - 1] + digit_sum[d];
-        }
+        });
 
-        let mut ten: i64 = 10;
-        for len in 4..MAX_SIZE {
+        (4..MAX_SIZE).fold(10i64, |ten, len| {
             let base = unrestricted[len - 1][9];
             unrestricted[len][0] = base + ten * digit_sum[0];
-            for d in 1..10 {
+            (1..10).for_each(|d| {
                 let added = base + ten * digit_sum[d];
                 unrestricted[len][d] = unrestricted[len][d - 1] + added;
                 restricted[len][d] = restricted[len][d - 1] + added;
-            }
-            ten *= 10;
-        }
+            });
+            ten * 10
+        });
 
         (restricted, unrestricted)
     }
@@ -90,15 +88,10 @@ impl Solution {
             return 0;
         }
 
-        let mut ten = 1i64;
-        for _ in 1..size {
-            ten *= 10;
-        }
+        let mut ten = (1..size).fold(1i64, |acc, _| acc * 10);
 
-        let mut total = restricted[size][num[0] as usize - 1];
-        for d in 3..size {
-            total += restricted[d][9];
-        }
+        let mut total = restricted[size][num[0] as usize - 1]
+            + (3..size).map(|d| restricted[d][9]).sum::<i64>();
 
         let mut curr_num = num[0] * ten;
         ten /= 10;
@@ -115,16 +108,19 @@ impl Solution {
                 total += unrestricted[size - i][curr_digit as usize - 1];
             }
 
-            let mut lower_count: i64 = 0;
-            for d in 0..curr_digit as usize {
-                if d > prev_digit as usize {
-                    lower_count += d as i64;
-                }
-                if d < prev_digit as usize {
-                    lower_count += (9 - d) as i64;
-                }
-            }
-            lower_count *= ten;
+            let lower_count: i64 = (0..curr_digit as usize)
+                .map(|d| {
+                    let mut contrib = 0i64;
+                    if d > prev_digit as usize {
+                        contrib += d as i64;
+                    }
+                    if d < prev_digit as usize {
+                        contrib += (9 - d) as i64;
+                    }
+                    contrib
+                })
+                .sum::<i64>()
+                * ten;
 
             let mut equal_count: i64 = 0;
             if curr_digit > prev_digit {

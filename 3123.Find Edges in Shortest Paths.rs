@@ -51,16 +51,18 @@ impl Solution {
     pub fn find_answer(n: i32, edges: Vec<Vec<i32>>) -> Vec<bool> {
         let node_count = n as usize;
         let mut adjacency = vec![Vec::<(usize, i64)>::new(); node_count];
-        let mut edge_list = Vec::with_capacity(edges.len());
 
-        for edge in edges {
-            let from = edge[0] as usize;
-            let to = edge[1] as usize;
-            let weight = edge[2] as i64;
-            edge_list.push(Edge { from, to, weight });
-            adjacency[from].push((to, weight));
-            adjacency[to].push((from, weight));
-        }
+        let edge_list: Vec<Edge> = edges
+            .iter()
+            .map(|edge| {
+                let from = edge[0] as usize;
+                let to = edge[1] as usize;
+                let weight = edge[2] as i64;
+                adjacency[from].push((to, weight));
+                adjacency[to].push((from, weight));
+                Edge { from, to, weight }
+            })
+            .collect();
 
         if node_count == 0 {
             return Vec::new();

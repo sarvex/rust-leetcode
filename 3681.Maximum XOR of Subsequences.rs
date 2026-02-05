@@ -17,9 +17,7 @@ impl Solution {
     /// - Space: O(log(max_val)) for the basis array
     pub fn max_xor_subsequences(nums: Vec<i32>) -> i32 {
         const BITS: usize = 30;
-        let mut basis = [0i32; BITS];
-
-        for num in nums {
+        let basis = nums.into_iter().fold([0i32; BITS], |mut basis, num| {
             let mut cur = num;
             for bit in (0..BITS).rev() {
                 if cur >> bit & 1 == 1 {
@@ -30,7 +28,8 @@ impl Solution {
                     cur ^= basis[bit];
                 }
             }
-        }
+            basis
+        });
 
         // Process from high to low bits for correct greedy maximization
         basis.iter().rev().fold(0, |acc, &b| acc.max(acc ^ b))

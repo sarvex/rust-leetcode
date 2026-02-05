@@ -23,19 +23,19 @@ impl Solution {
         let n = bytes.len();
         let mut parent: Vec<usize> = (0..n).collect();
 
-        for pair in &pairs {
-            Self::union(pair[0] as usize, pair[1] as usize, &mut parent);
-        }
+        pairs
+            .iter()
+            .for_each(|pair| Self::union(pair[0] as usize, pair[1] as usize, &mut parent));
 
         let mut groups: Vec<Vec<u8>> = vec![Vec::new(); n];
-        for (i, &b) in bytes.iter().enumerate() {
+        bytes.iter().enumerate().for_each(|(i, &b)| {
             let root = Self::find(i, &mut parent);
             groups[root].push(b);
-        }
+        });
 
-        for group in &mut groups {
-            group.sort_unstable_by(|a, b| b.cmp(a));
-        }
+        groups
+            .iter_mut()
+            .for_each(|group| group.sort_unstable_by(|a, b| b.cmp(a)));
 
         let mut result = String::with_capacity(n);
         for i in 0..n {

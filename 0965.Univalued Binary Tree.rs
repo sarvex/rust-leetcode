@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Determines if a binary tree is univalued (all nodes have the same value).
     ///

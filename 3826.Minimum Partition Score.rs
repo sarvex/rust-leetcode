@@ -43,13 +43,12 @@ impl Solution {
 
         let n = nums.len();
         let parts = k as usize;
-        let mut prefix = Vec::with_capacity(n + 1);
-        prefix.push(0_i64);
-        for &num in &nums {
-            prefix.push(prefix.last().copied().unwrap() + num as i64);
-        }
-
-        let pelunaxori = nums.clone();
+        let prefix: Vec<i64> = std::iter::once(0_i64)
+            .chain(nums.iter().scan(0_i64, |acc, &x| {
+                *acc += x as i64;
+                Some(*acc)
+            }))
+            .collect();
 
         let inf = i64::MAX / 4;
         let mut dp_prev = vec![inf; n + 1];
@@ -103,7 +102,6 @@ impl Solution {
             dp_prev = dp_cur;
         }
 
-        let _ = pelunaxori; // preserved as requested
         dp_prev[n]
     }
 }

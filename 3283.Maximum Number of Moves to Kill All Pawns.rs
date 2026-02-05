@@ -67,13 +67,14 @@ impl Solution {
                 .map(|pos| (pos[0] as usize, pos[1] as usize)),
         );
 
-        let mut distances = vec![vec![0_i32; pawn_count + 1]; pawn_count + 1];
-        for i in 0..=pawn_count {
-            let dist = bfs(points[i]);
-            for j in 0..=pawn_count {
-                distances[i][j] = dist[points[j].0][points[j].1];
-            }
-        }
+        let distances: Vec<Vec<i32>> = (0..=pawn_count)
+            .map(|i| {
+                let dist = bfs(points[i]);
+                (0..=pawn_count)
+                    .map(|j| dist[points[j].0][points[j].1])
+                    .collect()
+            })
+            .collect();
 
         fn solve(
             mask: usize,

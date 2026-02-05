@@ -27,7 +27,10 @@ impl AuctionSystem {
 
     fn add_bid(&mut self, user_id: i32, item_id: i32, bid_amount: i32) {
         let k = key(user_id, item_id);
-        self.bid_amount_map.entry(k).and_modify(|v| *v = bid_amount).or_insert(bid_amount);
+        self.bid_amount_map
+            .entry(k)
+            .and_modify(|v| *v = bid_amount)
+            .or_insert(bid_amount);
         self.by_item
             .entry(item_id)
             .or_default()

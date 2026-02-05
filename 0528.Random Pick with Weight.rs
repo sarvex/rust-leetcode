@@ -1,4 +1,4 @@
-use rand::{thread_rng, Rng};
+use rand::{Rng, thread_rng};
 
 /// Weighted random index picker using prefix sums and binary search.
 ///

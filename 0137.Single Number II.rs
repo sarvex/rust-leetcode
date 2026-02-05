@@ -14,14 +14,13 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(1)
     pub fn single_number(nums: Vec<i32>) -> i32 {
-        let (mut ones, mut twos) = (0_i32, 0_i32);
-
-        for &value in &nums {
-            ones = (ones ^ value) & !twos;
-            twos = (twos ^ value) & !ones;
-        }
-
-        ones
+        nums.iter()
+            .fold((0_i32, 0_i32), |(ones, twos), &value| {
+                let new_ones = (ones ^ value) & !twos;
+                let new_twos = (twos ^ value) & !new_ones;
+                (new_ones, new_twos)
+            })
+            .0
     }
 }
 

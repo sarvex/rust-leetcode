@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Inverts a binary tree by recursively swapping left and right children.
     ///
@@ -62,7 +61,7 @@ mod tests {
 
         while !queue.is_empty() && i < values.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < values.len() {
                 if let Some(val) = values[i] {
                     let left = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -71,7 +70,7 @@ mod tests {
                 }
                 i += 1;
             }
-            
+
             if i < values.len() {
                 if let Some(val) = values[i] {
                     let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -123,9 +122,25 @@ mod tests {
         //     / \ / \
         //    1  3 6  9
         // Inverted: [4,7,2,9,6,3,1]
-        let root = build_tree(&[Some(4), Some(2), Some(7), Some(1), Some(3), Some(6), Some(9)]);
+        let root = build_tree(&[
+            Some(4),
+            Some(2),
+            Some(7),
+            Some(1),
+            Some(3),
+            Some(6),
+            Some(9),
+        ]);
         let inverted = Solution::invert_tree(root);
-        let expected = build_tree(&[Some(4), Some(7), Some(2), Some(9), Some(6), Some(3), Some(1)]);
+        let expected = build_tree(&[
+            Some(4),
+            Some(7),
+            Some(2),
+            Some(9),
+            Some(6),
+            Some(3),
+            Some(1),
+        ]);
         assert_eq!(tree_to_vec(&inverted), tree_to_vec(&expected));
     }
 

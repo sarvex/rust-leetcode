@@ -21,12 +21,10 @@ impl Solution {
         }
 
         let mut degree = vec![0u32; n];
-        for e in &edges {
-            let u = e[0] as usize;
-            let v = e[1] as usize;
-            degree[u] += 1;
-            degree[v] += 1;
-        }
+        edges.iter().for_each(|e| {
+            degree[e[0] as usize] += 1;
+            degree[e[1] as usize] += 1;
+        });
 
         let mut head = vec![0u32; n + 1];
         for i in 0..n {
@@ -61,10 +59,7 @@ impl Solution {
             }
         }
 
-        let mut dp = Vec::with_capacity(n);
-        for &g in &good {
-            dp.push((g << 1) - 1);
-        }
+        let mut dp: Vec<i32> = good.iter().map(|&g| (g << 1) - 1).collect();
 
         for i in (1..n).rev() {
             let u = order[i] as usize;

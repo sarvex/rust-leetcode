@@ -205,13 +205,13 @@ impl Solution {
         let mut seg_tree = SegTree::new(num_elements);
         seg_tree.build(&difference);
 
-        let mut max_length = 0;
-
         // Slide left pointer, find rightmost balanced position
-        for left_pos in 0..num_elements {
-            if let Some(right_pos) = seg_tree.find_rightmost_zero(left_pos) {
-                max_length = max_length.max(right_pos + 1 - left_pos);
-            }
+        let max_length = (0..num_elements).fold(0, |current_max, left_pos| {
+            let new_max = seg_tree
+                .find_rightmost_zero(left_pos)
+                .map_or(current_max, |right_pos| {
+                    current_max.max(right_pos + 1 - left_pos)
+                });
 
             let next_pos = next_occurrence[left_pos] as usize;
             if next_pos > left_pos + 1 {
@@ -219,7 +219,8 @@ impl Solution {
                 let delta = if (nums[left_pos] & 1) != 0 { -1 } else { 1 };
                 seg_tree.range_add(left_pos + 1, next_pos - 1, delta);
             }
-        }
+            new_max
+        });
 
         max_length as i32
     }

@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds the shortest subarray that, when sorted, sorts the entire array.
     ///
@@ -31,11 +30,7 @@ impl Solution {
                 min_val = nums[n - 1 - i];
             }
         }
-        if right == -1 {
-            0
-        } else {
-            right - left + 1
-        }
+        if right == -1 { 0 } else { right - left + 1 }
     }
 }
 

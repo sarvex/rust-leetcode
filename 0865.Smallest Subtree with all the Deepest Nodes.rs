@@ -20,7 +20,6 @@ impl TreeNode {
     }
 }
 
-
 type TreeLink = Option<Rc<RefCell<TreeNode>>>;
 
 impl Solution {

@@ -17,11 +17,7 @@ impl Solution {
         let bytes = s.as_bytes();
         let n = bytes.len();
         let is_palindrome = (0..n / 2).all(|i| bytes[i] == bytes[n - 1 - i]);
-        if is_palindrome {
-            1
-        } else {
-            2
-        }
+        if is_palindrome { 1 } else { 2 }
     }
 }
 

@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds the length of the longest increasing subsequence using binary search.
     ///
@@ -17,22 +16,16 @@ impl Solution {
     /// - Time: O(n log n)
     /// - Space: O(n)
     pub fn length_of_lis(nums: Vec<i32>) -> i32 {
-        let mut tails = Vec::with_capacity(nums.len());
-
-        for &num in &nums {
-            match tails.binary_search(&num) {
-                Ok(_) => {}
-                Err(pos) => {
-                    if pos == tails.len() {
-                        tails.push(num);
-                    } else {
-                        tails[pos] = num;
-                    }
+        nums.iter()
+            .fold(Vec::with_capacity(nums.len()), |mut tails, &num| {
+                match tails.binary_search(&num) {
+                    Ok(_) => {}
+                    Err(pos) if pos == tails.len() => tails.push(num),
+                    Err(pos) => tails[pos] = num,
                 }
-            }
-        }
-
-        tails.len() as i32
+                tails
+            })
+            .len() as i32
     }
 }
 

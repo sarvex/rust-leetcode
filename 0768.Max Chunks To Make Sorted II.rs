@@ -15,19 +15,20 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n) for the stack
     pub fn max_chunks_to_sorted(arr: Vec<i32>) -> i32 {
-        let mut stack: Vec<i32> = Vec::new();
-        for &val in &arr {
-            if stack.last().is_some_and(|&top| top > val) {
-                let max_val = stack.pop().unwrap();
-                while stack.last().is_some_and(|&top| top > val) {
-                    stack.pop();
+        arr.iter()
+            .fold(Vec::new(), |mut stack, &val| {
+                if stack.last().is_some_and(|&top| top > val) {
+                    let max_val = stack.pop().unwrap();
+                    while stack.last().is_some_and(|&top| top > val) {
+                        stack.pop();
+                    }
+                    stack.push(max_val);
+                } else {
+                    stack.push(val);
                 }
-                stack.push(max_val);
-            } else {
-                stack.push(val);
-            }
-        }
-        stack.len() as i32
+                stack
+            })
+            .len() as i32
     }
 }
 

@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Finds the lowest common ancestor of two nodes using recursive DFS.
     ///
@@ -66,7 +65,10 @@ mod tests {
 
     fn build_tree_with_map(
         vals: Vec<Option<i32>>,
-    ) -> (Option<Rc<RefCell<TreeNode>>>, HashMap<i32, Rc<RefCell<TreeNode>>>) {
+    ) -> (
+        Option<Rc<RefCell<TreeNode>>>,
+        HashMap<i32, Rc<RefCell<TreeNode>>>,
+    ) {
         let mut map = HashMap::new();
         if vals.is_empty() || vals[0].is_none() {
             return (None, map);

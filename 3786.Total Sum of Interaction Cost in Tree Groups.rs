@@ -71,9 +71,7 @@ impl Solution {
         order.reverse();
 
         let mut group_size = [0i32; 21];
-        for &g in &group {
-            group_size[g as usize] += 1;
-        }
+        group.iter().for_each(|&g| group_size[g as usize] += 1);
 
         let mut group_nodes: [Vec<u32>; 21] = std::array::from_fn(|i| {
             let sz = group_size[i];
@@ -83,12 +81,11 @@ impl Solution {
                 Vec::new()
             }
         });
-        for (i, &g) in group.iter().enumerate() {
-            let gi = g as usize;
-            if group_size[gi] >= 2 {
-                group_nodes[gi].push(i as u32);
-            }
-        }
+        group
+            .iter()
+            .enumerate()
+            .filter(|(_, &g)| group_size[g as usize] >= 2)
+            .for_each(|(i, &g)| group_nodes[g as usize].push(i as u32));
 
         let mut total_cost = 0i64;
         let mut cnt = vec![0i32; n];

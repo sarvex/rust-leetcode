@@ -22,27 +22,29 @@ impl Solution {
         }
 
         // Precompute log2 values
-        let mut lg = vec![0usize; n + 1];
-        for i in 2..=n {
-            lg[i] = lg[i / 2] + 1;
-        }
+        let lg: Vec<usize> = (0..=n)
+            .scan(0usize, |acc, i| {
+                if i >= 2 {
+                    *acc = (*acc).max((i as f64).log2().floor() as usize);
+                }
+                Some(*acc)
+            })
+            .collect();
         let k_max = lg[n] + 1;
 
         // Build sparse table for GCD queries
         let mut st = vec![vec![0i64; n]; k_max];
-        for i in 0..n {
-            st[0][i] = nums[i] as i64;
-        }
-        for k in 1..k_max {
-            for i in 0..n {
+        st[0] = nums.iter().map(|&x| x as i64).collect();
+        (1..k_max).for_each(|k| {
+            (0..n).for_each(|i| {
                 let j = i + (1 << (k - 1));
                 st[k][i] = if j < n {
                     Self::gcd(st[k - 1][i], st[k - 1][j])
                 } else {
                     st[k - 1][i]
                 };
-            }
-        }
+            });
+        });
 
         // GCD range query [l, r]
         let query = |l: usize, r: usize| -> i64 {

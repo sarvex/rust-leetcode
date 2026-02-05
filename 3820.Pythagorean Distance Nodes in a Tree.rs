@@ -25,13 +25,12 @@ impl Solution {
         let y = y as usize;
         let z = z as usize;
 
-        let mut adj = vec![Vec::new(); n];
-        for edge in edges {
-            let u = edge[0] as usize;
-            let v = edge[1] as usize;
+        let adj = edges.iter().fold(vec![Vec::new(); n], |mut adj, edge| {
+            let (u, v) = (edge[0] as usize, edge[1] as usize);
             adj[u].push(v);
             adj[v].push(u);
-        }
+            adj
+        });
 
         let dist_x = Self::bfs_distances(n, &adj, x);
         let dist_y = Self::bfs_distances(n, &adj, y);
@@ -71,13 +70,7 @@ mod tests {
     #[test]
     fn test_example_1() {
         assert_eq!(
-            Solution::special_nodes(
-                4,
-                vec![vec![0, 1], vec![0, 2], vec![0, 3]],
-                1,
-                2,
-                3
-            ),
+            Solution::special_nodes(4, vec![vec![0, 1], vec![0, 2], vec![0, 3]], 1, 2, 3),
             3
         );
     }
@@ -85,13 +78,7 @@ mod tests {
     #[test]
     fn test_example_2() {
         assert_eq!(
-            Solution::special_nodes(
-                4,
-                vec![vec![0, 1], vec![1, 2], vec![2, 3]],
-                0,
-                3,
-                2
-            ),
+            Solution::special_nodes(4, vec![vec![0, 1], vec![1, 2], vec![2, 3]], 0, 3, 2),
             0
         );
     }
@@ -99,13 +86,7 @@ mod tests {
     #[test]
     fn test_example_3() {
         assert_eq!(
-            Solution::special_nodes(
-                4,
-                vec![vec![0, 1], vec![1, 2], vec![1, 3]],
-                1,
-                3,
-                0
-            ),
+            Solution::special_nodes(4, vec![vec![0, 1], vec![1, 2], vec![1, 3]], 1, 3, 0),
             1
         );
     }

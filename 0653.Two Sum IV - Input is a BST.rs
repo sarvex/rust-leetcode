@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::{HashSet, VecDeque};
 use std::rc::Rc;
 
-
 impl Solution {
     /// Checks if two nodes in a BST sum to k using BFS with a complement set.
     ///
@@ -64,15 +63,15 @@ mod tests {
         if vals.is_empty() || vals[0].is_none() {
             return None;
         }
-        
+
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
         let mut queue = VecDeque::new();
         queue.push_back(root.clone());
-        
+
         let mut i = 1;
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() {
                 if let Some(val) = vals[i] {
                     let left = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -81,7 +80,7 @@ mod tests {
                 }
                 i += 1;
             }
-            
+
             if i < vals.len() {
                 if let Some(val) = vals[i] {
                     let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -91,7 +90,7 @@ mod tests {
                 i += 1;
             }
         }
-        
+
         Some(root)
     }
 
@@ -144,7 +143,15 @@ mod tests {
         //    -2   2
         //    / \   \
         //  -4  -1   3
-        let root = create_tree(&[Some(0), Some(-2), Some(2), Some(-4), Some(-1), None, Some(3)]);
+        let root = create_tree(&[
+            Some(0),
+            Some(-2),
+            Some(2),
+            Some(-4),
+            Some(-1),
+            None,
+            Some(3),
+        ]);
         assert_eq!(Solution::find_target(root, -1), true); // -4 + 3 = -1
     }
 

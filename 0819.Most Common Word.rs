@@ -1,6 +1,5 @@
 use std::collections::{HashMap, HashSet};
 
-
 impl Solution {
     /// Finds the most frequent non-banned word in a paragraph.
     ///

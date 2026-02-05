@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Counts substrings where at least one of 0s or 1s count is at most k.
     ///

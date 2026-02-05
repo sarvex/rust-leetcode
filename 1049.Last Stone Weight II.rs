@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Minimizes the last stone weight using 0/1 knapsack DP.
     ///

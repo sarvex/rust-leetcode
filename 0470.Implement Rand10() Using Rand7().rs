@@ -1,7 +1,6 @@
 // The rand7() API is already defined for you.
 // fn rand7() -> i32;
 
-
 impl Solution {
     /// Implements rand10() using rejection sampling with rand7().
     ///
@@ -100,10 +99,10 @@ mod tests {
             (vec![2, 3], 10), // val = 10 -> 10
         ];
 
-        for (sequence, expected) in test_cases {
+        test_cases.into_iter().for_each(|(sequence, expected)| {
             set_rand7_sequence(sequence);
             assert_eq!(rand10(), expected);
-        }
+        });
     }
 
     #[test]

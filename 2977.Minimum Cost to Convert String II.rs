@@ -1,4 +1,4 @@
-use std::collections::{hash_map::Entry, HashMap};
+use std::collections::{HashMap, hash_map::Entry};
 
 struct LengthGraph {
     len: usize,
@@ -134,11 +134,7 @@ impl Solution {
         dp[n] = 0;
 
         for i in (0..n).rev() {
-            let mut best = if src[i] == tgt[i] {
-                dp[i + 1]
-            } else {
-                INF
-            };
+            let mut best = if src[i] == tgt[i] { dp[i + 1] } else { INF };
             let remaining = n - i;
             let src_tail = &src[i..];
             let tgt_tail = &tgt[i..];
@@ -173,11 +169,7 @@ impl Solution {
             dp[i] = best;
         }
 
-        if dp[0] >= INF {
-            -1
-        } else {
-            dp[0]
-        }
+        if dp[0] >= INF { -1 } else { dp[0] }
     }
 }
 
@@ -272,13 +264,7 @@ mod tests {
     #[test]
     fn no_rules_but_equal() {
         assert_eq!(
-            Solution::minimum_cost(
-                "abc".to_string(),
-                "abc".to_string(),
-                vec![],
-                vec![],
-                vec![]
-            ),
+            Solution::minimum_cost("abc".to_string(), "abc".to_string(), vec![], vec![], vec![]),
             0
         );
     }

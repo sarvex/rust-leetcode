@@ -12,7 +12,6 @@ impl ListNode {
     }
 }
 
-
 impl Solution {
     /// Finds the maximum twin sum by collecting values and pairing from ends.
     ///
@@ -106,8 +105,8 @@ mod tests {
         // Input: head = [47,22,81,46,94,95,90,22,55,91,6,83,49,65,10,32,41,26,83,99,14,85,42,99]
         // Output: 182
         let head = vec_to_list(vec![
-            47, 22, 81, 46, 94, 95, 90, 22, 55, 91, 6, 83, 49, 65, 10, 32, 41, 26, 83, 99, 14,
-            85, 42, 99,
+            47, 22, 81, 46, 94, 95, 90, 22, 55, 91, 6, 83, 49, 65, 10, 32, 41, 26, 83, 99, 14, 85,
+            42, 99,
         ]);
         assert_eq!(Solution::pair_sum(head), 193);
     }

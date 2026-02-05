@@ -87,19 +87,22 @@ impl Solution {
         let n = parent.len();
 
         // Count children per node
-        let mut child_count = vec![0usize; n];
-        for (_child, &parent_id) in parent.iter().enumerate() {
-            if parent_id != -1 {
-                child_count[parent_id as usize] += 1;
-            }
-        }
+        let child_count = parent
+            .iter()
+            .fold(vec![0usize; n], |mut counts, &parent_id| {
+                if parent_id != -1 {
+                    counts[parent_id as usize] += 1;
+                }
+                counts
+            });
 
-        // Compute start positions for each node's children
-        let mut starts = Vec::with_capacity(n + 1);
-        starts.push(0);
-        for &count in &child_count {
-            starts.push(starts.last().unwrap() + count);
-        }
+        // Compute start positions for each node's children (prefix sums)
+        let starts: Vec<usize> = std::iter::once(0)
+            .chain(child_count.iter().scan(0, |acc, &count| {
+                *acc += count;
+                Some(*acc)
+            }))
+            .collect();
 
         // Fill adjacency list (n-1 edges in tree)
         let total_edges = if n > 0 { n - 1 } else { 0 };
@@ -141,15 +144,13 @@ impl Solution {
     /// Precompute powers of hash base modulo MOD
     #[inline]
     fn compute_hash_powers(max_power: usize, base: u64, modulus: u64) -> Vec<u64> {
-        let mut powers = Vec::with_capacity(max_power + 1);
-        powers.push(1);
-
-        for _ in 1..=max_power {
-            let next_power = (powers.last().unwrap() * base) % modulus;
-            powers.push(next_power);
-        }
-
-        powers
+        (0..=max_power)
+            .scan(1u64, |power, _| {
+                let current = *power;
+                *power = (*power * base) % modulus;
+                Some(current)
+            })
+            .collect()
     }
 
     /// Compute forward hash: children concatenated then node character
@@ -162,20 +163,15 @@ impl Solution {
         char_value: u64,
         modulus: u64,
     ) -> (u64, usize) {
-        let mut hash = 0u64;
-        let mut total_length = 0usize;
-
-        // Concatenate children hashes
-        for &child in children {
-            hash = (hash + forward_hash[child] * hash_powers[total_length]) % modulus;
-            total_length += subtree_size[child];
-        }
+        // Concatenate children hashes using fold
+        let (hash, total_length) = children.iter().fold((0u64, 0usize), |(hash, len), &child| {
+            let new_hash = (hash + forward_hash[child] * hash_powers[len]) % modulus;
+            (new_hash, len + subtree_size[child])
+        });
 
         // Append node character
-        hash = (hash + char_value * hash_powers[total_length]) % modulus;
-        total_length += 1;
-
-        (hash, total_length)
+        let final_hash = (hash + char_value * hash_powers[total_length]) % modulus;
+        (final_hash, total_length + 1)
     }
 
     /// Compute reverse hash: node character then children in reverse
@@ -188,16 +184,15 @@ impl Solution {
         char_value: u64,
         modulus: u64,
     ) -> u64 {
-        let mut hash = char_value;
-        let mut position = 1usize;
-
-        // Concatenate children hashes in reverse order
-        for &child in children.iter().rev() {
-            hash = (hash + reverse_hash[child] * hash_powers[position]) % modulus;
-            position += subtree_size[child];
-        }
-
-        hash
+        // Concatenate children hashes in reverse order using fold
+        children
+            .iter()
+            .rev()
+            .fold((char_value, 1usize), |(hash, pos), &child| {
+                let new_hash = (hash + reverse_hash[child] * hash_powers[pos]) % modulus;
+                (new_hash, pos + subtree_size[child])
+            })
+            .0
     }
 }
 

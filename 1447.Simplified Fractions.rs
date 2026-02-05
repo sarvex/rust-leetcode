@@ -15,11 +15,7 @@ impl Solution {
     /// - Space: O(n²) worst case for the result
     pub fn simplified_fractions(n: i32) -> Vec<String> {
         fn gcd(a: i32, b: i32) -> i32 {
-            if b == 0 {
-                a
-            } else {
-                gcd(b, a % b)
-            }
+            if b == 0 { a } else { gcd(b, a % b) }
         }
 
         (2..=n)

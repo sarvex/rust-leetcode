@@ -39,13 +39,9 @@ impl Solution {
             }
         }
 
-        for d in 0..10 {
-            for _ in 0..count[d] {
-                result = result * 10 + d as i64;
-            }
-        }
-
-        result
+        (0..10).fold(result, |acc, d| {
+            (0..count[d]).fold(acc, |a, _| a * 10 + d as i64)
+        })
     }
 }
 

@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-
 impl Solution {
     /// BFS level-order traversal summing the deepest level.
     ///

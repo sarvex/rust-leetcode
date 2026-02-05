@@ -22,9 +22,7 @@ impl Solution {
 
         // dep[v] = bitmask of nodes that must come before v
         let mut dep = vec![0u32; n];
-        for e in &edges {
-            dep[e[1] as usize] |= 1 << e[0];
-        }
+        edges.iter().for_each(|e| dep[e[1] as usize] |= 1 << e[0]);
 
         // avail[mask] = bitmask of nodes available to pick when `mask` is processed
         let mut avail = vec![0u32; m];

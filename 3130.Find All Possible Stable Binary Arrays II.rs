@@ -2,11 +2,7 @@ const MOD: i64 = 1_000_000_007;
 
 fn mod_add(left: i64, right: i64) -> i64 {
     let value = left + right;
-    if value >= MOD {
-        value - MOD
-    } else {
-        value
-    }
+    if value >= MOD { value - MOD } else { value }
 }
 
 fn mod_sub(left: i64, right: i64) -> i64 {

@@ -18,11 +18,7 @@ impl Solution {
                 .enumerate()
                 .map(|(i, &val)| {
                     let has_strike = (i >= 1 && arr[i - 1] == 10) || (i >= 2 && arr[i - 2] == 10);
-                    if has_strike {
-                        2 * val
-                    } else {
-                        val
-                    }
+                    if has_strike { 2 * val } else { val }
                 })
                 .sum()
         };

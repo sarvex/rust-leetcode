@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-
 impl Solution {
     /// Counts subarrays summing to k using prefix sum frequency tracking.
     ///

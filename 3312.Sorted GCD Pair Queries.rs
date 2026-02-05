@@ -37,37 +37,38 @@ impl Solution {
 
         let max_value = nums.iter().copied().max().unwrap_or(0) as usize;
         let mut freq = vec![0_i64; max_value + 1];
-        for num in nums {
-            freq[num as usize] += 1;
-        }
+        nums.into_iter().for_each(|num| freq[num as usize] += 1);
 
         let mut divisible = vec![0_i64; max_value + 1];
-        for d in 1..=max_value {
-            let mut count = 0_i64;
-            for multiple in (d..=max_value).step_by(d) {
-                count += freq[multiple];
-            }
-            divisible[d] = count;
-        }
+        (1..=max_value).for_each(|d| {
+            divisible[d] = (d..=max_value)
+                .step_by(d)
+                .map(|multiple| freq[multiple])
+                .sum();
+        });
 
         let mut exact_pairs = vec![0_i64; max_value + 1];
-        for d in (1..=max_value).rev() {
+        (1..=max_value).rev().for_each(|d| {
             let count = divisible[d];
-            let mut pairs = count * (count - 1) / 2;
-            for multiple in ((d + d)..=max_value).step_by(d) {
-                pairs -= exact_pairs[multiple];
-            }
-            exact_pairs[d] = pairs;
-        }
+            let pairs = count * (count - 1) / 2;
+            let subtract: i64 = ((d + d)..=max_value)
+                .step_by(d)
+                .map(|multiple| exact_pairs[multiple])
+                .sum();
+            exact_pairs[d] = pairs - subtract;
+        });
 
         let mut prefix = vec![0_i64; max_value + 1];
-        let mut running = 0_i64;
-        for d in 1..=max_value {
-            running += exact_pairs[d];
-            prefix[d] = running;
-        }
+        (1..=max_value).fold(0_i64, |running, d| {
+            let new_running = running + exact_pairs[d];
+            prefix[d] = new_running;
+            new_running
+        });
 
-        queries.into_iter().map(|q| first_greater(&prefix, q)).collect()
+        queries
+            .into_iter()
+            .map(|q| first_greater(&prefix, q))
+            .collect()
     }
 }
 
@@ -77,7 +78,10 @@ mod tests {
 
     #[test]
     fn example_one() {
-        assert_eq!(Solution::gcd_values(vec![2, 3, 4], vec![0, 2, 2]), vec![1, 2, 2]);
+        assert_eq!(
+            Solution::gcd_values(vec![2, 3, 4], vec![0, 2, 2]),
+            vec![1, 2, 2]
+        );
     }
 
     #[test]
@@ -95,6 +99,9 @@ mod tests {
 
     #[test]
     fn all_same_values() {
-        assert_eq!(Solution::gcd_values(vec![6, 6, 6], vec![0, 1, 2]), vec![6, 6, 6]);
+        assert_eq!(
+            Solution::gcd_values(vec![6, 6, 6], vec![0, 1, 2]),
+            vec![6, 6, 6]
+        );
     }
 }

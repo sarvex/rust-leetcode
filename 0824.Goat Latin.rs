@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Converts a sentence to Goat Latin with vowel/consonant rules.
     ///

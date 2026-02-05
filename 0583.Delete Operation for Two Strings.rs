@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds the minimum delete operations to make two strings equal using edit distance DP.
     ///

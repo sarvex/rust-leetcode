@@ -1,3 +1,5 @@
+struct Solution;
+
 impl Solution {
     /// Uses 3-state DP tracking GCD pairs to count disjoint subsequence pairs.
     ///

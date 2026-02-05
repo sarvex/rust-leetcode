@@ -76,7 +76,6 @@ impl TreeNode {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -101,7 +100,7 @@ mod tests {
         let trees = Solution::generate_trees(3);
         // For n=3, there should be 5 unique BSTs (Catalan number C(3) = 5)
         assert_eq!(trees.len(), 5);
-        
+
         // Verify all trees are valid BSTs with values 1, 2, 3
         for tree in &trees {
             let vals = tree_to_vec(tree);
@@ -114,7 +113,7 @@ mod tests {
         let trees = Solution::generate_trees(1);
         // For n=1, there should be exactly 1 tree
         assert_eq!(trees.len(), 1);
-        
+
         // The single tree should have just node with value 1
         let vals = tree_to_vec(&trees[0]);
         assert_eq!(vals, vec![1]);
@@ -125,7 +124,7 @@ mod tests {
         let trees = Solution::generate_trees(2);
         // For n=2, there should be 2 unique BSTs (Catalan number C(2) = 2)
         assert_eq!(trees.len(), 2);
-        
+
         // Both trees should have values 1, 2 in order
         for tree in &trees {
             let vals = tree_to_vec(tree);

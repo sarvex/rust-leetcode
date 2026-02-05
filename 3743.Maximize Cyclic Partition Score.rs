@@ -35,14 +35,15 @@ impl Solution {
             let mut current_dp = vec![NEG_INFINITY; length + 1];
             let mut next_dp = vec![NEG_INFINITY; length + 1];
 
-            let mut running_min = i64::MAX;
-            let mut running_max = i64::MIN;
-            for index in 0..length {
-                let value = arr[index];
-                running_min = running_min.min(value);
-                running_max = running_max.max(value);
-                current_dp[index + 1] = running_max - running_min;
-            }
+            arr.iter().enumerate().fold(
+                (i64::MAX, i64::MIN),
+                |(running_min, running_max), (index, &value)| {
+                    let new_min = running_min.min(value);
+                    let new_max = running_max.max(value);
+                    current_dp[index + 1] = new_max - new_min;
+                    (new_min, new_max)
+                },
+            );
 
             let mut result = current_dp[length];
 
@@ -53,7 +54,7 @@ impl Solution {
                 let mut best_plus_value = NEG_INFINITY;
                 let mut best_score = NEG_INFINITY;
 
-                for position in _segment..length {
+                for position in 1..length {
                     let current_value = arr[position];
                     let previous_score = current_dp[position];
 

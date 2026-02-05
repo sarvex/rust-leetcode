@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds the added character using XOR of all bytes.
     ///

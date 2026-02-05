@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Counts nodes in a complete binary tree using left-depth comparison.
     ///
@@ -110,14 +109,7 @@ mod tests {
         //    / \ /
         //   4  5 6
         // Count: 6
-        let root = build_tree(vec![
-            Some(1),
-            Some(2),
-            Some(3),
-            Some(4),
-            Some(5),
-            Some(6),
-        ]);
+        let root = build_tree(vec![Some(1), Some(2), Some(3), Some(4), Some(5), Some(6)]);
         assert_eq!(Solution::count_nodes(root), 6);
     }
 

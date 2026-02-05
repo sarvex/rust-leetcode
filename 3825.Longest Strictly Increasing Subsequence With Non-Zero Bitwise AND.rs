@@ -16,7 +16,6 @@ impl Solution {
     pub fn longest_subsequence(nums: Vec<i32>) -> i32 {
         const MAX_BITS: usize = 30; // 10^9 < 2^30
         let mut tails: [Vec<i32>; MAX_BITS] = std::array::from_fn(|_| Vec::new());
-        let mut best = 0usize;
 
         for &value in &nums {
             let v = value as u32;
@@ -34,10 +33,7 @@ impl Solution {
             }
         }
 
-        for t in &tails {
-            best = best.max(t.len());
-        }
-        best as i32
+        tails.iter().map(|t| t.len()).max().unwrap_or(0) as i32
     }
 }
 

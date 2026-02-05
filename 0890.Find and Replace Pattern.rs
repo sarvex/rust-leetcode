@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-
 impl Solution {
     /// Finds words matching a character-mapping pattern.
     ///

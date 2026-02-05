@@ -43,15 +43,18 @@ impl Solution {
         }
 
         // Count actual frequency and available positions for candidate
-        n_cnt = 0;
-        let mut not_n: i32 = 0;
-        for (&n, &f) in nums.iter().zip(forbidden.iter()) {
-            if n == cand_n && n == f {
-                n_cnt += 1;
-            } else if n != cand_n && cand_n != f {
-                not_n += 1;
-            }
-        }
+        let (n_cnt, not_n) =
+            nums.iter()
+                .zip(forbidden.iter())
+                .fold((0, 0), |(cnt, not), (&n, &f)| {
+                    if n == cand_n && n == f {
+                        (cnt + 1, not)
+                    } else if n != cand_n && cand_n != f {
+                        (cnt, not + 1)
+                    } else {
+                        (cnt, not)
+                    }
+                });
 
         if n_cnt > not_n {
             -1

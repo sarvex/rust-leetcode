@@ -22,9 +22,9 @@ impl Solution {
         }
 
         let mut remaining = [0u32; 26];
-        for &b in bytes {
-            remaining[(b - b'a') as usize] += 1;
-        }
+        bytes
+            .iter()
+            .for_each(|&b| remaining[(b - b'a') as usize] += 1);
 
         let mut in_stack = [0u32; 26];
         let mut result: Vec<u8> = Vec::with_capacity(bytes.len());

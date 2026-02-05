@@ -16,7 +16,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Recursive DFS for binary tree inorder traversal (left-root-right).
     ///

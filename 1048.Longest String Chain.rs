@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-
 impl Solution {
     /// Finds the longest word chain where each word is a predecessor of the next.
     ///

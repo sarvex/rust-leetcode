@@ -72,15 +72,20 @@ impl Solution {
         }
 
         // DP with O(1) cost lookup per segment
-        let mut dp = vec![i32::MAX; n + 1];
-        dp[0] = 0;
-
-        for i in 1..=n {
-            for j in 0..i {
-                let cost = cost_no_rev[j][i].min(1 + cost_rev[j][i]);
-                dp[i] = dp[i].min(dp[j] + cost);
-            }
-        }
+        let dp = (1..=n).fold(
+            {
+                let mut dp = vec![i32::MAX; n + 1];
+                dp[0] = 0;
+                dp
+            },
+            |mut dp, i| {
+                dp[i] = (0..i)
+                    .map(|j| dp[j] + cost_no_rev[j][i].min(1 + cost_rev[j][i]))
+                    .min()
+                    .unwrap_or(i32::MAX);
+                dp
+            },
+        );
 
         dp[n]
     }

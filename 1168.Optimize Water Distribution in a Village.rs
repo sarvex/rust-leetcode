@@ -1,4 +1,3 @@
-
 struct UnionFind {
     parent: Vec<usize>,
     size: Vec<usize>,

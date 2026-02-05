@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Removes the outermost parentheses of each primitive decomposition.
     ///
@@ -14,22 +13,18 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n) for the result
     pub fn remove_outer_parentheses(s: String) -> String {
-        let mut result = String::with_capacity(s.len());
-        let mut depth = 0;
-        for b in s.bytes() {
-            if b == b'(' {
-                depth += 1;
-                if depth > 1 {
-                    result.push('(');
+        s.bytes()
+            .scan(0i32, |depth, b| {
+                if b == b'(' {
+                    *depth += 1;
+                    Some(if *depth > 1 { Some('(') } else { None })
+                } else {
+                    *depth -= 1;
+                    Some(if *depth > 0 { Some(')') } else { None })
                 }
-            } else {
-                depth -= 1;
-                if depth > 0 {
-                    result.push(')');
-                }
-            }
-        }
-        result
+            })
+            .flatten()
+            .collect()
     }
 }
 

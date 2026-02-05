@@ -179,10 +179,7 @@ impl Solution {
     /// # Complexity
     /// - Time: O((n + q) log n)
     /// - Space: O(n)
-    pub fn number_of_alternating_groups(
-        colors: Vec<i32>,
-        queries: Vec<Vec<i32>>,
-    ) -> Vec<i32> {
+    pub fn number_of_alternating_groups(colors: Vec<i32>, queries: Vec<Vec<i32>>) -> Vec<i32> {
         let mut state = AlternatingGroups::new(colors);
         let mut results = Vec::new();
         for query in queries {
@@ -378,27 +375,39 @@ mod tests {
     fn example_one() {
         let colors = vec![0, 1, 1, 0, 1];
         let queries = vec![vec![2, 1, 0], vec![1, 4]];
-        assert_eq!(Solution::number_of_alternating_groups(colors, queries), vec![2]);
+        assert_eq!(
+            Solution::number_of_alternating_groups(colors, queries),
+            vec![2]
+        );
     }
 
     #[test]
     fn example_two() {
         let colors = vec![0, 0, 1, 0, 1, 1];
         let queries = vec![vec![1, 3], vec![2, 3, 0], vec![1, 5]];
-        assert_eq!(Solution::number_of_alternating_groups(colors, queries), vec![2, 0]);
+        assert_eq!(
+            Solution::number_of_alternating_groups(colors, queries),
+            vec![2, 0]
+        );
     }
 
     #[test]
     fn transition_to_all_ones() {
         let colors = vec![0, 0, 1, 0];
         let queries = vec![vec![1, 3], vec![2, 0, 1], vec![1, 3]];
-        assert_eq!(Solution::number_of_alternating_groups(colors, queries), vec![1, 4]);
+        assert_eq!(
+            Solution::number_of_alternating_groups(colors, queries),
+            vec![1, 4]
+        );
     }
 
     #[test]
     fn all_ones_then_break() {
         let colors = vec![0, 1, 0, 1];
         let queries = vec![vec![1, 3], vec![2, 1, 0], vec![1, 3]];
-        assert_eq!(Solution::number_of_alternating_groups(colors, queries), vec![4, 1]);
+        assert_eq!(
+            Solution::number_of_alternating_groups(colors, queries),
+            vec![4, 1]
+        );
     }
 }

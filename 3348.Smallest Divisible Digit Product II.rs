@@ -1,3 +1,5 @@
+struct Solution;
+
 /// Tracks required counts of prime factors 2, 3, 5, 7 for divisibility.
 #[derive(Clone, Copy, Debug, Default)]
 struct PrimeFactorCount {
@@ -61,19 +63,22 @@ impl Solution {
         let mut prefix_factors = Vec::with_capacity(input_length + 1);
         prefix_factors.push(required_factors);
 
-        let mut remaining_factors = required_factors;
-        let mut first_zero_pos = input_length;
+        // Find first zero position
+        let first_zero_pos = input_bytes
+            .iter()
+            .position(|&b| b == b'0')
+            .unwrap_or(input_length);
 
-        // Process each digit, tracking remaining factors needed
-        for (pos, &digit_byte) in input_bytes.iter().enumerate() {
-            if digit_byte == b'0' {
-                first_zero_pos = pos;
-                break;
-            }
-            let digit = digit_byte - b'0';
-            remaining_factors = Self::subtract_digit_contribution(remaining_factors, digit);
-            prefix_factors.push(remaining_factors);
-        }
+        // Process each digit until zero, tracking remaining factors needed
+        let remaining_factors =
+            input_bytes[..first_zero_pos]
+                .iter()
+                .fold(required_factors, |factors, &digit_byte| {
+                    let digit = digit_byte - b'0';
+                    let new_factors = Self::subtract_digit_contribution(factors, digit);
+                    prefix_factors.push(new_factors);
+                    new_factors
+                });
 
         // If no zeros and already satisfies, return original
         if first_zero_pos == input_length

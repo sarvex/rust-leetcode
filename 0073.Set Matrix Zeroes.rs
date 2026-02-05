@@ -22,31 +22,26 @@ impl Solution {
         let first_row_has_zero = matrix[0].iter().any(|value| *value == 0);
         let first_col_has_zero = matrix.iter().any(|row| row[0] == 0);
 
-        for i in 1..m {
-            for j in 1..n {
-                if matrix[i][j] == 0 {
-                    matrix[i][0] = 0;
-                    matrix[0][j] = 0;
-                }
-            }
-        }
+        (1..m).for_each(|i| {
+            (1..n).filter(|&j| matrix[i][j] == 0).for_each(|j| {
+                matrix[i][0] = 0;
+                matrix[0][j] = 0;
+            });
+        });
 
-        for i in 1..m {
-            for j in 1..n {
-                if matrix[i][0] == 0 || matrix[0][j] == 0 {
-                    matrix[i][j] = 0;
-                }
-            }
-        }
+        (1..m).for_each(|i| {
+            let zero_row = matrix[i][0] == 0;
+            (1..n)
+                .filter(|&j| zero_row || matrix[0][j] == 0)
+                .for_each(|j| matrix[i][j] = 0);
+        });
 
         if first_row_has_zero {
             matrix[0].fill(0);
         }
 
         if first_col_has_zero {
-            for row in matrix.iter_mut() {
-                row[0] = 0;
-            }
+            matrix.iter_mut().for_each(|row| row[0] = 0);
         }
     }
 }

@@ -30,9 +30,10 @@ impl Solution {
 
         // Map original index to position in sorted order
         let mut pos = vec![0usize; n];
-        for (p, &idx) in sorted_indices.iter().enumerate() {
-            pos[idx] = p;
-        }
+        sorted_indices
+            .iter()
+            .enumerate()
+            .for_each(|(p, &idx)| pos[idx] = p);
 
         // For each position, find the farthest position reachable in one hop
         // Using two pointers since sorted values allow binary search
@@ -54,11 +55,11 @@ impl Solution {
         jump[0].copy_from_slice(&farthest);
 
         // Build sparse table
-        for k in 1..log_n {
-            for i in 0..n {
+        (1..log_n).for_each(|k| {
+            (0..n).for_each(|i| {
                 jump[k][i] = jump[k - 1][jump[k - 1][i]];
-            }
-        }
+            });
+        });
 
         // Process queries
         queries

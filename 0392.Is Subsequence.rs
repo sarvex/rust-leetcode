@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Checks if `s` is a subsequence of `t` using a two-pointer scan.
     ///

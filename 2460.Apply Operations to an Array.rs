@@ -15,22 +15,21 @@ impl Solution {
     pub fn apply_operations(nums: Vec<i32>) -> Vec<i32> {
         let mut nums = nums;
 
-        for i in 0..nums.len() - 1 {
+        // Apply doubling operations on adjacent equal elements
+        (0..nums.len() - 1).for_each(|i| {
             if nums[i] == nums[i + 1] {
                 nums[i] <<= 1;
                 nums[i + 1] = 0;
             }
-        }
+        });
 
-        let mut write = 0;
-        for i in 0..nums.len() {
-            if nums[i] != 0 {
-                nums.swap(i, write);
-                write += 1;
-            }
-        }
-
-        nums
+        // Partition: collect non-zeros first, then pad with zeros
+        let non_zeros: Vec<i32> = nums.iter().copied().filter(|&x| x != 0).collect();
+        let zero_count = nums.len() - non_zeros.len();
+        non_zeros
+            .into_iter()
+            .chain(std::iter::repeat(0).take(zero_count))
+            .collect()
     }
 }
 

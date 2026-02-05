@@ -7,10 +7,13 @@ struct RangeFreqQuery {
 
 impl RangeFreqQuery {
     fn new(arr: Vec<i32>) -> Self {
-        let mut indices = HashMap::new();
-        for (i, &val) in arr.iter().enumerate() {
-            indices.entry(val).or_insert_with(Vec::new).push(i);
-        }
+        let indices = arr
+            .iter()
+            .enumerate()
+            .fold(HashMap::new(), |mut acc, (i, &val)| {
+                acc.entry(val).or_insert_with(Vec::new).push(i);
+                acc
+            });
         Self { indices }
     }
 

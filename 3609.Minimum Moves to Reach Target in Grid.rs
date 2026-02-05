@@ -91,11 +91,7 @@ impl Solution {
                 }
             }
 
-            if best == i32::MAX {
-                -1
-            } else {
-                best
-            }
+            if best == i32::MAX { -1 } else { best }
         } else {
             // ty > tx: last move increased y
             // Try both possibilities for previous position
@@ -136,11 +132,7 @@ impl Solution {
                 }
             }
 
-            if best == i32::MAX {
-                -1
-            } else {
-                best
-            }
+            if best == i32::MAX { -1 } else { best }
         }
     }
 }

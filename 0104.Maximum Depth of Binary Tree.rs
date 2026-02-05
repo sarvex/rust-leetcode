@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Recursive DFS for maximum depth of a binary tree.
     ///

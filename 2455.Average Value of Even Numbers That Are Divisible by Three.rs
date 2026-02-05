@@ -19,11 +19,7 @@ impl Solution {
             .filter(|x| **x % 6 == 0)
             .fold((0, 0), |(s, n), &x| (s + x, n + 1));
 
-        if count == 0 {
-            0
-        } else {
-            sum / count
-        }
+        if count == 0 { 0 } else { sum / count }
     }
 }
 

@@ -31,15 +31,12 @@ impl Solution {
 
         let mut ops = 0;
         while nums.len() > 1 {
-            let mut min_sum = nums[0] + nums[1];
-            let mut idx = 0;
-            for i in 1..nums.len() - 1 {
-                let cur_sum = nums[i] + nums[i + 1];
-                if cur_sum < min_sum {
-                    min_sum = cur_sum;
-                    idx = i;
-                }
-            }
+            let (idx, min_sum) = nums
+                .windows(2)
+                .enumerate()
+                .map(|(i, w)| (i, w[0] + w[1]))
+                .min_by_key(|&(_, sum)| sum)
+                .unwrap();
 
             nums[idx] = min_sum;
             nums.remove(idx + 1);

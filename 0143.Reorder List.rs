@@ -13,7 +13,6 @@ impl ListNode {
 
 use std::collections::VecDeque;
 
-
 impl Solution {
     /// Reorders a linked list by interleaving from both ends using a deque.
     ///
@@ -32,7 +31,7 @@ impl Solution {
         if head.is_none() {
             return;
         }
-        
+
         let mut tail = &mut head.as_mut().unwrap().next;
         let mut current = tail.take();
         let mut deque = VecDeque::new();

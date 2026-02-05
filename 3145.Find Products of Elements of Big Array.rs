@@ -175,7 +175,14 @@ mod tests {
     #[test]
     fn test_small_ranges_against_naive() {
         let nums = build_big_nums(40);
-        let cases = vec![(0, 0, 7), (1, 3, 7), (2, 5, 3), (7, 7, 4), (0, 9, 5), (10, 15, 11)];
+        let cases = vec![
+            (0, 0, 7),
+            (1, 3, 7),
+            (2, 5, 3),
+            (7, 7, 4),
+            (0, 9, 5),
+            (10, 15, 11),
+        ];
         let queries: Vec<Vec<i64>> = cases
             .iter()
             .map(|&(left, right, modu)| vec![left as i64, right as i64, modu as i64])

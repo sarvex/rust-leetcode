@@ -27,11 +27,11 @@ impl Solution {
         let k = k as usize;
 
         let mut adj = vec![vec![]; n];
-        for edge in &edges {
+        edges.iter().for_each(|edge| {
             let (u, v) = (edge[0] as usize, edge[1] as usize);
             adj[u].push(v);
             adj[v].push(u);
-        }
+        });
 
         let mut f = vec![vec![0i64; k + 1]; n];
         let mut g = vec![vec![0i64; k + 1]; n];
@@ -45,11 +45,10 @@ impl Solution {
                 order.push((node, parent));
             } else {
                 stack.push((node, parent, true));
-                for &child in &adj[node] {
-                    if child != parent {
-                        stack.push((child, node, false));
-                    }
-                }
+                adj[node]
+                    .iter()
+                    .filter(|&&child| child != parent)
+                    .for_each(|&child| stack.push((child, node, false)));
             }
         }
 
@@ -75,10 +74,10 @@ impl Solution {
             g[node][k] = (-val + sg[k]).max(val + sf[1]);
 
             // Distance 1 to k-1: cannot invert
-            for d in (1..k).rev() {
+            (1..k).rev().for_each(|d| {
                 f[node][d] = val + sf[d + 1];
                 g[node][d] = -val + sg[d + 1];
-            }
+            });
         }
 
         f[0][k]

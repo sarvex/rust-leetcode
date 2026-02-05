@@ -15,12 +15,7 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(m) for extracted non-negative values
     pub fn rotate_elements(mut nums: Vec<i32>, k: i32) -> Vec<i32> {
-        let mut non_neg = Vec::with_capacity(nums.len());
-        for &x in nums.iter() {
-            if x >= 0 {
-                non_neg.push(x);
-            }
-        }
+        let non_neg: Vec<_> = nums.iter().filter(|&&x| x >= 0).copied().collect();
 
         let m = non_neg.len();
         if m < 2 {

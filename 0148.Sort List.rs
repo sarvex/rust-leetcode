@@ -14,7 +14,6 @@ impl ListNode {
     }
 }
 
-
 impl Solution {
     /// Sorts a linked list in O(n log n) time using merge sort.
     ///

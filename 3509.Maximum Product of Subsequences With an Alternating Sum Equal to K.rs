@@ -85,9 +85,11 @@ impl Solution {
                     .or_insert_with(|| (vec![0u64; num_chunks], false, false));
                 entry.1 |= new_zero;
                 entry.2 |= new_big;
-                for (i, &chunk) in new_prods.iter().enumerate() {
-                    entry.0[i] |= chunk;
-                }
+                entry
+                    .0
+                    .iter_mut()
+                    .zip(new_prods.iter())
+                    .for_each(|(dst, &src)| *dst |= src);
             }
 
             // Start new subsequence

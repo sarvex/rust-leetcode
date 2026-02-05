@@ -28,35 +28,26 @@ impl Solution {
             let delta = nums[i] - nums[i - 1];
             let min_inc = if delta > 0 { delta as usize } else { 0 };
 
-            let mut prefix = vec![0_i64; prev_max + 1];
-            let mut running = 0_i64;
-            for (idx, value) in dp.iter().enumerate() {
-                running += *value;
-                if running >= MOD {
-                    running -= MOD;
-                }
-                prefix[idx] = running;
-            }
+            let prefix: Vec<i64> = dp
+                .iter()
+                .scan(0_i64, |running, &value| {
+                    *running = (*running + value) % MOD;
+                    Some(*running)
+                })
+                .collect();
 
-            let mut next = vec![0_i64; curr_max + 1];
-            for value in 0..=curr_max {
-                if value < min_inc {
-                    continue;
-                }
-                let max_prev = (value - min_inc).min(prev_max);
-                next[value] = prefix[max_prev];
-            }
-            dp = next;
+            dp = (0..=curr_max)
+                .map(|value| {
+                    if value < min_inc {
+                        0_i64
+                    } else {
+                        prefix[(value - min_inc).min(prev_max)]
+                    }
+                })
+                .collect();
         }
 
-        let mut total = 0_i64;
-        for value in dp {
-            total += value;
-            if total >= MOD {
-                total -= MOD;
-            }
-        }
-        total as i32
+        (dp.iter().fold(0_i64, |acc, &v| (acc + v) % MOD)) as i32
     }
 }
 

@@ -33,13 +33,15 @@ impl Solution {
             _ => {}
         }
 
-        let (mut min_b, mut max_b) = (i32::MAX, i32::MIN);
-        for i in 0..n {
-            if nums[i] != -1 && ((i > 0 && nums[i - 1] == -1) || (i + 1 < n && nums[i + 1] == -1)) {
-                min_b = min_b.min(nums[i]);
-                max_b = max_b.max(nums[i]);
-            }
-        }
+        let (min_b, max_b) = nums
+            .iter()
+            .enumerate()
+            .filter(|&(i, &v)| {
+                v != -1 && ((i > 0 && nums[i - 1] == -1) || (i + 1 < n && nums[i + 1] == -1))
+            })
+            .fold((i32::MAX, i32::MIN), |(min_b, max_b), (_, &v)| {
+                (min_b.min(v), max_b.max(v))
+            });
 
         let (mut lo, mut hi) = (0i32, 1_000_000_000i32);
 

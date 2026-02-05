@@ -13,7 +13,6 @@
 /// # Complexity
 /// - Time: O((n + q) * log n) amortized
 /// - Space: O(n + distinct_primes)
-
 use std::collections::HashMap;
 
 struct SegTree {
@@ -69,11 +68,7 @@ impl SegTree {
 
     #[inline(always)]
     fn max(&self) -> i32 {
-        if self.n == 0 {
-            0
-        } else {
-            self.tree[1]
-        }
+        if self.n == 0 { 0 } else { self.tree[1] }
     }
 }
 
@@ -91,7 +86,7 @@ impl Solution {
         let mut positions: HashMap<u32, Vec<u32>> = HashMap::with_capacity(1000);
         let mut total_primes = 0i32;
 
-        for (i, &num) in nums.iter().enumerate() {
+        nums.iter().enumerate().for_each(|(i, &num)| {
             let v = num as u32;
             if is_prime[v as usize] {
                 let pos = positions.entry(v).or_default();
@@ -100,17 +95,18 @@ impl Solution {
                 }
                 pos.push(i as u32);
             }
-        }
+        });
 
         let mut seg = SegTree::new(n - 1);
 
-        for pos in positions.values() {
-            if pos.len() > 1 {
+        positions
+            .values()
+            .filter(|pos| pos.len() > 1)
+            .for_each(|pos| {
                 let f = pos[0] as usize;
                 let l = *pos.last().unwrap() as usize;
                 seg.update(f, l - 1, 1);
-            }
-        }
+            });
 
         let mut result = Vec::with_capacity(queries.len());
 
@@ -193,17 +189,14 @@ fn sieve() -> [bool; MAX_VAL] {
     let mut is_prime = [true; MAX_VAL];
     is_prime[0] = false;
     is_prime[1] = false;
-    let mut i = 2;
-    while i * i < MAX_VAL {
-        if is_prime[i] {
-            let mut j = i * i;
-            while j < MAX_VAL {
+    (2..)
+        .take_while(|&i| i * i < MAX_VAL)
+        .filter(|&i| is_prime[i])
+        .for_each(|i| {
+            (i * i..MAX_VAL).step_by(i).for_each(|j| {
                 is_prime[j] = false;
-                j += i;
-            }
-        }
-        i += 1;
-    }
+            });
+        });
     is_prime
 }
 

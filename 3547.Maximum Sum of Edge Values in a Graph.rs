@@ -21,21 +21,19 @@ impl Solution {
         let mut result = 0i64;
 
         // Sum of odd consecutive pairs: 1*3 + 3*5 + 5*7 + ...
-        let mut k = 3i64;
-        while k <= n {
-            result += k * (k - 2);
-            k += 2;
-        }
+        result += (3..=n).step_by(2).map(|k| k * (k - 2)).sum::<i64>();
 
         // Transition between max odd and max even
         result += n * (n - 1);
 
         // Sum of even consecutive pairs descending
-        k = if n % 2 == 0 { n - 2 } else { n - 3 };
-        while k > 1 {
-            result += (k + 2) * k;
-            k -= 2;
-        }
+        let start = if n % 2 == 0 { n - 2 } else { n - 3 };
+        result += (0..=(start - 2) / 2)
+            .map(|i| {
+                let k = start - 2 * i;
+                (k + 2) * k
+            })
+            .sum::<i64>();
 
         // Cycle has n edges (adds wrap-around 1*2), path has n-1 edges
         if edges.len() == n as usize {

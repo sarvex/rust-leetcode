@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Counts beautiful arrangements using backtracking with precomputed divisibility.
     ///

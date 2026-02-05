@@ -65,10 +65,7 @@ mod tests {
 
     #[test]
     fn test_example_3() {
-        assert_eq!(
-            Solution::max_capacity(vec![2, 2, 2], vec![3, 5, 4], 5),
-            9
-        );
+        assert_eq!(Solution::max_capacity(vec![2, 2, 2], vec![3, 5, 4], 5), 9);
     }
 
     #[test]
@@ -78,10 +75,7 @@ mod tests {
 
     #[test]
     fn test_two_machines_same_cost() {
-        assert_eq!(
-            Solution::max_capacity(vec![3, 3], vec![2, 4], 7),
-            6
-        );
+        assert_eq!(Solution::max_capacity(vec![3, 3], vec![2, 4], 7), 6);
     }
 
     #[test]

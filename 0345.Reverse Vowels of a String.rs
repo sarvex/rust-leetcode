@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Reverses only the vowels in a string using two pointers on a byte vector.
     ///

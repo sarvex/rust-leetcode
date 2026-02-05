@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Finds the minimum absolute difference between any two BST nodes via in-order traversal.
     ///

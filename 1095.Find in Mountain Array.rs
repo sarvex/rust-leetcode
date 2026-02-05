@@ -1,4 +1,3 @@
-
 // MountainArray's API interface.
 pub struct MountainArray {
     arr: Vec<i32>,
@@ -58,10 +57,6 @@ impl Solution {
                 lo = mid + 1;
             }
         }
-        if m.get(lo) == target {
-            lo
-        } else {
-            -1
-        }
+        if m.get(lo) == target { lo } else { -1 }
     }
 }

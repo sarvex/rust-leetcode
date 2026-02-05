@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-
 impl Solution {
     /// Finds words that appear exactly once across both sentences.
     ///

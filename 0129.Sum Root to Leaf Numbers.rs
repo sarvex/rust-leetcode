@@ -19,7 +19,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Sums all root-to-leaf numbers using DFS with accumulated value.
     ///

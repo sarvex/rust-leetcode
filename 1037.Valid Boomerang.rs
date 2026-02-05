@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Checks if three points form a valid boomerang (non-collinear).
     ///

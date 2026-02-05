@@ -71,11 +71,9 @@ impl Solution {
     pub fn min_deletions(s: String, queries: Vec<Vec<i32>>) -> Vec<i32> {
         let len = s.len();
         let mut bytes = s.as_bytes().to_vec();
-        let mut values = Vec::with_capacity(len);
-        values.push(0);
-        for i in 1..len {
-            values.push(i32::from(bytes[i - 1] == bytes[i]));
-        }
+        let values: Vec<i32> = std::iter::once(0)
+            .chain(bytes.windows(2).map(|w| i32::from(w[0] == w[1])))
+            .collect();
         let mut tree = Fenwick::from_slice(&values);
         let mut ans = Vec::with_capacity(queries.len());
         for query in &queries {

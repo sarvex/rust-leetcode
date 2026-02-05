@@ -14,18 +14,7 @@ impl Solution {
     /// - Time: O(log n) — standard binary search
     /// - Space: O(1) — scalar pointers only
     pub fn search_insert(nums: Vec<i32>, target: i32) -> i32 {
-        let (mut left, mut right) = (0usize, nums.len());
-
-        while left < right {
-            let mid = left + (right - left) / 2;
-            if nums[mid] >= target {
-                right = mid;
-            } else {
-                left = mid + 1;
-            }
-        }
-
-        left as i32
+        nums.partition_point(|&x| x < target) as i32
     }
 }
 

@@ -108,10 +108,10 @@ mod tests {
             },
         ];
 
-        for (i, tc) in test_cases.iter().enumerate() {
+        test_cases.iter().enumerate().for_each(|(i, tc)| {
             let result = Solution::max_alternating_sum(tc.nums.clone(), tc.swaps.clone());
             assert_eq!(result, tc.expected, "Test case {} failed", i + 1);
-        }
+        });
     }
 
     #[test]

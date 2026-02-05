@@ -60,42 +60,42 @@ impl Solution {
         }
 
         let len = bits.len();
-        let mut result = 0i64;
 
-        for num_bits in 1..len {
-            if target <= num_bits {
-                result = (result + binomial[num_bits - 1][target - 1]) % MOD;
-            }
-        }
+        let result = (1..len)
+            .filter(|&num_bits| target <= num_bits)
+            .fold(0i64, |acc, num_bits| {
+                (acc + binomial[num_bits - 1][target - 1]) % MOD
+            });
 
-        let mut ones_placed = 1;
-        for (pos, &bit) in bits.iter().enumerate().skip(1) {
-            let remaining_bits = len - pos - 1;
-
-            if bit == 1 {
-                if ones_placed <= target {
-                    let ones_needed = target - ones_placed;
-                    if ones_needed <= remaining_bits {
-                        result = (result + binomial[remaining_bits][ones_needed]) % MOD;
+        bits.iter()
+            .enumerate()
+            .skip(1)
+            .fold((result, 1usize), |(mut acc, ones_placed), (pos, &bit)| {
+                if bit == 1 {
+                    let remaining_bits = len - pos - 1;
+                    if ones_placed <= target {
+                        let ones_needed = target - ones_placed;
+                        if ones_needed <= remaining_bits {
+                            acc = (acc + binomial[remaining_bits][ones_needed]) % MOD;
+                        }
                     }
+                    (acc, ones_placed + 1)
+                } else {
+                    (acc, ones_placed)
                 }
-                ones_placed += 1;
-            }
-        }
-
-        result
+            })
+            .0
     }
 
     fn precompute_binomial(max_n: usize) -> Vec<Vec<i64>> {
         const MOD: i64 = 1_000_000_007;
-        let mut c = vec![vec![0i64; max_n + 1]; max_n + 1];
-        for n in 0..=max_n {
+        (0..=max_n).fold(vec![vec![0i64; max_n + 1]; max_n + 1], |mut c, n| {
             c[n][0] = 1;
-            for k in 1..=n {
+            (1..=n).for_each(|k| {
                 c[n][k] = (c[n - 1][k - 1] + c[n - 1][k]) % MOD;
-            }
-        }
-        c
+            });
+            c
+        })
     }
 }
 

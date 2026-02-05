@@ -25,34 +25,28 @@ impl Solution {
 
         let start_bytes = start.as_bytes();
         let target_bytes = target.as_bytes();
-        let mut mismatch = Vec::with_capacity(n);
-        for i in 0..n {
-            mismatch.push(start_bytes[i] != target_bytes[i]);
-        }
+        let mut mismatch: Vec<bool> = start_bytes
+            .iter()
+            .zip(target_bytes.iter())
+            .map(|(&s, &t)| s != t)
+            .collect();
 
         let mut degree = vec![0usize; n];
-        for edge in &edges {
+        edges.iter().for_each(|edge| {
             let (u, v) = (edge[0] as usize, edge[1] as usize);
             degree[u] += 1;
             degree[v] += 1;
-        }
+        });
 
-        let mut graph: Vec<Vec<(usize, usize)>> = Vec::with_capacity(n);
-        for &deg in &degree {
-            graph.push(Vec::with_capacity(deg));
-        }
+        let mut graph: Vec<Vec<(usize, usize)>> =
+            degree.iter().map(|&deg| Vec::with_capacity(deg)).collect();
         for (i, edge) in edges.iter().enumerate() {
             let (u, v) = (edge[0] as usize, edge[1] as usize);
             graph[u].push((i, v));
             graph[v].push((i, u));
         }
 
-        let mut stack = Vec::with_capacity(n);
-        for v in 0..n {
-            if degree[v] == 1 {
-                stack.push(v);
-            }
-        }
+        let mut stack: Vec<usize> = (0..n).filter(|&v| degree[v] == 1).collect();
         let mut toggle = vec![false; m];
 
         while let Some(v) = stack.pop() {
@@ -89,13 +83,11 @@ impl Solution {
             degree[v] = 0;
         }
 
-        let mut result = Vec::with_capacity(m);
-        for (i, &t) in toggle.iter().enumerate() {
-            if t {
-                result.push(i as i32);
-            }
-        }
-        result
+        toggle
+            .iter()
+            .enumerate()
+            .filter_map(|(i, &t)| t.then_some(i as i32))
+            .collect()
     }
 }
 

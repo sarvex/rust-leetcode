@@ -27,15 +27,21 @@ impl Solution {
             let left = 2 * node;
             let right = 2 * node + 1;
             cnt[node] = [0; 5];
-            for r in 0..k {
-                cnt[node][r] = cnt[left][r];
-            }
-            for r in 0..k {
-                if cnt[right][r] > 0 {
+            (0..k).for_each(|r| cnt[node][r] = cnt[left][r]);
+            (0..k)
+                .filter_map(|r| {
+                    if cnt[right][r] > 0 {
+                        Some((r, cnt[right][r]))
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>()
+                .into_iter()
+                .for_each(|(r, count)| {
                     let new_r = (prod[left] * r) % k;
-                    cnt[node][new_r] += cnt[right][r];
-                }
-            }
+                    cnt[node][new_r] += count;
+                });
             prod[node] = (prod[left] * prod[right]) % k;
         }
 
@@ -110,15 +116,11 @@ impl Solution {
             let (right_cnt, right_prod) = query(cnt, prod, k, 2 * node + 1, mid + 1, end, l, r);
 
             let mut result = [0i32; 5];
-            for i in 0..k {
-                result[i] = left_cnt[i];
-            }
-            for i in 0..k {
-                if right_cnt[i] > 0 {
-                    let new_r = (left_prod * i) % k;
-                    result[new_r] += right_cnt[i];
-                }
-            }
+            (0..k).for_each(|i| result[i] = left_cnt[i]);
+            (0..k).filter(|&i| right_cnt[i] > 0).for_each(|i| {
+                let new_r = (left_prod * i) % k;
+                result[new_r] += right_cnt[i];
+            });
             (result, (left_prod * right_prod) % k)
         }
 

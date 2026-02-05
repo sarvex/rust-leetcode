@@ -18,11 +18,7 @@ impl Solution {
         let full = time / cycle;
         let rem = time % cycle;
 
-        if full % 2 == 0 {
-            1 + rem
-        } else {
-            n - rem
-        }
+        if full % 2 == 0 { 1 + rem } else { n - rem }
     }
 }
 

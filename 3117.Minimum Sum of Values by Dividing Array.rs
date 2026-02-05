@@ -87,15 +87,9 @@ impl Solution {
             prev_dp = Some(next_dp);
         }
 
-        let answer = prev_dp
-            .and_then(|dp| dp.last().copied())
-            .unwrap_or(INF);
+        let answer = prev_dp.and_then(|dp| dp.last().copied()).unwrap_or(INF);
 
-        if answer >= INF {
-            -1
-        } else {
-            answer as i32
-        }
+        if answer >= INF { -1 } else { answer as i32 }
     }
 }
 

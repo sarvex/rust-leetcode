@@ -20,12 +20,18 @@ impl Solution {
         let k = k as i64;
 
         // Prefix sums
-        let mut s = vec![0i64; n + 1];
-        let mut c = vec![0i64; n + 1];
-        for i in 0..n {
-            s[i + 1] = s[i] + nums[i] as i64;
-            c[i + 1] = c[i] + cost[i] as i64;
-        }
+        let s: Vec<i64> = std::iter::once(0)
+            .chain(nums.iter().scan(0i64, |acc, &x| {
+                *acc += x as i64;
+                Some(*acc)
+            }))
+            .collect();
+        let c: Vec<i64> = std::iter::once(0)
+            .chain(cost.iter().scan(0i64, |acc, &x| {
+                *acc += x as i64;
+                Some(*acc)
+            }))
+            .collect();
         let c_n = c[n];
 
         // CHT: lines (slope, intercept), monotonic deque with decreasing slopes

@@ -59,7 +59,7 @@ impl Solution {
                 dp[mask] = dp[mask].max(vals[u] as i64);
             }
 
-            for &child in &children[u] {
+            let dp = children[u].iter().fold(dp, |dp, &child| {
                 let child_dp = dfs(child, children, vals, masks, result);
                 let mut new_dp = vec![NEG_INF; 1024];
 
@@ -80,8 +80,8 @@ impl Solution {
                         submask = (submask - 1) & complement;
                     }
                 }
-                dp = new_dp;
-            }
+                new_dp
+            });
 
             let max_score = *dp.iter().max().unwrap();
             *result = (*result + max_score) % MOD;

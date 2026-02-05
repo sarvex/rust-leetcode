@@ -12,7 +12,6 @@ impl ListNode {
     }
 }
 
-
 impl Solution {
     /// Finds the next greater value for each node using a monotonic stack.
     ///
@@ -117,6 +116,9 @@ mod tests {
         // Input: head = [1,7,5,1,9,2,5,1]
         // Output: [7,9,9,9,0,5,0,0]
         let head = vec_to_list(vec![1, 7, 5, 1, 9, 2, 5, 1]);
-        assert_eq!(Solution::next_larger_nodes(head), vec![7, 9, 9, 9, 0, 5, 0, 0]);
+        assert_eq!(
+            Solution::next_larger_nodes(head),
+            vec![7, 9, 9, 9, 0, 5, 0, 0]
+        );
     }
 }

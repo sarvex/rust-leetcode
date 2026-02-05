@@ -15,19 +15,18 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(1) — 26-element array
     pub fn max_length_between_equal_characters(s: String) -> i32 {
-        let mut first = [-1i32; 26];
-        let mut best = -1;
-
-        for (i, b) in s.bytes().enumerate() {
-            let idx = (b - b'a') as usize;
-            if first[idx] == -1 {
-                first[idx] = i as i32;
-            } else {
-                best = best.max(i as i32 - first[idx] - 1);
-            }
-        }
-
-        best
+        s.bytes()
+            .enumerate()
+            .fold(([-1i32; 26], -1), |(mut first, best), (i, b)| {
+                let idx = (b - b'a') as usize;
+                if first[idx] == -1 {
+                    first[idx] = i as i32;
+                    (first, best)
+                } else {
+                    (first, best.max(i as i32 - first[idx] - 1))
+                }
+            })
+            .1
     }
 }
 

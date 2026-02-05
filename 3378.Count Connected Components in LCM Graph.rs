@@ -31,21 +31,22 @@ impl Solution {
         let mut parent: Vec<usize> = (0..=threshold).collect();
         let mut first = vec![0usize; threshold + 1];
 
-        for &v in &valid {
-            let mut m = v;
-            while m <= threshold {
-                if first[m] == 0 {
-                    first[m] = v;
-                } else {
-                    let px = Self::find(&mut parent, first[m]);
-                    let py = Self::find(&mut parent, v);
-                    if px != py {
-                        parent[px] = py;
+        valid.iter().for_each(|&v| {
+            (1..)
+                .map(|mult| v * mult)
+                .take_while(|&m| m <= threshold)
+                .for_each(|m| {
+                    if first[m] == 0 {
+                        first[m] = v;
+                    } else {
+                        let px = Self::find(&mut parent, first[m]);
+                        let py = Self::find(&mut parent, v);
+                        if px != py {
+                            parent[px] = py;
+                        }
                     }
-                }
-                m += v;
-            }
-        }
+                });
+        });
 
         let roots: std::collections::HashSet<_> =
             valid.iter().map(|&v| Self::find(&mut parent, v)).collect();

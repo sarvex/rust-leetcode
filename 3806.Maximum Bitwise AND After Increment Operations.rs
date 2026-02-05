@@ -48,16 +48,12 @@ impl Solution {
                 let suffix_len = n - clamp_idx;
                 if suffix_len <= 64 || suffix_len * 4 <= n {
                     let (left, right) = a.split_at_mut(clamp_idx);
-                    for v in right.iter_mut() {
-                        *v &= mask;
-                    }
+                    right.iter_mut().for_each(|v| *v &= mask);
                     right.sort_unstable();
                     Self::merge(left, right, &mut buf);
                     a.copy_from_slice(&buf);
                 } else {
-                    for v in a[clamp_idx..].iter_mut() {
-                        *v &= mask;
-                    }
+                    a[clamp_idx..].iter_mut().for_each(|v| *v &= mask);
                     a.sort_unstable();
                 }
                 psum_valid = false;

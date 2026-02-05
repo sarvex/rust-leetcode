@@ -21,22 +21,18 @@ impl Solution {
             return 0;
         }
 
-        let mut last_index = std::collections::HashMap::with_capacity(nums.len());
-        for (i, &value) in nums.iter().enumerate() {
-            last_index.insert(value, i);
-        }
+        let last_index: std::collections::HashMap<_, _> =
+            nums.iter().enumerate().map(|(i, &v)| (v, i)).collect();
 
-        let mut segments = 0_i64;
-        let mut current_end = 0_usize;
-        for (i, &value) in nums.iter().enumerate() {
-            let last = last_index[&value];
-            if last > current_end {
-                current_end = last;
-            }
-            if i == current_end {
-                segments += 1;
-            }
-        }
+        let segments = nums
+            .iter()
+            .enumerate()
+            .fold((0_i64, 0_usize), |(seg, current_end), (i, &value)| {
+                let new_end = current_end.max(last_index[&value]);
+                let new_seg = if i == new_end { seg + 1 } else { seg };
+                (new_seg, new_end)
+            })
+            .0;
 
         if segments <= 1 {
             return 1;

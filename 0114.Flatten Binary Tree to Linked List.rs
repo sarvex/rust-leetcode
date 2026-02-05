@@ -93,12 +93,12 @@ mod tests {
         if vals.is_empty() || vals[0].is_none() {
             return None;
         }
-        
+
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
         let mut queue = std::collections::VecDeque::new();
         queue.push_back(root.clone());
         let mut i = 1;
-        
+
         while !queue.is_empty() && i < vals.len() {
             if let Some(node) = queue.pop_front() {
                 if i < vals.len() {
@@ -109,7 +109,7 @@ mod tests {
                     }
                     i += 1;
                 }
-                
+
                 if i < vals.len() {
                     if let Some(val) = vals[i] {
                         let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -120,21 +120,24 @@ mod tests {
                 }
             }
         }
-        
+
         Some(root)
     }
 
     fn tree_to_list(root: &Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {
         let mut result = Vec::new();
         let mut current = root.clone();
-        
+
         while let Some(node) = current {
             let borrowed = node.borrow();
             result.push(borrowed.val);
-            assert!(borrowed.left.is_none(), "Left child should be None after flattening");
+            assert!(
+                borrowed.left.is_none(),
+                "Left child should be None after flattening"
+            );
             current = borrowed.right.clone();
         }
-        
+
         result
     }
 

@@ -19,7 +19,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// Mirror-comparison DFS for symmetric tree validation.
     ///

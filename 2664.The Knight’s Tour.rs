@@ -45,7 +45,15 @@ impl Solution {
             false
         }
 
-        dfs(r as usize, c as usize, &mut grid, m * n - 1, m_us, n_us, &dirs);
+        dfs(
+            r as usize,
+            c as usize,
+            &mut grid,
+            m * n - 1,
+            m_us,
+            n_us,
+            &dirs,
+        );
         grid
     }
 }

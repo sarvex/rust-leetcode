@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Finds the leftmost value in the bottom row using BFS.
     ///
@@ -38,21 +37,16 @@ impl Solution {
     /// - Time: O(n) where n is the number of nodes
     /// - Space: O(w) where w is the maximum width of the tree
     pub fn find_bottom_left_value(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
-        let mut queue = VecDeque::new();
-        queue.push_back(root);
+        let mut queue = VecDeque::from([root]);
         let mut result = 0;
         while !queue.is_empty() {
             result = queue.front().unwrap().as_ref().unwrap().borrow().val;
-            for _ in 0..queue.len() {
+            (0..queue.len()).for_each(|_| {
                 let node = queue.pop_front().unwrap();
                 let inner = node.as_ref().unwrap().borrow();
-                if inner.left.is_some() {
-                    queue.push_back(inner.left.clone());
-                }
-                if inner.right.is_some() {
-                    queue.push_back(inner.right.clone());
-                }
-            }
+                queue.extend(inner.left.clone());
+                queue.extend(inner.right.clone());
+            });
         }
         result
     }
@@ -68,13 +62,12 @@ mod tests {
         }
 
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
-        let mut queue = std::collections::VecDeque::new();
-        queue.push_back(root.clone());
+        let mut queue = std::collections::VecDeque::from([root.clone()]);
         let mut i = 1;
 
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() && vals[i].is_some() {
                 let left = Rc::new(RefCell::new(TreeNode::new(vals[i].unwrap())));
                 node.borrow_mut().left = Some(left.clone());
@@ -116,10 +109,18 @@ mod tests {
         //        7
         // Bottom left value is 7
         let root = create_tree(vec![
-            Some(1), 
-            Some(2), Some(3), 
-            Some(4), None, Some(5), Some(6), 
-            None, None, None, None, Some(7)
+            Some(1),
+            Some(2),
+            Some(3),
+            Some(4),
+            None,
+            Some(5),
+            Some(6),
+            None,
+            None,
+            None,
+            None,
+            Some(7),
         ]);
         assert_eq!(Solution::find_bottom_left_value(root), 7);
     }

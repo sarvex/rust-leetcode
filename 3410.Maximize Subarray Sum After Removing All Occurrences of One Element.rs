@@ -133,25 +133,25 @@ impl Solution {
 
         let mut tree = SegmentTree::new(&nodes, SubarrayHelper);
 
-        let mut neg_positions: HashMap<i32, Vec<usize>> = HashMap::new();
-        for (i, &x) in nums.iter().enumerate() {
-            if x < 0 {
-                neg_positions.entry(x).or_default().push(i);
-            }
-        }
+        let neg_positions: HashMap<i32, Vec<usize>> = nums
+            .iter()
+            .enumerate()
+            .filter(|(_, x)| **x < 0)
+            .fold(HashMap::new(), |mut acc, (i, x)| {
+                acc.entry(*x).or_default().push(i);
+                acc
+            });
 
         let mut result = tree.query(0, n - 1).0;
 
         for (&val, positions) in &neg_positions {
-            for &i in positions {
-                tree.update(i, (0, 0, 0, 0));
-            }
+            positions.iter().for_each(|&i| tree.update(i, (0, 0, 0, 0)));
 
             result = result.max(tree.query(0, n - 1).0);
 
-            for &i in positions {
-                tree.update(i, (0, 0, 0, val as i64));
-            }
+            positions
+                .iter()
+                .for_each(|&i| tree.update(i, (0, 0, 0, val as i64)));
         }
 
         result

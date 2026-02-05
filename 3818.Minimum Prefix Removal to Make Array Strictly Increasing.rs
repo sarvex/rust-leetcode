@@ -43,10 +43,7 @@ mod tests {
 
     #[test]
     fn test_example_2() {
-        assert_eq!(
-            Solution::minimum_prefix_length(vec![4, 3, -2, -5]),
-            3
-        );
+        assert_eq!(Solution::minimum_prefix_length(vec![4, 3, -2, -5]), 3);
     }
 
     #[test]

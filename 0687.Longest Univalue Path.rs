@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Finds the longest path where all nodes have the same value.
     ///
@@ -72,15 +71,15 @@ mod tests {
         if vals.is_empty() || vals[0].is_none() {
             return None;
         }
-        
+
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
         let mut queue = VecDeque::new();
         queue.push_back(root.clone());
-        
+
         let mut i = 1;
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() {
                 if let Some(val) = vals[i] {
                     let left = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -89,7 +88,7 @@ mod tests {
                 }
                 i += 1;
             }
-            
+
             if i < vals.len() {
                 if let Some(val) = vals[i] {
                     let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -99,7 +98,7 @@ mod tests {
                 i += 1;
             }
         }
-        
+
         Some(root)
     }
 
@@ -146,7 +145,15 @@ mod tests {
         //    / \ / \
         //   1  1 1  1
         // Path goes through root: 1 -> 1 -> 1 -> 1 -> 1 (length = 4)
-        let root = create_tree(&[Some(1), Some(1), Some(1), Some(1), Some(1), Some(1), Some(1)]);
+        let root = create_tree(&[
+            Some(1),
+            Some(1),
+            Some(1),
+            Some(1),
+            Some(1),
+            Some(1),
+            Some(1),
+        ]);
         assert_eq!(Solution::longest_univalue_path(root), 4);
     }
 
@@ -159,7 +166,15 @@ mod tests {
         //    / \ / \
         //   4  5 6  7
         // All values different, no path
-        let root = create_tree(&[Some(1), Some(2), Some(3), Some(4), Some(5), Some(6), Some(7)]);
+        let root = create_tree(&[
+            Some(1),
+            Some(2),
+            Some(3),
+            Some(4),
+            Some(5),
+            Some(6),
+            Some(7),
+        ]);
         assert_eq!(Solution::longest_univalue_path(root), 0);
     }
 

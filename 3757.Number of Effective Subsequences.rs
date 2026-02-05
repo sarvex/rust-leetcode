@@ -28,13 +28,10 @@ impl Solution {
 
         // Build compression map: bit position -> compressed index
         let mut compress = [0usize; 20];
-        let mut idx = 0;
-        for b in 0..20 {
-            if (total_or >> b) & 1 == 1 {
-                compress[b] = idx;
-                idx += 1;
-            }
-        }
+        (0..20)
+            .filter(|&b| (total_or >> b) & 1 == 1)
+            .enumerate()
+            .for_each(|(idx, b)| compress[b] = idx);
 
         // Count elements by compressed pattern (u32 for cache efficiency; max count ≤ n)
         let size = 1 << k;
@@ -61,12 +58,9 @@ impl Solution {
         }
 
         // Powers of 2
-        let mut pow2 = Vec::with_capacity(n + 1);
-        pow2.push(1u64);
-        for _ in 0..n {
-            let next = (pow2.last().copied().unwrap() * 2) % MOD;
-            pow2.push(next);
-        }
+        let pow2: Vec<u64> = std::iter::successors(Some(1u64), |&x| Some((x * 2) % MOD))
+            .take(n + 1)
+            .collect();
 
         // Inclusion-exclusion for f[full]: branchless with batched modulo
         const BATCH: usize = 512;

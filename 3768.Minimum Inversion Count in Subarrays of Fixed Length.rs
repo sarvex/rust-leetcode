@@ -56,20 +56,19 @@ impl Solution {
         sorted.sort_unstable();
         sorted.dedup();
 
-        let mut rank = Vec::with_capacity(n);
-        for &x in &nums {
-            let r = sorted.binary_search(&x).unwrap();
-            rank.push(r);
-        }
+        let rank: Vec<usize> = nums
+            .iter()
+            .map(|x| sorted.binary_search(x).unwrap())
+            .collect();
 
         let max_rank = sorted.len();
         let mut bit = BIT::new(max_rank);
         let mut inversions: i64 = 0;
 
-        for (i, &r) in rank[..k].iter().enumerate() {
+        rank[..k].iter().enumerate().for_each(|(i, &r)| {
             inversions += (i as i64) - bit.query(r);
             bit.update(r, 1);
-        }
+        });
 
         let mut min_inversions = inversions;
         let k_minus_one = (k - 1) as i64;

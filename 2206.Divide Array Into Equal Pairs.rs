@@ -13,11 +13,13 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn divide_array(nums: Vec<i32>) -> bool {
-        let mut count: HashMap<i32, i32> = HashMap::new();
-        for x in &nums {
-            *count.entry(*x).or_insert(0) += 1;
-        }
-        count.values().all(|&v| v % 2 == 0)
+        nums.iter()
+            .fold(HashMap::new(), |mut count, &x| {
+                *count.entry(x).or_insert(0) += 1;
+                count
+            })
+            .values()
+            .all(|&v| v % 2 == 0)
     }
 }
 

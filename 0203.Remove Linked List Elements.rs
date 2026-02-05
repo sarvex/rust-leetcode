@@ -11,7 +11,6 @@ impl ListNode {
     }
 }
 
-
 impl Solution {
     /// Removes all nodes with a given value using a dummy head technique.
     ///

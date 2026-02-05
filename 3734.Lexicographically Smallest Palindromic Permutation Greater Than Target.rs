@@ -70,26 +70,31 @@ impl Solution {
     #[inline]
     fn palindrome_gt_target(half: &[u8], mid: Option<u8>, target: &[u8]) -> bool {
         let half_len = half.len();
-        for i in 0..half_len {
-            if half[i] != target[i] {
-                return half[i] > target[i];
-            }
+
+        // Compare first half
+        if let Some(cmp) = half
+            .iter()
+            .zip(target.iter())
+            .find_map(|(&h, &t)| (h != t).then_some(h > t))
+        {
+            return cmp;
         }
+
+        // Compare middle character if present
         if let Some(m) = mid {
             let t_mid = target[half_len];
             if m != t_mid {
                 return m > t_mid;
             }
         }
+
+        // Compare second half (reversed)
         let start_second = half_len + mid.is_some() as usize;
-        for j in 0..half_len {
-            let result_val = half[half_len - 1 - j];
-            let target_val = target[start_second + j];
-            if result_val != target_val {
-                return result_val > target_val;
-            }
-        }
-        false
+        half.iter()
+            .rev()
+            .zip(target[start_second..].iter())
+            .find_map(|(&h, &t)| (h != t).then_some(h > t))
+            .unwrap_or(false)
     }
 
     fn solve(

@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-
 impl Solution {
     /// Finds the intersection of two arrays including duplicates using a frequency map.
     ///
@@ -17,20 +16,26 @@ impl Solution {
     /// - Time: O(n + m)
     /// - Space: O(min(n, m)) for the map
     pub fn intersect(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
-        let mut counts = HashMap::with_capacity(nums1.len().min(nums2.len()));
-        for &x in &nums1 {
-            *counts.entry(x).or_insert(0) += 1;
-        }
-        let mut result = Vec::with_capacity(nums2.len().min(counts.len()));
-        for &x in &nums2 {
-            if let Some(count) = counts.get_mut(&x) {
-                if *count > 0 {
-                    result.push(x);
-                    *count -= 1;
-                }
-            }
-        }
-        result
+        let mut counts = nums1.iter().fold(
+            HashMap::with_capacity(nums1.len().min(nums2.len())),
+            |mut acc, &x| {
+                *acc.entry(x).or_insert(0) += 1;
+                acc
+            },
+        );
+        nums2
+            .iter()
+            .filter_map(|&x| {
+                counts.get_mut(&x).and_then(|count| {
+                    if *count > 0 {
+                        *count -= 1;
+                        Some(x)
+                    } else {
+                        None
+                    }
+                })
+            })
+            .collect()
     }
 }
 

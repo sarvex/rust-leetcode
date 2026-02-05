@@ -29,12 +29,14 @@ impl Solution {
         let all_mask = (1usize << n) - 1;
 
         // Precompute max_time for each subset using subset DP
-        let mut max_time_of = vec![0i32; 1 << n];
-        for mask in 1usize..1 << n {
-            let lowest = mask & mask.wrapping_neg();
-            let idx = lowest.trailing_zeros() as usize;
-            max_time_of[mask] = max_time_of[mask ^ lowest].max(time[idx]);
-        }
+        let max_time_of = (0usize..1 << n).fold(vec![0i32; 1 << n], |mut acc, mask| {
+            if mask > 0 {
+                let lowest = mask & mask.wrapping_neg();
+                let idx = lowest.trailing_zeros() as usize;
+                acc[mask] = acc[mask ^ lowest].max(time[idx]);
+            }
+            acc
+        });
 
         // Precompute valid groups (size 1 to k)
         let valid_groups: Vec<usize> = (1usize..1 << n)
@@ -75,11 +77,12 @@ impl Solution {
                     }
                 } else {
                     // Iterate only over set bits in new_mask
-                    let mut remaining = new_mask;
-                    while remaining != 0 {
-                        let r = remaining.trailing_zeros() as usize;
-                        remaining &= remaining - 1;
-
+                    std::iter::successors(Some(new_mask), |&r| {
+                        let next = r & (r - 1);
+                        if next != 0 { Some(next) } else { None }
+                    })
+                    .map(|r| r.trailing_zeros() as usize)
+                    .for_each(|r| {
                         let ret_time = f64::from(time[r]) * mul[new_stage];
                         let final_mask = new_mask ^ (1 << r);
                         let final_stage = (new_stage + (ret_time as usize) % m) % m;
@@ -89,7 +92,7 @@ impl Solution {
                             dist[final_mask][final_stage] = new_cost;
                             heap.push(State(new_cost, final_mask, final_stage));
                         }
-                    }
+                    });
                 }
             }
         }

@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Removes adjacent duplicates using a stack.
     ///

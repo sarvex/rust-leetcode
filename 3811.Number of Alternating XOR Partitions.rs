@@ -18,12 +18,7 @@ impl Solution {
     /// - Space: O(1)
     pub fn alternating_xor(nums: Vec<i32>, target1: i32, target2: i32) -> i32 {
         let length = nums.len();
-        let cycle_prefix_xors: [i32; 4] = [
-            0,
-            target1,
-            target1 ^ target2,
-            target2,
-        ];
+        let cycle_prefix_xors: [i32; 4] = [0, target1, target1 ^ target2, target2];
 
         let mut ways_for_state = [0i32; 4];
         ways_for_state[0] = 1;
@@ -43,10 +38,10 @@ impl Solution {
             if running_prefix_xor == cycle_prefix_xors[0] {
                 transition_ways[0] = ways_for_state[3];
             }
-            for state_index in 0..4 {
-                ways_for_state[state_index] =
-                    (ways_for_state[state_index] + transition_ways[state_index]) % MOD;
-            }
+            ways_for_state
+                .iter_mut()
+                .zip(transition_ways.iter())
+                .for_each(|(state, &trans)| *state = (*state + trans) % MOD);
         }
         running_prefix_xor ^= nums[length - 1];
         let mut result = 0i32;
@@ -72,10 +67,7 @@ mod tests {
 
     #[test]
     fn test_example_1() {
-        assert_eq!(
-            Solution::alternating_xor(vec![2, 3, 1, 4], 1, 5),
-            1
-        );
+        assert_eq!(Solution::alternating_xor(vec![2, 3, 1, 4], 1, 5), 1);
     }
 
     #[test]

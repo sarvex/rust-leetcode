@@ -105,10 +105,7 @@ impl Solution {
             }
             a[..n].reverse();
 
-            let mut ans: i64 = 0;
-            for i in 2..n {
-                ans += f[i];
-            }
+            let mut ans: i64 = f[2..n].iter().sum();
             let off_i32 = OFF as i32;
             let sz_i32 = SZ as i32;
             let mut cur = off_i32;

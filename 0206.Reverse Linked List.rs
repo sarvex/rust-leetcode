@@ -11,7 +11,6 @@ impl ListNode {
     }
 }
 
-
 impl Solution {
     /// Reverses a singly linked list iteratively using pointer manipulation.
     ///

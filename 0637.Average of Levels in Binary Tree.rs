@@ -21,7 +21,6 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Computes the average value of each tree level using BFS.
     ///
@@ -72,15 +71,15 @@ mod tests {
         if vals.is_empty() || vals[0].is_none() {
             return None;
         }
-        
+
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
         let mut queue = VecDeque::new();
         queue.push_back(root.clone());
-        
+
         let mut i = 1;
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() {
                 if let Some(val) = vals[i] {
                     let left = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -89,7 +88,7 @@ mod tests {
                 }
                 i += 1;
             }
-            
+
             if i < vals.len() {
                 if let Some(val) = vals[i] {
                     let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -99,7 +98,7 @@ mod tests {
                 i += 1;
             }
         }
-        
+
         Some(root)
     }
 

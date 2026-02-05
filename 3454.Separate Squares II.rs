@@ -85,12 +85,7 @@ impl Solution {
             return 0.0;
         }
 
-        let n_sq = squares.len();
-        let mut xs = Vec::with_capacity(n_sq * 2);
-        for s in &squares {
-            xs.push(s[0]);
-            xs.push(s[0] + s[2]);
-        }
+        let mut xs: Vec<i32> = squares.iter().flat_map(|s| [s[0], s[0] + s[2]]).collect();
         xs.sort_unstable();
         xs.dedup();
 
@@ -98,7 +93,7 @@ impl Solution {
             return squares[0][1] as f64;
         }
 
-        let mut events = Vec::with_capacity(n_sq * 2);
+        let mut events = Vec::with_capacity(squares.len() * 2);
         for s in &squares {
             let (x1, x2) = (s[0], s[0] + s[2]);
             let (y1, y2) = (s[1], s[1] + s[2]);
@@ -162,15 +157,16 @@ impl Solution {
 
         let target = total_area / 2.0;
 
-        for (prev_area, y1, y2, width) in history {
-            let strip_max_area = width as f64 * (y2 - y1) as f64;
-            if prev_area + strip_max_area >= target {
-                let needed = target - prev_area;
-                return y1 as f64 + needed / width as f64;
-            }
-        }
-
-        events.last().map(|e| e.y as f64).unwrap_or(0.0)
+        history
+            .iter()
+            .find_map(|&(prev_area, y1, y2, width)| {
+                let strip_max_area = width as f64 * (y2 - y1) as f64;
+                (prev_area + strip_max_area >= target).then(|| {
+                    let needed = target - prev_area;
+                    y1 as f64 + needed / width as f64
+                })
+            })
+            .unwrap_or_else(|| events.last().map(|e| e.y as f64).unwrap_or(0.0))
     }
 }
 

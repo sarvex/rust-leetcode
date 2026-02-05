@@ -34,7 +34,6 @@ impl TreeNode {
     }
 }
 
-
 impl Solution {
     /// DFS matching linked list as a downward path in the binary tree.
     ///
@@ -91,15 +90,15 @@ mod tests {
         if vals.is_empty() {
             return None;
         }
-        
+
         let mut head = Box::new(ListNode::new(vals[0]));
         let mut current = &mut head;
-        
+
         for &val in &vals[1..] {
             current.next = Some(Box::new(ListNode::new(val)));
             current = current.next.as_mut().unwrap();
         }
-        
+
         Some(head)
     }
 
@@ -107,13 +106,13 @@ mod tests {
         if vals.is_empty() || vals[0].is_none() {
             return None;
         }
-        
+
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
         let mut queue = VecDeque::new();
         queue.push_back(root.clone());
-        
+
         let mut i = 1;
-        
+
         while !queue.is_empty() && i < vals.len() {
             if let Some(node) = queue.pop_front() {
                 if i < vals.len() {
@@ -124,7 +123,7 @@ mod tests {
                     }
                     i += 1;
                 }
-                
+
                 if i < vals.len() {
                     if let Some(val) = vals[i] {
                         let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -135,7 +134,7 @@ mod tests {
                 }
             }
         }
-        
+
         Some(root)
     }
 
@@ -155,9 +154,23 @@ mod tests {
         // Path exists: 4->2->8
         let head = build_list(&[4, 2, 8]);
         let root = build_tree(&[
-            Some(1), Some(4), Some(4), None, Some(2), Some(2), None,
-            Some(1), None, Some(6), Some(8), None, None, None, None,
-            Some(1), Some(3)
+            Some(1),
+            Some(4),
+            Some(4),
+            None,
+            Some(2),
+            Some(2),
+            None,
+            Some(1),
+            None,
+            Some(6),
+            Some(8),
+            None,
+            None,
+            None,
+            None,
+            Some(1),
+            Some(3),
         ]);
         assert_eq!(Solution::is_sub_path(head, root), true);
     }
@@ -169,9 +182,23 @@ mod tests {
         // Path exists: 1->4->2->6
         let head = build_list(&[1, 4, 2, 6]);
         let root = build_tree(&[
-            Some(1), Some(4), Some(4), None, Some(2), Some(2), None,
-            Some(1), None, Some(6), Some(8), None, None, None, None,
-            Some(1), Some(3)
+            Some(1),
+            Some(4),
+            Some(4),
+            None,
+            Some(2),
+            Some(2),
+            None,
+            Some(1),
+            None,
+            Some(6),
+            Some(8),
+            None,
+            None,
+            None,
+            None,
+            Some(1),
+            Some(3),
         ]);
         assert_eq!(Solution::is_sub_path(head, root), true);
     }
@@ -183,9 +210,23 @@ mod tests {
         // No path exists for the full list
         let head = build_list(&[1, 4, 2, 6, 8]);
         let root = build_tree(&[
-            Some(1), Some(4), Some(4), None, Some(2), Some(2), None,
-            Some(1), None, Some(6), Some(8), None, None, None, None,
-            Some(1), Some(3)
+            Some(1),
+            Some(4),
+            Some(4),
+            None,
+            Some(2),
+            Some(2),
+            None,
+            Some(1),
+            None,
+            Some(6),
+            Some(8),
+            None,
+            None,
+            None,
+            None,
+            Some(1),
+            Some(3),
         ]);
         assert_eq!(Solution::is_sub_path(head, root), false);
     }

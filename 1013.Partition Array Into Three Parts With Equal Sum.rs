@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Checks if array can be partitioned into three equal-sum parts.
     ///

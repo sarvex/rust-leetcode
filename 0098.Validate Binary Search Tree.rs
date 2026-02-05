@@ -16,7 +16,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Inorder traversal with predecessor tracking for BST validation.
     ///

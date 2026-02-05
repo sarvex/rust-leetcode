@@ -29,12 +29,16 @@ impl Solution {
             .map(|&c| (c - b'a') as i64)
             .collect();
 
-        let mut prefix = vec![vec![0i64; n + 1]; 26];
-        for c in 0..26 {
-            for i in 0..n {
-                prefix[c][i + 1] = prefix[c][i] + (s[i] - c as i64).abs();
-            }
-        }
+        let prefix: Vec<Vec<i64>> = (0..26)
+            .map(|c| {
+                std::iter::once(0)
+                    .chain(s.iter().scan(0i64, move |acc, &x| {
+                        *acc += (x - c as i64).abs();
+                        Some(*acc)
+                    }))
+                    .collect()
+            })
+            .collect();
 
         let cost = |l: usize, r: usize, c: usize| -> i64 { prefix[c][r + 1] - prefix[c][l] };
 
@@ -48,19 +52,13 @@ impl Solution {
                 continue;
             }
 
-            let mut candidates: Vec<(usize, usize, i64)> = Vec::new();
-
-            for len in 3..=remaining.min(5) {
-                let j = i + len;
-                if dp[j] == i64::MAX {
-                    continue;
-                }
-
-                for c in 0..26 {
-                    let new_cost = cost(i, j - 1, c) + dp[j];
-                    candidates.push((c, len, new_cost));
-                }
-            }
+            let candidates: Vec<(usize, usize, i64)> = (3..=remaining.min(5))
+                .filter(|&len| dp[i + len] != i64::MAX)
+                .flat_map(|len| {
+                    let j = i + len;
+                    (0..26).map(move |c| (c, len, cost(i, j - 1, c) + dp[j]))
+                })
+                .collect();
 
             if candidates.is_empty() {
                 continue;
@@ -75,12 +73,13 @@ impl Solution {
                 .map(|x| (x.0, x.1))
                 .collect();
 
-            let mut best = optimal[0];
-            for &candidate in &optimal[1..] {
+            let best = optimal[1..].iter().fold(optimal[0], |best, &candidate| {
                 if Self::is_lex_smaller(i, candidate, best, &best_choice, n) {
-                    best = candidate;
+                    candidate
+                } else {
+                    best
                 }
-            }
+            });
 
             best_choice[i] = best;
         }

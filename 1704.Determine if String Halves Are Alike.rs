@@ -30,11 +30,7 @@ impl Solution {
                 if !is_vowel(*b) {
                     return 0;
                 }
-                if i < n / 2 {
-                    1
-                } else {
-                    -1
-                }
+                if i < n / 2 { 1 } else { -1 }
             })
             .sum();
         balance == 0

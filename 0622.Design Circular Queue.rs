@@ -137,11 +137,11 @@ mod tests {
     #[test]
     fn test_alternating_operations() {
         let mut queue = MyCircularQueue::new(2);
-        for i in 0..10 {
+        (0..10).for_each(|i| {
             assert!(queue.en_queue(i));
             assert_eq!(queue.front(), i);
             assert!(queue.de_queue());
-        }
+        });
         assert!(queue.is_empty());
     }
 }

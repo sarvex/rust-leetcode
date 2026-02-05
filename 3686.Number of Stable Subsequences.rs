@@ -20,14 +20,15 @@ impl Solution {
     /// - Space: O(1) - only 4 state variables
     pub fn count_stable_subsequences(nums: Vec<i32>) -> i32 {
         const MOD: i64 = 1_000_000_007;
-        let (mut e2, mut e1, mut o1, mut o2) = (0i64, 0i64, 0i64, 0i64);
-
-        for &num in &nums {
-            match num & 1 {
-                0 => (e2, e1) = ((e2 + e1) % MOD, (1 + e1 + o1 + o2) % MOD),
-                _ => (o1, o2) = ((1 + e2 + e1 + o1) % MOD, (o1 + o2) % MOD),
-            }
-        }
+        let (e2, e1, o1, o2) =
+            nums.iter()
+                .fold((0i64, 0i64, 0i64, 0i64), |(e2, e1, o1, o2), &num| {
+                    if num & 1 == 0 {
+                        ((e2 + e1) % MOD, (1 + e1 + o1 + o2) % MOD, o1, o2)
+                    } else {
+                        (e2, e1, (1 + e2 + e1 + o1) % MOD, (o1 + o2) % MOD)
+                    }
+                });
 
         ((e2 + e1 + o1 + o2) % MOD) as i32
     }

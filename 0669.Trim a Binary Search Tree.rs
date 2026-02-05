@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Trims a BST to only contain values in [low, high].
     ///
@@ -72,15 +71,15 @@ mod tests {
         if vals.is_empty() || vals[0].is_none() {
             return None;
         }
-        
+
         let root = Rc::new(RefCell::new(TreeNode::new(vals[0].unwrap())));
         let mut queue = VecDeque::new();
         queue.push_back(root.clone());
-        
+
         let mut i = 1;
         while !queue.is_empty() && i < vals.len() {
             let node = queue.pop_front().unwrap();
-            
+
             if i < vals.len() {
                 if let Some(val) = vals[i] {
                     let left = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -89,7 +88,7 @@ mod tests {
                 }
                 i += 1;
             }
-            
+
             if i < vals.len() {
                 if let Some(val) = vals[i] {
                     let right = Rc::new(RefCell::new(TreeNode::new(val)));
@@ -99,7 +98,7 @@ mod tests {
                 i += 1;
             }
         }
-        
+
         Some(root)
     }
 
@@ -107,11 +106,11 @@ mod tests {
         if root.is_none() {
             return vec![];
         }
-        
+
         let mut result = Vec::new();
         let mut queue = VecDeque::new();
         queue.push_back(root);
-        
+
         while !queue.is_empty() {
             let node = queue.pop_front().unwrap();
             if let Some(rc) = node {
@@ -123,12 +122,12 @@ mod tests {
                 result.push(None);
             }
         }
-        
+
         // Remove trailing None values
         while result.last() == Some(&None) {
             result.pop();
         }
-        
+
         result
     }
 
@@ -156,20 +155,29 @@ mod tests {
         //      /
         //     1
         // Expected: [3,2,null,1]
-        let root = create_tree(&[Some(3), Some(0), Some(4), None, Some(2), None, None, Some(1)]);
+        let root = create_tree(&[
+            Some(3),
+            Some(0),
+            Some(4),
+            None,
+            Some(2),
+            None,
+            None,
+            Some(1),
+        ]);
         let result = Solution::trim_bst(root, 1, 3);
-        
+
         // Verify the root is 3
         assert_eq!(result.as_ref().unwrap().borrow().val, 3);
-        
+
         // Verify left child is 2
         let left = result.as_ref().unwrap().borrow().left.clone();
         assert_eq!(left.as_ref().unwrap().borrow().val, 2);
-        
+
         // Verify 2's left child is 1
         let left_left = left.as_ref().unwrap().borrow().left.clone();
         assert_eq!(left_left.as_ref().unwrap().borrow().val, 1);
-        
+
         // Verify right child is None
         let right = result.as_ref().unwrap().borrow().right.clone();
         assert!(right.is_none());
@@ -206,12 +214,20 @@ mod tests {
         //    / \ / \
         //   1  4 6  8
         // Expected: [7,6,8]
-        let root = create_tree(&[Some(5), Some(3), Some(7), Some(1), Some(4), Some(6), Some(8)]);
+        let root = create_tree(&[
+            Some(5),
+            Some(3),
+            Some(7),
+            Some(1),
+            Some(4),
+            Some(6),
+            Some(8),
+        ]);
         let result = Solution::trim_bst(root, 6, 8);
-        
+
         // Verify root is 7
         assert_eq!(result.as_ref().unwrap().borrow().val, 7);
-        
+
         // Verify left is 6 and right is 8
         let left = result.as_ref().unwrap().borrow().left.clone();
         let right = result.as_ref().unwrap().borrow().right.clone();

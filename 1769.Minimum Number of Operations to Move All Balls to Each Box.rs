@@ -16,23 +16,35 @@ impl Solution {
     /// - Space: O(n) for the result
     pub fn min_operations(boxes: String) -> Vec<i32> {
         let bytes = boxes.as_bytes();
-        let n = bytes.len();
-        let mut result = vec![0i32; n];
-        let mut count = 0i32;
-        let mut ops = 0i32;
-        for i in 0..n {
-            result[i] += ops;
-            count += (bytes[i] - b'0') as i32;
-            ops += count;
-        }
-        count = 0;
-        ops = 0;
-        for i in (0..n).rev() {
-            result[i] += ops;
-            count += (bytes[i] - b'0') as i32;
-            ops += count;
-        }
-        result
+
+        // Left pass: accumulate ops from balls to the left
+        let left: Vec<i32> = bytes
+            .iter()
+            .scan((0i32, 0i32), |(count, ops), &b| {
+                let current_ops = *ops;
+                *count += (b - b'0') as i32;
+                *ops += *count;
+                Some(current_ops)
+            })
+            .collect();
+
+        // Right pass: accumulate ops from balls to the right
+        let right: Vec<i32> = bytes
+            .iter()
+            .rev()
+            .scan((0i32, 0i32), |(count, ops), &b| {
+                let current_ops = *ops;
+                *count += (b - b'0') as i32;
+                *ops += *count;
+                Some(current_ops)
+            })
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .collect();
+
+        // Combine both passes
+        left.into_iter().zip(right).map(|(l, r)| l + r).collect()
     }
 }
 

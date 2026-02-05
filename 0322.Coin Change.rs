@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds the minimum coins to make an amount using unbounded knapsack DP.
     ///
@@ -25,11 +24,7 @@ impl Solution {
                 dp[j] = dp[j].min(dp[j - c] + 1);
             }
         }
-        if dp[n] > n {
-            -1
-        } else {
-            dp[n] as i32
-        }
+        if dp[n] > n { -1 } else { dp[n] as i32 }
     }
 }
 

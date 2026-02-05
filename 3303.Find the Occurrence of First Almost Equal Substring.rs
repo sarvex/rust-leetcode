@@ -64,19 +64,17 @@ impl Solution {
         backward.extend_from_slice(&rev_s);
         let z_backward = z_algorithm(&backward);
 
-        for i in 0..=n - m {
-            let prefix = z_forward[m + 1 + i];
-            if prefix == m {
-                return i as i32;
-            }
-            let rev_start = n - i - m;
-            let suffix = z_backward[m + 1 + rev_start];
-            if prefix + suffix >= m - 1 {
-                return i as i32;
-            }
-        }
-
-        -1
+        (0..=n - m)
+            .find(|&i| {
+                let prefix = z_forward[m + 1 + i];
+                if prefix == m {
+                    return true;
+                }
+                let rev_start = n - i - m;
+                let suffix = z_backward[m + 1 + rev_start];
+                prefix + suffix >= m - 1
+            })
+            .map_or(-1, |i| i as i32)
     }
 }
 
@@ -110,12 +108,18 @@ mod tests {
 
     #[test]
     fn example_four() {
-        assert_eq!(Solution::min_starting_index("dde".to_string(), "d".to_string()), 0);
+        assert_eq!(
+            Solution::min_starting_index("dde".to_string(), "d".to_string()),
+            0
+        );
     }
 
     #[test]
     fn pattern_length_one() {
-        assert_eq!(Solution::min_starting_index("xyz".to_string(), "a".to_string()), 0);
+        assert_eq!(
+            Solution::min_starting_index("xyz".to_string(), "a".to_string()),
+            0
+        );
     }
 
     #[test]

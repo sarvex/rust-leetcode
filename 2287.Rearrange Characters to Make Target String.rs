@@ -17,12 +17,13 @@ impl Solution {
         let mut source_freq = [0i32; 26];
         let mut target_freq = [0i32; 26];
 
-        for &b in s.as_bytes() {
-            source_freq[(b - b'a') as usize] += 1;
-        }
-        for &b in target.as_bytes() {
-            target_freq[(b - b'a') as usize] += 1;
-        }
+        s.as_bytes()
+            .iter()
+            .for_each(|b| source_freq[(b - b'a') as usize] += 1);
+        target
+            .as_bytes()
+            .iter()
+            .for_each(|b| target_freq[(b - b'a') as usize] += 1);
 
         (0..26)
             .filter(|&i| target_freq[i] > 0)

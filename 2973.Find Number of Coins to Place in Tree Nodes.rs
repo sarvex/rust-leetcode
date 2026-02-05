@@ -151,11 +151,7 @@ impl Solution {
                     * (node_extremes.bottom[0] as i64)
                     * (node_extremes.bottom[1] as i64);
                 let best = top_product.max(mixed_product);
-                if best < 0 {
-                    0
-                } else {
-                    best
-                }
+                if best < 0 { 0 } else { best }
             };
         }
 

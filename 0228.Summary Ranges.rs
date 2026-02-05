@@ -17,15 +17,17 @@ impl Solution {
         if nums.is_empty() {
             return Vec::new();
         }
-        let mut result = Vec::new();
-        let mut start = nums[0];
 
-        for i in 1..nums.len() {
-            if nums[i] != nums[i - 1] + 1 {
-                Self::push_range(&mut result, start, nums[i - 1]);
-                start = nums[i];
-            }
-        }
+        let (mut result, start) =
+            nums.windows(2)
+                .fold((Vec::new(), nums[0]), |(mut result, start), w| {
+                    if w[1] != w[0] + 1 {
+                        Self::push_range(&mut result, start, w[0]);
+                        (result, w[1])
+                    } else {
+                        (result, start)
+                    }
+                });
         Self::push_range(&mut result, start, *nums.last().unwrap());
         result
     }

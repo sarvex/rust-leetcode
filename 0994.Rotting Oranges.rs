@@ -47,11 +47,7 @@ impl Solution {
             }
         }
 
-        if fresh > 0 {
-            -1
-        } else {
-            minutes
-        }
+        if fresh > 0 { -1 } else { minutes }
     }
 }
 

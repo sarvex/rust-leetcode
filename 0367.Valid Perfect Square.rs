@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Determines if a number is a perfect square using binary search.
     ///

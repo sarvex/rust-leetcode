@@ -14,13 +14,11 @@ impl Solution {
     /// - Space: O(1) — fixed array of 26 elements
     pub fn greatest_letter(s: String) -> String {
         let mut flags = [0u8; 26];
-        for &b in s.as_bytes() {
-            match b {
-                b'a'..=b'z' => flags[(b - b'a') as usize] |= 1,
-                b'A'..=b'Z' => flags[(b - b'A') as usize] |= 2,
-                _ => {}
-            }
-        }
+        s.as_bytes().iter().for_each(|b| match b {
+            b'a'..=b'z' => flags[(b - b'a') as usize] |= 1,
+            b'A'..=b'Z' => flags[(b - b'A') as usize] |= 2,
+            _ => {}
+        });
 
         (0..26)
             .rev()

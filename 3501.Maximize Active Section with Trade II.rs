@@ -247,17 +247,13 @@ impl SparseTable {
         }
 
         let mut log = vec![0usize; n + 1];
-        for i in 2..=n {
-            log[i] = log[i / 2] + 1;
-        }
+        (2..=n).for_each(|i| log[i] = log[i / 2] + 1);
 
         let k = log[n] + 1;
         let identity = if is_max { i32::MIN } else { i32::MAX };
         let mut table = vec![vec![identity; n]; k];
 
-        for (i, &v) in arr.iter().enumerate() {
-            table[0][i] = v;
-        }
+        table[0].iter_mut().zip(arr).for_each(|(t, &v)| *t = v);
 
         for j in 1..k {
             let step = 1 << (j - 1);

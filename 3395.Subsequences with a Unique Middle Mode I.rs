@@ -34,19 +34,13 @@ impl Solution {
         let nums: Vec<usize> = nums.iter().map(|v| val_to_idx[v]).collect();
         let m = sorted_unique.len();
 
-        let mut right: Vec<i64> = vec![0; m];
-        for &v in &nums {
-            right[v] += 1;
-        }
+        let mut right: Vec<i64> = nums.iter().fold(vec![0; m], |mut acc, &v| {
+            acc[v] += 1;
+            acc
+        });
 
         let mut left: Vec<i64> = vec![0; m];
-        let comb2 = |x: i64| -> i64 {
-            if x < 2 {
-                0
-            } else {
-                x * (x - 1) / 2
-            }
-        };
+        let comb2 = |x: i64| -> i64 { if x < 2 { 0 } else { x * (x - 1) / 2 } };
 
         let mut result: i64 = 0;
 
@@ -68,19 +62,16 @@ impl Solution {
             result += left_c * l_other * right_c * r_other;
             result += comb2(l_other) * comb2(right_c);
 
-            let mut sum_left_sq: i64 = 0;
-            let mut sum_right_sq: i64 = 0;
-            let mut sum_lr_r_other: i64 = 0;
-            let mut sum_lr_l_other: i64 = 0;
-
-            for v in 0..m {
-                if v != c {
-                    sum_left_sq += comb2(left[v]);
-                    sum_right_sq += comb2(right[v]);
-                    sum_lr_r_other += left[v] * right[v] * (r_other - right[v]);
-                    sum_lr_l_other += left[v] * right[v] * (l_other - left[v]);
-                }
-            }
+            let (sum_left_sq, sum_right_sq, sum_lr_r_other, sum_lr_l_other) = (0..m)
+                .filter(|&v| v != c)
+                .fold((0i64, 0i64, 0i64, 0i64), |(lsq, rsq, lr_r, lr_l), v| {
+                    (
+                        lsq + comb2(left[v]),
+                        rsq + comb2(right[v]),
+                        lr_r + left[v] * right[v] * (r_other - right[v]),
+                        lr_l + left[v] * right[v] * (l_other - left[v]),
+                    )
+                });
 
             let total_1_0 = left_c * l_other * comb2(r_other);
             let invalid_1_0 = left_c * l_other * sum_right_sq + left_c * sum_lr_r_other;

@@ -47,15 +47,13 @@ impl Solution {
         compressed_values.dedup();
         let value_range = compressed_values.len();
 
-        let mut compressed_indices = Vec::with_capacity(num_elements);
-        for &value in &quotients {
-            let index = compressed_values.binary_search(&value).unwrap() + 1;
-            compressed_indices.push(index as u32);
-        }
+        let compressed_indices: Vec<u32> = quotients
+            .iter()
+            .map(|&value| (compressed_values.binary_search(&value).unwrap() + 1) as u32)
+            .collect();
 
         let value_range_u32 = value_range as u32;
-        let tree_height =
-            (u32::BITS - value_range_u32.max(1).leading_zeros()) as usize + 1;
+        let tree_height = (u32::BITS - value_range_u32.max(1).leading_zeros()) as usize + 1;
         let max_nodes = (num_elements + 1) * (tree_height + 1) + 10;
 
         let mut nodes: Vec<SegmentNode> = vec![SegmentNode::default(); max_nodes];

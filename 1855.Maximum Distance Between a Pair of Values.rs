@@ -15,26 +15,15 @@ impl Solution {
     /// - Time: O(m * log n)
     /// - Space: O(1)
     pub fn max_distance(nums1: Vec<i32>, nums2: Vec<i32>) -> i32 {
-        let n = nums2.len();
-        let mut result = 0;
-
-        for (i, &val) in nums1.iter().enumerate() {
-            let mut lo = i;
-            let mut hi = n;
-            while lo < hi {
-                let mid = lo + (hi - lo) / 2;
-                if nums2[mid] >= val {
-                    lo = mid + 1;
-                } else {
-                    hi = mid;
-                }
-            }
-            if lo > i {
-                result = result.max((lo - i - 1) as i32);
-            }
-        }
-
-        result
+        nums1
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| {
+                let j = nums2[i..].partition_point(|&x| x >= val) + i;
+                if j > i { (j - i - 1) as i32 } else { 0 }
+            })
+            .max()
+            .unwrap_or(0)
     }
 }
 

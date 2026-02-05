@@ -20,7 +20,6 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Prunes subtrees that do not contain a 1 via post-order traversal.
     ///

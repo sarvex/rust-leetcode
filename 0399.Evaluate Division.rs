@@ -7,15 +7,17 @@ struct UnionFind {
 
 impl UnionFind {
     fn new(equations: &[Vec<String>]) -> Self {
-        let capacity = equations.len() * 2;
-        let mut parent = HashMap::with_capacity(capacity);
-        let mut weight = HashMap::with_capacity(capacity);
-        for eq in equations {
-            for var in eq {
+        let (parent, weight) = equations.iter().flat_map(|eq| eq.iter()).fold(
+            (
+                HashMap::with_capacity(equations.len() * 2),
+                HashMap::with_capacity(equations.len() * 2),
+            ),
+            |(mut parent, mut weight), var| {
                 parent.entry(var.clone()).or_insert_with(|| var.clone());
                 weight.entry(var.clone()).or_insert(1.0);
-            }
-        }
+                (parent, weight)
+            },
+        );
         Self { parent, weight }
     }
 
@@ -55,7 +57,6 @@ impl UnionFind {
         }
     }
 }
-
 
 impl Solution {
     /// Evaluates division queries using a weighted Union-Find.
@@ -104,9 +105,9 @@ mod tests {
         let queries = make_eq(&[("a", "c"), ("b", "a"), ("a", "e"), ("a", "a"), ("x", "x")]);
         let result = Solution::calc_equation(equations, values, queries);
         let expected = vec![6.0, 0.5, -1.0, 1.0, -1.0];
-        for (r, e) in result.iter().zip(expected.iter()) {
+        result.iter().zip(expected.iter()).for_each(|(r, e)| {
             assert!((r - e).abs() < 1e-5, "expected {e}, got {r}");
-        }
+        });
     }
 
     #[test]

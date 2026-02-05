@@ -16,10 +16,10 @@ impl Solution {
     /// - Time: O(n × 26) where n is string length
     /// - Space: O(1)
     pub fn make_string_good(s: String) -> i32 {
-        let mut counts = [0i32; 26];
-        for b in s.as_bytes() {
-            counts[(b - b'a') as usize] += 1;
-        }
+        let counts = s.as_bytes().iter().fold([0i32; 26], |mut acc, b| {
+            acc[(b - b'a') as usize] += 1;
+            acc
+        });
 
         (0..=s.len() as i32)
             .map(|target| Self::ops_needed(&counts, target))

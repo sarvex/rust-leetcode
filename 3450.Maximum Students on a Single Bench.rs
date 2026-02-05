@@ -15,11 +15,15 @@ impl Solution {
     /// - Time: O(n) where n is the number of entries
     /// - Space: O(n) for the hash map and sets
     pub fn max_students_on_bench(students: Vec<Vec<i32>>) -> i32 {
-        let mut bench_students: HashMap<i32, HashSet<i32>> = HashMap::new();
-        for entry in &students {
-            bench_students.entry(entry[1]).or_default().insert(entry[0]);
-        }
-        bench_students
+        students
+            .iter()
+            .fold(
+                HashMap::<i32, HashSet<i32>>::new(),
+                |mut bench_students, entry| {
+                    bench_students.entry(entry[1]).or_default().insert(entry[0]);
+                    bench_students
+                },
+            )
             .values()
             .map(|s| s.len() as i32)
             .max()

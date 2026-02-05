@@ -134,11 +134,15 @@ impl Solution {
             }
         }
 
-        let mut dp = vec![vec![i64::MAX / 2; k + 1]; n + 1];
-        dp[0][0] = 0;
+        let mut dp: Vec<Vec<i64>> = (0..=n)
+            .map(|_| {
+                let mut row = vec![i64::MAX / 2; k + 1];
+                row[0] = 0;
+                row
+            })
+            .collect();
 
         for i in 1..=n {
-            dp[i][0] = 0;
             for j in 1..=k {
                 dp[i][j] = dp[i - 1][j];
                 if i >= x {

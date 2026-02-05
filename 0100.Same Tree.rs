@@ -16,7 +16,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 impl Solution {
     /// Recursive structural and value comparison for tree equality.
     ///

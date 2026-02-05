@@ -37,35 +37,22 @@ impl Solution {
             }
         }
 
-        let mut result = 0i64;
-        let mut perm = 1i64; // P(x, k) = x × (x-1) × ... × (x-k+1)
-        let mut stage_factor = x as i64;
-
-        if y == 1 {
-            for k in 1..=max_k {
-                perm = perm * stage_factor % MOD;
-                stage_factor -= 1;
-                let contribution = perm * stirling[k] % MOD;
-                result += contribution;
-                if result >= MOD {
-                    result -= MOD;
-                }
-            }
-        } else {
-            let mut pow_y = 1i64;
-            for k in 1..=max_k {
-                perm = perm * stage_factor % MOD;
-                stage_factor -= 1;
-                pow_y = pow_y * y % MOD;
+        // P(x, k) = x × (x-1) × ... × (x-k+1)
+        let result = (1..=max_k).fold(
+            (0i64, 1i64, x as i64, 1i64), // (result, perm, stage_factor, pow_y)
+            |(mut result, perm, stage_factor, pow_y), k| {
+                let perm = perm * stage_factor % MOD;
+                let pow_y = pow_y * y % MOD;
                 let contribution = perm * stirling[k] % MOD * pow_y % MOD;
                 result += contribution;
                 if result >= MOD {
                     result -= MOD;
                 }
-            }
-        }
+                (result, perm, stage_factor - 1, pow_y)
+            },
+        );
 
-        result as i32
+        result.0 as i32
     }
 }
 

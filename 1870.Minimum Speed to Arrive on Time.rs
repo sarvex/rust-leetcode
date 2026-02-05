@@ -28,11 +28,7 @@ impl Solution {
                 .enumerate()
                 .map(|(i, d)| {
                     let t = *d as f64 / speed as f64;
-                    if i == n - 1 {
-                        t
-                    } else {
-                        t.ceil()
-                    }
+                    if i == n - 1 { t } else { t.ceil() }
                 })
                 .sum();
             total <= hour
@@ -48,11 +44,7 @@ impl Solution {
             }
         }
 
-        if lo > MAX_SPEED {
-            -1
-        } else {
-            lo
-        }
+        if lo > MAX_SPEED { -1 } else { lo }
     }
 }
 

@@ -18,10 +18,10 @@ impl Solution {
     /// - Space: O(k) for the heap and counts
     pub fn reorganize_string(s: String) -> String {
         let n = s.len();
-        let mut freq = [0usize; 26];
-        for b in s.bytes() {
+        let freq = s.bytes().fold([0usize; 26], |mut freq, b| {
             freq[(b - b'a') as usize] += 1;
-        }
+            freq
+        });
 
         if freq.iter().any(|&f| 2 * f - 1 > n) {
             return String::new();

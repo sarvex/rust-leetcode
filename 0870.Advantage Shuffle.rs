@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Maximizes advantage of nums1 over nums2 using greedy assignment.
     ///

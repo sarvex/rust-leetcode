@@ -114,12 +114,7 @@ impl Solution {
             let total_cost = state.cost + edge_cost[last][0];
             if total_cost < best_cost
                 || (total_cost == best_cost
-                    && Self::is_lex_smaller(
-                        &state.path,
-                        state.len as usize,
-                        &best_path,
-                        best_len,
-                    ))
+                    && Self::is_lex_smaller(&state.path, state.len as usize, &best_path, best_len))
             {
                 best_cost = total_cost;
                 best_path = state.path;

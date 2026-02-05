@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Duplicates each zero in-place, shifting elements right.
     ///

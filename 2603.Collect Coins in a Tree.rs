@@ -25,12 +25,11 @@ impl Solution {
         }
 
         let mut adjacency = vec![Vec::<usize>::new(); node_count];
-        for edge in edges {
-            let u = edge[0] as usize;
-            let v = edge[1] as usize;
+        edges.iter().for_each(|edge| {
+            let (u, v) = (edge[0] as usize, edge[1] as usize);
             adjacency[u].push(v);
             adjacency[v].push(u);
-        }
+        });
 
         let mut degree = adjacency
             .iter()
@@ -39,11 +38,9 @@ impl Solution {
         let mut active = vec![true; node_count];
         let mut queue = VecDeque::new();
 
-        for node in 0..node_count {
-            if degree[node] <= 1 && coins[node] == 0 {
-                queue.push_back(node);
-            }
-        }
+        (0..node_count)
+            .filter(|&node| degree[node] <= 1 && coins[node] == 0)
+            .for_each(|node| queue.push_back(node));
 
         while let Some(node) = queue.pop_front() {
             if !active[node] {
@@ -60,11 +57,9 @@ impl Solution {
             }
         }
 
-        for node in 0..node_count {
-            if active[node] && degree[node] <= 1 {
-                queue.push_back(node);
-            }
-        }
+        (0..node_count)
+            .filter(|&node| active[node] && degree[node] <= 1)
+            .for_each(|node| queue.push_back(node));
 
         for _ in 0..2 {
             let layer_size = queue.len();
@@ -88,13 +83,11 @@ impl Solution {
             }
         }
 
-        let mut remaining_edges = 0i32;
-        for node in 0..node_count {
-            if active[node] {
-                remaining_edges += degree[node];
-            }
-        }
-        remaining_edges /= 2;
+        let remaining_edges: i32 = (0..node_count)
+            .filter(|&node| active[node])
+            .map(|node| degree[node])
+            .sum::<i32>()
+            / 2;
 
         if remaining_edges == 0 {
             0

@@ -56,20 +56,41 @@ Use descriptive names: `char_count` over `map`, `left_sum` over `ls`.
 
 ## Iterators vs Loops
 
-Use iterators when the transformation is clear:
+**Always prefer functional/iterator style over raw for loops.** Iterators are more expressive, composable, and often optimize better.
 
 ```rust
-// Good: clear pipeline
+// Preferred: functional style
 let sum: i32 = nums.iter().filter(|x| **x > 0).sum();
 
-// Good: complex early-exit logic is clearer as loop
-for &num in &nums {
-    if num < 0 { break; }
-    process(num);
-}
+let max_even = nums.iter().filter(|x| *x % 2 == 0).max();
+
+let squared: Vec<_> = nums.iter().map(|x| x * x).collect();
+
+// Early exit with find/take_while/any/all
+let first_negative = nums.iter().find(|x| **x < 0);
+let has_zero = nums.iter().any(|x| *x == 0);
+let prefix: Vec<_> = nums.iter().take_while(|x| **x > 0).collect();
+
+// Accumulation with fold/scan
+let running_sum: Vec<_> = nums.iter().scan(0, |acc, x| { *acc += x; Some(*acc) }).collect();
 ```
 
-**Guideline**: If an iterator chain exceeds 4-5 combinators or requires awkward workarounds, use a loop.
+**Only use loops when**:
+- Mutating external state in complex ways that `fold` cannot express cleanly
+- Multiple simultaneous mutable borrows are required
+- The algorithm is inherently stateful (e.g., two-pointer with complex conditions)
+
+```rust
+// Acceptable: complex two-pointer with early return
+let (mut l, mut r) = (0, nums.len() - 1);
+while l < r {
+    match nums[l] + nums[r].cmp(&target) {
+        Ordering::Equal => return Some((l, r)),
+        Ordering::Less => l += 1,
+        Ordering::Greater => r -= 1,
+    }
+}
+```
 
 ## Match Ergonomics (Rust 2024)
 

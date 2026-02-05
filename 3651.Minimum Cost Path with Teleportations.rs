@@ -36,44 +36,43 @@ impl Solution {
         sorted_cells.push((grid[0][0], 0, 0));
 
         // Fill first row (can only move right)
-        for col in 1..width {
+        (1..width).for_each(|col| {
             state[0][0][col] = state[0][0][col - 1] + grid[0][col];
             sorted_cells.push((grid[0][col], 0, col));
-        }
+        });
 
         // Fill remaining cells with standard DP (no teleports)
-        for row in 1..height {
+        (1..height).for_each(|row| {
             state[0][row][0] = state[0][row - 1][0] + grid[row][0];
             sorted_cells.push((grid[row][0], row, 0));
 
-            for col in 1..width {
+            (1..width).for_each(|col| {
                 // Take minimum of coming from top or left
                 state[0][row][col] =
                     (state[0][row - 1][col]).min(state[0][row][col - 1]) + grid[row][col];
                 sorted_cells.push((grid[row][col], row, col));
-            }
-        }
+            });
+        });
 
         // Sort cells by value in descending order for threshold processing
         sorted_cells.sort_unstable_by(|a, b| b.0.cmp(&a.0));
 
         // Process each teleport level
-        for teleports in 1..=k {
-            let mut min_cost = INF;
+        (1..=k).for_each(|teleports| {
             // HashMap to store best cost for each threshold value
             let mut threshold_costs = HashMap::with_capacity(height * width);
 
-            // Process cells in descending value order
-            for &(_, row, col) in &sorted_cells {
-                // Update running minimum from previous teleport level
-                min_cost = min_cost.min(state[teleports - 1][row][col]);
+            // Process cells in descending value order, tracking running minimum
+            sorted_cells.iter().fold(INF, |min_cost, &(_, row, col)| {
+                let new_min = min_cost.min(state[teleports - 1][row][col]);
                 // Store the best cost achievable for this threshold
-                threshold_costs.insert(grid[row][col], min_cost);
-            }
+                threshold_costs.insert(grid[row][col], new_min);
+                new_min
+            });
 
             // Fill current teleport level's DP table
-            for row in 0..height {
-                for col in 0..width {
+            (0..height).for_each(|row| {
+                (0..width).for_each(|col| {
                     // Start with cost from teleporting to this cell
                     // Safe unwrap: we inserted all grid values above
                     state[teleports][row][col] = *threshold_costs.get(&grid[row][col]).unwrap();
@@ -89,9 +88,9 @@ impl Solution {
                         let from_left = state[teleports][row][col - 1] + grid[row][col];
                         state[teleports][row][col] = state[teleports][row][col].min(from_left);
                     }
-                }
-            }
-        }
+                });
+            });
+        });
 
         // Return minimum cost to reach bottom-right with at most k teleports
         state[k][height - 1][width - 1]

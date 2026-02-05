@@ -83,11 +83,7 @@ impl Solution {
                         continue;
                     }
                     let pos = query[1] as usize;
-                    let prev = obstacles
-                        .range(..=pos)
-                        .next_back()
-                        .copied()
-                        .unwrap_or(0);
+                    let prev = obstacles.range(..=pos).next_back().copied().unwrap_or(0);
                     let next = obstacles.range((pos + 1)..).next().copied();
 
                     seg_tree.update(pos, (pos - prev) as i32);
@@ -103,11 +99,7 @@ impl Solution {
                     let x = query[1] as usize;
                     let size = query[2];
                     let prefix_max = if x == 0 { 0 } else { seg_tree.query(1, x) };
-                    let prev = obstacles
-                        .range(..=x)
-                        .next_back()
-                        .copied()
-                        .unwrap_or(0);
+                    let prev = obstacles.range(..=x).next_back().copied().unwrap_or(0);
                     let tail_gap = (x - prev) as i32;
                     let best = prefix_max.max(tail_gap);
                     results.push(best >= size);
@@ -131,7 +123,13 @@ mod tests {
 
     #[test]
     fn test_example_2() {
-        let queries = vec![vec![1, 7], vec![2, 7, 6], vec![1, 2], vec![2, 7, 5], vec![2, 7, 6]];
+        let queries = vec![
+            vec![1, 7],
+            vec![2, 7, 6],
+            vec![1, 2],
+            vec![2, 7, 5],
+            vec![2, 7, 6],
+        ];
         assert_eq!(Solution::get_results(queries), vec![true, true, false]);
     }
 
@@ -143,7 +141,12 @@ mod tests {
 
     #[test]
     fn test_tail_gap_only() {
-        let queries = vec![vec![1, 10], vec![2, 9, 10], vec![2, 10, 10], vec![2, 10, 11]];
+        let queries = vec![
+            vec![1, 10],
+            vec![2, 9, 10],
+            vec![2, 10, 10],
+            vec![2, 10, 11],
+        ];
         assert_eq!(Solution::get_results(queries), vec![false, true, false]);
     }
 }

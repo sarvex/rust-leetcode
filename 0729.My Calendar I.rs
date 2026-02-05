@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
 
-
 /// Calendar that prevents double-booking using a balanced BST.
 ///
 /// # Intuition

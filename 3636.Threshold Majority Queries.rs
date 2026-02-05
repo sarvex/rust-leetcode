@@ -101,16 +101,18 @@ impl Solution {
             }
 
             if max_idx == num_distinct {
-                for i in 0..num_distinct {
-                    if freq[i] > max_count
-                        || (freq[i] == max_count
-                            && max_idx < num_distinct
-                            && idx_to_val[i] < idx_to_val[max_idx])
-                    {
-                        max_idx = i;
-                        max_count = freq[i];
-                    }
-                }
+                (max_idx, max_count) =
+                    (0..num_distinct).fold((num_distinct, -1i32), |(best_idx, best_count), i| {
+                        if freq[i] > best_count
+                            || (freq[i] == best_count
+                                && best_idx < num_distinct
+                                && idx_to_val[i] < idx_to_val[best_idx])
+                        {
+                            (i, freq[i])
+                        } else {
+                            (best_idx, best_count)
+                        }
+                    });
             }
 
             if threshold <= max_count {

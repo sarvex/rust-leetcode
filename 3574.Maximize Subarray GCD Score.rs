@@ -30,10 +30,13 @@ impl Solution {
             .collect();
 
         let max_p = *pow2.iter().max().unwrap() as usize;
-        let mut pos: Vec<Vec<usize>> = vec![vec![]; max_p + 1];
-        for (i, &p) in pow2.iter().enumerate() {
-            pos[p as usize].push(i);
-        }
+        let pos: Vec<Vec<usize>> =
+            pow2.iter()
+                .enumerate()
+                .fold(vec![vec![]; max_p + 1], |mut pos, (i, &p)| {
+                    pos[p as usize].push(i);
+                    pos
+                });
 
         #[inline]
         fn count(pos: &[usize], l: usize, r: usize) -> i32 {
@@ -46,18 +49,20 @@ impl Solution {
         let mut entries: Vec<(i32, u8, usize, usize)> = vec![];
 
         for r in 0..n {
-            let mut new_entries: Vec<(i32, u8, usize, usize)> =
-                Vec::with_capacity(entries.len() + 1);
+            let capacity = entries.len() + 1;
+            let mut new_entries = entries.into_iter().fold(
+                Vec::with_capacity(capacity),
+                |mut acc, (g, mp, ls, le)| {
+                    let new_g = Self::gcd(g, nums[r]);
+                    let new_mp = mp.min(pow2[r]);
 
-            for (g, mp, ls, le) in entries {
-                let new_g = Self::gcd(g, nums[r]);
-                let new_mp = mp.min(pow2[r]);
-
-                match new_entries.last_mut() {
-                    Some(last) if last.0 == new_g && last.1 == new_mp => last.3 = le,
-                    _ => new_entries.push((new_g, new_mp, ls, le)),
-                }
-            }
+                    match acc.last_mut() {
+                        Some(last) if last.0 == new_g && last.1 == new_mp => last.3 = le,
+                        _ => acc.push((new_g, new_mp, ls, le)),
+                    }
+                    acc
+                },
+            );
 
             match new_entries.last_mut() {
                 Some(last) if last.0 == nums[r] && last.1 == pow2[r] => last.3 = r,
@@ -100,11 +105,7 @@ impl Solution {
     }
 
     fn gcd(a: i32, b: i32) -> i32 {
-        if b == 0 {
-            a
-        } else {
-            Self::gcd(b, a % b)
-        }
+        if b == 0 { a } else { Self::gcd(b, a % b) }
     }
 }
 

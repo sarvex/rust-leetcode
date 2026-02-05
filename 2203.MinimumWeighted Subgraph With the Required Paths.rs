@@ -84,11 +84,7 @@ impl Solution {
             .min()
             .unwrap_or(u64::MAX);
 
-        if ans == u64::MAX {
-            -1
-        } else {
-            ans as i64
-        }
+        if ans == u64::MAX { -1 } else { ans as i64 }
     }
 }
 

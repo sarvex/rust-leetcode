@@ -168,7 +168,15 @@ mod tests {
         //        /  \
         //       15   7
         // Bottom-up: [[15,7], [9,20], [3]]
-        let root = tree_from_vec(vec![Some(3), Some(9), Some(20), None, None, Some(15), Some(7)]);
+        let root = tree_from_vec(vec![
+            Some(3),
+            Some(9),
+            Some(20),
+            None,
+            None,
+            Some(15),
+            Some(7),
+        ]);
         let result = Solution::level_order_bottom(root);
         assert_eq!(result, vec![vec![15, 7], vec![9, 20], vec![3]]);
     }

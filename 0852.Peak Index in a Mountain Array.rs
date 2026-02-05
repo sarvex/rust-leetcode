@@ -1,4 +1,3 @@
-
 impl Solution {
     /// Finds the peak index in a mountain array via binary search.
     ///

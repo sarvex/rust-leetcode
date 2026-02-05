@@ -31,12 +31,7 @@ impl Solution {
     /// - Time: O(n) single traversal
     /// - Space: O(1)
     pub fn get_decimal_value(head: Option<Box<ListNode>>) -> i32 {
-        let mut result = 0;
-        let mut current = &head;
-        while let Some(node) = current {
-            result = (result << 1) | node.val;
-            current = &node.next;
-        }
-        result
+        std::iter::successors(head.as_ref(), |node| node.next.as_ref())
+            .fold(0, |acc, node| (acc << 1) | node.val)
     }
 }
