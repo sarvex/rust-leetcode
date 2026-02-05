@@ -36,8 +36,9 @@ impl Solution {
             }
         }
 
-        // Count elements by compressed pattern
-        let mut cnt = vec![0usize; 1 << k];
+        // Count elements by compressed pattern (u32 for cache efficiency; max count ≤ n)
+        let size = 1 << k;
+        let mut cnt = vec![0u32; size];
         for &num in &nums {
             let mut c = 0usize;
             let mut v = num & total_or;
@@ -49,11 +50,12 @@ impl Solution {
             cnt[c] += 1;
         }
 
-        // SOS DP
+        // SOS DP: in-place, cache-friendly order
         for i in 0..k {
-            for m in 0..(1 << k) {
-                if (m >> i) & 1 == 1 {
-                    cnt[m] += cnt[m ^ (1 << i)];
+            let bit = 1 << i;
+            for m in 0..size {
+                if (m & bit) != 0 {
+                    cnt[m] += cnt[m ^ bit];
                 }
             }
         }
@@ -66,24 +68,22 @@ impl Solution {
             pow2.push(next);
         }
 
-        // Inclusion-exclusion for f[full]
+        // Inclusion-exclusion for f[full]: branchless with batched modulo
+        const BATCH: usize = 512;
         let k_u32 = k as u32;
-        let mut non_eff = 0u64;
+        let mut even_sum = 0u64;
+        let mut odd_sum = 0u64;
         for s in 0..=full {
-            let pc = k_u32 - s.count_ones();
-            let val = pow2[cnt[s]];
-            if pc & 1 == 0 {
-                non_eff += val;
-                if non_eff >= MOD {
-                    non_eff -= MOD;
-                }
-            } else {
-                non_eff += MOD - val;
-                if non_eff >= MOD {
-                    non_eff -= MOD;
-                }
+            let val = pow2[cnt[s] as usize];
+            let parity = (k_u32 - s.count_ones()) & 1;
+            even_sum += val * (1 - parity as u64);
+            odd_sum += val * parity as u64;
+            if (s + 1) % BATCH == 0 {
+                even_sum %= MOD;
+                odd_sum %= MOD;
             }
         }
+        let non_eff = (even_sum % MOD + MOD - odd_sum % MOD) % MOD;
 
         ((pow2[n] + MOD - non_eff) % MOD) as i32
     }

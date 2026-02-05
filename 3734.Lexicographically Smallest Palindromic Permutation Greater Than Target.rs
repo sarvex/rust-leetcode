@@ -20,7 +20,7 @@ impl Solution {
         let mut freq = [0i32; 26];
         s.bytes().for_each(|b| freq[(b - b'a') as usize] += 1);
 
-        let odd_count = freq.iter().filter(|&&c| c % 2 == 1).count();
+        let odd_count = freq.iter().filter(|c| **c % 2 == 1).count();
         match (n % 2, odd_count) {
             (0, 0) | (1, 1) => {}
             _ => return String::new(),
@@ -29,7 +29,7 @@ impl Solution {
         let mid_char = freq
             .iter()
             .enumerate()
-            .find(|(_, &c)| c % 2 == 1)
+            .find(|(_, c)| *c % 2 == 1)
             .map(|(i, _)| b'a' + i as u8);
 
         let mut half_freq = [0i32; 26];
@@ -66,6 +66,32 @@ impl Solution {
         Self::solve(&mut current, 0, &mut freq, target, mid)
     }
 
+    /// Compares palindrome (half + mid + half.rev()) with target without allocating.
+    #[inline]
+    fn palindrome_gt_target(half: &[u8], mid: Option<u8>, target: &[u8]) -> bool {
+        let half_len = half.len();
+        for i in 0..half_len {
+            if half[i] != target[i] {
+                return half[i] > target[i];
+            }
+        }
+        if let Some(m) = mid {
+            let t_mid = target[half_len];
+            if m != t_mid {
+                return m > t_mid;
+            }
+        }
+        let start_second = half_len + mid.is_some() as usize;
+        for j in 0..half_len {
+            let result_val = half[half_len - 1 - j];
+            let target_val = target[start_second + j];
+            if result_val != target_val {
+                return result_val > target_val;
+            }
+        }
+        false
+    }
+
     fn solve(
         current: &mut Vec<u8>,
         pos: usize,
@@ -76,11 +102,11 @@ impl Solution {
         let half_len = current.len();
 
         if pos == half_len {
-            let palindrome = Self::build_palindrome(current, mid);
-            if palindrome.as_slice() > target {
-                return Some(current.clone());
-            }
-            return None;
+            return if Self::palindrome_gt_target(current, mid, target) {
+                Some(current.clone())
+            } else {
+                None
+            };
         }
 
         let target_char = target[pos];
@@ -99,14 +125,13 @@ impl Solution {
             freq[target_idx] += 1;
         }
 
-        // Then, try chars greater than target[pos], filling rest with smallest
+        // Place char > target[pos]: result is already > target at pos; fill rest and return
         for c in (target_char + 1)..=b'z' {
             let idx = (c - b'a') as usize;
             if freq[idx] > 0 {
                 freq[idx] -= 1;
                 current[pos] = c;
 
-                // Fill remaining positions with smallest available chars
                 let mut rest_pos = pos + 1;
                 for ch_idx in 0..26 {
                     for _ in 0..freq[ch_idx] {
@@ -115,12 +140,8 @@ impl Solution {
                     }
                 }
 
-                let palindrome = Self::build_palindrome(current, mid);
                 freq[idx] += 1;
-
-                if palindrome.as_slice() > target {
-                    return Some(current.clone());
-                }
+                return Some(current.clone());
             }
         }
 
