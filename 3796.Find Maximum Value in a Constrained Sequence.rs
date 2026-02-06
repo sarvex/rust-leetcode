@@ -1,49 +1,38 @@
 impl Solution {
-    /// Two-pass bounds: left-to-right maximizes growth; right-to-right propagates
-    /// restriction caps backward. Per-index upper bound is the minimum of both;
-    /// answer is the max of those bounds.
+    /// Single-array two-pass: left-to-right greedy, then right-to-left tighten
+    /// in place; max of the tightened values is the answer.
     ///
     /// # Intuition
-    /// Each index has an upper bound from "how high we can get from the left"
-    /// and "how high we can be and still satisfy future restrictions." The
-    /// tightest valid bound at each index is the minimum of the two; the
-    /// optimal sequence achieves the maximum of these bounds at some index.
+    /// Each index's upper bound is the minimum of "max from left" and "max
+    /// consistent with future restrictions." One array holds the left pass,
+    /// then the right pass tightens it in place; the maximum over indices is
+    /// the optimal largest value.
     ///
     /// # Approach
-    /// 1. Build a cap array from restrictions (indices without a restriction use a large sentinel).
-    /// 2. Left-to-right: start at 0, set `left_high[i+1] = min(left_high[i] + diff[i], cap[i+1])`.
-    /// 3. Right-to-left: start from last index with cap, set
-    ///    `right_high[i] = min(right_high[i+1] + diff[i], cap[i])`.
-    /// 4. At each index, valid upper bound is `min(left_high[i], right_high[i])`; return its max.
+    /// 1. Build `max_vals` from restrictions (i32::MAX where no restriction).
+    /// 2. Left-to-right: `vals[i] = (vals[i-1] + diff[i-1]).min(max_vals[i])`.
+    /// 3. Right-to-left: tighten `vals[i] = vals[i].min(vals[i+1] + diff[i])`
+    ///    and track the maximum.
     ///
     /// # Complexity
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn find_max_val(n: i32, restrictions: Vec<Vec<i32>>, diff: Vec<i32>) -> i32 {
-        const INF: i32 = 2_000_001;
         let n = n as usize;
-
-        let mut cap: Vec<i32> = vec![INF; n];
-        for r in &restrictions {
-            let (idx, max_val) = (r[0] as usize, r[1]);
-            cap[idx] = cap[idx].min(max_val);
+        let mut max_vals = vec![i32::MAX; n];
+        for r in restrictions {
+            max_vals[r[0] as usize] = r[1];
         }
-
-        let mut left_high = vec![0i32; n];
-        for i in 0..n.saturating_sub(1) {
-            left_high[i + 1] = (left_high[i] + diff[i]).min(cap[i + 1]);
+        let mut vals = vec![0; n];
+        for i in 1..n {
+            vals[i] = (vals[i - 1] + diff[i - 1]).min(max_vals[i]);
         }
-
-        let mut right_high = vec![INF; n];
-        right_high[n - 1] = cap[n - 1];
-        for i in (0..n.saturating_sub(1)).rev() {
-            right_high[i] = (right_high[i + 1] + diff[i]).min(cap[i]);
+        let mut res = vals[n - 1];
+        for i in (0..n - 1).rev() {
+            vals[i] = vals[i].min(vals[i + 1] + diff[i]);
+            res = res.max(vals[i]);
         }
-
-        (0..n)
-            .map(|i| left_high[i].min(right_high[i]))
-            .max()
-            .unwrap_or(0)
+        res
     }
 }
 
@@ -78,9 +67,10 @@ mod tests {
 
     #[test]
     fn test_single_restriction_at_end() {
+        // Sequence [0, 10, 12, 2] achieves max value 12 at index 2
         assert_eq!(
             Solution::find_max_val(4, vec![vec![3, 2]], vec![10, 10, 10]),
-            2
+            12
         );
     }
 }
