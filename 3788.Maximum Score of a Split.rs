@@ -1,37 +1,39 @@
 impl Solution {
-    /// Compute prefix sum on-the-fly while iterating, using precomputed suffix minimums.
+    /// O(1) space: compute total sum, then derive prefix on-the-fly from suffix.
     ///
     /// # Intuition
-    /// For each split index i, the score is prefix sum up to i minus the minimum in the suffix.
-    /// We only need to store suffix minimums; prefix sums can be computed incrementally.
+    /// For split i, score = prefix_sum[i] - suffix_min[i]. Since prefix_sum[i] = total - suffix_sum,
+    /// we only need running suffix_sum and suffix_min—no arrays required.
     ///
     /// # Approach
-    /// First pass (backward): build suffix_min where `suffix_min[i]` is min of `nums[i+1..n]`.
-    /// Second pass (forward): accumulate prefix sum and track maximum score in a single sweep.
+    /// First pass: compute total sum. Second pass (backward): maintain suffix_sum and suffix_min.
+    /// At each split i, prefix_sum = total - suffix_sum. Then extend suffix to include nums[i].
     ///
     /// # Complexity
     /// - Time: O(n)
-    /// - Space: O(n) for suffix_min array
+    /// - Space: O(1)
     pub fn maximum_score(nums: Vec<i32>) -> i64 {
         let n = nums.len();
         if n < 2 {
             return 0;
         }
 
-        let mut suffix_min = vec![0i64; n];
-        suffix_min[n - 1] = nums[n - 1] as i64;
+        let mut total = 0i64;
+        for &x in &nums {
+            total += x as i64;
+        }
+
+        let mut suffix_sum = nums[n - 1] as i64;
+        let mut suffix_min = nums[n - 1] as i64;
+        let mut ans = i64::MIN;
+
         for i in (0..n - 1).rev() {
-            suffix_min[i] = suffix_min[i + 1].min(nums[i + 1] as i64);
+            ans = ans.max(total - suffix_sum - suffix_min);
+            suffix_sum += nums[i] as i64;
+            suffix_min = suffix_min.min(nums[i] as i64);
         }
 
-        let mut prefix_sum = 0i64;
-        let mut max_score = i64::MIN;
-        for i in 0..n - 1 {
-            prefix_sum += nums[i] as i64;
-            max_score = max_score.max(prefix_sum - suffix_min[i]);
-        }
-
-        max_score
+        ans
     }
 }
 
