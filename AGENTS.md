@@ -488,6 +488,64 @@ If exceeding these, consider:
 - **Don't use `println!()`** - LeetCode solutions shouldn't have I/O
 - **Don't leave ListNode/TreeNode uncommented** - keep them commented for LeetCode compatibility
 
+## Mandatory Performance Optimization
+
+**All solutions must be optimized for the given constraints from the start.** Do not provide naive or unoptimized solutions that "work" but will TLE (Time Limit Exceeded) or MLE (Memory Limit Exceeded) on LeetCode.
+
+### Required Optimizations by Constraint
+
+| Constraint | Required Approach |
+|------------|-------------------|
+| `n <= 10^5` | O(n log n) or better; avoid O(n²) |
+| `n <= 10^6` | O(n) or O(n log n); preallocate collections |
+| `n <= 10^9` or `queries <= 10^5` | O(log n) per query; use segment trees, BIT, or binary search |
+| Range queries, updates | Segment tree, Fenwick tree, or sparse table |
+| Path queries on tree | LCA with binary lifting or heavy-light decomposition |
+| Pair sum/duplicate finding | HashMap/O(1) lookup, NOT O(n) scan |
+
+### Mandatory Implementation Patterns
+
+1. **HashMap with Combined Keys**: Use `i64` keys instead of tuple keys `(i32, i32)`:
+   ```rust
+   // GOOD: Single i64 key, no tuple hashing overhead
+   let key = ((xor as u32 as i64) << 32) | (parity as u32 as i64);
+   map.insert(key, value);
+   
+   // BAD: Tuple hashing is slower
+   map.insert((xor, parity), value);
+   ```
+
+2. **Preallocate All Collections**:
+   ```rust
+   let mut map = HashMap::with_capacity(n);
+   let mut vec = Vec::with_capacity(n);
+   ```
+
+3. **Use Bit Operations for Parity**:
+   ```rust
+   // GOOD: Single cycle
+   if num & 1 == 0 { /* even */ }
+   
+   // BAD: Modulo is slower
+   if num % 2 == 0 { /* even */ }
+   ```
+
+4. **Avoid `clone()` in Hot Paths**: Use references or indices instead
+
+5. **Use `entry()` API for HashMap Updates**:
+   ```rust
+   *map.entry(key).or_insert(0) += 1;  // Single lookup
+   ```
+
+### Verification Checklist
+
+Before submitting any solution, verify:
+- [ ] Solution handles `n = 10^5` within 100ms
+- [ ] Solution handles `n = 10^6` within 500ms  
+- [ ] No O(n²) loops for `n >= 10^4`
+- [ ] HashMap keys use primitive types only (no tuples for hot paths)
+- [ ] All collections use `with_capacity()` when size is known
+
 ## Task Guidelines
 
 ### Adding a New Solution
@@ -506,6 +564,14 @@ If exceeding these, consider:
 1. Check Rust 2024 edition compatibility first
 2. Verify match ergonomics in closures
 3. Ensure all imports are used (clippy `-- -D warnings`)
+
+### Handling Missing Files
+When a user references a file (e.g., `@3755.Find Maximum Balanced XOR Subarray Length.rs`) that does not exist:
+1. **Always create the missing file** with the solution - do not ask the user for confirmation
+2. Use the standard file naming pattern: `XXXX.Problem Name.rs`
+3. Follow the standard solution template structure
+4. Include the complete solution with proper documentation and unit tests
+5. Ensure the file compiles and follows all coding standards
 
 ## Pre-Submission Checklist
 
@@ -592,4 +658,4 @@ Connected to project `sarvex_rust-leetcode` for continuous code quality analysis
 
 ---
 
-*Last updated: 2025-02-11 | Rust Edition: 2024*
+*Last updated: 2026-02-11 | Rust Edition: 2024*
