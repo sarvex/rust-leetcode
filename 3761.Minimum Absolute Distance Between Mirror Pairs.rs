@@ -12,39 +12,37 @@ impl Solution {
     /// 2. At each index j, if map contains nums[j], we have a mirror pair (map[nums[j]], j);
     ///    update the minimum distance.
     /// 3. Then record that index j provides reverse(nums[j]) for future positions.
-    /// 4. Use i64 for digit reversal to avoid overflow (e.g. 10^9 → 9_000_000_000).
+    /// 4. Reversed values exceeding i32::MAX can never match any nums[j], so skip them
+    ///    and use i32 keys for faster hashing.
     ///
     /// # Complexity
     /// - Time: O(n * d) where d is max digits per element (≤10).
     /// - Space: O(n) for the map in the worst case.
     pub fn min_mirror_pair_distance(nums: Vec<i32>) -> i32 {
-        let n = nums.len();
-        let rev: Vec<i64> = nums.iter().map(|&x| Self::reverse_digits_i64(x)).collect();
-        let mut provides: HashMap<i64, usize> = HashMap::with_capacity(n);
+        let mut provides: HashMap<i32, usize> = HashMap::with_capacity(nums.len());
         let mut min_dist = i32::MAX;
 
         for (j, &val) in nums.iter().enumerate() {
-            if min_dist == 1 {
-                return 1;
-            }
-            let key = i64::from(val);
-            if let Some(&i) = provides.get(&key) {
+            if let Some(&i) = provides.get(&val) {
                 min_dist = min_dist.min((j - i) as i32);
+                if min_dist == 1 {
+                    return 1;
+                }
             }
-            provides.insert(rev[j], j);
+            let rev = Self::reverse_digits(val);
+            if rev <= i64::from(i32::MAX) {
+                provides.insert(rev as i32, j);
+            }
         }
 
-        if min_dist == i32::MAX {
-            -1
-        } else {
-            min_dist
-        }
+        if min_dist == i32::MAX { -1 } else { min_dist }
     }
 
     /// Reverses decimal digits of `x`; leading zeros are dropped (e.g. 120 → 21).
-    /// Returns i64 to avoid overflow (e.g. reverse(10^9) = 9_000_000_000).
+    /// Returns i64 to handle potential overflow (e.g. reverse(10^9) = 9_000_000_000),
+    /// but callers filter out values exceeding i32::MAX.
     #[inline(always)]
-    fn reverse_digits_i64(x: i32) -> i64 {
+    fn reverse_digits(x: i32) -> i64 {
         let mut n = i64::from(x);
         let mut r = 0_i64;
         while n != 0 {

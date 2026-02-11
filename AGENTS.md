@@ -1,58 +1,380 @@
-# Rust Agent Rules
+# Rust LeetCode Solutions - Agent Guide
 
-Enterprise-grade, performant Rust solutions using **Rust 2024 edition**. Code that wins at LeetCode and ships to production.
+A comprehensive collection of 1,100+ LeetCode problem solutions implemented in **Rust 2024 Edition**. This is a flat-file repository where each solution is a standalone Rust file with no Cargo project structure.
 
-## Rust 2024 Edition
+## Project Overview
 
-- Use `edition = "2024"` in Cargo.toml
-- Follow Rust 2024 match ergonomics rules (see [Match Ergonomics](#match-ergonomics-rust-2024))
-- Run `cargo fmt` and `cargo clippy -- -D warnings` before committing
+| Attribute | Value |
+|-----------|-------|
+| **Language** | Rust (Edition 2024) |
+| **Total Solutions** | 1,121 files |
+| **Total Lines** | ~100,000 lines |
+| **License** | MIT |
+| **Repository Type** | Flat file (no Cargo.toml) |
+| **File Pattern** | `XXXX.Problem Name.rs` |
+
+This repository contains production-ready solutions with comprehensive documentation, unit tests, and optimal algorithmic complexity. Each solution is designed to be self-contained and directly runnable in LeetCode's Rust environment.
+
+## Repository Structure
+
+### File Organization
+
+```
+rust-leetcode/
+├── XXXX.Problem Title.rs     # Individual solution files
+├── .rules                     # Comprehensive Rust coding standards
+├── .trunk/trunk.yaml          # Trunk linter/formatter configuration
+├── .vscode/settings.json      # VS Code workspace settings
+├── .github/                   # GitHub automation
+│   ├── renovate.json         # Renovate bot configuration
+│   └── dependabot.yml        # Dependabot configuration
+├── setup.sh                   # Unix setup script
+├── setup.ps1                  # PowerShell setup script
+├── AGENTS.md                  # This file
+├── README.md                  # Human-readable documentation
+└── LICENSE                    # MIT License
+```
+
+### File Naming Convention
+
+All solution files follow the strict pattern:
+```
+[4-digit zero-padded number].[Problem Title].rs
+```
+
+Examples:
+- `0001.Two Sum.rs`
+- `0146.LRU Cache.rs`
+- `3292.Minimum Number of Valid Strings to Form Target II.rs`
 
 ## Code Structure
 
+### Standard Solution Template
+
+Every solution file follows this consistent structure:
+
 ```rust
+// 1. Imports (only when needed)
+use std::collections::HashMap;
+
+// 2. Supporting structs (when required by problem) - COMMENTED OUT by default
+// Uncomment when needed for local testing:
+// #[derive(Clone, Debug)]
+// pub struct ListNode {
+//     pub val: i32,
+//     pub next: Option<Box<ListNode>>,
+// }
+
+// 3. Main Solution implementation
 impl Solution {
-    /// Brief description of the approach.
+    /// Brief algorithm description.
     ///
     /// # Intuition
     /// Key insight that unlocks the solution.
     ///
     /// # Approach
-    /// Algorithm explanation with key steps.
+    /// Step-by-step algorithm explanation.
     ///
     /// # Complexity
     /// - Time: O(n)
     /// - Space: O(1)
-    pub fn solve(nums: Vec<i32>) -> i32 {
-        nums.iter().filter(|n| **n > 0).sum()
+    ///
+    /// # Panics (if applicable)
+    /// Conditions under which the function panics.
+    pub fn method_name(params: Type) -> ReturnType {
+        // Implementation
     }
 }
 
+// 4. Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_example() {
-        assert_eq!(Solution::solve(vec![1, -2, 3]), 4);
+    fn test_example_case() {
+        assert_eq!(Solution::method_name(input), expected);
     }
 
     #[test]
-    fn test_edge_empty() {
-        assert_eq!(Solution::solve(vec![]), 0);
+    fn test_edge_cases() {
+        // Boundary conditions
     }
 }
 ```
 
-## Naming
+### Documentation Requirements
 
-| Type                 | Convention             | Example                    |
-| -------------------- | ---------------------- | -------------------------- |
-| Variables, functions | `snake_case`           | `num_to_index`, `find_max` |
-| Types, traits, enums | `PascalCase`           | `TreeNode`, `ListNode`     |
-| Constants            | `SCREAMING_SNAKE_CASE` | `MOD`, `MAX_SIZE`          |
+All public methods must include doc comments with these sections:
 
-Use descriptive names: `char_count` over `map`, `left_sum` over `ls`.
+1. **Tagline**: Brief one-line description of the approach
+2. **# Intuition**: High-level insight and reasoning
+3. **# Approach**: Algorithm steps and data structures used
+4. **# Complexity**: Time and space complexity analysis
+5. **# Panics** (optional): Panic conditions if any
+
+## Common Structs (Commented in Files)
+
+Since this is a flat-file repository without Cargo.toml, common LeetCode structs are included as **commented code** at the top of relevant files. These should be **uncommented only for local testing**:
+
+### ListNode (Linked List Problems)
+```rust
+// #[derive(Clone, Debug)]
+// pub struct ListNode {
+//     pub val: i32,
+//     pub next: Option<Box<ListNode>>,
+// }
+//
+// impl ListNode {
+//     #[inline]
+//     pub fn new(val: i32) -> Self {
+//         ListNode { val, next: None }
+//     }
+// }
+```
+
+### TreeNode (Binary Tree Problems)
+```rust
+// #[derive(Debug)]
+// pub struct TreeNode {
+//     pub val: i32,
+//     pub left: Option<Rc<RefCell<TreeNode>>>,
+//     pub right: Option<Rc<RefCell<TreeNode>>>,
+// }
+//
+// impl TreeNode {
+//     #[inline]
+//     pub fn new(val: i32) -> Self {
+//         TreeNode {
+//             val,
+//             left: None,
+//             right: None,
+//         }
+//     }
+// }
+```
+
+> **Note**: On LeetCode, these structs are pre-defined by the platform. Keep them commented in files to avoid conflicts when copying solutions directly.
+
+## Common Imports and Patterns
+
+### Most Frequently Used Imports
+
+```rust
+// Data structures
+use std::collections::HashMap;      // 67 occurrences
+use std::collections::VecDeque;     // 38 occurrences - BFS, queues
+use std::collections::HashSet;      // 31 occurrences
+use std::collections::BinaryHeap;   // 20 occurrences - priority queues
+use std::collections::BTreeMap;     // 5 occurrences - ordered map
+use std::collections::BTreeSet;     // 3 occurrences - ordered set
+
+// Smart pointers (for tree/graph problems)
+use std::rc::Rc;                    // 69 occurrences
+use std::cell::RefCell;             // 69 occurrences
+
+// Comparison utilities
+use std::cmp::Reverse;              // 12 occurrences - min-heap pattern
+use std::cmp::Ordering;             // 8 occurrences
+```
+
+### Common Algorithm Patterns
+
+#### Two Pointers
+```rust
+let (mut left, mut right) = (0, nums.len() - 1);
+while left < right {
+    match nums[left] + nums[right] {
+        sum if sum == target => return vec![left, right],
+        sum if sum < target => left += 1,
+        _ => right -= 1,
+    }
+}
+```
+
+#### Sliding Window
+```rust
+let (mut start, mut end, mut best) = (0, 0, 0);
+while end < nums.len() {
+    // expand window
+    while window_invalid() { start += 1; }
+    best = best.max(end - start + 1);
+    end += 1;
+}
+```
+
+#### Hash Map for O(1) Lookup
+```rust
+let mut num_to_index = HashMap::with_capacity(nums.len());
+for (i, num) in nums.iter().enumerate() {
+    if let Some(&j) = num_to_index.get(&(target - num)) {
+        return vec![j as i32, i as i32];
+    }
+    num_to_index.insert(num, i);
+}
+```
+
+#### BFS with VecDeque
+```rust
+let mut queue = VecDeque::from([root]);
+while let Some(node) = queue.pop_front() {
+    // process node
+    queue.push_back(left_child);
+    queue.push_back(right_child);
+}
+```
+
+#### Binary Heap (Min/Max Heap)
+```rust
+// Min-heap pattern
+let mut heap = BinaryHeap::new();
+heap.push(Reverse((cost, node)));
+while let Some(Reverse((cost, node))) = heap.pop() {
+    // process
+}
+```
+
+## Choosing the Right Pattern
+
+| Problem Characteristic | Recommended Approach |
+|------------------------|---------------------|
+| Sorted array, find pair | Two pointers (O(n)) |
+| Subarray/sliding condition | Sliding window |
+| Find duplicates/frequency | HashMap |
+| Tree traversal, level by level | BFS with VecDeque |
+| Tree traversal, path finding | DFS recursive |
+| Need min/max repeatedly | BinaryHeap |
+| Range queries, updates | Segment tree or BIT |
+| Overlapping subproblems | Dynamic Programming |
+
+## Code Quality Standards
+
+### Rust 2024 Edition Compliance
+
+- **No reference patterns in closures** when default binding mode is `ref`:
+  ```rust
+  // WRONG in Rust 2024
+  .filter(|(i, &c)| ...)
+  
+  // CORRECT
+  .filter(|(i, c)| *c == target)
+  ```
+
+### Formatting and Linting
+
+The project uses **Trunk** for unified linting and formatting:
+
+```yaml
+# .trunk/trunk.yaml
+lint:
+  enabled:
+    - rustfmt@1.65.0      # Code formatting
+    - checkov@3.2.396     # Security scanning
+    - markdownlint@0.44.0 # Markdown linting
+    - prettier@3.5.3      # General formatting
+    - shellcheck@0.10.0   # Shell script linting
+    - shfmt@3.6.0         # Shell formatting
+    - trufflehog@3.88.20  # Secret scanning
+```
+
+### Required Commands
+
+```bash
+# Format all code
+cargo fmt
+
+# Check with clippy (strict mode)
+cargo clippy -- -D warnings
+
+# Run tests (when in a Cargo project)
+cargo test
+```
+
+## Testing Strategy
+
+Every solution includes comprehensive unit tests covering:
+
+1. **Example cases**: From problem statement
+2. **Edge cases**: Empty input, single element, minimum/maximum values
+3. **Boundary conditions**: i32::MIN, i32::MAX, large n
+4. **Negative cases**: Invalid inputs where applicable
+
+### Test Module Pattern
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Helper functions for test data construction
+    fn to_list(vec: &[i32]) -> Option<Box<ListNode>> { ... }
+    fn from_list(list: Option<Box<ListNode>>) -> Vec<i32> { ... }
+
+    #[test]
+    fn test_example_from_problem() { ... }
+
+    #[test]
+    fn test_edge_empty_input() { ... }
+
+    #[test]
+    fn test_edge_single_element() { ... }
+
+    #[test]
+    fn test_boundary_max_values() { ... }
+}
+```
+
+## Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Variables, functions | `snake_case` | `num_to_index`, `find_max` |
+| Types, traits, enums | `PascalCase` | `TreeNode`, `ListNode` |
+| Constants | `SCREAMING_SNAKE_CASE` | `MOD`, `MAX_SIZE` |
+| Solution struct | `Solution` | `impl Solution` |
+| Helper structs | Descriptive | `LRUCache`, `Node` |
+
+### Variable Naming Guidelines
+
+- Use descriptive names: `char_count` over `map`
+- Avoid single-letter names except for:
+  - Loop indices: `i`, `j`, `k`
+  - Coordinates: `x`, `y`, `z`
+  - Well-known math: `n`, `m` for dimensions
+- Prefer `left`/`right` over `l`/`r` for pointers
+- Use `prev`/`curr`/`next` for iteration state
+
+## Working with This Repository
+
+### Running Individual Solutions
+
+Since there's no Cargo.toml, to run a solution locally:
+
+1. Create a temporary Cargo project:
+   ```bash
+   cargo new temp_solution && cd temp_solution
+   ```
+
+2. Copy solution content to `src/main.rs`
+
+3. Uncomment the required structs (ListNode/TreeNode) at the top of the file
+
+4. Run with:
+   ```bash
+   cargo run
+   # or
+   cargo test
+   ```
+
+### Adding New Solutions
+
+1. Create file with correct naming: `XXXX.Problem Title.rs`
+2. Follow the standard template structure
+3. Include commented ListNode/TreeNode if problem requires them
+4. Include all required documentation sections
+5. Add comprehensive unit tests
+6. Run formatting: `cargo fmt`
+7. Ensure no clippy warnings
 
 ## Iterators vs Loops
 
@@ -69,7 +391,6 @@ let squared: Vec<_> = nums.iter().map(|x| x * x).collect();
 // Early exit with find/take_while/any/all
 let first_negative = nums.iter().find(|x| **x < 0);
 let has_zero = nums.iter().any(|x| *x == 0);
-let prefix: Vec<_> = nums.iter().take_while(|x| **x > 0).collect();
 
 // Accumulation with fold/scan
 let running_sum: Vec<_> = nums.iter().scan(0, |acc, x| { *acc += x; Some(*acc) }).collect();
@@ -92,233 +413,183 @@ while l < r {
 }
 ```
 
-## Match Ergonomics (Rust 2024)
+## Code Style Examples
 
-Rust 2024 disallows reference patterns (`&`) when default binding mode is already `ref`:
-
+### ✅ Good: Iterator chains
 ```rust
-// ERROR in Rust 2024
-.filter(|(i, &c)| ...)      // & inside implicit ref binding
-.take_while(|&&c| ...)      // same issue
+let sum: i32 = nums.iter().filter(|x| **x > 0).sum();
+```
 
-// CORRECT: dereference in body
+### ❌ Bad: Unnecessary loops
+```rust
+let mut sum = 0;
+for i in 0..nums.len() {
+    if nums[i] > 0 {
+        sum += nums[i];
+    }
+}
+```
+
+### ✅ Good: Entry API
+```rust
+*count.entry(num).or_insert(0) += 1;
+```
+
+### ❌ Bad: Manual check + insert
+```rust
+if !count.contains_key(&num) {
+    count.insert(num, 0);
+}
+*count.get_mut(&num).unwrap() += 1;
+```
+
+### ✅ Good: Pattern matching with match ergonomics
+```rust
 .filter(|(i, c)| *c == target)
-.take_while(|c| **c == target)
-
-// CORRECT: explicit outer pattern
-.filter(|&(i, c)| c == target)
 ```
 
-Run `cargo fix --edition` to auto-migrate.
-
-## Performance Patterns
-
-### Preallocate Collections
-
+### ❌ Bad: Reference patterns (Rust 2024 error)
 ```rust
-let mut result = Vec::with_capacity(n);
-let mut seen = HashMap::with_capacity(n);
+.filter(|(i, &c)| ...)  // ERROR in Rust 2024
 ```
 
-### Avoid Unnecessary Cloning
+## Complexity Quick Reference
 
-```rust
-// Prefer
-fn process(s: &str) -> usize { s.len() }
+| Pattern | Typical Time | Typical Space |
+|---------|-------------|---------------|
+| HashMap lookup | O(1) | O(n) |
+| Binary search | O(log n) | O(1) |
+| Two pointers | O(n) | O(1) |
+| Sliding window | O(n) | O(1) or O(k) |
+| BFS/DFS | O(V + E) | O(V) |
+| Dijkstra | O((V + E) log V) | O(V) |
+| Union-Find | O(α(n)) ≈ O(1) | O(n) |
 
-// Over
-fn process(s: String) -> usize { s.len() }
-```
+## Performance Targets
 
-### Use Entry API for HashMap
+For solutions to be accepted on LeetCode:
 
-```rust
-*freq.entry(key).or_insert(0) += 1;
-```
+- **Easy**: < 10ms runtime, < 2MB memory
+- **Medium**: < 50ms runtime, < 3MB memory  
+- **Hard**: < 100ms runtime, < 5MB memory
 
-### Bit Manipulation
+If exceeding these, consider:
+- Using `with_capacity()` for collections
+- Avoiding `clone()` in hot paths
+- Using bit manipulation instead of HashSet for small ranges
+- In-place algorithms for space optimization
 
-```rust
-// Check if power of 2
-n > 0 && (n & (n - 1)) == 0
+## Common Pitfalls to Avoid
 
-// Count set bits
-n.count_ones()
+- **Don't use raw for loops** when iterators suffice (see Iterators vs Loops)
+- **Don't forget Rust 2024 match ergonomics** - no `&` patterns in closures
+- **Don't use `unimplemented!()`** in final solutions - always provide working code
+- **Don't omit doc comments** - every public method needs full documentation
+- **Don't use `println!()`** - LeetCode solutions shouldn't have I/O
+- **Don't leave ListNode/TreeNode uncommented** - keep them commented for LeetCode compatibility
 
-// XOR for finding single element
-nums.iter().fold(0, |acc, x| acc ^ x)
-```
+## Task Guidelines
 
-## Common Algorithm Patterns
+### Adding a New Solution
+1. Check if problem number already exists (avoid duplicates)
+2. Create file with pattern: `XXXX.Problem Name.rs`
+3. Include commented ListNode/TreeNode structs if needed
+4. Use `cargo new temp_test` to test compilation locally
+5. Include at least 3 test cases: example, edge case, stress test
 
-### Two Pointers
+### Refactoring Existing Code
+1. Preserve all existing test cases - they define correctness
+2. Run benchmarks if optimizing for performance
+3. Update complexity comments if algorithm changes
 
-```rust
-let (mut l, mut r) = (0, nums.len() - 1);
-while l < r {
-    match nums[l] + nums[r] {
-        sum if sum == target => return vec![l, r],
-        sum if sum < target => l += 1,
-        _ => r -= 1,
-    }
-}
-```
+### Fixing Compilation Errors
+1. Check Rust 2024 edition compatibility first
+2. Verify match ergonomics in closures
+3. Ensure all imports are used (clippy `-- -D warnings`)
 
-### Sliding Window
+## Pre-Submission Checklist
 
-```rust
-let (mut start, mut end, mut best) = (0, 0, 0);
-while end < nums.len() {
-    // expand: add nums[end] to window state
-    while /* window invalid */ {
-        // shrink: remove nums[start] from state
-        start += 1;
-    }
-    best = best.max(end - start + 1);
-    end += 1;
-}
-```
+Before marking any task complete, verify:
 
-### Binary Search
+- [ ] `cargo fmt` produces no changes
+- [ ] `cargo clippy -- -D warnings` passes
+- [ ] All unit tests pass (`cargo test`)
+- [ ] Doc comments include Intuition, Approach, Complexity
+- [ ] No `TODO`, `FIXME`, or `unimplemented!()` markers remain
+- [ ] File follows naming: `XXXX.Problem Name.rs`
+- [ ] ListNode/TreeNode structs are commented out (not uncommented)
+- [ ] Edge cases covered: empty, single element, maximum constraints
 
-```rust
-// Standard library
-nums.binary_search(&target).unwrap_or_else(|i| i)
+## Tooling Integration
 
-// Custom bounds
-let idx = nums.partition_point(|&x| x < target);
-```
+### VS Code Settings
 
-### DFS/BFS
+The `.vscode/settings.json` includes:
+- Peacock theme color (#dd0531 - red)
+- SonarLint connected mode configuration
+- Custom dictionary for LeetCode terms
 
-```rust
-// DFS recursive
-fn dfs(node: Option<Rc<RefCell<TreeNode>>>) -> i32 {
-    node.map_or(0, |n| {
-        let n = n.borrow();
-        1 + dfs(n.left.clone()).max(dfs(n.right.clone()))
-    })
-}
+### GitHub Automation
 
-// BFS iterative
-let mut queue = VecDeque::from([root]);
-while let Some(node) = queue.pop_front() {
-    // process, then queue.push_back(children)
-}
-```
+- **Renovate**: Automated dependency updates (configured via `renovate.json`)
+- **Dependabot**: GitHub Actions updates
 
-### Dynamic Programming
+### SonarLint
 
-```rust
-// Bottom-up with space optimization
-let (mut prev, mut curr) = (0, 1);
-for i in 2..=n {
-    (prev, curr) = (curr, prev + curr);
-}
-```
+Connected to project `sarvex_rust-leetcode` for continuous code quality analysis.
 
-### Union-Find
+## Security Considerations
 
-```rust
-fn find(parent: &mut [usize], x: usize) -> usize {
-    if parent[x] != x {
-        parent[x] = find(parent, parent[x]); // path compression
-    }
-    parent[x]
-}
+- **No unsafe code**: All solutions use safe Rust only
+- **Input validation**: Solutions handle edge cases gracefully
+- **No secrets**: Repository contains no API keys or credentials
+- **MIT Licensed**: Open source with permissive licensing
 
-fn union(parent: &mut [usize], rank: &mut [usize], x: usize, y: usize) {
-    let (px, py) = (find(parent, x), find(parent, y));
-    if px != py {
-        match rank[px].cmp(&rank[py]) {
-            std::cmp::Ordering::Less => parent[px] = py,
-            std::cmp::Ordering::Greater => parent[py] = px,
-            std::cmp::Ordering::Equal => { parent[py] = px; rank[px] += 1; }
-        }
-    }
-}
-```
+## Performance Guidelines
 
-## Error Handling
+### Preferred Patterns
 
-**LeetCode context**: Constraints are guaranteed. Use direct indexing and `unwrap()` when the problem guarantees validity.
+1. **Preallocate collections** when size is known:
+   ```rust
+   let mut result = Vec::with_capacity(n);
+   ```
 
-**Production context**: Use `Result<T, E>` with `?` propagation:
+2. **Use iterator chains** over manual loops
 
-```rust
-fn parse_input(s: &str) -> Result<i32, ParseIntError> {
-    s.trim().parse()
-}
-```
+3. **Leverage entry API** for HashMap updates:
+   ```rust
+   *freq.entry(key).or_insert(0) += 1;
+   ```
 
-## Safety Guidelines
+4. **Use binary search** from standard library:
+   ```rust
+   nums.binary_search(&target)
+   nums.partition_point(|&x| x < target)
+   ```
 
-- Prefer safe abstractions; use `unsafe` only when necessary and isolate it
-- Validate inputs at system boundaries
-- Use `#[cfg(debug_assertions)]` for expensive runtime checks during development
+### Memory Efficiency
 
-```rust
-// Isolated unsafe with safety comment
-// SAFETY: index is bounds-checked above
-unsafe { *slice.get_unchecked(index) }
-```
+- Use references (`&`) to avoid cloning
+- Leverage `Option` and `Result` for null-safety
+- Prefer stack allocation for small, fixed-size data
+- Use `Box<T>` for recursive types (trees, linked lists)
 
-## Testing Checklist
+## Troubleshooting
 
-Every solution needs:
+### Common Issues
 
-- [ ] Example cases from problem statement
-- [ ] Edge cases: empty input, single element, all same values
-- [ ] Boundary conditions: i32::MIN, i32::MAX, large n
-- [ ] Negative cases where applicable
+1. **Clippy warnings**: Run `cargo clippy -- -D warnings` and fix all issues
+2. **Formatting**: Run `cargo fmt` before committing
+3. **Rust 2024 errors**: Check match ergonomics in closures
+4. **Test failures**: Ensure `#[cfg(test)]` module is properly defined
+5. **Struct conflicts**: Make sure ListNode/TreeNode are commented when submitting to LeetCode
 
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
+### Getting Help
 
-    #[test]
-    fn test_examples() {
-        assert_eq!(Solution::solve(vec![2, 7, 11, 15], 9), vec![0, 1]);
-    }
+- Check `.rules` file for detailed coding standards
+- Refer to existing solutions for patterns
+- Follow Rust API guidelines: https://rust-lang.github.io/api-guidelines/
 
-    #[test]
-    fn test_edge_two_elements() {
-        assert_eq!(Solution::solve(vec![3, 3], 6), vec![0, 1]);
-    }
+---
 
-    #[test]
-    fn test_negative_numbers() {
-        assert_eq!(Solution::solve(vec![-1, -2, -3, -4, -5], -8), vec![2, 4]);
-    }
-}
-```
-
-## Tooling
-
-```bash
-# Format and lint
-cargo fmt && cargo clippy -- -D warnings
-
-# Run tests
-cargo test
-
-# Check for security vulnerabilities
-cargo audit
-
-# Benchmark (for optimization work)
-cargo bench
-```
-
-## Quick Reference
-
-| Need            | Use                                                |
-| --------------- | -------------------------------------------------- |
-| O(1) lookup     | `HashMap`, `HashSet`                               |
-| Sorted keys     | `BTreeMap`, `BTreeSet`                             |
-| Queue (FIFO)    | `VecDeque`                                         |
-| Stack (LIFO)    | `Vec` with `push`/`pop`                            |
-| Priority queue  | `BinaryHeap` (max-heap; wrap in `Reverse` for min) |
-| Counting        | `HashMap<K, usize>` with entry API                 |
-| Memoization     | `HashMap<State, Result>`                           |
-| Graph adjacency | `Vec<Vec<usize>>` or `HashMap<usize, Vec<usize>>`  |
+*Last updated: 2025-02-11 | Rust Edition: 2024*
