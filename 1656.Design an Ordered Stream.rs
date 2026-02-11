@@ -1,18 +1,23 @@
-/// Ordered stream that emits consecutive values from a pointer.
-///
-/// # Intuition
-/// Store values at their designated positions. On each insert, if the
-/// pointer's position is filled, emit all consecutive filled values.
-///
-/// # Complexity
-/// - insert: O(k) where k is the number of consecutive values emitted
-/// - Space: O(n)
 struct OrderedStream {
     ptr: usize,
     data: Vec<Option<String>>,
 }
 
 impl OrderedStream {
+    /// Ordered stream that emits consecutive values from a pointer.
+    ///
+    /// # Intuition
+    /// Store values at their designated positions. On each insert, if the
+    /// pointer's position is filled, emit all consecutive filled values.
+    ///
+    /// # Approach
+    /// Maintain an array of `Option<String>` and a pointer. On `insert`, place the
+    /// value at the given index, then advance the pointer while consecutive slots
+    /// are filled, collecting those values into the result vector.
+    ///
+    /// # Complexity
+    /// - insert: O(k) where k is the number of consecutive values emitted
+    /// - Space: O(n)
     fn new(n: i32) -> Self {
         Self {
             ptr: 1,

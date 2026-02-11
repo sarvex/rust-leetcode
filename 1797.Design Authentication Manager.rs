@@ -1,12 +1,27 @@
 use std::collections::HashMap;
 
-/// Token-based authentication manager with time-to-live expiration.
 struct AuthenticationManager {
     time_to_live: i32,
     tokens: HashMap<String, i32>,
 }
 
 impl AuthenticationManager {
+    /// Token-based authentication manager with time-to-live expiration.
+    ///
+    /// # Intuition
+    /// Each token has an expiration time equal to its creation or renewal time
+    /// plus the TTL. Renewing only succeeds if the token is still unexpired.
+    ///
+    /// # Approach
+    /// Store token expiration times in a HashMap. On `generate`, insert with
+    /// `current_time + ttl`. On `renew`, update only if the token exists and
+    /// is unexpired. On `count_unexpired_tokens`, filter values greater than
+    /// `current_time`.
+    ///
+    /// # Complexity
+    /// - generate / renew: O(1)
+    /// - count_unexpired_tokens: O(n)
+    /// - Space: O(n)
     fn new(time_to_live: i32) -> Self {
         Self {
             time_to_live,

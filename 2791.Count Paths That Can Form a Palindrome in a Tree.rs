@@ -3,18 +3,18 @@ use std::collections::HashMap;
 impl Solution {
     /// Prefix-parity masks with hash counting.
     ///
-    /// # intuition
+    /// # Intuition
     /// A path can be permuted into a palindrome iff at most one character has an odd count.
     /// Parity along any path equals XOR of prefix parities from the root.
     ///
-    /// # approach
+    /// # Approach
     /// 1. Build children lists from `parent`, then DFS from root to compute a 26-bit parity mask
     ///    for every node (bit c is 1 if char c appears odd times on the root->node path).
     /// 2. For each node mask m, count previously seen nodes with mask m (XOR 0) and with
     ///    masks m ^ (1<<c) for all letters (XOR has exactly one bit). Add these counts to
     ///    the answer, then record m in the frequency map.
     ///
-    /// # complexity
+    /// # Complexity
     /// - Time: O(n * 26)
     /// - Space: O(n)
     pub fn count_palindrome_paths(parent: Vec<i32>, s: String) -> i64 {

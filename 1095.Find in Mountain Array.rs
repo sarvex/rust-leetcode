@@ -57,6 +57,56 @@ impl Solution {
                 lo = mid + 1;
             }
         }
-        if m.get(lo) == target { lo } else { -1 }
+        if m.get(lo) == target {
+            lo
+        } else {
+            -1
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn target_in_ascending_half() {
+        let ma = MountainArray {
+            arr: vec![1, 2, 3, 4, 5, 3, 1],
+        };
+        assert_eq!(Solution::find_in_mountain_array(3, &ma), 2);
+    }
+
+    #[test]
+    fn target_at_peak() {
+        let ma = MountainArray {
+            arr: vec![1, 2, 5, 3, 1],
+        };
+        assert_eq!(Solution::find_in_mountain_array(5, &ma), 2);
+    }
+
+    #[test]
+    fn target_only_in_descending_half() {
+        let ma = MountainArray {
+            arr: vec![1, 5, 4, 3, 2],
+        };
+        // 2 is not in [1,5], only in [5,4,3,2]
+        assert_eq!(Solution::find_in_mountain_array(2, &ma), 4);
+    }
+
+    #[test]
+    fn target_not_found() {
+        let ma = MountainArray {
+            arr: vec![1, 2, 3, 2, 1],
+        };
+        assert_eq!(Solution::find_in_mountain_array(4, &ma), -1);
+    }
+
+    #[test]
+    fn target_prefers_leftmost() {
+        let ma = MountainArray {
+            arr: vec![0, 1, 2, 4, 2, 1],
+        };
+        assert_eq!(Solution::find_in_mountain_array(2, &ma), 2);
     }
 }

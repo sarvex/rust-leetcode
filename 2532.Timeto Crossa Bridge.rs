@@ -1,27 +1,27 @@
-/// Time to Cross a Bridge
-///
-/// # Intuition
-/// This is a discrete event simulation problem where workers transition between
-/// states (waiting, crossing, picking, putting) and we must respect bridge priority
-/// rules. The key insight is that "least efficient" workers get priority, which
-/// means we need max-heaps ordered by inefficiency.
-///
-/// # Approach
-/// Use four priority queues to track worker states:
-/// - `left_waiting`: Max-heap of workers ready to cross right (by inefficiency)
-/// - `right_waiting`: Max-heap of workers ready to cross left with box (by inefficiency)
-/// - `left_busy`: Min-heap of workers putting boxes (by completion time)
-/// - `right_busy`: Min-heap of workers picking boxes (by completion time)
-///
-/// Simulate time progression, always processing bridge crossings based on priority rules.
-///
-/// # Complexity
-/// - Time: O((n + k) * log k) - each box requires O(log k) heap operations
-/// - Space: O(k) - storing worker information in heaps
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
 impl Solution {
+    /// Time to Cross a Bridge
+    ///
+    /// # Intuition
+    /// This is a discrete event simulation problem where workers transition between
+    /// states (waiting, crossing, picking, putting) and we must respect bridge priority
+    /// rules. The key insight is that "least efficient" workers get priority, which
+    /// means we need max-heaps ordered by inefficiency.
+    ///
+    /// # Approach
+    /// Use four priority queues to track worker states:
+    /// - `left_waiting`: Max-heap of workers ready to cross right (by inefficiency)
+    /// - `right_waiting`: Max-heap of workers ready to cross left with box (by inefficiency)
+    /// - `left_busy`: Min-heap of workers putting boxes (by completion time)
+    /// - `right_busy`: Min-heap of workers picking boxes (by completion time)
+    ///
+    /// Simulate time progression, always processing bridge crossings based on priority rules.
+    ///
+    /// # Complexity
+    /// - Time: O((n + k) * log k) - each box requires O(log k) heap operations
+    /// - Space: O(k) - storing worker information in heaps
     pub fn find_crossing_time(n: i32, _k: i32, time: Vec<Vec<i32>>) -> i32 {
         let n = n as usize;
         let k = time.len();

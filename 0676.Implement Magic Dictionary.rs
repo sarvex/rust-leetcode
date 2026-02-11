@@ -1,18 +1,3 @@
-/// Magic dictionary supporting search with exactly one character difference.
-///
-/// # Intuition
-/// Uses a trie to efficiently search for words that differ by exactly one
-/// character from the query.
-///
-/// # Approach
-/// Build a trie from the dictionary words. During search, recursively explore
-/// the trie tracking the number of character differences. Accept paths with
-/// exactly one difference.
-///
-/// # Complexity
-/// - Time: O(n * m) for build where n is number of words and m is average length
-/// - Time: O(m * 26) for search where m is query length
-/// - Space: O(ALPHABET * N) where N is total characters in dictionary
 struct Trie {
     children: [Option<Box<Trie>>; 26],
     is_end: bool,
@@ -65,6 +50,21 @@ struct MagicDictionary {
 }
 
 impl MagicDictionary {
+    /// Magic dictionary supporting search with exactly one character difference.
+    ///
+    /// # Intuition
+    /// Uses a trie to efficiently search for words that differ by exactly one
+    /// character from the query.
+    ///
+    /// # Approach
+    /// Build a trie from the dictionary words. During search, recursively explore
+    /// the trie tracking the number of character differences. Accept paths with
+    /// exactly one difference.
+    ///
+    /// # Complexity
+    /// - Time: O(n * m) for build where n is number of words and m is average length
+    /// - Time: O(m * 26) for search where m is query length
+    /// - Space: O(ALPHABET * N) where N is total characters in dictionary
     fn new() -> Self {
         Self { trie: Trie::new() }
     }

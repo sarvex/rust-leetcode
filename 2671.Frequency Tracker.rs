@@ -1,16 +1,24 @@
 use std::collections::HashMap;
 
-/// Tracks element frequencies and allows querying whether any element has a given frequency.
-///
-/// # Approach
-/// Maintain two maps: `cnt` maps numbers to their count, `freq` maps frequency values
-/// to how many numbers have that frequency. Both are updated in O(1) per operation.
 struct FrequencyTracker {
     cnt: HashMap<i32, i32>,
     freq: HashMap<i32, i32>,
 }
 
 impl FrequencyTracker {
+    /// Tracks element frequencies and allows querying whether any element has a given frequency.
+    ///
+    /// # Intuition
+    /// A second frequency-of-frequency map enables O(1) `has_frequency` lookups
+    /// without scanning all element counts.
+    ///
+    /// # Approach
+    /// Maintain two maps: `cnt` maps numbers to their count, `freq` maps frequency values
+    /// to how many numbers have that frequency. Both are updated in O(1) per operation.
+    ///
+    /// # Complexity
+    /// - add / delete_one / has_frequency: O(1)
+    /// - Space: O(n)
     fn new() -> Self {
         Self {
             cnt: HashMap::new(),

@@ -8,23 +8,29 @@ struct Task {
     due_date: i32,
 }
 
-/// A TodoList that supports adding, retrieving, filtering, and completing tasks per user.
-///
-/// # Intuition
-/// Each user maintains a list of tasks. Tasks are globally identified by an
-/// auto-incrementing ID. Completing a task removes it from the user's list.
-///
-/// # Approach
-/// - Store tasks per user in a HashMap<i32, Vec<Task>>
-/// - Auto-increment task IDs globally
-/// - Sort by due_date when retrieving tasks
-/// - Filter by tag using HashSet membership
 struct TodoList {
     next_id: i32,
     user_tasks: HashMap<i32, Vec<Task>>,
 }
 
 impl TodoList {
+    /// A TodoList that supports adding, retrieving, filtering, and completing tasks per user.
+    ///
+    /// # Intuition
+    /// Each user maintains a list of tasks. Tasks are globally identified by an
+    /// auto-incrementing ID. Completing a task removes it from the user's list.
+    ///
+    /// # Approach
+    /// - Store tasks per user in a HashMap<i32, Vec<Task>>
+    /// - Auto-increment task IDs globally
+    /// - Sort by due_date when retrieving tasks
+    /// - Filter by tag using HashSet membership
+    ///
+    /// # Complexity
+    /// - add_task: O(1)
+    /// - get_all_tasks / get_tasks_for_tag: O(n log n) due to sorting
+    /// - complete_task: O(n) linear scan and removal
+    /// - Space: O(total tasks)
     fn new() -> Self {
         Self {
             next_id: 1,

@@ -1,19 +1,24 @@
 use std::collections::BTreeSet;
 
-/// Maintains an infinite set of positive integers supporting pop-smallest and add-back.
-///
-/// # Intuition
-/// A BTreeSet efficiently tracks which numbers are present, providing O(log n)
-/// insertion, removal, and minimum queries.
-///
-/// # Approach
-/// Initialize with all integers 1..=1000. Pop returns and removes the smallest.
-/// Add-back re-inserts a removed number.
 struct SmallestInfiniteSet {
     present: BTreeSet<i32>,
 }
 
 impl SmallestInfiniteSet {
+    /// Maintains an infinite set of positive integers supporting pop-smallest and add-back.
+    ///
+    /// # Intuition
+    /// A BTreeSet efficiently tracks which numbers are present, providing O(log n)
+    /// insertion, removal, and minimum queries.
+    ///
+    /// # Approach
+    /// Initialize with all integers 1..=1000. Pop returns and removes the smallest.
+    /// Add-back re-inserts a removed number.
+    ///
+    /// # Complexity
+    /// - pop_smallest: O(log n)
+    /// - add_back: O(log n)
+    /// - Space: O(n)
     fn new() -> Self {
         Self {
             present: (1..=1000).collect(),

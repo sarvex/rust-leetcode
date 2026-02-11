@@ -1,9 +1,23 @@
-/// Simple bank system supporting transfers, deposits, and withdrawals.
 struct Bank {
     balance: Vec<i64>,
 }
 
 impl Bank {
+    /// Simple bank system supporting transfers, deposits, and withdrawals.
+    ///
+    /// # Intuition
+    /// Validate account indices before every operation. Transfers, deposits,
+    /// and withdrawals are straightforward balance mutations guarded by
+    /// bounds and sufficiency checks.
+    ///
+    /// # Approach
+    /// Store balances in a Vec indexed by `account - 1`. Each operation first
+    /// validates account numbers, then checks sufficient funds for transfers
+    /// and withdrawals before mutating balances.
+    ///
+    /// # Complexity
+    /// - Each operation: O(1)
+    /// - Space: O(n) for n accounts
     fn new(balance: Vec<i64>) -> Self {
         Self { balance }
     }

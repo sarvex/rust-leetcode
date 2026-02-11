@@ -51,3 +51,52 @@ impl Solution {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn node(
+        val: i32,
+        left: Option<Rc<RefCell<TreeNode>>>,
+        right: Option<Rc<RefCell<TreeNode>>>,
+    ) -> Option<Rc<RefCell<TreeNode>>> {
+        Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+    }
+
+    fn leaf(val: i32) -> Option<Rc<RefCell<TreeNode>>> {
+        node(val, None, None)
+    }
+
+    #[test]
+    fn or_true_false() {
+        // OR(true, false) = true
+        let root = node(2, leaf(1), leaf(0));
+        assert!(Solution::evaluate_tree(root));
+    }
+
+    #[test]
+    fn and_true_false() {
+        // AND(true, false) = false
+        let root = node(3, leaf(1), leaf(0));
+        assert!(!Solution::evaluate_tree(root));
+    }
+
+    #[test]
+    fn nested_tree() {
+        // OR(true, AND(true, false)) = OR(true, false) = true
+        let right = node(3, leaf(1), leaf(0));
+        let root = node(2, leaf(1), right);
+        assert!(Solution::evaluate_tree(root));
+    }
+
+    #[test]
+    fn single_leaf_true() {
+        assert!(Solution::evaluate_tree(leaf(1)));
+    }
+
+    #[test]
+    fn single_leaf_false() {
+        assert!(!Solution::evaluate_tree(leaf(0)));
+    }
+}

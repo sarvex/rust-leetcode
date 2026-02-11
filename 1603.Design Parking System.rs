@@ -1,19 +1,23 @@
-/// Array-based parking system with slot capacity tracking.
-///
-/// # Intuition
-/// Track available slots per car type (big=1, medium=2, small=3) in a
-/// fixed-size array. Each `add_car` call decrements the corresponding
-/// counter if space remains.
-///
-/// # Complexity
-/// - new: O(1)
-/// - add_car: O(1)
-/// - Space: O(1)
 struct ParkingSystem {
     slots: [i32; 4],
 }
 
 impl ParkingSystem {
+    /// Array-based parking system with slot capacity tracking.
+    ///
+    /// # Intuition
+    /// Track available slots per car type (big=1, medium=2, small=3) in a
+    /// fixed-size array. Each `add_car` call decrements the corresponding
+    /// counter if space remains.
+    ///
+    /// # Approach
+    /// Use a 4-element array indexed by car type (1-indexed). On `add_car`,
+    /// check if the slot count is positive; if so, decrement and return true.
+    ///
+    /// # Complexity
+    /// - new: O(1)
+    /// - add_car: O(1)
+    /// - Space: O(1)
     fn new(big: i32, medium: i32, small: i32) -> Self {
         Self {
             slots: [0, big, medium, small],

@@ -1,27 +1,27 @@
 use std::collections::HashMap;
 
-/// Hash map leaderboard with on-demand sorting for top-K queries.
-///
-/// # Intuition
-/// A HashMap provides O(1) score updates and resets. For top-K queries,
-/// collecting and partially sorting scores is sufficient since K is
-/// typically small relative to the total player count.
-///
-/// # Approach
-/// - `add_score`: accumulate scores per player using entry API
-/// - `top`: collect all scores, sort descending, sum the first K
-/// - `reset`: remove the player entirely from the map
-///
-/// # Complexity
-/// - add_score: O(1) amortized
-/// - top: O(n log n) for sorting
-/// - reset: O(1)
-/// - Space: O(n) for the player map
 struct Leaderboard {
     scores: HashMap<i32, i32>,
 }
 
 impl Leaderboard {
+    /// Hash map leaderboard with on-demand sorting for top-K queries.
+    ///
+    /// # Intuition
+    /// A HashMap provides O(1) score updates and resets. For top-K queries,
+    /// collecting and partially sorting scores is sufficient since K is
+    /// typically small relative to the total player count.
+    ///
+    /// # Approach
+    /// - `add_score`: accumulate scores per player using entry API
+    /// - `top`: collect all scores, sort descending, sum the first K
+    /// - `reset`: remove the player entirely from the map
+    ///
+    /// # Complexity
+    /// - add_score: O(1) amortized
+    /// - top: O(n log n) for sorting
+    /// - reset: O(1)
+    /// - Space: O(n) for the player map
     fn new() -> Self {
         Self {
             scores: HashMap::new(),

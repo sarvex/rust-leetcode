@@ -1,18 +1,3 @@
-/// Highly Optimized Solution with Sorted Vectors and Segment Tree
-///
-/// # Intuition
-/// answer[k] = total_primes + count(primes with first < k <= last)
-/// Use interval coverage with segment tree for range add / max query.
-///
-/// # Approach
-/// 1. Sorted Vec per prime instead of BTreeSet (better cache locality)
-/// 2. Segment tree with lazy propagation for range add and max query
-/// 3. u32 types to reduce memory bandwidth
-/// 4. HashMap only for primes that actually appear
-///
-/// # Complexity
-/// - Time: O((n + q) * log n) amortized
-/// - Space: O(n + distinct_primes)
 use std::collections::HashMap;
 
 struct SegTree {
@@ -68,13 +53,32 @@ impl SegTree {
 
     #[inline(always)]
     fn max(&self) -> i32 {
-        if self.n == 0 { 0 } else { self.tree[1] }
+        if self.n == 0 {
+            0
+        } else {
+            self.tree[1]
+        }
     }
 }
 
 const MAX_VAL: usize = 100_001;
 
 impl Solution {
+    /// Highly Optimized Solution with Sorted Vectors and Segment Tree
+    ///
+    /// # Intuition
+    /// answer[k] = total_primes + count(primes with first < k <= last)
+    /// Use interval coverage with segment tree for range add / max query.
+    ///
+    /// # Approach
+    /// 1. Sorted Vec per prime instead of BTreeSet (better cache locality)
+    /// 2. Segment tree with lazy propagation for range add and max query
+    /// 3. u32 types to reduce memory bandwidth
+    /// 4. HashMap only for primes that actually appear
+    ///
+    /// # Complexity
+    /// - Time: O((n + q) * log n) amortized
+    /// - Space: O(n + distinct_primes)
     pub fn maximum_count(nums: Vec<i32>, queries: Vec<Vec<i32>>) -> Vec<i32> {
         let n = nums.len();
         if n < 2 {

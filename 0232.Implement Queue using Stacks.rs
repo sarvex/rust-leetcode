@@ -1,22 +1,22 @@
-/// Queue implemented using two stacks with lazy transfer.
-///
-/// # Intuition
-/// Elements pushed to one stack are in LIFO order. Transferring to a second
-/// stack reverses them to FIFO order. Transfer lazily only when needed.
-///
-/// # Approach
-/// Push to `input` stack. On pop/peek, if `output` is empty, transfer all
-/// elements from `input` to `output`. This amortizes the cost.
-///
-/// # Complexity
-/// - Time: O(1) amortized per operation
-/// - Space: O(n)
 struct MyQueue {
     input: Vec<i32>,
     output: Vec<i32>,
 }
 
 impl MyQueue {
+    /// Queue implemented using two stacks with lazy transfer.
+    ///
+    /// # Intuition
+    /// Elements pushed to one stack are in LIFO order. Transferring to a second
+    /// stack reverses them to FIFO order. Transfer lazily only when needed.
+    ///
+    /// # Approach
+    /// Push to `input` stack. On pop/peek, if `output` is empty, transfer all
+    /// elements from `input` to `output`. This amortizes the cost.
+    ///
+    /// # Complexity
+    /// - Time: O(1) amortized per operation
+    /// - Space: O(n)
     fn new() -> Self {
         Self {
             input: Vec::new(),

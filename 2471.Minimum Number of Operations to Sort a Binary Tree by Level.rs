@@ -68,3 +68,50 @@ impl Solution {
         ans
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn node(
+        val: i32,
+        left: Option<Rc<RefCell<TreeNode>>>,
+        right: Option<Rc<RefCell<TreeNode>>>,
+    ) -> Option<Rc<RefCell<TreeNode>>> {
+        Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+    }
+
+    fn leaf(val: i32) -> Option<Rc<RefCell<TreeNode>>> {
+        node(val, None, None)
+    }
+
+    #[test]
+    fn example_one() {
+        // [1, 4, 3, 7, 6, 8, 5, null, null, null, null, 9, null, 10]
+        let root = node(
+            1,
+            node(4, leaf(7), leaf(6)),
+            node(3, node(8, leaf(9), None), node(5, leaf(10), None)),
+        );
+        assert_eq!(Solution::minimum_operations(root), 3);
+    }
+
+    #[test]
+    fn already_sorted() {
+        let root = node(1, leaf(2), leaf(3));
+        assert_eq!(Solution::minimum_operations(root), 0);
+    }
+
+    #[test]
+    fn single_node() {
+        let root = leaf(1);
+        assert_eq!(Solution::minimum_operations(root), 0);
+    }
+
+    #[test]
+    fn one_swap_needed() {
+        // Level 1: [3, 2] needs one swap
+        let root = node(1, leaf(3), leaf(2));
+        assert_eq!(Solution::minimum_operations(root), 1);
+    }
+}

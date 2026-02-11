@@ -1,25 +1,25 @@
 use std::collections::BTreeMap;
 
-/// Calendar that prevents double-booking using a balanced BST.
-///
-/// # Intuition
-/// Store intervals keyed by end time. For a new booking, check if any
-/// existing interval overlaps by querying the tree for the nearest
-/// entry after the start time.
-///
-/// # Approach
-/// Use a `BTreeMap<end, start>`. For a new `[start, end)`, look at the
-/// first entry with key > start. If that entry's value (start of existing
-/// interval) is less than the new end, there is an overlap.
-///
-/// # Complexity
-/// - Time: O(log n) per booking
-/// - Space: O(n) for stored intervals
 struct MyCalendar {
     intervals: BTreeMap<i32, i32>,
 }
 
 impl MyCalendar {
+    /// Calendar that prevents double-booking using a balanced BST.
+    ///
+    /// # Intuition
+    /// Store intervals keyed by end time. For a new booking, check if any
+    /// existing interval overlaps by querying the tree for the nearest
+    /// entry after the start time.
+    ///
+    /// # Approach
+    /// Use a `BTreeMap<end, start>`. For a new `[start, end)`, look at the
+    /// first entry with key > start. If that entry's value (start of existing
+    /// interval) is less than the new end, there is an overlap.
+    ///
+    /// # Complexity
+    /// - Time: O(log n) per booking
+    /// - Space: O(n) for stored intervals
     fn new() -> Self {
         Self {
             intervals: BTreeMap::new(),

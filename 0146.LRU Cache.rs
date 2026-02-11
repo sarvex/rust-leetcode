@@ -1,19 +1,3 @@
-/// Doubly-linked list with hash map for O(1) LRU cache operations.
-///
-/// # Intuition
-/// An LRU cache requires O(1) lookup by key and O(1) eviction of the least
-/// recently used entry. A hash map provides fast lookup while a doubly-linked
-/// list maintains access order, enabling O(1) move-to-front and removal.
-///
-/// # Approach
-/// Maintain a hash map from key to `Rc<RefCell<Node>>` and a doubly-linked
-/// list with explicit head/tail pointers. On `get`, move the accessed node
-/// to the front. On `put`, either update an existing node (and move to front)
-/// or insert a new node at the front, evicting the tail if capacity is exceeded.
-///
-/// # Complexity
-/// - Time: O(1) per `get` and `put` operation
-/// - Space: O(capacity) — bounded by the cache capacity
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -45,6 +29,22 @@ struct LRUCache {
 }
 
 impl LRUCache {
+    /// Doubly-linked list with hash map for O(1) LRU cache operations.
+    ///
+    /// # Intuition
+    /// An LRU cache requires O(1) lookup by key and O(1) eviction of the least
+    /// recently used entry. A hash map provides fast lookup while a doubly-linked
+    /// list maintains access order, enabling O(1) move-to-front and removal.
+    ///
+    /// # Approach
+    /// Maintain a hash map from key to `Rc<RefCell<Node>>` and a doubly-linked
+    /// list with explicit head/tail pointers. On `get`, move the accessed node
+    /// to the front. On `put`, either update an existing node (and move to front)
+    /// or insert a new node at the front, evicting the tail if capacity is exceeded.
+    ///
+    /// # Complexity
+    /// - Time: O(1) per `get` and `put` operation
+    /// - Space: O(capacity) — bounded by the cache capacity
     fn new(capacity: i32) -> Self {
         Self {
             capacity: capacity as usize,

@@ -1,19 +1,5 @@
 use std::collections::VecDeque;
 
-/// Zigzag iterator alternating between two vectors using deques.
-///
-/// # Intuition
-/// Use VecDeque for efficient front removal. Alternate between the two deques,
-/// falling through to the non-empty one when one is exhausted.
-///
-/// # Approach
-/// 1. Store both vectors as VecDeques.
-/// 2. Track a flag to alternate between them.
-/// 3. On next(), pop from the current deque; if empty, pop from the other.
-///
-/// # Complexity
-/// - Time: O(1) per next/has_next
-/// - Space: O(n + m)
 struct ZigzagIterator {
     q1: VecDeque<i32>,
     q2: VecDeque<i32>,
@@ -21,6 +7,20 @@ struct ZigzagIterator {
 }
 
 impl ZigzagIterator {
+    /// Zigzag iterator alternating between two vectors using deques.
+    ///
+    /// # Intuition
+    /// Use VecDeque for efficient front removal. Alternate between the two deques,
+    /// falling through to the non-empty one when one is exhausted.
+    ///
+    /// # Approach
+    /// 1. Store both vectors as VecDeques.
+    /// 2. Track a flag to alternate between them.
+    /// 3. On next(), pop from the current deque; if empty, pop from the other.
+    ///
+    /// # Complexity
+    /// - Time: O(1) per next/has_next
+    /// - Space: O(n + m)
     fn new(v1: Vec<i32>, v2: Vec<i32>) -> Self {
         Self {
             q1: VecDeque::from(v1),

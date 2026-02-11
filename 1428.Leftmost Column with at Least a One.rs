@@ -40,6 +40,78 @@ impl Solution {
             result = result.min(lo);
         }
 
-        if result >= n { -1 } else { result as i32 }
+        if result >= n {
+            -1
+        } else {
+            result as i32
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    struct BinaryMatrix {
+        data: Vec<Vec<i32>>,
+    }
+
+    impl BinaryMatrix {
+        fn new(data: Vec<Vec<i32>>) -> Self {
+            Self { data }
+        }
+
+        fn get(&self, row: i32, col: i32) -> i32 {
+            self.data[row as usize][col as usize]
+        }
+
+        fn dimensions(&self) -> Vec<i32> {
+            vec![self.data.len() as i32, self.data[0].len() as i32]
+        }
+    }
+
+    fn left_most_column_with_one(bm: &BinaryMatrix) -> i32 {
+        let dims = bm.dimensions();
+        let (m, n) = (dims[0] as usize, dims[1] as usize);
+        let mut result = n;
+        for i in 0..m {
+            let (mut lo, mut hi) = (0, n);
+            while lo < hi {
+                let mid = lo + (hi - lo) / 2;
+                if bm.get(i as i32, mid as i32) == 1 {
+                    hi = mid;
+                } else {
+                    lo = mid + 1;
+                }
+            }
+            result = result.min(lo);
+        }
+        if result >= n {
+            -1
+        } else {
+            result as i32
+        }
+    }
+
+    #[test]
+    fn example_one() {
+        let bm = BinaryMatrix::new(vec![vec![0, 0], vec![1, 1]]);
+        assert_eq!(left_most_column_with_one(&bm), 0);
+    }
+
+    #[test]
+    fn example_two() {
+        let bm = BinaryMatrix::new(vec![vec![0, 0], vec![0, 1]]);
+        assert_eq!(left_most_column_with_one(&bm), 1);
+    }
+
+    #[test]
+    fn all_zeroes() {
+        let bm = BinaryMatrix::new(vec![vec![0, 0], vec![0, 0]]);
+        assert_eq!(left_most_column_with_one(&bm), -1);
+    }
+
+    #[test]
+    fn all_ones() {
+        let bm = BinaryMatrix::new(vec![vec![1, 1], vec![1, 1]]);
+        assert_eq!(left_most_column_with_one(&bm), 0);
     }
 }

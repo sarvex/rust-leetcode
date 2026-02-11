@@ -1,25 +1,25 @@
 use std::collections::HashMap;
 
-/// Randomized set supporting O(1) insert, remove, and getRandom.
-///
-/// # Intuition
-/// A vector provides O(1) random access. A HashMap maps values to indices
-/// for O(1) lookup. On removal, swap the target with the last element.
-///
-/// # Approach
-/// 1. Insert: append to vector, store index in map.
-/// 2. Remove: swap with last element, update map, pop last.
-/// 3. GetRandom: pick a random index from the vector.
-///
-/// # Complexity
-/// - Time: O(1) per operation
-/// - Space: O(n)
 struct RandomizedSet {
     vals: Vec<i32>,
     indices: HashMap<i32, usize>,
 }
 
 impl RandomizedSet {
+    /// Randomized set supporting O(1) insert, remove, and getRandom.
+    ///
+    /// # Intuition
+    /// A vector provides O(1) random access. A HashMap maps values to indices
+    /// for O(1) lookup. On removal, swap the target with the last element.
+    ///
+    /// # Approach
+    /// 1. Insert: append to vector, store index in map.
+    /// 2. Remove: swap with last element, update map, pop last.
+    /// 3. GetRandom: pick a random index from the vector.
+    ///
+    /// # Complexity
+    /// - Time: O(1) per operation
+    /// - Space: O(n)
     fn new() -> Self {
         Self {
             vals: Vec::with_capacity(16),

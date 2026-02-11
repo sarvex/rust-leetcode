@@ -1,26 +1,26 @@
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
-/// Finds the running median using two heaps.
-///
-/// # Intuition
-/// A max-heap holds the smaller half and a min-heap holds the larger half.
-/// The median is derived from the tops of both heaps.
-///
-/// # Approach
-/// 1. Push each number through the max-heap, then move its top to the min-heap.
-/// 2. If the min-heap grows too large, rebalance by moving its top to the max-heap.
-/// 3. The median is the min-heap top (odd count) or the average of both tops (even).
-///
-/// # Complexity
-/// - Time: O(log n) per add, O(1) per find_median
-/// - Space: O(n)
 struct MedianFinder {
     min_heap: BinaryHeap<Reverse<i32>>,
     max_heap: BinaryHeap<i32>,
 }
 
 impl MedianFinder {
+    /// Finds the running median using two heaps.
+    ///
+    /// # Intuition
+    /// A max-heap holds the smaller half and a min-heap holds the larger half.
+    /// The median is derived from the tops of both heaps.
+    ///
+    /// # Approach
+    /// 1. Push each number through the max-heap, then move its top to the min-heap.
+    /// 2. If the min-heap grows too large, rebalance by moving its top to the max-heap.
+    /// 3. The median is the min-heap top (odd count) or the average of both tops (even).
+    ///
+    /// # Complexity
+    /// - Time: O(log n) per add, O(1) per find_median
+    /// - Space: O(n)
     fn new() -> Self {
         Self {
             min_heap: BinaryHeap::new(),

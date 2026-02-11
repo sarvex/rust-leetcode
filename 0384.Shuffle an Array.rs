@@ -1,24 +1,24 @@
 use rand::Rng;
 
-/// Shuffles an array using the Fisher-Yates algorithm.
-///
-/// # Intuition
-/// Fisher-Yates shuffle produces a uniform random permutation by swapping
-/// each element with a randomly chosen element from the remaining positions.
-///
-/// # Approach
-/// 1. Store the original array for reset.
-/// 2. On shuffle, clone the array and perform Fisher-Yates swaps.
-/// 3. On reset, return a clone of the original.
-///
-/// # Complexity
-/// - Time: O(n) per shuffle/reset
-/// - Space: O(n)
 struct Solution {
     nums: Vec<i32>,
 }
 
 impl Solution {
+    /// Shuffles an array using the Fisher-Yates algorithm.
+    ///
+    /// # Intuition
+    /// Fisher-Yates shuffle produces a uniform random permutation by swapping
+    /// each element with a randomly chosen element from the remaining positions.
+    ///
+    /// # Approach
+    /// 1. Store the original array for reset.
+    /// 2. On shuffle, clone the array and perform Fisher-Yates swaps.
+    /// 3. On reset, return a clone of the original.
+    ///
+    /// # Complexity
+    /// - Time: O(n) per shuffle/reset
+    /// - Space: O(n)
     fn new(nums: Vec<i32>) -> Self {
         Self { nums }
     }

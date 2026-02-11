@@ -1,18 +1,3 @@
-/// Circular queue implemented with a fixed-size array.
-///
-/// # Intuition
-/// A circular buffer reuses space by wrapping indices. Using a front pointer
-/// and size counter (instead of front/rear) simplifies boundary calculations.
-///
-/// # Approach
-/// 1. Use a Vec as the underlying storage with fixed capacity.
-/// 2. Track front index and current size.
-/// 3. Compute rear position dynamically as (front + size) % capacity.
-/// 4. Enqueue adds at rear, dequeue advances front.
-///
-/// # Complexity
-/// - Time: O(1) for all operations
-/// - Space: O(k) where k is the queue capacity
 struct MyCircularQueue {
     data: Vec<i32>,
     front: usize,
@@ -21,6 +6,21 @@ struct MyCircularQueue {
 }
 
 impl MyCircularQueue {
+    /// Circular queue implemented with a fixed-size array.
+    ///
+    /// # Intuition
+    /// A circular buffer reuses space by wrapping indices. Using a front pointer
+    /// and size counter (instead of front/rear) simplifies boundary calculations.
+    ///
+    /// # Approach
+    /// 1. Use a Vec as the underlying storage with fixed capacity.
+    /// 2. Track front index and current size.
+    /// 3. Compute rear position dynamically as (front + size) % capacity.
+    /// 4. Enqueue adds at rear, dequeue advances front.
+    ///
+    /// # Complexity
+    /// - Time: O(1) for all operations
+    /// - Space: O(k) where k is the queue capacity
     fn new(k: i32) -> Self {
         let cap = k as usize;
         Self {

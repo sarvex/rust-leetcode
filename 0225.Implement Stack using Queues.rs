@@ -1,23 +1,23 @@
 use std::collections::VecDeque;
 
-/// Stack implemented using a single queue with push-time reordering.
-///
-/// # Intuition
-/// After each push, rotate all previous elements behind the new one,
-/// making the most recently pushed element always at the front.
-///
-/// # Approach
-/// Use one VecDeque. On push, add to back then rotate `len - 1` elements
-/// from front to back, ensuring LIFO order at the front.
-///
-/// # Complexity
-/// - Time: O(n) push, O(1) pop/top/empty
-/// - Space: O(n)
 struct MyStack {
     queue: VecDeque<i32>,
 }
 
 impl MyStack {
+    /// Stack implemented using a single queue with push-time reordering.
+    ///
+    /// # Intuition
+    /// After each push, rotate all previous elements behind the new one,
+    /// making the most recently pushed element always at the front.
+    ///
+    /// # Approach
+    /// Use one VecDeque. On push, add to back then rotate `len - 1` elements
+    /// from front to back, ensuring LIFO order at the front.
+    ///
+    /// # Complexity
+    /// - Time: O(n) push, O(1) pop/top/empty
+    /// - Space: O(n)
     fn new() -> Self {
         Self {
             queue: VecDeque::new(),

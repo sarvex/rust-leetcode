@@ -123,25 +123,25 @@ impl DriverQueue {
     }
 }
 
-/// Ride-sharing system that matches riders and drivers in FIFO order.
-///
-/// # Intuition
-/// Riders and drivers join queues; cancel removes the rider from the queue in
-/// O(1). Match always sees the true front with no draining.
-///
-/// # Approach
-/// - Rider queue uses fixed arrays keyed by rider_id to support O(1) remove.
-/// - Drivers use a fixed-size ring buffer (no heap growth).
-///
-/// # Complexity
-/// - Time: O(1) for add_rider, add_driver, match_driver_with_rider, cancel_rider.
-/// - Space: O(n + m).
 struct RideSharingSystem {
     riders: RiderQueue,
     drivers: DriverQueue,
 }
 
 impl RideSharingSystem {
+    /// Ride-sharing system that matches riders and drivers in FIFO order.
+    ///
+    /// # Intuition
+    /// Riders and drivers join queues; cancel removes the rider from the queue in
+    /// O(1). Match always sees the true front with no draining.
+    ///
+    /// # Approach
+    /// - Rider queue uses fixed arrays keyed by rider_id to support O(1) remove.
+    /// - Drivers use a fixed-size ring buffer (no heap growth).
+    ///
+    /// # Complexity
+    /// - Time: O(1) for add_rider, add_driver, match_driver_with_rider, cancel_rider.
+    /// - Space: O(n + m).
     fn new() -> Self {
         Self {
             riders: RiderQueue::new(),

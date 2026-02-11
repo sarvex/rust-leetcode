@@ -1,20 +1,20 @@
-/// Immutable range sum query using prefix sums.
-///
-/// # Intuition
-/// Precompute prefix sums so that any range sum is a constant-time subtraction.
-///
-/// # Approach
-/// 1. Build a prefix sum array of length n + 1.
-/// 2. `sum_range(left, right) = prefix[right + 1] - prefix[left]`.
-///
-/// # Complexity
-/// - Time: O(n) construction, O(1) per query
-/// - Space: O(n)
 struct NumArray {
     prefix: Vec<i32>,
 }
 
 impl NumArray {
+    /// Immutable range sum query using prefix sums.
+    ///
+    /// # Intuition
+    /// Precompute prefix sums so that any range sum is a constant-time subtraction.
+    ///
+    /// # Approach
+    /// 1. Build a prefix sum array of length n + 1.
+    /// 2. `sum_range(left, right) = prefix[right + 1] - prefix[left]`.
+    ///
+    /// # Complexity
+    /// - Time: O(n) construction, O(1) per query
+    /// - Space: O(n)
     fn new(nums: Vec<i32>) -> Self {
         let mut prefix = Vec::with_capacity(nums.len() + 1);
         prefix.push(0);

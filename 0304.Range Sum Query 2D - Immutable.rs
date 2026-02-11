@@ -1,21 +1,21 @@
-/// 2D immutable range sum query using prefix sums.
-///
-/// # Intuition
-/// A 2D prefix sum allows O(1) computation of any rectangular sub-region sum
-/// using inclusion-exclusion.
-///
-/// # Approach
-/// 1. Build a 2D prefix sum matrix of size (m+1) x (n+1).
-/// 2. Query using: prefix[r2+1][c2+1] - prefix[r2+1][c1] - prefix[r1][c2+1] + prefix[r1][c1].
-///
-/// # Complexity
-/// - Time: O(m * n) construction, O(1) per query
-/// - Space: O(m * n)
 struct NumMatrix {
     prefix: Vec<Vec<i32>>,
 }
 
 impl NumMatrix {
+    /// 2D immutable range sum query using prefix sums.
+    ///
+    /// # Intuition
+    /// A 2D prefix sum allows O(1) computation of any rectangular sub-region sum
+    /// using inclusion-exclusion.
+    ///
+    /// # Approach
+    /// 1. Build a 2D prefix sum matrix of size (m+1) x (n+1).
+    /// 2. Query using: prefix[r2+1][c2+1] - prefix[r2+1][c1] - prefix[r1][c2+1] + prefix[r1][c1].
+    ///
+    /// # Complexity
+    /// - Time: O(m * n) construction, O(1) per query
+    /// - Space: O(m * n)
     fn new(matrix: Vec<Vec<i32>>) -> Self {
         if matrix.is_empty() || matrix[0].is_empty() {
             return Self {

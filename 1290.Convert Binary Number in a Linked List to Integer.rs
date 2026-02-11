@@ -35,3 +35,51 @@ impl Solution {
             .fold(0, |acc, node| (acc << 1) | node.val)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[derive(PartialEq, Eq, Clone, Debug)]
+    pub struct ListNode {
+        pub val: i32,
+        pub next: Option<Box<ListNode>>,
+    }
+
+    impl ListNode {
+        fn new(val: i32) -> Self {
+            ListNode { next: None, val }
+        }
+    }
+
+    fn from_vec(vals: &[i32]) -> Option<Box<ListNode>> {
+        vals.iter()
+            .rev()
+            .fold(None, |next, &val| Some(Box::new(ListNode { val, next })))
+    }
+
+    fn get_decimal_value(head: Option<Box<ListNode>>) -> i32 {
+        std::iter::successors(head.as_ref(), |node| node.next.as_ref())
+            .fold(0, |acc, node| (acc << 1) | node.val)
+    }
+
+    #[test]
+    fn binary_101() {
+        assert_eq!(get_decimal_value(from_vec(&[1, 0, 1])), 5);
+    }
+
+    #[test]
+    fn single_zero() {
+        assert_eq!(get_decimal_value(from_vec(&[0])), 0);
+    }
+
+    #[test]
+    fn single_one() {
+        assert_eq!(get_decimal_value(from_vec(&[1])), 1);
+    }
+
+    #[test]
+    fn all_ones() {
+        assert_eq!(get_decimal_value(from_vec(&[1, 1, 1, 1])), 15);
+    }
+}

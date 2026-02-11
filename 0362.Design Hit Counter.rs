@@ -1,22 +1,22 @@
-/// Hit counter that counts hits in the last 300 seconds using binary search.
-///
-/// # Intuition
-/// Store all timestamps sorted. Use binary search to find the first timestamp
-/// within the 300-second window.
-///
-/// # Approach
-/// 1. Append timestamps to a vector (already sorted by arrival order).
-/// 2. On getHits, binary search for the first timestamp >= `timestamp - 299`.
-/// 3. The count is `total - index`.
-///
-/// # Complexity
-/// - Time: O(1) hit, O(log n) getHits
-/// - Space: O(n)
 struct HitCounter {
     timestamps: Vec<i32>,
 }
 
 impl HitCounter {
+    /// Hit counter that counts hits in the last 300 seconds using binary search.
+    ///
+    /// # Intuition
+    /// Store all timestamps sorted. Use binary search to find the first timestamp
+    /// within the 300-second window.
+    ///
+    /// # Approach
+    /// 1. Append timestamps to a vector (already sorted by arrival order).
+    /// 2. On getHits, binary search for the first timestamp >= `timestamp - 299`.
+    /// 3. The count is `total - index`.
+    ///
+    /// # Complexity
+    /// - Time: O(1) hit, O(log n) getHits
+    /// - Space: O(n)
     fn new() -> Self {
         Self {
             timestamps: Vec::new(),

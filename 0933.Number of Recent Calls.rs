@@ -1,22 +1,22 @@
 use std::collections::VecDeque;
 
-/// Queue-based recent call counter within a 3000ms window.
-///
-/// # Intuition
-/// Keep a queue of timestamps. On each ping, remove timestamps older than
-/// `t - 3000` and return the queue length.
-///
-/// # Approach
-/// Push new timestamp, pop from front while front < t - 3000.
-///
-/// # Complexity
-/// - Time: O(1) amortized per ping
-/// - Space: O(W) where W is the window size (at most 3001 elements)
 struct RecentCounter {
     queue: VecDeque<i32>,
 }
 
 impl RecentCounter {
+    /// Queue-based recent call counter within a 3000ms window.
+    ///
+    /// # Intuition
+    /// Keep a queue of timestamps. On each ping, remove timestamps older than
+    /// `t - 3000` and return the queue length.
+    ///
+    /// # Approach
+    /// Push new timestamp, pop from front while front < t - 3000.
+    ///
+    /// # Complexity
+    /// - Time: O(1) amortized per ping
+    /// - Space: O(W) where W is the window size (at most 3001 elements)
     fn new() -> Self {
         Self {
             queue: VecDeque::with_capacity(3001), // Maximum window size

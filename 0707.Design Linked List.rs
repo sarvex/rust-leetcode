@@ -4,25 +4,25 @@ struct ListNode {
     next: Option<Box<ListNode>>,
 }
 
-/// Singly linked list implementation using boxed nodes.
-///
-/// # Intuition
-/// A linked list supports dynamic insertion and deletion at any index
-/// by traversing to the target position and relinking pointers.
-///
-/// # Approach
-/// Store the head as `Option<Box<ListNode>>`. Use a dummy node for
-/// insertion and deletion to simplify edge cases at the head.
-///
-/// # Complexity
-/// - Time: O(n) for get, add, and delete operations
-/// - Space: O(n) for storing n elements
 #[derive(Default)]
 struct MyLinkedList {
     head: Option<Box<ListNode>>,
 }
 
 impl MyLinkedList {
+    /// Singly linked list implementation using boxed nodes.
+    ///
+    /// # Intuition
+    /// A linked list supports dynamic insertion and deletion at any index
+    /// by traversing to the target position and relinking pointers.
+    ///
+    /// # Approach
+    /// Store the head as `Option<Box<ListNode>>`. Use a dummy node for
+    /// insertion and deletion to simplify edge cases at the head.
+    ///
+    /// # Complexity
+    /// - Time: O(n) for get, add, and delete operations
+    /// - Space: O(n) for storing n elements
     fn new() -> Self {
         Self::default()
     }

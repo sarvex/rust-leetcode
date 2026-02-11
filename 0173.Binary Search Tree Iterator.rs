@@ -20,25 +20,25 @@ impl TreeNode {
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// BST iterator using flattened inorder traversal.
-///
-/// # Intuition
-/// Pre-compute the inorder traversal and serve elements sequentially via an index.
-///
-/// # Approach
-/// 1. Perform a full inorder traversal at construction, storing values in a vector.
-/// 2. `next()` returns the current element and advances the index.
-/// 3. `has_next()` checks if the index is within bounds.
-///
-/// # Complexity
-/// - Time: O(n) construction, O(1) per `next`/`has_next`
-/// - Space: O(n) for the values vector
 struct BSTIterator {
     vals: Vec<i32>,
     index: usize,
 }
 
 impl BSTIterator {
+    /// BST iterator using flattened inorder traversal.
+    ///
+    /// # Intuition
+    /// Pre-compute the inorder traversal and serve elements sequentially via an index.
+    ///
+    /// # Approach
+    /// 1. Perform a full inorder traversal at construction, storing values in a vector.
+    /// 2. `next()` returns the current element and advances the index.
+    /// 3. `has_next()` checks if the index is within bounds.
+    ///
+    /// # Complexity
+    /// - Time: O(n) construction, O(1) per `next`/`has_next`
+    /// - Space: O(n) for the values vector
     fn new(root: Option<Rc<RefCell<TreeNode>>>) -> Self {
         let mut vals = Vec::new();
         Self::inorder(&root, &mut vals);

@@ -1,45 +1,21 @@
-//! # Separate Squares I
-//!
-//! Sweep line algorithm to find horizontal line splitting square areas equally.
-//!
-//! ## Intuition
-//!
-//! Instead of binary searching for the answer, we can sweep a horizontal line upward
-//! through all critical y-coordinates (bottom and top edges of squares). At each
-//! position, we track the total "width" of squares currently intersecting the line.
-//! As we sweep upward, the area below increases by `width * height_delta`. When
-//! the cumulative area below reaches half the total area, we can calculate the
-//! exact y-coordinate using linear interpolation.
-//!
-//! ## Approach
-//!
-//! 1. **Event-based sweep line**: Create events at each square's bottom edge (+width)
-//!    and top edge (-width). This lets us track how many squares intersect any
-//!    horizontal line between events.
-//!
-//! 2. **Sort events by y-coordinate**: Process events from bottom to top.
-//!
-//! 3. **Sweep and accumulate**: For each event, calculate the area added since
-//!    the previous event (`covered_width * height_delta`). When cumulative area
-//!    would exceed half the total, interpolate to find the exact y-coordinate.
-//!
-//! 4. **Single pass solution**: Unlike binary search approaches, this finds the
-//!    answer in one pass through the sorted events, making it significantly faster.
-//!
-//! ## Complexity
-//!
-//! - **Time Complexity**: O(n log n) where n is the number of squares
-//!   - O(n) to create events
-//!   - O(n log n) for sorting events
-//!   - O(n) single pass through events
-//!
-//! - **Space Complexity**: O(n) for storing the events vector
-
 impl Solution {
-    /// Finds the minimum y-coordinate where total area above equals total area below.
+    /// Sweep line to find horizontal line splitting square areas equally.
     ///
-    /// Uses an event-based sweep line algorithm with O(n log n) time complexity
-    /// and a single pass through sorted events.
+    /// # Intuition
+    /// Sweep a horizontal line upward through all critical y-coordinates
+    /// (bottom and top edges of squares). Track the total width of squares
+    /// intersecting the line. When the cumulative area below reaches half
+    /// the total area, interpolate to find the exact y-coordinate.
+    ///
+    /// # Approach
+    /// 1. Create events at each square's bottom edge (+width) and top edge (-width).
+    /// 2. Sort events by y-coordinate and process from bottom to top.
+    /// 3. For each event, accumulate `covered_width * height_delta`. When cumulative
+    ///    area would exceed half the total, linearly interpolate the answer.
+    ///
+    /// # Complexity
+    /// - Time: O(n log n) — sorting events dominates
+    /// - Space: O(n) — events vector
     pub fn separate_squares(squares: Vec<Vec<i32>>) -> f64 {
         // Calculate total area and create sweep line events
         let (total_area, mut events) = squares.iter().fold(

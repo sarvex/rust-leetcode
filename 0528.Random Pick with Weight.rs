@@ -1,19 +1,5 @@
-use rand::{Rng, thread_rng};
+use rand::{thread_rng, Rng};
 
-/// Weighted random index picker using prefix sums and binary search.
-///
-/// # Intuition
-/// Transform weights into cumulative distribution. Binary search locates
-/// the index corresponding to a random value in the total weight range.
-///
-/// # Approach
-/// 1. Precompute prefix sums of weights.
-/// 2. Generate random number in [1, total_weight].
-/// 3. Binary search for the first prefix sum >= target.
-///
-/// # Complexity
-/// - Time: O(n) for construction, O(log n) per pick
-/// - Space: O(n)
 struct Solution {
     prefix: Vec<i32>,
 }
@@ -50,6 +36,20 @@ mod tests {
     }
 
     impl TestSolution {
+        /// Weighted random index picker using prefix sums and binary search.
+        ///
+        /// # Intuition
+        /// Transform weights into cumulative distribution. Binary search locates
+        /// the index corresponding to a random value in the total weight range.
+        ///
+        /// # Approach
+        /// 1. Precompute prefix sums of weights.
+        /// 2. Generate random number in [1, total_weight].
+        /// 3. Binary search for the first prefix sum >= target.
+        ///
+        /// # Complexity
+        /// - Time: O(n) for construction, O(log n) per pick
+        /// - Space: O(n)
         fn new(w: Vec<i32>) -> Self {
             let mut prefix = Vec::with_capacity(w.len());
             let mut sum = 0;

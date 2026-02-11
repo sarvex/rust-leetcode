@@ -1,20 +1,6 @@
 const PREVIEW_LEN: usize = 10;
 const DEFAULT_CAPACITY: usize = 128;
 
-/// Gap buffer text editor for efficient cursor-based editing.
-///
-/// # Intuition
-/// A text editor with cursor support requires efficient insertion, deletion,
-/// and cursor movement. The gap buffer pattern using two stacks (left and right
-/// of cursor) provides O(1) amortized operations for all required functionality.
-///
-/// # Approach
-/// - Use `Vec<u8>` for single-byte ASCII operations (per LeetCode constraints)
-/// - Leverage `drain().rev()` for zero-allocation transfers (Drain is DoubleEndedIterator)
-///
-/// # Complexity
-/// - Time: O(k) for cursor movement, O(n) for text insertion
-/// - Space: O(n) total, O(1) auxiliary for cursor operations
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TextEditor {
     /// Bytes to the left of cursor (in natural reading order)
@@ -31,13 +17,20 @@ impl Default for TextEditor {
 }
 
 impl TextEditor {
-    /// Creates a new empty text editor with pre-allocated capacity.
+    /// Gap buffer text editor for efficient cursor-based editing.
     ///
-    /// # Examples
-    /// ```
-    /// let editor = TextEditor::new();
-    /// assert!(editor.is_empty());
-    /// ```
+    /// # Intuition
+    /// A text editor with cursor support requires efficient insertion, deletion,
+    /// and cursor movement. The gap buffer pattern using two stacks (left and right
+    /// of cursor) provides O(1) amortized operations for all required functionality.
+    ///
+    /// # Approach
+    /// - Use `Vec<u8>` for single-byte ASCII operations (per LeetCode constraints)
+    /// - Leverage `drain().rev()` for zero-allocation transfers (Drain is DoubleEndedIterator)
+    ///
+    /// # Complexity
+    /// - Time: O(k) for cursor movement, O(n) for text insertion
+    /// - Space: O(n) total, O(1) auxiliary for cursor operations
     #[inline]
     #[must_use]
     pub fn new() -> Self {

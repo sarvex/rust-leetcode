@@ -1,11 +1,25 @@
 use std::collections::HashMap;
 
-/// Range frequency query structure using sorted index lists per value.
 struct RangeFreqQuery {
     indices: HashMap<i32, Vec<usize>>,
 }
 
 impl RangeFreqQuery {
+    /// Range frequency query structure using sorted index lists per value.
+    ///
+    /// # Intuition
+    /// Precompute sorted index lists per value so that range frequency queries
+    /// reduce to counting indices within `[left, right]` via binary search.
+    ///
+    /// # Approach
+    /// During construction, build a HashMap mapping each value to a sorted
+    /// vector of its indices. For each query, binary search for the lower and
+    /// upper bounds within the index list to count occurrences in O(log n).
+    ///
+    /// # Complexity
+    /// - Construction: O(n)
+    /// - Query: O(log n) per call
+    /// - Space: O(n)
     fn new(arr: Vec<i32>) -> Self {
         let indices = arr
             .iter()

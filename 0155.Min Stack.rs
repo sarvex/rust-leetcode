@@ -1,22 +1,22 @@
-/// A stack that supports push, pop, top, and retrieving the minimum in O(1).
-///
-/// # Intuition
-/// Maintain a secondary stack that tracks the current minimum. When pushing,
-/// also push to the min stack if the value is <= the current minimum.
-///
-/// # Approach
-/// Use two `Vec<i32>` stacks: one for values and one for minimums.
-/// The min stack only grows when a new minimum (or equal) is pushed.
-///
-/// # Complexity
-/// - Time: O(1) per operation
-/// - Space: O(n) for both stacks
 struct MinStack {
     stack: Vec<i32>,
     min_stack: Vec<i32>,
 }
 
 impl MinStack {
+    /// A stack that supports push, pop, top, and retrieving the minimum in O(1).
+    ///
+    /// # Intuition
+    /// Maintain a secondary stack that tracks the current minimum. When pushing,
+    /// also push to the min stack if the value is <= the current minimum.
+    ///
+    /// # Approach
+    /// Use two `Vec<i32>` stacks: one for values and one for minimums.
+    /// The min stack only grows when a new minimum (or equal) is pushed.
+    ///
+    /// # Complexity
+    /// - Time: O(1) per operation
+    /// - Space: O(n) for both stacks
     fn new() -> Self {
         Self {
             stack: Vec::new(),

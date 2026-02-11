@@ -1,8 +1,3 @@
-//! Design Auction System
-//!
-//! BinaryHeap per item with lazy deletion: add/update only push, remove only clears
-//! from the canonical map; get_highest_bidder pops stale heap entries until top matches.
-
 use std::collections::{BinaryHeap, HashMap};
 
 #[inline(always)]
@@ -11,13 +6,27 @@ fn key(user_id: i32, item_id: i32) -> u32 {
 }
 
 struct AuctionSystem {
-    /// packed(user_id, item_id) -> current bid amount (canonical)
     bid_amount_map: HashMap<u32, i32>,
-    /// item_id -> max-heap (bid_amount, user_id); tie-break higher user_id
     by_item: HashMap<i32, BinaryHeap<(i32, i32)>>,
 }
 
 impl AuctionSystem {
+    /// Auction system with lazy-deletion max-heap per item.
+    ///
+    /// # Intuition
+    /// Lazy deletion avoids expensive heap removal. The canonical bid amount lives
+    /// in a flat HashMap; the heap may contain stale entries that are filtered on read.
+    ///
+    /// # Approach
+    /// Maintain a HashMap `(user_id, item_id) -> bid_amount` as the source of truth
+    /// and a BinaryHeap per item for max-bid queries. `add_bid`/`update_bid` push new
+    /// entries without removing old ones. `remove_bid` only deletes from the map.
+    /// `get_highest_bidder` pops stale heap entries until the top matches the canonical map.
+    ///
+    /// # Complexity
+    /// - add_bid / update_bid / remove_bid: O(log n) amortized
+    /// - get_highest_bidder: O(k log n) where k is the number of stale entries popped
+    /// - Space: O(n) total bids stored
     fn new() -> Self {
         Self {
             bid_amount_map: HashMap::new(),

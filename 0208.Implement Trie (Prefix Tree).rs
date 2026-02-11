@@ -1,17 +1,3 @@
-/// Trie (prefix tree) using array-based children for O(1) character lookup.
-///
-/// # Intuition
-/// A trie stores strings character-by-character in a tree structure where
-/// each node has up to 26 children (for lowercase English letters).
-///
-/// # Approach
-/// Each node contains an array of 26 optional children and a boolean flag
-/// marking end-of-word. Insert, search, and starts_with all traverse the
-/// trie following the character path.
-///
-/// # Complexity
-/// - Time: O(m) per operation where m is the word/prefix length
-/// - Space: O(n * 26) where n is total characters inserted
 struct TrieNode {
     children: [Option<Box<TrieNode>>; 26],
     is_end: bool,
@@ -31,6 +17,20 @@ struct Trie {
 }
 
 impl Trie {
+    /// Trie (prefix tree) using array-based children for O(1) character lookup.
+    ///
+    /// # Intuition
+    /// A trie stores strings character-by-character in a tree structure where
+    /// each node has up to 26 children (for lowercase English letters).
+    ///
+    /// # Approach
+    /// Each node contains an array of 26 optional children and a boolean flag
+    /// marking end-of-word. Insert, search, and starts_with all traverse the
+    /// trie following the character path.
+    ///
+    /// # Complexity
+    /// - Time: O(m) per operation where m is the word/prefix length
+    /// - Space: O(n * 26) where n is total characters inserted
     fn new() -> Self {
         Self {
             root: TrieNode::new(),

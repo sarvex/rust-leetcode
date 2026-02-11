@@ -70,3 +70,44 @@ impl Solution {
         result
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn node(
+        val: i32,
+        left: Option<Rc<RefCell<TreeNode>>>,
+        right: Option<Rc<RefCell<TreeNode>>>,
+    ) -> Option<Rc<RefCell<TreeNode>>> {
+        Some(Rc::new(RefCell::new(TreeNode { val, left, right })))
+    }
+
+    fn leaf(val: i32) -> Option<Rc<RefCell<TreeNode>>> {
+        node(val, None, None)
+    }
+
+    #[test]
+    fn both_non_empty() {
+        // Tree1: [2, 1, 4]  Tree2: [1, 0, 3]
+        let t1 = node(2, leaf(1), leaf(4));
+        let t2 = node(1, leaf(0), leaf(3));
+        assert_eq!(Solution::get_all_elements(t1, t2), vec![0, 1, 1, 2, 3, 4]);
+    }
+
+    #[test]
+    fn one_empty() {
+        let t1 = node(2, leaf(1), leaf(3));
+        assert_eq!(Solution::get_all_elements(t1, None), vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn both_empty() {
+        assert_eq!(Solution::get_all_elements(None, None), Vec::<i32>::new());
+    }
+
+    #[test]
+    fn single_nodes() {
+        assert_eq!(Solution::get_all_elements(leaf(5), leaf(3)), vec![3, 5]);
+    }
+}
