@@ -1,118 +1,237 @@
-use std::collections::HashMap;
+use std::cmp::{max, min};
+
+const MAXV: usize = 100_000;
+
+struct SegTree {
+    n: usize,
+    mn: Vec<i32>,
+    mx: Vec<i32>,
+    lz: Vec<i32>,
+}
+
+impl SegTree {
+    #[inline(always)]
+    fn new(n: usize) -> Self {
+        let size = 4 * n + 5;
+        Self {
+            n,
+            mn: vec![0; size],
+            mx: vec![0; size],
+            lz: vec![0; size],
+        }
+    }
+
+    fn build(&mut self, arr: &[i32]) {
+        self.build_rec(1, 0, self.n - 1, arr);
+    }
+
+    fn build_rec(&mut self, idx: usize, left: usize, right: usize, arr: &[i32]) {
+        if left == right {
+            let value = arr[left];
+            self.mn[idx] = value;
+            self.mx[idx] = value;
+            return;
+        }
+        let mid = (left + right) >> 1;
+        let left_child = idx << 1;
+        let right_child = left_child | 1;
+        self.build_rec(left_child, left, mid, arr);
+        self.build_rec(right_child, mid + 1, right, arr);
+        self.mn[idx] = min(self.mn[left_child], self.mn[right_child]);
+        self.mx[idx] = max(self.mx[left_child], self.mx[right_child]);
+    }
+
+    #[inline(always)]
+    fn apply(&mut self, idx: usize, delta: i32) {
+        self.mn[idx] += delta;
+        self.mx[idx] += delta;
+        self.lz[idx] += delta;
+    }
+
+    #[inline(always)]
+    fn push(&mut self, idx: usize) {
+        let delta = self.lz[idx];
+        if delta != 0 {
+            let left_child = idx << 1;
+            let right_child = left_child | 1;
+            self.apply(left_child, delta);
+            self.apply(right_child, delta);
+            self.lz[idx] = 0;
+        }
+    }
+
+    #[inline(always)]
+    fn pull(&mut self, idx: usize) {
+        let left_child = idx << 1;
+        let right_child = left_child | 1;
+        self.mn[idx] = min(self.mn[left_child], self.mn[right_child]);
+        self.mx[idx] = max(self.mx[left_child], self.mx[right_child]);
+    }
+
+    #[inline(always)]
+    fn add(&mut self, left: usize, right: usize, delta: i32) {
+        if left > right {
+            return;
+        }
+        self.add_rec(1, 0, self.n - 1, left, right, delta);
+    }
+
+    fn add_rec(
+        &mut self,
+        idx: usize,
+        tree_left: usize,
+        tree_right: usize,
+        query_left: usize,
+        query_right: usize,
+        delta: i32,
+    ) {
+        if query_left <= tree_left && tree_right <= query_right {
+            self.apply(idx, delta);
+            return;
+        }
+        self.push(idx);
+        let tree_mid = (tree_left + tree_right) >> 1;
+
+        if query_left <= tree_mid {
+            self.add_rec(
+                idx << 1,
+                tree_left,
+                tree_mid,
+                query_left,
+                query_right.min(tree_mid),
+                delta,
+            );
+        }
+        if query_right > tree_mid {
+            self.add_rec(
+                idx << 1 | 1,
+                tree_mid + 1,
+                tree_right,
+                query_left.max(tree_mid + 1),
+                query_right,
+                delta,
+            );
+        }
+        self.pull(idx);
+    }
+
+    #[inline(always)]
+    fn rightmost_zero_from(&mut self, query_left: usize) -> Option<usize> {
+        self.find_rec(1, 0, self.n - 1, query_left)
+    }
+
+    fn find_rec(
+        &mut self,
+        idx: usize,
+        tree_left: usize,
+        tree_right: usize,
+        query_left: usize,
+    ) -> Option<usize> {
+        if tree_right < query_left {
+            return None;
+        }
+        if self.mn[idx] > 0 || self.mx[idx] < 0 {
+            return None;
+        }
+        if tree_left == tree_right {
+            return Some(tree_left);
+        }
+
+        self.push(idx);
+        let tree_mid = (tree_left + tree_right) >> 1;
+
+        if let Some(result) = self.find_rec(idx << 1 | 1, tree_mid + 1, tree_right, query_left) {
+            return Some(result);
+        }
+        self.find_rec(idx << 1, tree_left, tree_mid, query_left)
+    }
+}
 
 impl Solution {
-    /// Longest contiguous subarray where #distinct evens equals #distinct odds.
+    /// Longest balanced subarray via lazy segment tree.
     ///
     /// # Intuition
-    /// Track `diff[i] = #distinct_evens - #distinct_odds` for every potential start index `i`
-    /// of subarrays ending at the current position. When value `v` appears at position `j`,
-    /// only subarrays starting after the previous occurrence of `v` gain a new distinct element,
-    /// translating to a range addition on a segment tree.
+    /// For fixed left boundary `l`, let `diff[r]` be:
+    /// `#distinct_odd(nums[l..=r]) - #distinct_even(nums[l..=r])`.
+    /// Then `[l, r]` is balanced iff `diff[r] == 0`.
+    ///
+    /// Sliding `l` to `l + 1` only changes a contiguous suffix of `r` values until the next
+    /// occurrence of `nums[l]`, which is a range add on `diff`.
     ///
     /// # Approach
-    /// Maintain a segment tree with lazy propagation over start indices. For each position `j`:
-    /// 1. Let `prev` be the last occurrence of `nums[j]` (or before the array start).
-    /// 2. Add +1 (even) or -1 (odd) to range `[prev+1, j]`.
-    /// 3. Query for the leftmost index in `[0, j]` where value == 0 (balanced).
-    /// 4. Update the answer with `j - leftmost + 1`.
+    /// 1. Build `diff[r]` for `l = 0`.
+    /// 2. Segment tree supports range add and rightmost index with value `0`.
+    /// 3. Iterate left boundary `l`:
+    ///    - query rightmost `r >= l` where `diff[r] == 0`
+    ///    - apply one range update reflecting removal of `nums[l]`
     ///
     /// # Complexity
     /// - Time: O(n log n)
     /// - Space: O(n)
     pub fn longest_balanced(nums: Vec<i32>) -> i32 {
         let n = nums.len();
-        if n == 0 {
+        if n < 2 {
             return 0;
         }
 
-        let mut tree = SegTree::new(n);
-        let mut last_occ: HashMap<i32, usize> = HashMap::with_capacity(n);
-        let mut result = 0;
+        let n_u32 = n as u32;
 
-        for (j, &v) in nums.iter().enumerate() {
-            let left = last_occ.get(&v).map_or(0, |&p| p + 1);
-            let delta = if v % 2 == 0 { 1 } else { -1 };
-            tree.update(1, 0, n - 1, left, j, delta);
-            last_occ.insert(v, j);
+        let mut next_occ: Vec<u32> = vec![n_u32; n];
+        let mut last: Vec<u32> = vec![n_u32; MAXV + 1];
+        for i in (0..n).rev() {
+            let value = nums[i] as usize;
+            next_occ[i] = last[value];
+            last[value] = i as u32;
+        }
 
-            if let Some(i) = tree.query(1, 0, n - 1, 0, j) {
-                result = result.max((j - i + 1) as i32);
+        let mut seen: Vec<u8> = vec![0; MAXV + 1];
+        let mut diff: Vec<i32> = vec![0; n];
+        let mut balance = 0_i32;
+        let mut odd_count = 0_i32;
+        let mut even_count = 0_i32;
+
+        for i in 0..n {
+            let value = nums[i] as usize;
+            if seen[value] == 0 {
+                seen[value] = 1;
+                if (value & 1) == 1 {
+                    balance += 1;
+                    odd_count += 1;
+                } else {
+                    balance -= 1;
+                    even_count += 1;
+                }
+            }
+            diff[i] = balance;
+        }
+
+        if odd_count == 0 || even_count == 0 {
+            return 0;
+        }
+        if balance == 0 {
+            return n as i32;
+        }
+
+        let mut seg_tree = SegTree::new(n);
+        seg_tree.build(&diff);
+
+        let mut best: usize = 0;
+        for left in 0..n {
+            if let Some(right) = seg_tree.rightmost_zero_from(left) {
+                let length = right + 1 - left;
+                if length > best {
+                    best = length;
+                }
+            }
+
+            let next = next_occ[left] as usize;
+            if next > left + 1 {
+                let delta = if (nums[left] & 1) != 0 { -1 } else { 1 };
+                seg_tree.add(left + 1, next - 1, delta);
             }
         }
 
-        result
-    }
-}
-
-struct SegTree {
-    min_val: Vec<i32>,
-    max_val: Vec<i32>,
-    lazy: Vec<i32>,
-}
-
-impl SegTree {
-    fn new(n: usize) -> Self {
-        let size = 4 * n;
-        Self {
-            min_val: vec![0; size],
-            max_val: vec![0; size],
-            lazy: vec![0; size],
-        }
-    }
-
-    fn push_down(&mut self, node: usize) {
-        if self.lazy[node] != 0 {
-            let val = self.lazy[node];
-            let left = 2 * node;
-            let right = 2 * node + 1;
-            self.min_val[left] += val;
-            self.max_val[left] += val;
-            self.lazy[left] += val;
-            self.min_val[right] += val;
-            self.max_val[right] += val;
-            self.lazy[right] += val;
-            self.lazy[node] = 0;
-        }
-    }
-
-    fn pull_up(&mut self, node: usize) {
-        let left = 2 * node;
-        let right = 2 * node + 1;
-        self.min_val[node] = self.min_val[left].min(self.min_val[right]);
-        self.max_val[node] = self.max_val[left].max(self.max_val[right]);
-    }
-
-    fn update(&mut self, node: usize, lo: usize, hi: usize, l: usize, r: usize, delta: i32) {
-        if l > hi || r < lo {
-            return;
-        }
-        if l <= lo && hi <= r {
-            self.min_val[node] += delta;
-            self.max_val[node] += delta;
-            self.lazy[node] += delta;
-            return;
-        }
-        self.push_down(node);
-        let mid = lo + (hi - lo) / 2;
-        self.update(2 * node, lo, mid, l, r, delta);
-        self.update(2 * node + 1, mid + 1, hi, l, r, delta);
-        self.pull_up(node);
-    }
-
-    fn query(&mut self, node: usize, lo: usize, hi: usize, ql: usize, qr: usize) -> Option<usize> {
-        if lo > qr || hi < ql {
-            return None;
-        }
-        if self.min_val[node] > 0 || self.max_val[node] < 0 {
-            return None;
-        }
-        if lo == hi {
-            return Some(lo);
-        }
-        self.push_down(node);
-        let mid = lo + (hi - lo) / 2;
-        self.query(2 * node, lo, mid, ql, qr)
-            .or_else(|| self.query(2 * node + 1, mid + 1, hi, ql, qr))
+        best as i32
     }
 }
 
