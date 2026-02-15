@@ -54,10 +54,8 @@ Examples:
 Every solution file follows this consistent structure:
 
 ```rust
-// 1. Imports (only when needed)
 use std::collections::HashMap;
 
-// 2. Supporting structs (when required by problem) - COMMENTED OUT by default
 // Uncomment when needed for local testing:
 // #[derive(Clone, Debug)]
 // pub struct ListNode {
@@ -65,7 +63,6 @@ use std::collections::HashMap;
 //     pub next: Option<Box<ListNode>>,
 // }
 
-// 3. Main Solution implementation
 impl Solution {
     /// Brief algorithm description.
     ///
@@ -86,7 +83,6 @@ impl Solution {
     }
 }
 
-// 4. Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -232,6 +228,23 @@ heap.push(Reverse((cost, node)));
 while let Some(Reverse((cost, node))) = heap.pop() {
     // process
 }
+```
+
+#### Greedy for Lexicographically Smallest
+When constructing a lexicographically smallest array with constraints:
+```rust
+// Process from largest to smallest, decide each element's properties
+// Result will naturally be in lexicographic order when collected appropriately
+for val in (1..=n).rev() {
+    if can_make_negative(val, remaining_target) {
+        negatives.push(-val);  // Larger negatives first = lexicographically smaller
+        target += val;
+    } else {
+        positives.push(val);
+        target -= val;
+    }
+}
+// Combine: negatives (descending) + reversed(positives) (ascending)
 ```
 
 ## Choosing the Right Pattern
@@ -535,6 +548,20 @@ If exceeding these, consider:
 5. **Use `entry()` API for HashMap Updates**:
    ```rust
    *map.entry(key).or_insert(0) += 1;  // Single lookup
+   ```
+
+6. **Avoid Unnecessary Sorts**: When the problem asks for lexicographically smallest/largest output or sorted result, construct the answer in sorted order directly instead of building unsorted and sorting at the end.
+   ```rust
+   // GOOD: O(n) - construct in sorted order directly
+   for i in (1..=n).rev() {  // descending
+       if condition(i) { result.push(i); }
+   }
+   
+   // BAD: O(n log n) - sorting at the end
+   for i in 1..=n {
+       if condition(i) { result.push(i); }
+   }
+   result.sort();  // Unnecessary if we can construct in order
    ```
 
 ### Verification Checklist

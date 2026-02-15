@@ -6,29 +6,35 @@ impl Solution {
     /// pour row by row, distributing excess champagne downward.
     ///
     /// # Approach
-    /// Start with all champagne in glass `(0, 0)`. For each row, compute
-    /// overflow to the next row. The answer is `min(1.0, glass_amount)` at
-    /// the queried position.
+    /// Start with all champagne in glass `(0, 0)`. Use two preallocated
+    /// buffers and alternate (double-buffer) to avoid allocating a new vec
+    /// each row. Only the slice that will be written is zeroed each step.
     ///
     /// # Complexity
     /// - Time: O(query_row^2)
-    /// - Space: O(query_row) using single-row optimization
+    /// - Space: O(query_row)
     pub fn champagne_tower(poured: i32, query_row: i32, query_glass: i32) -> f64 {
         let query_row = query_row as usize;
         let query_glass = query_glass as usize;
-        let mut row = vec![poured as f64];
+        let cap = query_row + 2;
+
+        let mut row0 = vec![0.0_f64; cap];
+        let mut row1 = vec![0.0_f64; cap];
+        row0[0] = poured as f64;
+
+        let (mut cur, mut nxt) = (&mut row0, &mut row1);
 
         for i in 1..=query_row {
-            let mut next = vec![0.0; i + 1];
+            nxt[..=i].fill(0.0);
             for j in 0..i {
-                let overflow = (row[j] - 1.0).max(0.0) / 2.0;
-                next[j] += overflow;
-                next[j + 1] += overflow;
+                let overflow = (cur[j] - 1.0).max(0.0) * 0.5;
+                nxt[j] += overflow;
+                nxt[j + 1] += overflow;
             }
-            row = next;
+            std::mem::swap(&mut cur, &mut nxt);
         }
 
-        row[query_glass].min(1.0)
+        cur[query_glass].min(1.0)
     }
 }
 
