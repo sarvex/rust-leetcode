@@ -2,23 +2,32 @@ impl Solution {
     /// Reverses the bits of a 32-bit unsigned integer.
     ///
     /// # Intuition
-    /// Extract each bit from the least significant end and place it at the
-    /// corresponding position from the most significant end.
+    /// Use divide and conquer to swap bits in parallel: first swap adjacent bits,
+    /// then swap pairs, then nibbles, bytes, and finally half-words.
     ///
     /// # Approach
-    /// 1. Iterate through all 32 bit positions.
-    /// 2. Extract the lowest bit of n and shift it to position `31 - i`.
-    /// 3. OR into the result and right-shift n.
+    /// 1. Swap odd and even bits
+    /// 2. Swap consecutive pairs
+    /// 3. Swap nibbles (4 bits)
+    /// 4. Swap bytes
+    /// 5. Swap half-words (16 bits)
     ///
     /// # Complexity
-    /// - Time: O(1) — always 32 iterations
+    /// - Time: O(1) — only 5 bitwise operations
     /// - Space: O(1)
-    pub fn reverse_bits(mut n: u32) -> u32 {
-        (0..32).fold(0u32, |ans, i| {
-            let bit = (n & 1) << (31 - i);
-            n >>= 1;
-            ans | bit
-        })
+    pub fn reverse_bits(n: i32) -> i32 {
+        let mut n = n as u32;
+        // Swap odd and even bits
+        n = ((n & 0xAAAAAAAA) >> 1) | ((n & 0x55555555) << 1);
+        // Swap consecutive pairs
+        n = ((n & 0xCCCCCCCC) >> 2) | ((n & 0x33333333) << 2);
+        // Swap nibbles
+        n = ((n & 0xF0F0F0F0) >> 4) | ((n & 0x0F0F0F0F) << 4);
+        // Swap bytes
+        n = ((n & 0xFF00FF00) >> 8) | ((n & 0x00FF00FF) << 8);
+        // Swap half-words (16 bits)
+        n = (n >> 16) | (n << 16);
+        n as i32
     }
 }
 
@@ -36,7 +45,7 @@ mod tests {
 
     #[test]
     fn all_ones() {
-        assert_eq!(Solution::reverse_bits(u32::MAX), u32::MAX);
+        assert_eq!(Solution::reverse_bits(-1), -1);
     }
 
     #[test]
