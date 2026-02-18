@@ -13,6 +13,7 @@ impl Solution {
     /// - Time: O(1)
     /// - Space: O(1)
     pub fn has_alternating_bits(n: i32) -> bool {
+        let n = n as u32;
         let x = n ^ (n >> 1);
         x & (x + 1) == 0
     }

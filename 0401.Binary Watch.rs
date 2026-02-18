@@ -1,32 +1,46 @@
 impl Solution {
-    /// Enumerates valid binary watch times by counting set bits.
+    /// Enumerates valid binary watch times by bucketing hours and minutes by popcount.
     ///
     /// # Intuition
-    /// A binary watch has 4 hour LEDs and 6 minute LEDs. Instead of
-    /// backtracking through bit positions, iterate all possible (h, m) pairs
-    /// and check if their combined popcount equals `turned_on`.
+    /// A binary watch has 4 hour LEDs and 6 minute LEDs. Only (h, m) pairs
+    /// whose combined set-bit count equals `turned_on` are valid. Bucket
+    /// hours by popcount (0..=4) and minutes by popcount (0..=6), then
+    /// enumerate pairs (h_bits, m_bits) with h_bits + m_bits == turned_on.
     ///
     /// # Approach
-    /// 1. Iterate hours 0–11 and minutes 0–59.
-    /// 2. Count total set bits in (h, m).
-    /// 3. Collect formatted times where the count matches.
+    /// 1. Bucket hours 0–11 by popcount (5 buckets) and minutes 0–59 by popcount (7 buckets).
+    /// 2. For each h_bits in 0..=4, set m_bits = turned_on - h_bits; if m_bits in 0..=6,
+    ///    take the Cartesian product of the two buckets and format each (h, m).
+    /// 3. No filtering: we only allocate and format for valid pairs.
     ///
     /// # Complexity
-    /// - Time: O(1) — at most 12 × 60 = 720 iterations
+    /// - Time: O(1) — 12 + 60 bucketing steps plus output size (at most ~150 strings)
     /// - Space: O(1) excluding the result
     pub fn read_binary_watch(turned_on: i32) -> Vec<String> {
-        let target = turned_on as u32;
-        (0u32..12)
-            .flat_map(|h| {
-                (0u32..60).filter_map(move |m| {
-                    if (h.count_ones() + m.count_ones()) == target {
-                        Some(format!("{h}:{m:02}"))
-                    } else {
-                        None
+        let target = turned_on;
+        let mut hours_by_bits: [Vec<u32>; 5] = Default::default();
+        for h in 0u32..12 {
+            let b = h.count_ones() as usize;
+            hours_by_bits[b].push(h);
+        }
+        let mut minutes_by_bits: [Vec<u32>; 7] = Default::default();
+        for m in 0u32..60 {
+            let b = m.count_ones() as usize;
+            minutes_by_bits[b].push(m);
+        }
+        let mut result = Vec::new();
+        for h_bits in 0..=4usize {
+            let m_bits_i = target - h_bits as i32;
+            if (0..=6).contains(&m_bits_i) {
+                let m_bits = m_bits_i as usize;
+                for &h in &hours_by_bits[h_bits] {
+                    for &m in &minutes_by_bits[m_bits] {
+                        result.push(format!("{h}:{m:02}"));
                     }
-                })
-            })
-            .collect()
+                }
+            }
+        }
+        result
     }
 }
 
