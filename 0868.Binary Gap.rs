@@ -14,11 +14,13 @@ impl Solution {
     /// - Space: O(1)
     pub fn binary_gap(mut n: i32) -> i32 {
         let mut max_gap = 0;
-        let mut last_one = -32;
+        let mut last_one = -1;
         let mut pos = 0;
         while n > 0 {
             if n & 1 == 1 {
-                max_gap = max_gap.max(pos - last_one);
+                if last_one >= 0 {
+                    max_gap = max_gap.max(pos - last_one);
+                }
                 last_one = pos;
             }
             pos += 1;
