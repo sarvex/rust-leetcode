@@ -1,42 +1,38 @@
 impl Solution {
-    /// Simulates the game: apply odd and 6th-game swaps, then active player gains points.
+    /// Simulates the game and returns first player's score minus second player's score.
     ///
     /// # Intuition
-    /// The active player is determined before each game by two rules applied in order: swap if
-    /// points are odd, then swap on every 6th game (indices 5, 11, 17, ...). The active player
-    /// then gains that game's points. Simulate once and return first player's score minus second's.
+    /// Two swap rules determine who is active before each game: an odd-value swap and a
+    /// periodic 6th-game swap. Since we only need the difference, track a single signed
+    /// accumulator — add when the first player is active, subtract otherwise.
     ///
     /// # Approach
-    /// 1. First player starts active (`first_active = true`), both scores start at 0.
-    /// 2. For each game index `i`: if `nums[i]` is odd, flip active; if `i % 6 == 5`, flip again.
-    /// 3. Add `nums[i]` to the active player's score.
-    /// 4. Return `score_first - score_second`.
+    /// Fold over enumerated values carrying `(difference, first_active)`. For each game,
+    /// apply the odd swap, then the 6th-game swap, then accumulate `+pts` or `-pts`.
     ///
     /// # Complexity
     /// - Time: O(n)
     /// - Space: O(1)
-    ///
-    /// # Panics
-    /// Never panics; indices and values are within constraints.
     pub fn score_difference(nums: Vec<i32>) -> i32 {
-        let mut first_active = true;
-        let (mut score_first, mut score_second) = (0i32, 0i32);
-
-        for (i, &pts) in nums.iter().enumerate() {
-            if pts & 1 == 1 {
-                first_active = !first_active;
-            }
-            if i % 6 == 5 {
-                first_active = !first_active;
-            }
-            if first_active {
-                score_first += pts;
-            } else {
-                score_second += pts;
-            }
-        }
-
-        score_first - score_second
+        nums.iter()
+            .enumerate()
+            .fold((0, true), |(diff, mut first_active), (i, pts)| {
+                if *pts & 1 == 1 {
+                    first_active = !first_active;
+                }
+                if i % 6 == 5 {
+                    first_active = !first_active;
+                }
+                (
+                    if first_active {
+                        diff + *pts
+                    } else {
+                        diff - *pts
+                    },
+                    first_active,
+                )
+            })
+            .0
     }
 }
 
