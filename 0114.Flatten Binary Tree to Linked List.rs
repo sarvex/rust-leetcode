@@ -60,28 +60,28 @@ impl Solution {
     }
 }
 
-/// Binary tree node used by the LeetCode harness.
-#[derive(Debug, PartialEq, Eq)]
-pub struct TreeNode {
-    /// Node value.
-    pub val: i32,
-    /// Left child pointer.
-    pub left: Option<Rc<RefCell<TreeNode>>>,
-    /// Right child pointer.
-    pub right: Option<Rc<RefCell<TreeNode>>>,
-}
-
-impl TreeNode {
-    /// Creates a new tree node with empty children.
-    #[inline]
-    pub fn new(val: i32) -> Self {
-        TreeNode {
-            val,
-            left: None,
-            right: None,
-        }
-    }
-}
+// /// Binary tree node used by the LeetCode harness.
+// #[derive(Debug, PartialEq, Eq)]
+// pub struct TreeNode {
+//     /// Node value.
+//     pub val: i32,
+//     /// Left child pointer.
+//     pub left: Option<Rc<RefCell<TreeNode>>>,
+//     /// Right child pointer.
+//     pub right: Option<Rc<RefCell<TreeNode>>>,
+// }
+//
+// impl TreeNode {
+//     /// Creates a new tree node with empty children.
+//     #[inline]
+//     pub fn new(val: i32) -> Self {
+//         TreeNode {
+//             val,
+//             left: None,
+//             right: None,
+//         }
+//     }
+// }
 
 /// LeetCode solution container.
 
