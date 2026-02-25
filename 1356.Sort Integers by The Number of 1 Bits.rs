@@ -1,19 +1,21 @@
 impl Solution {
-    /// Sort by popcount with value as tiebreaker.
+    /// Sort by popcount with value as tiebreaker using packed key.
     ///
     /// # Intuition
-    /// Sorting by a composite key `(count_ones, value)` achieves the required
-    /// ordering: primary sort by bit count, secondary sort by value.
+    /// Encoding both popcount and value into a single integer eliminates
+    /// tuple comparison overhead. Since values are at most 10,000 (14 bits),
+    /// shifting popcount left by 16 bits produces a composite key where
+    /// natural integer ordering matches the desired sort order.
     ///
     /// # Approach
-    /// 1. Sort using `sort_unstable_by_key` with key `(count_ones, value)`
-    /// 2. Return the sorted array
+    /// 1. Pack sort key as `(count_ones << 16) | value` into one `i32`
+    /// 2. Sort with `sort_unstable_by_key` on the packed key
     ///
     /// # Complexity
     /// - Time: O(n log n) for sorting
     /// - Space: O(1) in-place sort
     pub fn sort_by_bits(mut arr: Vec<i32>) -> Vec<i32> {
-        arr.sort_unstable_by_key(|&x| (x.count_ones(), x));
+        arr.sort_unstable_by_key(|&x| (x.count_ones() << 16) | x as u32);
         arr
     }
 }
