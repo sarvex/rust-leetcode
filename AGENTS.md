@@ -685,4 +685,32 @@ Connected to project `sarvex_rust-leetcode` for continuous code quality analysis
 
 ---
 
+## Cursor Cloud specific instructions
+
+### Environment
+
+- **Rust**: `rustup update stable` has been run; `rustc` 1.93.1 (stable) supports Rust 2024 Edition.
+- **Trunk CLI**: Installed at `/usr/local/bin/trunk` (version 1.22.12). First invocation in a session downloads the versioned backend binary; expect ~3 s latency on the first `trunk check`.
+
+### Testing individual solution files
+
+There is no `Cargo.toml` in the repo. To compile / test any `.rs` file:
+
+1. `cargo new /tmp/temp_solution` (creates a project with `edition = "2024"` by default).
+2. Prepend `struct Solution;` to the solution code, uncomment any `ListNode`/`TreeNode` structs, and write to `/tmp/temp_solution/src/main.rs`.
+3. Run `cargo test`, `cargo clippy -- -D warnings`, and `cargo fmt -- --check` inside `/tmp/temp_solution`.
+4. Delete `/tmp/temp_solution` when done.
+
+### Linting
+
+- **Trunk** (`trunk check --no-fix <file>`) runs rustfmt, shellcheck, prettier, markdownlint, checkov, shfmt, and trufflehog per `.trunk/trunk.yaml`. Use `--no-fix` to avoid interactive prompts.
+- **cargo fmt / cargo clippy** work inside a temp Cargo project (see above).
+
+### Gotchas
+
+- `trunk check` without `--no-fix` may prompt interactively for autofixes (e.g. markdown formatting); always pass `--no-fix` in non-interactive contexts.
+- Solution files reference `Solution` and sometimes `ListNode`/`TreeNode` without definitions because LeetCode provides them. You must add `struct Solution;` and uncomment the struct definitions when testing locally.
+
+---
+
 *Last updated: 2026-02-11 | Rust Edition: 2024*
