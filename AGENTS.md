@@ -1,14 +1,14 @@
 # Rust LeetCode Solutions - Agent Guide
 
-A comprehensive collection of 1,100+ LeetCode problem solutions implemented in **Rust 2024 Edition**. This is a flat-file repository where each solution is a standalone Rust file with no Cargo project structure.
+A comprehensive collection of 1,100+ LeetCode problem solutions implemented in **Rust 2024 Edition**. This is a flat-file repository where each solution is a standalone Rust file with no Cargo project structure. Problems span from #0001 to #3849 across all difficulty levels.
 
 ## Project Overview
 
 | Attribute | Value |
 |-----------|-------|
 | **Language** | Rust (Edition 2024) |
-| **Total Solutions** | 1,121 files |
-| **Total Lines** | ~100,000 lines |
+| **Total Solutions** | 1,144 files |
+| **Total Lines** | ~103,000 lines |
 | **License** | MIT |
 | **Repository Type** | Flat file (no Cargo.toml) |
 | **File Pattern** | `XXXX.Problem Name.rs` |
@@ -21,16 +21,19 @@ This repository contains production-ready solutions with comprehensive documenta
 
 ```
 rust-leetcode/
-├── XXXX.Problem Title.rs     # Individual solution files
-├── .rules                     # Comprehensive Rust coding standards
+├── XXXX.Problem Title.rs     # 1,144 individual solution files (all in root)
+├── .rules                     # Comprehensive Rust coding standards (458 lines)
 ├── .trunk/trunk.yaml          # Trunk linter/formatter configuration
-├── .vscode/settings.json      # VS Code workspace settings
+├── .trunk/configs/            # rustfmt, markdownlint, shellcheck configs
+├── .vscode/settings.json      # VS Code workspace + SonarLint settings
 ├── .github/                   # GitHub automation
+│   ├── copilot-instructions.md # References AGENTS.md
 │   ├── renovate.json         # Renovate bot configuration
 │   └── dependabot.yml        # Dependabot configuration
-├── setup.sh                   # Unix setup script
+├── setup.sh                   # Unix setup script (file reorganization)
 ├── setup.ps1                  # PowerShell setup script
-├── AGENTS.md                  # This file
+├── AGENTS.md                  # This file — primary knowledge base
+├── CLAUDE.md                  # Redirects to AGENTS.md
 ├── README.md                  # Human-readable documentation
 └── LICENSE                    # MIT License
 ```
@@ -45,7 +48,7 @@ All solution files follow the strict pattern:
 Examples:
 - `0001.Two Sum.rs`
 - `0146.LRU Cache.rs`
-- `3292.Minimum Number of Valid Strings to Form Target II.rs`
+- `3849.Maximum Bitwise XOR After Rearrangement.rs`
 
 ## Code Structure
 
@@ -259,6 +262,20 @@ for val in (1..=n).rev() {
 | Need min/max repeatedly | BinaryHeap |
 | Range queries, updates | Segment tree or BIT |
 | Overlapping subproblems | Dynamic Programming |
+
+### Advanced Data Structures in This Repository
+
+| Structure | Count | Reference Implementation | Notes |
+|-----------|-------|------------------------|-------|
+| Trie | 36 | `0208.Implement Trie (Prefix Tree).rs` | Canonical trie; XOR tries in `0421` |
+| Fenwick Tree (BIT) | 17 | `3245.Alternating Groups III.rs` | Largest at 413 lines with 4 structs |
+| LCA / Binary Lifting | 10 | `2846.Minimum Edge Weight Equilibrium Queries in a Tree.rs` | Often combined with sparse tables |
+| Segment Tree | 8 | `3161.Block Placement Queries.rs` | Lazy propagation in `2569`, `3165` |
+| Sparse Table | 7 | `3501.Maximize Active Section with Trade II.rs` | RMQ pattern, 371 lines |
+| Union-Find (DSU) | 7 | `1202.Smallest String With Swaps.rs` | Path compression + rank |
+| KMP / Pattern Match | 7 | `0028.Find the Index of the First Occurrence in a String.rs` | Also in `1392`, `3036` |
+
+~35 "Design" problems use custom structs instead of `impl Solution` (e.g., `LRUCache`, `Trie`, `TextEditor`). This is intentional — LeetCode design problems require struct definitions.
 
 ## Code Quality Standards
 
@@ -685,4 +702,4 @@ Connected to project `sarvex_rust-leetcode` for continuous code quality analysis
 
 ---
 
-*Last updated: 2026-02-11 | Rust Edition: 2024*
+*Last updated: 2026-02-26 | Rust Edition: 2024 | Commit: e646e1a*
