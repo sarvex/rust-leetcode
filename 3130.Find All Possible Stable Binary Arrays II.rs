@@ -1,67 +1,109 @@
-const MOD: i64 = 1_000_000_007;
+const MOD: u64 = 1_000_000_007;
+const N: usize = 2001;
 
-fn mod_add(left: i64, right: i64) -> i64 {
-    let value = left + right;
-    if value >= MOD { value - MOD } else { value }
+const fn mod_pow(mut base: u64, mut exp: u64) -> u64 {
+    let mut result = 1;
+    base %= MOD;
+    while exp > 0 {
+        if exp & 1 == 1 {
+            result = result * base % MOD;
+        }
+        base = base * base % MOD;
+        exp >>= 1;
+    }
+    result
 }
 
-fn mod_sub(left: i64, right: i64) -> i64 {
-    let mut value = left - right;
-    if value < 0 {
-        value += MOD;
+const fn precalc() -> ([u64; N], [u64; N]) {
+    let mut fact = [1_u64; N];
+    let mut inv_fact = [1_u64; N];
+    let mut i = 2;
+    while i < N {
+        fact[i] = fact[i - 1] * i as u64 % MOD;
+        i += 1;
     }
-    value
+    inv_fact[N - 1] = mod_pow(fact[N - 1], MOD - 2);
+    let mut i = N - 1;
+    while i > 1 {
+        inv_fact[i - 1] = inv_fact[i] * i as u64 % MOD;
+        i -= 1;
+    }
+    (fact, inv_fact)
+}
+
+const TABLES: ([u64; N], [u64; N]) = precalc();
+
+/// Binomial coefficient C(n, r) mod MOD via precomputed factorials.
+fn c(n: u64, r: u64) -> u64 {
+    if r > n {
+        return 0;
+    }
+    TABLES.0[n as usize] * (TABLES.1[r as usize] * TABLES.1[(n - r) as usize] % MOD) % MOD
+}
+
+/// Counts compositions of `n` into `k` parts in \[1, limit\] via inclusion-exclusion.
+fn split_ways(n: u64, k: u64, limit: u64) -> u64 {
+    if n == k {
+        return 1;
+    }
+    if n > k * limit {
+        return 0;
+    }
+    let (mut total, mut sign, mut remaining, mut j) = (0_u64, true, n, 0_u64);
+    while j <= k && k <= remaining {
+        let t = c(k, j) * c(remaining - 1, k - 1) % MOD;
+        total = (total + if sign { t } else { MOD - t }) % MOD;
+        sign = !sign;
+        if remaining <= limit {
+            break;
+        }
+        remaining -= limit;
+        j += 1;
+    }
+    total
 }
 
 impl Solution {
-    /// Counts stable binary arrays with bounded run lengths.
+    /// Counts stable binary arrays using combinatorial inclusion-exclusion.
     ///
     /// # Intuition
-    /// Stability means no run of identical bits exceeds `limit`, so the last run determines
-    /// how the array can be extended.
+    /// Instead of position-by-position DP, enumerate how many runs of 0s there are
+    /// (call it k). The runs of 1s must be k−1, k, or k+1 depending on whether the
+    /// array starts and/or ends with 0. Counting compositions into bounded parts
+    /// reduces to inclusion-exclusion over binomial coefficients.
     ///
     /// # Approach
-    /// - Use DP on counts and last bit: `dp0[i][j]` ends with 0, `dp1[i][j]` ends with 1.
-    /// - For each cell, extend the previous state and subtract the window that exceeds `limit`.
-    /// - This yields O(1) transitions without extra prefix arrays.
+    /// 1. Precompute factorials and inverse factorials at compile time for O(1) binomial lookups.
+    /// 2. `split_ways(n, k, limit)` counts compositions of n into k parts in \[1, limit\]
+    ///    via inclusion-exclusion in O(min(k, n/limit)) time.
+    /// 3. The main loop iterates k = 1..=min(zero, one), combining zero-side and one-side
+    ///    split counts with coefficients 1, 2, 1 for the three interleaving patterns.
     ///
     /// # Complexity
-    /// - Time: O(zero * one)
-    /// - Space: O(zero * one)
+    /// - Time:  O(min(zero, one) × max(zero, one) / limit)
+    /// - Space: O(1) working (factorial tables are compile-time constants)
     pub fn number_of_stable_arrays(zero: i32, one: i32, limit: i32) -> i32 {
-        let zeros = zero as usize;
-        let ones = one as usize;
-        let limit = limit as usize;
-
-        let mut dp = vec![vec![[0i64; 2]; ones + 1]; zeros + 1];
-
-        for i in 1..=limit {
-            if i <= zeros {
-                dp[i][0][0] = 1;
+        let (zero, one, limit) = (zero.min(one) as u64, zero.max(one) as u64, limit as u64);
+        if limit == 1 {
+            if zero == one {
+                return 2;
             }
-            if i <= ones {
-                dp[0][i][1] = 1;
+            if zero + 1 == one {
+                return 1;
             }
+            return 0;
         }
-
-        for i in 1..=zeros {
-            for j in 1..=ones {
-                let mut zero_ending = mod_add(dp[i - 1][j][0], dp[i - 1][j][1]);
-                if i > limit {
-                    zero_ending = mod_sub(zero_ending, dp[i - limit - 1][j][1]);
-                }
-
-                let mut one_ending = mod_add(dp[i][j - 1][0], dp[i][j - 1][1]);
-                if j > limit {
-                    one_ending = mod_sub(one_ending, dp[i][j - limit - 1][0]);
-                }
-
-                dp[i][j][0] = zero_ending;
-                dp[i][j][1] = one_ending;
-            }
+        let (mut result, mut prev, mut curr, mut next) = (
+            0_u64,
+            0_u64,
+            split_ways(one, 1, limit),
+            split_ways(one, 2, limit),
+        );
+        for k in 1..=zero {
+            result = (result + (prev + 2 * curr + next) % MOD * split_ways(zero, k, limit)) % MOD;
+            (prev, curr, next) = (curr, next, split_ways(one, k + 2, limit));
         }
-
-        mod_add(dp[zeros][ones][0], dp[zeros][ones][1]) as i32
+        result as i32
     }
 }
 
@@ -92,5 +134,18 @@ mod tests {
     #[test]
     fn test_large_limit_no_constraint() {
         assert_eq!(Solution::number_of_stable_arrays(2, 3, 5), 10);
+    }
+
+    #[test]
+    fn test_max_params() {
+        assert_eq!(
+            Solution::number_of_stable_arrays(1000, 1000, 1000),
+            72_475_738
+        );
+    }
+
+    #[test]
+    fn test_max_params_limit_one() {
+        assert_eq!(Solution::number_of_stable_arrays(1000, 1000, 1), 2);
     }
 }

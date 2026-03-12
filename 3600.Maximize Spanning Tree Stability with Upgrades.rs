@@ -1,112 +1,124 @@
 impl Solution {
-    /// Binary search on stability with greedy spanning tree construction.
+    /// Binary search on stability with optimized spanning tree construction.
     ///
     /// # Intuition
-    /// The answer must be an edge strength (original or doubled). Binary search
-    /// on target stability, checking if a valid spanning tree exists using
-    /// greedy Kruskal-style construction prioritizing non-upgraded edges.
+    /// The answer equals some edge strength (original or doubled). Binary
+    /// search on target stability and check feasibility via reusable
+    /// union-find with pre-computed mandatory state and sorted optionals.
     ///
     /// # Approach
-    /// 1. Separate mandatory/optional edges, check mandatory for cycles
-    /// 2. Binary search on candidate target values (all strengths and doubled)
-    /// 3. For each target: use strong edges first (free), then weak edges (cost 1)
-    /// 4. Check if all nodes connected within upgrade budget
+    /// 1. Classify edges, pre-build mandatory union-find state, detect cycles
+    /// 2. Sort optional edges descending; use partition-point lookups
+    /// 3. Binary search with buffer-reusing union-find and component count
+    ///    tracking for O(1) connectivity detection and early termination
     ///
     /// # Complexity
     /// - Time: O(E log E × α(N)) for binary search with union-find checks
-    /// - Space: O(N + E) for union-find and edge storage
+    /// - Space: O(N + E) for union-find buffers and edge storage
     pub fn max_stability(n: i32, edges: Vec<Vec<i32>>, k: i32) -> i32 {
         let n = n as usize;
+        let m = edges.len();
+        let mut mandatory = Vec::with_capacity(m);
+        let mut optional = Vec::with_capacity(m);
+        let mut mandatory_min = i32::MAX;
 
-        let (mandatory, optional): (Vec<_>, Vec<_>) = edges
-            .iter()
-            .map(|e| (e[0] as usize, e[1] as usize, e[2], e[3]))
-            .partition(|&(_, _, _, must)| must == 1);
-        let mandatory: Vec<_> = mandatory
-            .into_iter()
-            .map(|(u, v, s, _)| (u, v, s))
-            .collect();
-        let optional: Vec<_> = optional.into_iter().map(|(u, v, s, _)| (u, v, s)).collect();
-
-        // Check mandatory edges for cycles
-        let mut uf_check = UnionFind::new(n);
-        let has_cycle = mandatory.iter().any(|&(u, v, _)| {
-            if uf_check.find(u) == uf_check.find(v) {
-                true
+        for e in &edges {
+            let (u, v, s) = (e[0] as usize, e[1] as usize, e[2]);
+            if e[3] == 1 {
+                mandatory.push((u, v, s));
+                mandatory_min = mandatory_min.min(s);
             } else {
-                uf_check.union(u, v);
-                false
+                optional.push((u, v, s));
             }
-        });
-        if has_cycle {
-            return -1;
         }
-        let mandatory_min = mandatory
-            .iter()
-            .map(|&(_, _, s)| s)
-            .min()
-            .unwrap_or(i32::MAX);
 
-        // Generate candidate target values
-        let mut candidates: Vec<i32> = edges.iter().flat_map(|e| [e[2], e[2] * 2]).collect();
+        // Pre-build mandatory UF state and detect cycles
+        let mut parent_base: Vec<usize> = (0..n).collect();
+        let mut rank_base = vec![0u32; n];
+        let mut base_components = n;
+
+        for &(u, v, _) in &mandatory {
+            let pu = find(&mut parent_base, u);
+            let pv = find(&mut parent_base, v);
+            if pu == pv {
+                return -1;
+            }
+            union_nodes(&mut parent_base, &mut rank_base, pu, pv);
+            base_components -= 1;
+        }
+
+        // Sort optional edges descending for partition-based processing
+        optional.sort_unstable_by(|a, b| b.2.cmp(&a.2));
+
+        // Generate candidates, skip doubled mandatory (can't upgrade mandatory)
+        let mut candidates = Vec::with_capacity(2 * m);
+        for e in &edges {
+            candidates.push(e[2]);
+            if e[3] == 0 {
+                candidates.push(e[2] * 2);
+            }
+        }
         candidates.sort_unstable();
         candidates.dedup();
+
+        // Prune candidates above mandatory_min (always infeasible)
+        let upper = candidates.partition_point(|&c| c <= mandatory_min);
+        candidates.truncate(upper);
 
         if candidates.is_empty() {
             return -1;
         }
 
-        let can_achieve = |target: i32| -> bool {
-            // Mandatory edges must all meet target
-            if !mandatory.is_empty() && mandatory_min < target {
-                return false;
-            }
-
-            let mut uf = UnionFind::new(n);
-
-            // Add mandatory edges
-            mandatory.iter().for_each(|&(u, v, _)| {
-                uf.union(u, v);
-            });
-
-            // Add strong optional edges (no upgrade needed)
-            optional
-                .iter()
-                .filter(|&&(_, _, s)| s >= target)
-                .for_each(|&(u, v, _)| {
-                    if uf.find(u) != uf.find(v) {
-                        uf.union(u, v);
-                    }
-                });
-
-            // Add weak optional edges (need upgrade)
-            let upgrades = optional
-                .iter()
-                .filter(|&&(_, _, s)| s < target && 2 * s >= target)
-                .filter(|&&(u, v, _)| {
-                    if uf.find(u) != uf.find(v) {
-                        uf.union(u, v);
-                        true
-                    } else {
-                        false
-                    }
-                })
-                .count() as i32;
-
-            // Check connectivity and budget
-            let root = uf.find(0);
-            (0..n).all(|i| uf.find(i) == root) && upgrades <= k
-        };
-
-        // Binary search for maximum achievable target
-        let (mut lo, mut hi) = (0i32, candidates.len() as i32 - 1);
-        let mut result = -1;
+        // Reusable UF buffers — copy_from_slice instead of allocating each step
+        let mut parent = vec![0usize; n];
+        let mut rank = vec![0u32; n];
+        let mut result = -1i32;
+        let (mut lo, mut hi) = (0usize, candidates.len() - 1);
 
         while lo <= hi {
-            let mid = (lo + hi) / 2;
-            if can_achieve(candidates[mid as usize]) {
-                result = candidates[mid as usize];
+            let mid = lo + (hi - lo) / 2;
+            let target = candidates[mid];
+
+            parent.copy_from_slice(&parent_base);
+            rank.copy_from_slice(&rank_base);
+            let mut comp = base_components;
+
+            // Strong optional edges (s >= target, free)
+            let strong_end = optional.partition_point(|&(_, _, s)| s >= target);
+            for &(u, v, _) in &optional[..strong_end] {
+                let (pu, pv) = (find(&mut parent, u), find(&mut parent, v));
+                if pu != pv {
+                    union_nodes(&mut parent, &mut rank, pu, pv);
+                    comp -= 1;
+                    if comp == 1 {
+                        break;
+                    }
+                }
+            }
+
+            // Weak optional edges (s < target, 2s >= target, cost 1 each)
+            let mut upgrades = 0i32;
+            if comp > 1 {
+                let half = (target + 1) / 2;
+                let weak_end = optional.partition_point(|&(_, _, s)| s >= half);
+                for &(u, v, _) in &optional[strong_end..weak_end] {
+                    let (pu, pv) = (find(&mut parent, u), find(&mut parent, v));
+                    if pu != pv {
+                        union_nodes(&mut parent, &mut rank, pu, pv);
+                        comp -= 1;
+                        upgrades += 1;
+                        if upgrades > k || comp == 1 {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if comp == 1 && upgrades <= k {
+                result = target;
                 lo = mid + 1;
+            } else if mid == 0 {
+                break;
             } else {
                 hi = mid - 1;
             }
@@ -116,39 +128,24 @@ impl Solution {
     }
 }
 
-struct UnionFind {
-    parent: Vec<usize>,
-    rank: Vec<usize>,
+#[inline]
+fn find(parent: &mut [usize], mut x: usize) -> usize {
+    while parent[x] != x {
+        parent[x] = parent[parent[x]];
+        x = parent[x];
+    }
+    x
 }
 
-impl UnionFind {
-    fn new(n: usize) -> Self {
-        Self {
-            parent: (0..n).collect(),
-            rank: vec![0; n],
+#[inline]
+fn union_nodes(parent: &mut [usize], rank: &mut [u32], x: usize, y: usize) {
+    if rank[x] < rank[y] {
+        parent[x] = y;
+    } else {
+        if rank[x] == rank[y] {
+            rank[x] += 1;
         }
-    }
-
-    fn find(&mut self, x: usize) -> usize {
-        if self.parent[x] != x {
-            self.parent[x] = self.find(self.parent[x]);
-        }
-        self.parent[x]
-    }
-
-    fn union(&mut self, x: usize, y: usize) {
-        let (px, py) = (self.find(x), self.find(y));
-        if px == py {
-            return;
-        }
-        if self.rank[px] < self.rank[py] {
-            self.parent[px] = py;
-        } else if self.rank[px] > self.rank[py] {
-            self.parent[py] = px;
-        } else {
-            self.parent[py] = px;
-            self.rank[px] += 1;
-        }
+        parent[y] = x;
     }
 }
 
