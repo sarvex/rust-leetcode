@@ -3,39 +3,43 @@ impl Solution {
     ///
     /// # Intuition
     /// Similar to "product of array except self", use prefix and suffix products.
-    /// Flatten the 2D grid into a linear traversal and accumulate from both ends.
+    /// Flatten the 2D grid into a contiguous suffix array for cache-friendly access,
+    /// then combine with a running prefix in a single forward pass that overwrites
+    /// the grid in place.
     ///
     /// # Approach
-    /// 1. Traverse the grid in reverse, computing suffix products modulo 12345.
-    /// 2. Traverse forward, multiplying each cell's suffix value by the running prefix.
-    /// 3. Both passes use modular arithmetic with `i64` intermediates to avoid overflow.
+    /// 1. Build a flat suffix-product array indexed by linearised position.
+    /// 2. Forward-pass: read the original cell value, overwrite the cell with
+    ///    `prefix * suffix[pos + 1] mod 12345`, then advance the prefix.
+    /// 3. Reuse the input grid as the output to avoid a second `Vec<Vec>` allocation.
     ///
     /// # Complexity
     /// - Time: O(n * m) two passes over the grid
-    /// - Space: O(n * m) for the result matrix
-    pub fn construct_product_matrix(grid: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+    /// - Space: O(n * m) for the flat suffix array (grid reused, no extra matrix)
+    pub fn construct_product_matrix(mut grid: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
         const MOD: i64 = 12345;
         let n = grid.len();
         let m = grid[0].len();
-        let mut result = vec![vec![0i32; m]; n];
+        let total = n * m;
 
-        let mut suf: i64 = 1;
+        let mut suf = vec![1_i64; total + 1];
         for i in (0..n).rev() {
             for j in (0..m).rev() {
-                result[i][j] = suf as i32;
-                suf = suf * grid[i][j] as i64 % MOD;
+                let pos = i * m + j;
+                suf[pos] = suf[pos + 1] * grid[i][j] as i64 % MOD;
             }
         }
 
-        let mut pre: i64 = 1;
+        let mut pre = 1_i64;
         for i in 0..n {
             for j in 0..m {
-                result[i][j] = (result[i][j] as i64 * pre % MOD) as i32;
-                pre = pre * grid[i][j] as i64 % MOD;
+                let val = grid[i][j] as i64;
+                grid[i][j] = (pre * suf[i * m + j + 1] % MOD) as i32;
+                pre = pre * val % MOD;
             }
         }
 
-        result
+        grid
     }
 }
 
@@ -51,9 +55,31 @@ mod tests {
     }
 
     #[test]
+    fn test_modulo_zeros() {
+        let grid = vec![vec![12345], vec![2], vec![1]];
+        let result = Solution::construct_product_matrix(grid);
+        assert_eq!(result, vec![vec![2], vec![0], vec![0]]);
+    }
+
+    #[test]
     fn test_single_element() {
         let grid = vec![vec![12345]];
         let result = Solution::construct_product_matrix(grid);
         assert_eq!(result, vec![vec![1]]);
+    }
+
+    #[test]
+    fn test_single_row() {
+        let grid = vec![vec![1, 2, 3, 4, 5]];
+        let result = Solution::construct_product_matrix(grid);
+        assert_eq!(result, vec![vec![120, 60, 40, 30, 24]]);
+    }
+
+    #[test]
+    fn test_large_values() {
+        let grid = vec![vec![1_000_000_000, 1_000_000_000]];
+        let result = Solution::construct_product_matrix(grid);
+        let expected = (1_000_000_000_i64 % 12345) as i32;
+        assert_eq!(result, vec![vec![expected, expected]]);
     }
 }
