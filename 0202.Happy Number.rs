@@ -16,7 +16,7 @@ impl Solution {
     /// - Time: O(log n) per step, bounded cycle length
     /// - Space: O(log n) for the seen set
     pub fn is_happy(mut n: i32) -> bool {
-        let mut seen = HashSet::new();
+        let mut seen = HashSet::with_capacity(811);
         while n != 1 {
             n = Self::digit_square_sum(n);
             if !seen.insert(n) {

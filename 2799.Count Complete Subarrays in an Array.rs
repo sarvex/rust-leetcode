@@ -21,7 +21,7 @@ impl Solution {
         let n = nums.len();
         let mut ans = 0i32;
         for i in 0..n {
-            let mut seen = HashSet::new();
+            let mut seen = HashSet::with_capacity(n - i);
             for j in i..n {
                 seen.insert(nums[j]);
                 if seen.len() == total {

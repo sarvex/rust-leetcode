@@ -17,7 +17,7 @@ impl Solution {
                 let x = num / 3;
                 vec![x - 1, x, x + 1]
             }
-            _ => Vec::new(),
+            _ => Vec::with_capacity(0),
         }
     }
 }

@@ -17,7 +17,7 @@ impl Solution {
     /// - Space: O(1)
     pub fn min_speed_on_time(dist: Vec<i32>, hour: f64) -> i32 {
         let n = dist.len();
-        if n as f64 > hour.ceil() {
+        if (n - 1) as f64 >= hour {
             return -1;
         }
 
@@ -27,8 +27,11 @@ impl Solution {
                 .iter()
                 .enumerate()
                 .map(|(i, d)| {
-                    let t = *d as f64 / speed as f64;
-                    if i == n - 1 { t } else { t.ceil() }
+                    if i == n - 1 {
+                        *d as f64 / speed as f64
+                    } else {
+                        ((*d + speed - 1) / speed) as f64
+                    }
                 })
                 .sum();
             total <= hour
@@ -44,7 +47,11 @@ impl Solution {
             }
         }
 
-        if lo > MAX_SPEED { -1 } else { lo }
+        if lo > MAX_SPEED {
+            -1
+        } else {
+            lo
+        }
     }
 }
 

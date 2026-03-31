@@ -78,7 +78,7 @@ impl Solution {
             if sz >= 2 {
                 Vec::with_capacity(sz as usize)
             } else {
-                Vec::new()
+                Vec::with_capacity(0)
             }
         });
         group

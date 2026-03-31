@@ -26,7 +26,7 @@ impl Solution {
         if s.len() <= 2 {
             return s;
         }
-        let mut parts: Vec<String> = Vec::new();
+        let mut parts: Vec<String> = Vec::with_capacity(s.len() / 2);
         let bytes = s.as_bytes();
         let mut balance = 0u32;
         let mut start = 0usize;
@@ -48,7 +48,7 @@ impl Solution {
                 start = i + 1;
             }
         }
-        parts.sort_by(|a, b| b.cmp(a));
+        parts.sort_unstable_by(|a, b| b.cmp(a));
         parts.join("")
     }
 }

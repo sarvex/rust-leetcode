@@ -27,7 +27,7 @@ impl Solution {
             }
         }
 
-        let mut answers = Vec::new();
+        let mut answers = Vec::with_capacity(queries.len());
         for query in queries {
             if query.len() != 3 {
                 continue;

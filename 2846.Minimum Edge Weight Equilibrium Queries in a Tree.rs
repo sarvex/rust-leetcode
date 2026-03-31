@@ -77,7 +77,7 @@ impl Solution {
     ) -> Vec<i32> {
         let node_count = n as usize;
         if node_count == 0 {
-            return Vec::new();
+            return Vec::with_capacity(0);
         }
 
         let mut degrees = vec![0_usize; node_count];

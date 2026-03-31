@@ -18,7 +18,7 @@ impl Solution {
         }
         let negative = num < 0;
         let mut n = num.abs();
-        let mut digits = Vec::new();
+        let mut digits = Vec::with_capacity(12);
         while n > 0 {
             digits.push((b'0' + (n % 7) as u8) as char);
             n /= 7;

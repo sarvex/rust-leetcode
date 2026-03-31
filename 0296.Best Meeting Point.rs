@@ -15,8 +15,8 @@ impl Solution {
     /// - Space: O(k)
     pub fn min_total_distance(grid: Vec<Vec<i32>>) -> i32 {
         let (m, n) = (grid.len(), grid[0].len());
-        let mut rows = Vec::new();
-        let mut cols = Vec::new();
+        let mut rows = Vec::with_capacity(m * n);
+        let mut cols = Vec::with_capacity(m * n);
         for i in 0..m {
             for j in 0..n {
                 if grid[i][j] == 1 {

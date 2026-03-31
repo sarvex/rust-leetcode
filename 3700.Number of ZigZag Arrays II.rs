@@ -36,11 +36,9 @@ impl Solution {
             })
             .collect();
 
-        (0..half_size).rev().for_each(|row_idx| {
-            let mut mirrored_row = matrix[row_idx].clone();
-            mirrored_row.reverse();
-            matrix.push(mirrored_row);
-        });
+        (0..half_size)
+            .rev()
+            .for_each(|row_idx| matrix.push(matrix[row_idx].iter().rev().copied().collect()));
 
         matrix
     }

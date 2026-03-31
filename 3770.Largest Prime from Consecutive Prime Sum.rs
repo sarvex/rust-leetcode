@@ -33,7 +33,7 @@ impl Solution {
     fn build_sprime_ans() -> Vec<i32> {
         let mut is_prime = [true; MX + 1];
         is_prime[..2].fill(false);
-        let mut primes = Vec::new();
+        let mut primes = Vec::with_capacity(MX);
         for i in 2..=MX {
             if !is_prime[i] {
                 continue;

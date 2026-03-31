@@ -40,7 +40,7 @@ impl Solution {
 
         let n = vals.len();
         let mut result = vec![0; n];
-        let mut stack: Vec<i32> = Vec::new();
+        let mut stack: Vec<i32> = Vec::with_capacity(n);
 
         for i in (0..n).rev() {
             while stack.last().is_some_and(|&top| top <= vals[i]) {

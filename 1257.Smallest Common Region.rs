@@ -22,7 +22,11 @@ impl Solution {
         region1: String,
         region2: String,
     ) -> String {
-        let mut parent: HashMap<String, String> = HashMap::new();
+        let parent_capacity = regions
+            .iter()
+            .map(|r| r.len().saturating_sub(1))
+            .sum::<usize>();
+        let mut parent: HashMap<String, String> = HashMap::with_capacity(parent_capacity);
 
         for r in &regions {
             for child in &r[1..] {
@@ -30,7 +34,7 @@ impl Solution {
             }
         }
 
-        let mut ancestors: HashSet<String> = HashSet::new();
+        let mut ancestors: HashSet<String> = HashSet::with_capacity(parent.len() + 1);
         let mut current = Some(region1);
         while let Some(region) = current {
             ancestors.insert(region.clone());

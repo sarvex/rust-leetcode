@@ -17,7 +17,7 @@ impl Solution {
     /// - Space: O(log n) — sorting stack (excluding output)
     pub fn merge(mut intervals: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
         intervals.sort_unstable_by_key(|interval| interval[0]);
-        let mut merged: Vec<Vec<i32>> = Vec::new();
+        let mut merged: Vec<Vec<i32>> = Vec::with_capacity(intervals.len());
 
         for interval in intervals {
             if let Some(last) = merged.last_mut() {

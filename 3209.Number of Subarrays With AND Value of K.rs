@@ -16,7 +16,7 @@ impl Solution {
     /// - Space: O(b)
     pub fn count_subarrays(nums: Vec<i32>, k: i32) -> i64 {
         let mut result = 0i64;
-        let mut prev: Vec<(i32, i64)> = Vec::new();
+        let mut prev: Vec<(i32, i64)> = Vec::with_capacity(nums.len().min(32));
 
         for &num in &nums {
             let mut next: Vec<(i32, i64)> = Vec::with_capacity(prev.len() + 1);

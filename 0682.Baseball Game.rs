@@ -14,7 +14,7 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn cal_points(operations: Vec<String>) -> i32 {
-        let mut stack: Vec<i32> = Vec::new();
+        let mut stack: Vec<i32> = Vec::with_capacity(operations.len());
         for op in &operations {
             match op.as_str() {
                 "+" => {

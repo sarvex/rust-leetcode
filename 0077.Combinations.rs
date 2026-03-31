@@ -15,7 +15,7 @@ impl Solution {
     /// - Time: O(C(n,k) × k) — generating all combinations
     /// - Space: O(k) — recursion depth and current path
     pub fn combine(n: i32, k: i32) -> Vec<Vec<i32>> {
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(n as usize);
 
         fn dfs(start: i32, n: i32, k: usize, path: &mut Vec<i32>, result: &mut Vec<Vec<i32>>) {
             if path.len() == k {
@@ -31,7 +31,13 @@ impl Solution {
             dfs(start + 1, n, k, path, result);
         }
 
-        dfs(1, n, k as usize, &mut Vec::new(), &mut result);
+        dfs(
+            1,
+            n,
+            k as usize,
+            &mut Vec::with_capacity(k as usize),
+            &mut result,
+        );
         result
     }
 }
@@ -43,7 +49,7 @@ mod tests {
     #[test]
     fn four_choose_two() {
         let mut result = Solution::combine(4, 2);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(
             result,
             vec![
@@ -65,7 +71,7 @@ mod tests {
     #[test]
     fn k_equals_one() {
         let mut result = Solution::combine(3, 1);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![vec![1], vec![2], vec![3]]);
     }
 }

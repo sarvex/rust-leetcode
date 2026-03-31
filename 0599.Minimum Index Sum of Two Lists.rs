@@ -22,18 +22,19 @@ impl Solution {
             .map(|(i, s)| (s.as_str(), i))
             .collect();
 
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(list1.len().min(list2.len()));
         let mut min_sum = usize::MAX;
-        for (i, s) in list1.iter().enumerate() {
+        for (i, s) in list1.into_iter().enumerate() {
             if let Some(&j) = index_map.get(s.as_str()) {
                 let sum = i + j;
                 match sum.cmp(&min_sum) {
                     std::cmp::Ordering::Less => {
                         min_sum = sum;
-                        result = vec![s.clone()];
+                        result.clear();
+                        result.push(s);
                     }
                     std::cmp::Ordering::Equal => {
-                        result.push(s.clone());
+                        result.push(s);
                     }
                     _ => {}
                 }

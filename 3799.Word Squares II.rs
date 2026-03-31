@@ -23,7 +23,7 @@ impl Solution {
         let c0: Vec<u8> = words.iter().map(|w| w.as_bytes()[0]).collect();
         let c3: Vec<u8> = words.iter().map(|w| w.as_bytes()[3]).collect();
 
-        let mut res = Vec::new();
+        let mut res = Vec::with_capacity(n);
 
         for itop in 0..n {
             let (t0, t3) = (c0[itop], c3[itop]);

@@ -42,7 +42,7 @@ impl Solution {
         let mut changed = true;
         while changed {
             changed = false;
-            let mut seen = std::collections::HashMap::new();
+            let mut seen = std::collections::HashMap::with_capacity(vals.len() + 1);
             seen.insert(0, 0);
             let mut sum = 0;
 

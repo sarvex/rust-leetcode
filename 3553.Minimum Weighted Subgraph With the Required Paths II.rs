@@ -112,7 +112,8 @@ impl Solution {
             .collect();
 
         // Build sparse table for O(1) LCA queries via RMQ
-        let sparse_table = SparseTable::new(euler_context.euler_path.clone(), |a, b| a.min(b));
+        let euler_path = std::mem::take(&mut euler_context.euler_path);
+        let sparse_table = SparseTable::new(euler_path, |a, b| a.min(b));
 
         queries
             .iter()

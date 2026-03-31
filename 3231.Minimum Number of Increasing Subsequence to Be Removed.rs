@@ -18,7 +18,7 @@ impl Solution {
     /// - Time: O(n log n)
     /// - Space: O(n)
     pub fn min_operations(nums: Vec<i32>) -> i32 {
-        let mut tails = Vec::new();
+        let mut tails = Vec::with_capacity(nums.len());
 
         for &x in &nums {
             let pos = tails.partition_point(|&t| t >= x);

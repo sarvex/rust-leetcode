@@ -26,7 +26,7 @@ impl Solution {
         pairs.sort_unstable();
 
         let mut best = vec![pairs[0].0, *&pairs.last().unwrap().0];
-        let mut count: HashMap<usize, usize> = HashMap::new();
+        let mut count: HashMap<usize, usize> = HashMap::with_capacity(k);
         let mut covered = 0;
         let mut left = 0;
 

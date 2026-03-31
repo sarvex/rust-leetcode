@@ -26,11 +26,11 @@ impl Solution {
         }
 
         let mut best = String::new();
-        for word in &dictionary {
+        for word in dictionary {
             if is_subseq(word.as_bytes(), s_bytes)
-                && (word.len() > best.len() || (word.len() == best.len() && *word < best))
+                && (word.len() > best.len() || (word.len() == best.len() && word < best))
             {
-                best = word.clone();
+                best = word;
             }
         }
         best

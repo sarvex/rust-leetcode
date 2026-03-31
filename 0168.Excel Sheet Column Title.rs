@@ -15,7 +15,14 @@ impl Solution {
     /// - Time: O(log_{26} n)
     /// - Space: O(log_{26} n) for the result string
     pub fn convert_to_title(mut column_number: i32) -> String {
-        let mut result = Vec::new();
+        let mut title_len = 0;
+        let mut remaining = column_number;
+        while remaining > 0 {
+            title_len += 1;
+            remaining = (remaining - 1) / 26;
+        }
+
+        let mut result = Vec::with_capacity(title_len);
         while column_number > 0 {
             column_number -= 1;
             result.push((b'A' + (column_number % 26) as u8) as char);

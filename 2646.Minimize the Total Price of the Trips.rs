@@ -35,7 +35,7 @@ impl Solution {
         for trip in trips {
             let start = trip[0] as usize;
             let end = trip[1] as usize;
-            let mut path = Vec::new();
+            let mut path = Vec::with_capacity(node_count);
             Self::collect_path(start, None, end, &adjacency, &mut path);
             for node in path {
                 usage_counts[node] += 1;

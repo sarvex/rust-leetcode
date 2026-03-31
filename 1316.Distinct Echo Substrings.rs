@@ -34,7 +34,7 @@ impl Solution {
             hash[r].wrapping_sub(hash[l - 1].wrapping_mul(power[r - l + 1]))
         };
 
-        let mut seen = HashSet::new();
+        let mut seen = HashSet::with_capacity(n);
         for i in 0..n - 1 {
             for j in i + 1..n {
                 if (j - i) % 2 != 0 {

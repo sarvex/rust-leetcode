@@ -48,7 +48,8 @@ impl Solution {
         }
 
         // Binary lifting: jump[k][i] = position after 2^k maximum jumps from position i
-        let log_n = (n.max(1) as f64).log2().ceil() as usize + 1;
+        let m = n.max(1);
+        let log_n = (usize::BITS as usize - (m - 1).leading_zeros() as usize) + 1;
         let mut jump = vec![vec![0usize; n]; log_n];
 
         // Base case: jump[0][i] = farthest reachable in one hop

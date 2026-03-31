@@ -30,9 +30,9 @@ mod tests {
     #[test]
     fn test_two_closest() {
         let mut result = Solution::k_closest(vec![vec![3, 3], vec![5, -1], vec![-2, 4]], 2);
-        result.sort();
+        result.sort_unstable();
         let mut expected = vec![vec![-2, 4], vec![3, 3]];
-        expected.sort();
+        expected.sort_unstable();
         assert_eq!(result, expected);
     }
 }

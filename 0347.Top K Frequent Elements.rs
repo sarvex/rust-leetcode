@@ -41,7 +41,7 @@ mod tests {
     #[test]
     fn top_two() {
         let mut result = Solution::top_k_frequent(vec![1, 1, 1, 2, 2, 3], 2);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![1, 2]);
     }
 
@@ -53,7 +53,7 @@ mod tests {
     #[test]
     fn all_same_frequency() {
         let mut result = Solution::top_k_frequent(vec![1, 2, 3, 4], 2);
-        result.sort();
+        result.sort_unstable();
         // Any two elements are valid since all have frequency 1
         assert_eq!(result.len(), 2);
     }
@@ -61,7 +61,7 @@ mod tests {
     #[test]
     fn k_equals_unique_count() {
         let mut result = Solution::top_k_frequent(vec![1, 2, 2, 3, 3, 3], 3);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![1, 2, 3]);
     }
 
@@ -74,7 +74,7 @@ mod tests {
     #[test]
     fn large_k() {
         let mut result = Solution::top_k_frequent(vec![1, 1, 2, 2, 3, 3], 3);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![1, 2, 3]);
     }
 }

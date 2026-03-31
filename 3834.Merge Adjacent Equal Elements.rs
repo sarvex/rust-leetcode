@@ -13,7 +13,7 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn merge_adjacent(nums: Vec<i32>) -> Vec<i64> {
-        let mut st = Vec::new();
+        let mut st = Vec::with_capacity(nums.len());
         for x in nums {
             let mut v = x as i64;
             while let Some(&last) = st.last() {

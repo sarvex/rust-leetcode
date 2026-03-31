@@ -61,16 +61,25 @@ impl Solution {
             trie.insert(word);
         }
 
-        let mut result = String::new();
-        for word in &words {
-            if (word.len() > result.len() || (word.len() == result.len() && *word < result))
-                && trie.all_prefixes_exist(word)
-            {
-                result = word.clone();
+        let mut best_idx: Option<usize> = None;
+        for (idx, word) in words.iter().enumerate() {
+            if !trie.all_prefixes_exist(word) {
+                continue;
+            }
+
+            match best_idx {
+                None => best_idx = Some(idx),
+                Some(best) => {
+                    if word.len() > words[best].len()
+                        || (word.len() == words[best].len() && word < &words[best])
+                    {
+                        best_idx = Some(idx);
+                    }
+                }
             }
         }
 
-        result
+        best_idx.map(|i| words[i].clone()).unwrap_or_default()
     }
 }
 

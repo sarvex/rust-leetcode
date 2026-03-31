@@ -17,10 +17,11 @@ impl Solution {
     /// - Space: O(n) for the hash map
     pub fn find_repeated_dna_sequences(s: String) -> Vec<String> {
         if s.len() < 10 {
-            return Vec::new();
+            return Vec::with_capacity(0);
         }
-        let mut counts = HashMap::new();
-        let mut result = Vec::new();
+        let windows = s.len() - 9;
+        let mut counts = HashMap::with_capacity(windows);
+        let mut result = Vec::with_capacity(windows);
         for i in 0..=s.len() - 10 {
             let seq = &s[i..i + 10];
             let count = counts.entry(seq).or_insert(0);
@@ -41,7 +42,7 @@ mod tests {
     fn multiple_repeats() {
         let mut result =
             Solution::find_repeated_dna_sequences("AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT".to_string());
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec!["AAAAACCCCC", "CCCCCAAAAA"]);
     }
 

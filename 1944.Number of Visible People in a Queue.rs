@@ -17,7 +17,7 @@ impl Solution {
     pub fn can_see_persons_count(heights: Vec<i32>) -> Vec<i32> {
         let n = heights.len();
         let mut result = vec![0; n];
-        let mut stack: Vec<usize> = Vec::new();
+        let mut stack: Vec<usize> = Vec::with_capacity(n);
 
         for i in (0..n).rev() {
             while let Some(&top) = stack.last() {

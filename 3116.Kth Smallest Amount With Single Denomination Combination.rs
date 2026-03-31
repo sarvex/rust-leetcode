@@ -54,7 +54,7 @@ impl Solution {
     fn build_inclusion_list(coins: &[i64], limit: i64) -> Vec<(i64, i64)> {
         let n = coins.len();
         let subset_count = 1usize << n;
-        let mut list = Vec::new();
+        let mut list = Vec::with_capacity(subset_count - 1);
 
         for mask in 1..subset_count {
             let mut lcm = 1i64;

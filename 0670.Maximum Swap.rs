@@ -16,7 +16,7 @@ impl Solution {
     /// - Time: O(d) where d = number of digits
     /// - Space: O(d)
     pub fn maximum_swap(num: i32) -> i32 {
-        let mut digits = Vec::new();
+        let mut digits = Vec::with_capacity(10);
         let mut n = num;
         while n > 0 {
             digits.push(n % 10);

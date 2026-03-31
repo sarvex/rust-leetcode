@@ -181,7 +181,7 @@ impl Solution {
     /// - Space: O(n)
     pub fn number_of_alternating_groups(colors: Vec<i32>, queries: Vec<Vec<i32>>) -> Vec<i32> {
         let mut state = AlternatingGroups::new(colors);
-        let mut results = Vec::new();
+        let mut results = Vec::with_capacity(queries.len());
         for query in queries {
             match query[0] {
                 1 => {

@@ -36,7 +36,7 @@ mod tests {
     #[test]
     fn basic_matching() {
         let mut result = Solution::string_matching(s(&["mass", "as", "hero", "superhero"]));
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, s(&["as", "hero"]));
     }
 
@@ -51,7 +51,7 @@ mod tests {
     #[test]
     fn nested_substrings() {
         let mut result = Solution::string_matching(s(&["leetcode", "et", "code"]));
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, s(&["code", "et"]));
     }
 }

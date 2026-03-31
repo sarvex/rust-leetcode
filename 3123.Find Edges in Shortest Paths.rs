@@ -65,7 +65,7 @@ impl Solution {
             .collect();
 
         if node_count == 0 {
-            return Vec::new();
+            return Vec::with_capacity(0);
         }
 
         let dist_from_start = dijkstra(0, &adjacency);

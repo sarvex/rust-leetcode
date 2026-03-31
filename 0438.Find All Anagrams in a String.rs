@@ -24,7 +24,7 @@ impl Solution {
             cnt[(p[i] - b'a') as usize] += 1;
             cnt[(s[i] - b'a') as usize] -= 1;
         }
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(m - n + 1);
         if cnt.iter().all(|&v| v == 0) {
             result.push(0);
         }

@@ -18,10 +18,10 @@ impl Solution {
     pub fn dest_city(paths: Vec<Vec<String>>) -> String {
         let sources: HashSet<&str> = paths.iter().map(|p| p[0].as_str()).collect();
         paths
-            .iter()
+            .into_iter()
             .find(|p| !sources.contains(p[1].as_str()))
-            .unwrap()[1]
-            .clone()
+            .and_then(|p| p.into_iter().nth(1))
+            .unwrap_or_default()
     }
 }
 

@@ -19,7 +19,7 @@ impl Solution {
     pub fn num_different_integers(word: String) -> i32 {
         let bytes = word.as_bytes();
         let n = bytes.len();
-        let mut set = HashSet::new();
+        let mut set = HashSet::with_capacity(n);
         let mut i = 0;
 
         while i < n {

@@ -18,24 +18,28 @@ impl Solution {
     pub fn insert(intervals: Vec<Vec<i32>>, new_interval: Vec<i32>) -> Vec<Vec<i32>> {
         let mut result = Vec::with_capacity(intervals.len() + 1);
         let (mut start, mut end) = (new_interval[0], new_interval[1]);
-        let mut i = 0;
+        let mut iter = intervals.into_iter().peekable();
 
-        while i < intervals.len() && intervals[i][1] < start {
-            result.push(intervals[i].clone());
-            i += 1;
+        while let Some(interval) = iter.peek() {
+            if interval[1] < start {
+                result.push(iter.next().expect("peeked interval must exist"));
+            } else {
+                break;
+            }
         }
 
-        while i < intervals.len() && intervals[i][0] <= end {
-            start = start.min(intervals[i][0]);
-            end = end.max(intervals[i][1]);
-            i += 1;
+        while let Some(interval) = iter.peek() {
+            if interval[0] <= end {
+                start = start.min(interval[0]);
+                end = end.max(interval[1]);
+                let _ = iter.next();
+            } else {
+                break;
+            }
         }
         result.push(vec![start, end]);
 
-        while i < intervals.len() {
-            result.push(intervals[i].clone());
-            i += 1;
-        }
+        result.extend(iter);
 
         result
     }

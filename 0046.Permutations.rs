@@ -16,7 +16,7 @@ impl Solution {
     /// - Space: O(n) — recursion depth and auxiliary arrays
     pub fn permute(nums: Vec<i32>) -> Vec<Vec<i32>> {
         let n = nums.len();
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(n);
         let mut path = vec![0; n];
         let mut visited = vec![false; n];
 
@@ -53,7 +53,7 @@ mod tests {
     #[test]
     fn three_elements() {
         let mut result = Solution::permute(vec![1, 2, 3]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(
             result,
             vec![
@@ -75,7 +75,7 @@ mod tests {
     #[test]
     fn two_elements() {
         let mut result = Solution::permute(vec![0, 1]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![vec![0, 1], vec![1, 0]]);
     }
 }

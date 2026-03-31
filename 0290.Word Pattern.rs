@@ -22,8 +22,8 @@ impl Solution {
         if chars.len() != words.len() {
             return false;
         }
-        let mut char_map = HashMap::new();
-        let mut word_map = HashMap::new();
+        let mut char_map = HashMap::with_capacity(words.len());
+        let mut word_map = HashMap::with_capacity(words.len());
         for (i, (&c, &w)) in chars.iter().zip(words.iter()).enumerate() {
             let char_idx = *char_map.entry(c).or_insert(i);
             let word_idx = *word_map.entry(w).or_insert(i);

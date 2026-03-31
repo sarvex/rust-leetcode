@@ -38,7 +38,7 @@ mod tests {
             "this apple is sweet".to_string(),
             "this apple is sour".to_string(),
         );
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec!["sour", "sweet"]);
     }
 

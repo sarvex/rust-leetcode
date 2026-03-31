@@ -21,7 +21,7 @@ impl Solution {
 
         let bfs = |start: i32, end: i32| -> i32 {
             let mut queue = VecDeque::new();
-            let mut visited = HashSet::new();
+            let mut visited = HashSet::with_capacity((rows * cols) as usize);
             queue.push_back(start);
             visited.insert(start);
             let mut steps = 0;
@@ -51,7 +51,7 @@ impl Solution {
             -1
         };
 
-        let mut trees: Vec<(i32, i32)> = Vec::new();
+        let mut trees: Vec<(i32, i32)> = Vec::with_capacity((rows * cols) as usize);
         for i in 0..rows {
             for j in 0..cols {
                 let h = forest[i as usize][j as usize];

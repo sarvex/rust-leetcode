@@ -36,9 +36,10 @@ impl Solution {
 
         let mod_inverse = |a: i64| mod_pow(a, MOD - 2);
 
-        let threshold = ((n as f64).sqrt() as usize).max(1);
+        let threshold = Self::isqrt(n).max(1);
 
-        let mut small_k_queries: HashMap<(usize, usize), Vec<(usize, usize, i64)>> = HashMap::new();
+        let mut small_k_queries: HashMap<(usize, usize), Vec<(usize, usize, i64)>> =
+            HashMap::with_capacity(queries.len());
         let mut mult = vec![1i64; n];
 
         queries.iter().for_each(|query| {
@@ -92,6 +93,20 @@ impl Solution {
         (0..n)
             .map(|i| (nums[i] as i64) * mult[i] % MOD)
             .fold(0i64, |acc, x| acc ^ x) as i32
+    }
+
+    #[inline]
+    fn isqrt(n: usize) -> usize {
+        if n == 0 {
+            return 0;
+        }
+        let mut x = n;
+        let mut y = (x + n / x) / 2;
+        while y < x {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        x
     }
 }
 

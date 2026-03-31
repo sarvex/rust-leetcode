@@ -15,19 +15,20 @@ impl Solution {
     /// - Space: O(1) excluding output
     pub fn summary_ranges(nums: Vec<i32>) -> Vec<String> {
         if nums.is_empty() {
-            return Vec::new();
+            return Vec::with_capacity(0);
         }
 
-        let (mut result, start) =
-            nums.windows(2)
-                .fold((Vec::new(), nums[0]), |(mut result, start), w| {
-                    if w[1] != w[0] + 1 {
-                        Self::push_range(&mut result, start, w[0]);
-                        (result, w[1])
-                    } else {
-                        (result, start)
-                    }
-                });
+        let (mut result, start) = nums.windows(2).fold(
+            (Vec::with_capacity(nums.len()), nums[0]),
+            |(mut result, start), w| {
+                if w[1] != w[0] + 1 {
+                    Self::push_range(&mut result, start, w[0]);
+                    (result, w[1])
+                } else {
+                    (result, start)
+                }
+            },
+        );
         Self::push_range(&mut result, start, *nums.last().unwrap());
         result
     }

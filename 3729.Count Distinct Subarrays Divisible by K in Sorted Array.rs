@@ -33,7 +33,7 @@ impl Solution {
 
         // Group consecutive identical elements into chunks: (value % k, count)
         let chunks: Vec<(usize, usize)> = {
-            let mut result = Vec::new();
+            let mut result = Vec::with_capacity(nums.len());
             let mut i = 0;
             while i < nums.len() {
                 let x = (nums[i] as usize) % k;
@@ -65,12 +65,12 @@ impl Solution {
     }
 
     fn solve_with_map(nums: &[i32], k: i32) -> i64 {
-        let mut sums: HashMap<i32, i64> = HashMap::new();
+        let mut sums: HashMap<i32, i64> = HashMap::with_capacity(nums.len());
         sums.insert(0, 1);
 
         // Group consecutive identical elements into chunks: (value % k, count)
         let chunks: Vec<(i32, usize)> = {
-            let mut result = Vec::new();
+            let mut result = Vec::with_capacity(nums.len());
             let mut i = 0;
             while i < nums.len() {
                 let x = ((nums[i] % k) + k) % k;

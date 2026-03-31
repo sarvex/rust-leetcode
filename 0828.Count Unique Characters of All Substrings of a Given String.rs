@@ -29,11 +29,16 @@ impl Solution {
         positions
             .iter()
             .map(|pos| {
-                let mut v = pos.clone();
-                v.push(n as i32);
-                (1..v.len() - 1)
-                    .map(|i| (v[i] - v[i - 1]) as i64 * (v[i + 1] - v[i]) as i64)
-                    .sum::<i64>()
+                let mut iter = pos.iter().copied().chain(std::iter::once(n as i32));
+                let mut prev = iter.next().unwrap_or(-1);
+                let mut curr = iter.next().unwrap_or(n as i32);
+                iter.map(|next| {
+                    let contribution = (curr - prev) as i64 * (next - curr) as i64;
+                    prev = curr;
+                    curr = next;
+                    contribution
+                })
+                .sum::<i64>()
             })
             .sum::<i64>() as i32
     }

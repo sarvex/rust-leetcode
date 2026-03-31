@@ -18,7 +18,7 @@ impl Solution {
     /// - Space: O(n) for the hash map
     pub fn min_operations(nums: Vec<i32>, x: i32) -> i32 {
         let target = nums.iter().sum::<i32>() - x;
-        let mut first_seen: HashMap<i32, i32> = HashMap::new();
+        let mut first_seen: HashMap<i32, i32> = HashMap::with_capacity(nums.len() + 1);
         first_seen.insert(0, -1);
 
         let mut max_len = -1;

@@ -16,7 +16,7 @@ impl Solution {
     /// - Time: O(n * m) where n is word count and m is word length
     /// - Space: O(n * m) for storing difference arrays
     pub fn odd_string(words: Vec<String>) -> String {
-        let mut groups: HashMap<Vec<i8>, (usize, usize)> = HashMap::new();
+        let mut groups: HashMap<Vec<i8>, (usize, usize)> = HashMap::with_capacity(words.len());
         for (i, word) in words.iter().enumerate() {
             let diff: Vec<i8> = word
                 .as_bytes()
@@ -30,7 +30,7 @@ impl Solution {
         groups
             .into_values()
             .find(|&(count, _)| count == 1)
-            .map(|(_, idx)| words[idx].clone())
+            .and_then(|(_, idx)| words.into_iter().nth(idx))
             .unwrap_or_default()
     }
 }

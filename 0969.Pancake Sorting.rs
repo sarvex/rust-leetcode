@@ -13,7 +13,7 @@ impl Solution {
     /// - Time: O(n^2) — n iterations with O(n) search each
     /// - Space: O(n) for the flip indices
     pub fn pancake_sort(mut arr: Vec<i32>) -> Vec<i32> {
-        let mut flips = Vec::new();
+        let mut flips = Vec::with_capacity(arr.len().saturating_mul(2));
         for n in (1..arr.len()).rev() {
             let max_idx = (0..=n).max_by_key(|&i| arr[i]).unwrap();
             if max_idx != n {

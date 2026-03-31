@@ -17,7 +17,7 @@ impl Solution {
     /// - Time: O(n²)
     /// - Space: O(n²)
     pub fn tuple_same_product(nums: Vec<i32>) -> i32 {
-        let mut cnt: HashMap<i32, i32> = HashMap::new();
+        let mut cnt: HashMap<i32, i32> = HashMap::with_capacity(nums.len());
         for i in 1..nums.len() {
             for j in 0..i {
                 *cnt.entry(nums[i] * nums[j]).or_insert(0) += 1;

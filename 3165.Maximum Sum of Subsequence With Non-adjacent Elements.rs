@@ -53,7 +53,7 @@ impl SegTree {
     fn new(nums: &[i32]) -> Self {
         let first_level: Vec<Node> = nums.iter().map(|&num| Node::leaf(num as i64)).collect();
 
-        let mut levels = Vec::new();
+        let mut levels = Vec::with_capacity(first_level.len().max(1).ilog2() as usize + 1);
         levels.push(first_level);
 
         while levels.last().unwrap().len() > 1 {

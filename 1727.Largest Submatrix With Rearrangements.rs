@@ -21,6 +21,7 @@ impl Solution {
         let m = matrix.len();
         let n = matrix[0].len();
         let mut heights = vec![0i32; n];
+        let mut sorted = vec![0i32; n];
         let mut result = 0;
 
         for i in 0..m {
@@ -28,7 +29,7 @@ impl Solution {
                 heights[j] = if matrix[i][j] == 1 { heights[j] + 1 } else { 0 };
             }
 
-            let mut sorted = heights.clone();
+            sorted.copy_from_slice(&heights);
             sorted.sort_unstable_by(|a, b| b.cmp(a));
 
             for (j, &h) in sorted.iter().enumerate() {

@@ -21,13 +21,13 @@ impl RangeFreqQuery {
     /// - Query: O(log n) per call
     /// - Space: O(n)
     fn new(arr: Vec<i32>) -> Self {
-        let indices = arr
-            .iter()
-            .enumerate()
-            .fold(HashMap::new(), |mut acc, (i, &val)| {
-                acc.entry(val).or_insert_with(Vec::new).push(i);
-                acc
-            });
+        let indices =
+            arr.iter()
+                .enumerate()
+                .fold(HashMap::with_capacity(arr.len()), |mut acc, (i, &val)| {
+                    acc.entry(val).or_insert_with(Vec::new).push(i);
+                    acc
+                });
         Self { indices }
     }
 

@@ -26,7 +26,7 @@ impl Solution {
                 (digits, num)
             })
             .collect();
-        entries.sort_by_key(|(digits, _)| digits.len());
+        entries.sort_unstable_by_key(|(digits, _)| digits.len());
 
         let mut seen: HashMap<i32, i32> = HashMap::with_capacity(entries.len());
         let mut total: i64 = 0;
@@ -46,7 +46,7 @@ impl Solution {
 }
 
 fn digits(mut num: i32) -> Vec<u8> {
-    let mut rev_digits = Vec::new();
+    let mut rev_digits = Vec::with_capacity(10);
     while num > 0 {
         rev_digits.push((num % 10) as u8);
         num /= 10;

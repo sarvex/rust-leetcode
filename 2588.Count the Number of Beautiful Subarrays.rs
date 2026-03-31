@@ -16,7 +16,7 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn beautiful_subarrays(nums: Vec<i32>) -> i64 {
-        let mut cnt: HashMap<i32, i64> = HashMap::new();
+        let mut cnt: HashMap<i32, i64> = HashMap::with_capacity(nums.len() + 1);
         cnt.insert(0, 1);
         let mut ans: i64 = 0;
         let mut mask = 0;

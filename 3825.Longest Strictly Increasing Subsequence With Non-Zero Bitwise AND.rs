@@ -15,7 +15,8 @@ impl Solution {
     /// - Space: O(n)
     pub fn longest_subsequence(nums: Vec<i32>) -> i32 {
         const MAX_BITS: usize = 30; // 10^9 < 2^30
-        let mut tails: [Vec<i32>; MAX_BITS] = std::array::from_fn(|_| Vec::new());
+        let mut tails: [Vec<i32>; MAX_BITS] =
+            std::array::from_fn(|_| Vec::with_capacity(nums.len()));
 
         for &value in &nums {
             let v = value as u32;

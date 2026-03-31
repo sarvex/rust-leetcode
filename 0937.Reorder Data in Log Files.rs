@@ -16,12 +16,12 @@ impl Solution {
     /// - Time: O(n * L * log n) where L is max log length
     /// - Space: O(L) for comparisons
     pub fn reorder_log_files(mut logs: Vec<String>) -> Vec<String> {
-        logs.sort_by(|a, b| {
+        logs.sort_unstable_by(|a, b| {
             let (id_a, body_a) = a.split_once(' ').unwrap();
             let (id_b, body_b) = b.split_once(' ').unwrap();
             let is_letter_a = body_a.as_bytes()[0].is_ascii_alphabetic();
             let is_letter_b = body_b.as_bytes()[0].is_ascii_alphabetic();
-
+        
             match (is_letter_a, is_letter_b) {
                 (true, true) => body_a.cmp(body_b).then_with(|| id_a.cmp(id_b)),
                 (true, false) => Ordering::Less,

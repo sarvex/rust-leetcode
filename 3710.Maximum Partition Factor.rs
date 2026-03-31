@@ -23,7 +23,7 @@ impl Solution {
 
         // Precompute all pairwise Manhattan distances
         let mut dist_matrix = vec![vec![0i64; n]; n];
-        let mut distances: Vec<i64> = Vec::new();
+        let mut distances: Vec<i64> = Vec::with_capacity(n.saturating_mul(n.saturating_sub(1)) / 2);
 
         (0..n).for_each(|i| {
             (i + 1..n).for_each(|j| {

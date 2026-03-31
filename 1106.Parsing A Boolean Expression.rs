@@ -15,7 +15,7 @@ impl Solution {
     /// - Space: O(n) recursion depth
     pub fn parse_bool_expr(expression: String) -> bool {
         fn parse(expr: &[u8], pos: &mut usize) -> Vec<bool> {
-            let mut result = Vec::new();
+            let mut result = Vec::with_capacity(expr.len());
             while *pos < expr.len() {
                 match expr[*pos] {
                     b')' => {

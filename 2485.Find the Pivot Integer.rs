@@ -13,8 +13,27 @@ impl Solution {
     /// - Space: O(1)
     pub fn pivot_integer(n: i32) -> i32 {
         let total = n * (n + 1) / 2;
-        let x = (total as f64).sqrt() as i32;
-        if x * x == total { x } else { -1 }
+        let x = Self::isqrt(total as u32) as i32;
+        if x * x == total {
+            x
+        } else {
+            -1
+        }
+    }
+
+    #[inline]
+    fn isqrt(n: u32) -> u32 {
+        if n == 0 {
+            return 0;
+        }
+        let mut x = n as u64;
+        let n = n as u64;
+        let mut y = (x + n / x) / 2;
+        while y < x {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        x as u32
     }
 }
 

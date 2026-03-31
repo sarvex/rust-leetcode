@@ -76,7 +76,7 @@ mod tests {
         }
 
         let mut abs_values: Vec<i32> = result.iter().map(|&x| x.abs()).collect();
-        abs_values.sort();
+        abs_values.sort_unstable();
         for i in 0..n {
             if abs_values[i as usize] != i + 1 {
                 return false;

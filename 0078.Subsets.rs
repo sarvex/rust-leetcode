@@ -14,7 +14,7 @@ impl Solution {
     /// - Time: O(n × 2^n) — 2^n subsets, each taking O(n) to copy
     /// - Space: O(n) — recursion depth and current path
     pub fn subsets(nums: Vec<i32>) -> Vec<Vec<i32>> {
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(nums.len());
 
         fn dfs(index: usize, nums: &[i32], path: &mut Vec<i32>, result: &mut Vec<Vec<i32>>) {
             if index == nums.len() {
@@ -27,7 +27,7 @@ impl Solution {
             path.pop();
         }
 
-        dfs(0, &nums, &mut Vec::new(), &mut result);
+        dfs(0, &nums, &mut Vec::with_capacity(nums.len()), &mut result);
         result
     }
 }
@@ -40,9 +40,9 @@ mod tests {
     fn three_elements() {
         let mut result = Solution::subsets(vec![1, 2, 3]);
         for s in &mut result {
-            s.sort();
+            s.sort_unstable();
         }
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result.len(), 8);
         assert!(result.contains(&vec![]));
         assert!(result.contains(&vec![1, 2, 3]));
@@ -51,7 +51,7 @@ mod tests {
     #[test]
     fn single_element() {
         let mut result = Solution::subsets(vec![0]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![vec![], vec![0]]);
     }
 

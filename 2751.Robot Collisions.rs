@@ -24,7 +24,7 @@ impl Solution {
     ) -> Vec<i32> {
         let n = positions.len();
         if n == 0 {
-            return Vec::new();
+            return Vec::with_capacity(0);
         }
 
         let dir_bytes = directions.as_bytes();

@@ -25,7 +25,7 @@ impl Solution {
         let lg: Vec<usize> = (0..=n)
             .scan(0usize, |acc, i| {
                 if i >= 2 {
-                    *acc = (*acc).max((i as f64).log2().floor() as usize);
+                    *acc = (*acc).max(Self::floor_log2(i));
                 }
                 Some(*acc)
             })
@@ -113,7 +113,16 @@ impl Solution {
     }
 
     fn gcd(a: i64, b: i64) -> i64 {
-        if b == 0 { a } else { Self::gcd(b, a % b) }
+        if b == 0 {
+            a
+        } else {
+            Self::gcd(b, a % b)
+        }
+    }
+
+    #[inline]
+    fn floor_log2(x: usize) -> usize {
+        (usize::BITS as usize - 1) - x.leading_zeros() as usize
     }
 }
 

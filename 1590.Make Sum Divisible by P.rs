@@ -26,7 +26,7 @@ impl Solution {
         }
 
         let n = nums.len();
-        let mut last: HashMap<i32, i32> = HashMap::new();
+        let mut last: HashMap<i32, i32> = HashMap::with_capacity(n + 1);
         last.insert(0, -1);
         let mut result = n as i32;
         let mut prefix = 0;
@@ -40,7 +40,11 @@ impl Solution {
             last.insert(prefix, i as i32);
         }
 
-        if result >= n as i32 { -1 } else { result }
+        if result >= n as i32 {
+            -1
+        } else {
+            result
+        }
     }
 }
 

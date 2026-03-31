@@ -26,7 +26,7 @@ impl Solution {
             for &w in &worker_times {
                 let w = w as i64;
                 let limit = 2 * time / w;
-                let mut x = ((-1.0 + (1.0 + 4.0 * limit as f64).sqrt()) / 2.0) as i64;
+                let mut x = ((Self::isqrt(1 + 4 * limit as u128) - 1) / 2) as i64;
                 while x > 0 && x * (x + 1) > limit {
                     x -= 1;
                 }
@@ -54,6 +54,20 @@ impl Solution {
         }
 
         lo
+    }
+
+    #[inline]
+    fn isqrt(n: u128) -> u128 {
+        if n == 0 {
+            return 0;
+        }
+        let mut x = n;
+        let mut y = (x + n / x) / 2;
+        while y < x {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        x
     }
 }
 

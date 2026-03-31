@@ -14,7 +14,7 @@ impl Solution {
     /// - Time: O(n^2) — filling all elements of the triangle
     /// - Space: O(n^2) — storing the triangle
     pub fn generate(num_rows: i32) -> Vec<Vec<i32>> {
-        (0..num_rows as usize).fold(Vec::new(), |mut triangle, i| {
+        (0..num_rows as usize).fold(Vec::with_capacity(num_rows as usize), |mut triangle, i| {
             let mut row = vec![1; i + 1];
             for j in 1..i {
                 row[j] = triangle[i - 1][j - 1] + triangle[i - 1][j];

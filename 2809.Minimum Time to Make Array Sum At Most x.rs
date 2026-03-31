@@ -29,7 +29,7 @@ impl Solution {
             .map(|value| value as i64)
             .zip(nums2.into_iter().map(|value| value as i64))
             .collect();
-        items.sort_by(|left, right| left.1.cmp(&right.1));
+        items.sort_unstable_by(|left, right| left.1.cmp(&right.1));
 
         let mut dp = vec![i64::MIN / 4; n + 1];
         dp[0] = 0;

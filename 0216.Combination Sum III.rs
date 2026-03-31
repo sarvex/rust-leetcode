@@ -15,8 +15,8 @@ impl Solution {
     /// - Time: O(C(9, k)) — bounded by choosing k from 9
     /// - Space: O(k) recursion depth
     pub fn combination_sum3(k: i32, n: i32) -> Vec<Vec<i32>> {
-        let mut result = Vec::new();
-        let mut path = Vec::new();
+        let mut result = Vec::with_capacity(1 << (k.clamp(0, 9) as usize));
+        let mut path = Vec::with_capacity(k.max(0) as usize);
         Self::backtrack(1, n, k as usize, &mut path, &mut result);
         result
     }
@@ -55,7 +55,7 @@ mod tests {
     #[test]
     fn three_numbers_sum_nine() {
         let mut result = Solution::combination_sum3(3, 9);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![vec![1, 2, 6], vec![1, 3, 5], vec![2, 3, 4]]);
     }
 

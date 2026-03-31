@@ -22,8 +22,8 @@ impl Solution {
 
         const MOD: i64 = 1_000_000_007;
 
-        let mut count: HashMap<i32, i64> = HashMap::new();
-        let mut total_sum: HashMap<i32, i64> = HashMap::new();
+        let mut count: HashMap<i32, i64> = HashMap::with_capacity(nums.len());
+        let mut total_sum: HashMap<i32, i64> = HashMap::with_capacity(nums.len());
         let mut result = 0i64;
 
         for x in nums {

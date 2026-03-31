@@ -26,8 +26,8 @@ impl Solution {
             path.pop();
         }
 
-        let mut result = Vec::new();
-        dfs(0, &graph, &mut Vec::new(), &mut result);
+        let mut result = Vec::with_capacity(graph.len());
+        dfs(0, &graph, &mut Vec::with_capacity(graph.len()), &mut result);
         result
     }
 }

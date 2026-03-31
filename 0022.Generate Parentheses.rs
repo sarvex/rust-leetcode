@@ -32,7 +32,7 @@ impl Solution {
             }
         }
 
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(n as usize);
         dfs(
             &mut result,
             &mut String::with_capacity(n as usize * 2),
@@ -51,7 +51,7 @@ mod tests {
     #[test]
     fn n_equals_three() {
         let mut result = Solution::generate_parenthesis(3);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(
             result,
             vec!["((()))", "(()())", "(())()", "()(())", "()()()"]
@@ -66,7 +66,7 @@ mod tests {
     #[test]
     fn n_equals_two() {
         let mut result = Solution::generate_parenthesis(2);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec!["(())", "()()"]);
     }
 }

@@ -20,7 +20,7 @@ impl Solution {
     /// - Time: O(n + min_freq * d) where d is the number of distinct elements
     /// - Space: O(d) for the frequency map
     pub fn min_groups_for_valid_assignment(nums: Vec<i32>) -> i32 {
-        let mut freq: HashMap<i32, i32> = HashMap::new();
+        let mut freq: HashMap<i32, i32> = HashMap::with_capacity(nums.len());
         nums.iter().for_each(|&x| {
             *freq.entry(x).or_insert(0) += 1;
         });

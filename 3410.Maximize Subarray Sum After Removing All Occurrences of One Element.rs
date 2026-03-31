@@ -137,7 +137,7 @@ impl Solution {
             .iter()
             .enumerate()
             .filter(|(_, x)| **x < 0)
-            .fold(HashMap::new(), |mut acc, (i, x)| {
+            .fold(HashMap::with_capacity(n), |mut acc, (i, x)| {
                 acc.entry(*x).or_default().push(i);
                 acc
             });

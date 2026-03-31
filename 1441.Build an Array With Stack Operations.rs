@@ -14,7 +14,7 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n) for the result
     pub fn build_array(target: Vec<i32>, _n: i32) -> Vec<String> {
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity((_n as usize) * 2);
         let mut current = 1;
 
         for &num in &target {

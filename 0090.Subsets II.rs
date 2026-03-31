@@ -16,7 +16,7 @@ impl Solution {
     /// - Space: O(n) — recursion depth and current path
     pub fn subsets_with_dup(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
         nums.sort_unstable();
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(nums.len());
 
         fn dfs(index: usize, nums: &[i32], path: &mut Vec<i32>, result: &mut Vec<Vec<i32>>) {
             if index >= nums.len() {
@@ -34,7 +34,7 @@ impl Solution {
             dfs(skip + 1, nums, path, result);
         }
 
-        dfs(0, &nums, &mut Vec::new(), &mut result);
+        dfs(0, &nums, &mut Vec::with_capacity(nums.len()), &mut result);
         result
     }
 }
@@ -47,9 +47,9 @@ mod tests {
     fn with_duplicates() {
         let mut result = Solution::subsets_with_dup(vec![1, 2, 2]);
         for s in &mut result {
-            s.sort();
+            s.sort_unstable();
         }
-        result.sort();
+        result.sort_unstable();
         assert_eq!(
             result,
             vec![
@@ -66,7 +66,7 @@ mod tests {
     #[test]
     fn no_duplicates() {
         let mut result = Solution::subsets_with_dup(vec![0]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![vec![], vec![0]]);
     }
 
@@ -74,9 +74,9 @@ mod tests {
     fn all_same() {
         let mut result = Solution::subsets_with_dup(vec![1, 1, 1]);
         for s in &mut result {
-            s.sort();
+            s.sort_unstable();
         }
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![vec![], vec![1], vec![1, 1], vec![1, 1, 1]]);
     }
 }

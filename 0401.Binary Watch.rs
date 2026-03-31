@@ -28,7 +28,7 @@ impl Solution {
             let b = m.count_ones() as usize;
             minutes_by_bits[b].push(m);
         }
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(12 * 60);
         for h_bits in 0..=4usize {
             let m_bits_i = target - h_bits as i32;
             if (0..=6).contains(&m_bits_i) {
@@ -51,11 +51,11 @@ mod tests {
     #[test]
     fn test_one_led() {
         let mut result = Solution::read_binary_watch(1);
-        result.sort();
+        result.sort_unstable();
         let mut expected = vec![
             "0:01", "0:02", "0:04", "0:08", "0:16", "0:32", "1:00", "2:00", "4:00", "8:00",
         ];
-        expected.sort();
+        expected.sort_unstable();
         assert_eq!(result, expected);
     }
 

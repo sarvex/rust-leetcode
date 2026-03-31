@@ -21,7 +21,7 @@ impl Solution {
             last[(b - b'a') as usize] = i;
         }
 
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(bytes.len());
         let mut start = 0;
         let mut end = 0;
         for (i, &b) in bytes.iter().enumerate() {

@@ -22,7 +22,7 @@ impl Solution {
             n >= 1 && n <= 9 && tag.bytes().all(|b| b.is_ascii_uppercase())
         }
 
-        let mut stack: Vec<&str> = Vec::new();
+        let mut stack: Vec<&str> = Vec::with_capacity(code.len());
         let mut i = 0;
         while i < code.len() {
             if i > 0 && stack.is_empty() {

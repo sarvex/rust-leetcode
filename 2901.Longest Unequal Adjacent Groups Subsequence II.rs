@@ -46,7 +46,7 @@ impl Solution {
         }
 
         let mut i = (0..n).rev().find(|&i| f[i] == mx).unwrap_or(0);
-        let mut ans = Vec::new();
+        let mut ans = Vec::with_capacity(n);
         let mut j = i as i32;
         while j >= 0 {
             ans.push(words[j as usize].clone());

@@ -90,7 +90,7 @@ impl Solution {
             }
             let mut stack = vec![node];
             visited[node] = true;
-            let mut members = Vec::new();
+            let mut members = Vec::with_capacity(n);
 
             while let Some(current) = stack.pop() {
                 members.push(current);

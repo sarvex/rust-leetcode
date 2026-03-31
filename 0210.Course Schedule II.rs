@@ -43,7 +43,7 @@ impl Solution {
         if result.len() == n {
             result
         } else {
-            Vec::new()
+            Vec::with_capacity(0)
         }
     }
 }

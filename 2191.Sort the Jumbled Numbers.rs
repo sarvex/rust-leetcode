@@ -35,7 +35,7 @@ impl Solution {
             .enumerate()
             .map(|(i, v)| (map_value(*v), i))
             .collect();
-        indexed.sort();
+        indexed.sort_unstable();
 
         indexed.iter().map(|(_, i)| nums[*i]).collect()
     }

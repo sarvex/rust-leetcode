@@ -51,7 +51,7 @@ impl Solution {
     }
 
     fn get_divisors(n: i64) -> Vec<i64> {
-        let mut divisors = Vec::new();
+        let mut divisors = Vec::with_capacity((Self::isqrt(n as u64) as usize) * 2 + 1);
         let mut i = 1i64;
         while i * i <= n {
             if n % i == 0 {
@@ -63,6 +63,20 @@ impl Solution {
             i += 1;
         }
         divisors
+    }
+
+    #[inline]
+    fn isqrt(n: u64) -> u64 {
+        if n == 0 {
+            return 0;
+        }
+        let mut x = n;
+        let mut y = (x + n / x) / 2;
+        while y < x {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        x
     }
 
     fn mod_pow(mut base: i64, mut exp: i64, modulo: i64) -> i64 {

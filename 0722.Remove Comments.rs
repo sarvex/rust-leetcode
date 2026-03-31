@@ -15,7 +15,7 @@ impl Solution {
     /// - Time: O(n) where n is total characters across all lines
     /// - Space: O(n) for the output
     pub fn remove_comments(source: Vec<String>) -> Vec<String> {
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(source.len());
         let mut buffer = String::new();
         let mut in_block = false;
 
@@ -41,8 +41,7 @@ impl Solution {
                 }
             }
             if !in_block && !buffer.is_empty() {
-                result.push(buffer.clone());
-                buffer.clear();
+                result.push(std::mem::take(&mut buffer));
             }
         }
         result

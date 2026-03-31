@@ -22,7 +22,7 @@ impl Solution {
         let total_ones: i32 = s.iter().filter(|&&c| c == b'1').count() as i32;
 
         // Build runs: (start, end, is_one)
-        let mut runs: Vec<(u32, u32, bool)> = Vec::new();
+        let mut runs: Vec<(u32, u32, bool)> = Vec::with_capacity(n);
         let mut i = 0u32;
         while (i as usize) < n {
             let start = i;

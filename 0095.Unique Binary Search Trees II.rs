@@ -37,7 +37,7 @@ impl Solution {
             if lo > hi {
                 return vec![None];
             }
-            let mut trees = Vec::new();
+            let mut trees = Vec::with_capacity((hi - lo + 1) as usize);
             for root_val in lo..=hi {
                 let left_trees = dfs(lo, root_val - 1);
                 let right_trees = dfs(root_val + 1, hi);

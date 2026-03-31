@@ -20,11 +20,25 @@ impl Solution {
 
         for _ in 0..k {
             if let Some(max_gift) = heap.pop() {
-                heap.push((max_gift as f64).sqrt().floor() as i32);
+                heap.push(Self::isqrt(max_gift as u64) as i32);
             }
         }
 
         heap.into_iter().map(|x| x as i64).sum()
+    }
+
+    #[inline]
+    fn isqrt(n: u64) -> u64 {
+        if n == 0 {
+            return 0;
+        }
+        let mut x = n;
+        let mut y = (x + n / x) / 2;
+        while y < x {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        x
     }
 }
 

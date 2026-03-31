@@ -16,7 +16,7 @@ impl Solution {
     /// - Time: O(m + n)
     /// - Space: O(n)
     pub fn next_greater_element(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
-        let mut stack = Vec::new();
+        let mut stack = Vec::with_capacity(nums2.len());
         let mut map = HashMap::with_capacity(nums2.len());
         for &x in nums2.iter().rev() {
             while stack.last().map_or(false, |&top| top <= x) {

@@ -16,7 +16,7 @@ impl Solution {
     /// - Space: O(4^n × n) — storing all combinations
     pub fn letter_combinations(digits: String) -> Vec<String> {
         if digits.is_empty() {
-            return Vec::new();
+            return Vec::with_capacity(0);
         }
 
         const MAPPING: [&str; 8] = ["abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"];
@@ -40,7 +40,7 @@ mod tests {
     #[test]
     fn two_digits() {
         let mut result = Solution::letter_combinations("23".to_string());
-        result.sort();
+        result.sort_unstable();
         assert_eq!(
             result,
             vec!["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"]

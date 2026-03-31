@@ -20,7 +20,7 @@ impl Solution {
     pub fn three_sum(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
         nums.sort_unstable();
         let n = nums.len();
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(n);
         let mut i = 0;
 
         while i < n.saturating_sub(2) && nums[i] <= 0 {
@@ -61,7 +61,7 @@ mod tests {
     #[test]
     fn standard_case() {
         let mut result = Solution::three_sum(vec![-1, 0, 1, 2, -1, -4]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![vec![-1, -1, 2], vec![-1, 0, 1]]);
     }
 

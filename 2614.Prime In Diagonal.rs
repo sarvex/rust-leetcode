@@ -33,8 +33,23 @@ impl Solution {
         if n < 2 {
             return false;
         }
-        let upper = (n as f64).sqrt() as i32;
+        let upper = Self::isqrt(n as u32) as i32;
         (2..=upper).all(|i| n % i != 0)
+    }
+
+    #[inline]
+    fn isqrt(n: u32) -> u32 {
+        if n == 0 {
+            return 0;
+        }
+        let mut x = n as u64;
+        let n = n as u64;
+        let mut y = (x + n / x) / 2;
+        while y < x {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        x as u32
     }
 }
 

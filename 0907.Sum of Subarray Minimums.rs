@@ -19,7 +19,7 @@ impl Solution {
         let n = arr.len();
         let mut left = vec![-1i32; n];
         let mut right = vec![n as i32; n];
-        let mut stack: Vec<usize> = Vec::new();
+        let mut stack: Vec<usize> = Vec::with_capacity(n);
 
         for i in 0..n {
             while stack.last().is_some_and(|&top| arr[top] >= arr[i]) {

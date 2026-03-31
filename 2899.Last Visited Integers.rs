@@ -14,8 +14,8 @@ impl Solution {
     /// - Time: O(n) where n is the number of words
     /// - Space: O(n) for the nums and result vectors
     pub fn last_visited_integers(words: Vec<String>) -> Vec<i32> {
-        let mut nums: Vec<i32> = Vec::new();
-        let mut ans: Vec<i32> = Vec::new();
+        let mut nums: Vec<i32> = Vec::with_capacity(words.len());
+        let mut ans: Vec<i32> = Vec::with_capacity(words.len());
         let mut k = 0i32;
 
         for w in &words {

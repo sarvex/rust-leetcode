@@ -15,7 +15,7 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn kth_distinct(arr: Vec<String>, mut k: i32) -> String {
-        let mut freq = HashMap::new();
+        let mut freq = HashMap::with_capacity(arr.len());
         for s in &arr {
             *freq.entry(s.as_str()).or_insert(0) += 1;
         }

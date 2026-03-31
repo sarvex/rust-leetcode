@@ -42,7 +42,7 @@ impl Solution {
             }
         }
 
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(n - m + 1);
         let mut visited = vec![false; n];
 
         while let Some(i) = queue.pop_front() {
@@ -64,7 +64,7 @@ impl Solution {
             result.reverse();
             result
         } else {
-            Vec::new()
+            Vec::with_capacity(0)
         }
     }
 }

@@ -22,8 +22,8 @@ impl Solution {
         let min_vowels = Self::min_square_factor(k);
         let step = (min_vowels * 2) as usize;
 
-        let mut counts: HashMap<(i32, usize), i64> = HashMap::with_capacity(s.len() + 1);
-        counts.insert((0, 0), 1);
+        let mut counts: HashMap<i64, i64> = HashMap::with_capacity(s.len() + 1);
+        counts.insert(Self::encode_key(0, 0), 1);
 
         let mut balance = 0_i32;
         let mut total = 0_i64;
@@ -35,7 +35,7 @@ impl Solution {
                 balance -= 1;
             }
             let mod_class = (idx + 1) % step;
-            let key = (balance, mod_class);
+            let key = Self::encode_key(balance, mod_class);
             if let Some(prev) = counts.get(&key) {
                 total += *prev;
             }
@@ -47,6 +47,10 @@ impl Solution {
 
     fn is_vowel(ch: u8) -> bool {
         matches!(ch, b'a' | b'e' | b'i' | b'o' | b'u')
+    }
+
+    fn encode_key(balance: i32, mod_class: usize) -> i64 {
+        ((balance as i64) << 32) | (mod_class as u32 as i64)
     }
 
     fn min_square_factor(k: i32) -> i32 {

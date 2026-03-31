@@ -21,7 +21,7 @@ impl Solution {
         lines.sort_unstable();
 
         let mut heap = BinaryHeap::new();
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(lines.len());
         let mut idx = 0;
         let n = buildings.len();
 

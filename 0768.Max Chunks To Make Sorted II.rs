@@ -16,7 +16,7 @@ impl Solution {
     /// - Space: O(n) for the stack
     pub fn max_chunks_to_sorted(arr: Vec<i32>) -> i32 {
         arr.iter()
-            .fold(Vec::new(), |mut stack, &val| {
+            .fold(Vec::with_capacity(arr.len()), |mut stack, &val| {
                 if stack.last().is_some_and(|&top| top > val) {
                     let max_val = stack.pop().unwrap();
                     while stack.last().is_some_and(|&top| top > val) {

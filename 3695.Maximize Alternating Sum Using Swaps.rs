@@ -50,7 +50,7 @@ impl Solution {
             }
         }
 
-        let mut groups: Vec<Vec<usize>> = vec![Vec::new(); n];
+        let mut groups: Vec<Vec<usize>> = vec![Vec::with_capacity(1); n];
         (0..n).for_each(|i| groups[find(&mut parent, i)].push(i));
 
         groups

@@ -95,12 +95,14 @@ impl Solution {
 
     #[inline(always)]
     fn isqrt(x: usize) -> usize {
-        let mut r = (x as f64).sqrt() as usize;
-        while (r + 1) * (r + 1) <= x {
-            r += 1;
+        if x == 0 {
+            return 0;
         }
-        while r > 0 && r * r > x {
-            r -= 1;
+        let mut r = x;
+        let mut y = (r + x / r) / 2;
+        while y < r {
+            r = y;
+            y = (r + x / r) / 2;
         }
         r
     }
@@ -108,12 +110,20 @@ impl Solution {
     #[inline(always)]
     fn add_mod(a: u32, b: u32) -> u32 {
         let s = a + b;
-        if s >= MOD { s - MOD } else { s }
+        if s >= MOD {
+            s - MOD
+        } else {
+            s
+        }
     }
 
     #[inline(always)]
     fn sub_mod(a: u32, b: u32) -> u32 {
-        if a >= b { a - b } else { a + MOD - b }
+        if a >= b {
+            a - b
+        } else {
+            a + MOD - b
+        }
     }
 
     #[inline(always)]

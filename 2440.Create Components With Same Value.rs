@@ -32,7 +32,7 @@ impl Solution {
         let mut counts = vec![0usize; s + 1];
         Self::dfs(&g, &nums, &mut counts, 0, n);
 
-        let mut divisors = Vec::new();
+        let mut divisors = Vec::with_capacity(Self::isqrt(s) * 2 + 1);
         let mut i = 1;
         while i * i <= s {
             if s % i == 0 {
@@ -71,6 +71,20 @@ impl Solution {
             });
         counts[subtree_sum as usize] += 1;
         subtree_sum
+    }
+
+    #[inline]
+    fn isqrt(n: usize) -> usize {
+        if n == 0 {
+            return 0;
+        }
+        let mut x = n;
+        let mut y = (x + n / x) / 2;
+        while y < x {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        x
     }
 }
 

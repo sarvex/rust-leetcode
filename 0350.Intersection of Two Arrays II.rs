@@ -46,14 +46,14 @@ mod tests {
     #[test]
     fn standard_case() {
         let mut result = Solution::intersect(vec![1, 2, 2, 1], vec![2, 2]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![2, 2]);
     }
 
     #[test]
     fn partial_overlap() {
         let mut result = Solution::intersect(vec![4, 9, 5], vec![9, 4, 9, 8, 4]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![4, 9]);
     }
 
@@ -78,7 +78,7 @@ mod tests {
     #[test]
     fn all_duplicates() {
         let mut result = Solution::intersect(vec![1, 1, 1], vec![1, 1]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![1, 1]);
     }
 
@@ -91,7 +91,7 @@ mod tests {
     #[test]
     fn complete_overlap() {
         let mut result = Solution::intersect(vec![1, 2, 3], vec![1, 2, 3]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![1, 2, 3]);
     }
 }

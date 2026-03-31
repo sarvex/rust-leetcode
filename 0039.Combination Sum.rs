@@ -17,7 +17,7 @@ impl Solution {
     /// - Space: O(T/M) — recursion depth bounded by target / minimum value
     pub fn combination_sum(mut candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
         candidates.sort_unstable();
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(candidates.len());
 
         fn dfs(
             candidates: &[i32],
@@ -40,7 +40,13 @@ impl Solution {
             }
         }
 
-        dfs(&candidates, 0, target, &mut Vec::new(), &mut result);
+        dfs(
+            &candidates,
+            0,
+            target,
+            &mut Vec::with_capacity(candidates.len()),
+            &mut result,
+        );
         result
     }
 }
@@ -52,14 +58,14 @@ mod tests {
     #[test]
     fn standard_case() {
         let mut result = Solution::combination_sum(vec![2, 3, 6, 7], 7);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![vec![2, 2, 3], vec![7]]);
     }
 
     #[test]
     fn multiple_combinations() {
         let mut result = Solution::combination_sum(vec![2, 3, 5], 8);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![vec![2, 2, 2, 2], vec![2, 3, 3], vec![3, 5]]);
     }
 

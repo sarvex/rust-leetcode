@@ -64,9 +64,12 @@ impl TodoList {
         self.user_tasks
             .get(&user_id)
             .map(|tasks| {
-                let mut sorted = tasks.clone();
+                let mut sorted: Vec<&Task> = tasks.iter().collect();
                 sorted.sort_unstable_by_key(|t| t.due_date);
-                sorted.into_iter().map(|t| t.description).collect()
+                sorted
+                    .into_iter()
+                    .map(|task| task.description.clone())
+                    .collect()
             })
             .unwrap_or_default()
     }
@@ -75,13 +78,12 @@ impl TodoList {
         self.user_tasks
             .get(&user_id)
             .map(|tasks| {
-                let mut sorted: Vec<_> = tasks
-                    .iter()
-                    .filter(|t| t.tags.contains(&tag))
-                    .cloned()
-                    .collect();
+                let mut sorted: Vec<_> = tasks.iter().filter(|t| t.tags.contains(&tag)).collect();
                 sorted.sort_unstable_by_key(|t| t.due_date);
-                sorted.into_iter().map(|t| t.description).collect()
+                sorted
+                    .into_iter()
+                    .map(|task| task.description.clone())
+                    .collect()
             })
             .unwrap_or_default()
     }

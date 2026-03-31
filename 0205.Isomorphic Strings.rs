@@ -21,7 +21,7 @@ impl Solution {
     }
 
     fn maps_consistently(a: &[u8], b: &[u8]) -> bool {
-        let mut mapping = HashMap::new();
+        let mut mapping = HashMap::with_capacity(a.len());
         a.iter()
             .zip(b.iter())
             .all(|(&ac, &bc)| match mapping.get(&ac) {

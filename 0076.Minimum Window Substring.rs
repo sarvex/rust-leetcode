@@ -18,8 +18,8 @@ impl Solution {
     /// - Time: O(|s| + |t|) — each character visited at most twice
     /// - Space: O(|s| + |t|) — frequency maps
     pub fn min_window(s: String, t: String) -> String {
-        let mut need: HashMap<u8, usize> = HashMap::new();
-        let mut window: HashMap<u8, usize> = HashMap::new();
+        let mut need: HashMap<u8, usize> = HashMap::with_capacity(t.len());
+        let mut window: HashMap<u8, usize> = HashMap::with_capacity(s.len());
 
         for &b in t.as_bytes() {
             *need.entry(b).or_default() += 1;

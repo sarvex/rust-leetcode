@@ -43,12 +43,15 @@ impl Solution {
                 let (child_dp0, child_dp1) = Self::dfs(v, u, adj, k);
                 (child_dp0, w + child_dp1 - child_dp0)
             })
-            .fold((0, Vec::new()), |(sum, mut gains), (dp0, gain)| {
-                if gain > 0 {
-                    gains.push(gain);
-                }
-                (sum + dp0, gains)
-            });
+            .fold(
+                (0, Vec::with_capacity(adj[u].len())),
+                |(sum, mut gains), (dp0, gain)| {
+                    if gain > 0 {
+                        gains.push(gain);
+                    }
+                    (sum + dp0, gains)
+                },
+            );
 
         gains.sort_unstable_by(|a, b| b.cmp(a));
 

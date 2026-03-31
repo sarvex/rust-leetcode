@@ -32,14 +32,14 @@ mod tests {
     #[test]
     fn two_unique_numbers() {
         let mut result = Solution::single_number(vec![1, 2, 1, 3, 2, 5]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![3, 5]);
     }
 
     #[test]
     fn negative_numbers() {
         let mut result = Solution::single_number(vec![-1, 0]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![-1, 0]);
     }
 }

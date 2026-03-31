@@ -25,7 +25,7 @@ impl NestedIterator {
     /// - Time: O(n) construction, O(1) per next/has_next
     /// - Space: O(n) for the flattened vector
     fn new(nested_list: Vec<NestedInteger>) -> Self {
-        let mut nums = Vec::new();
+        let mut nums = Vec::with_capacity(nested_list.len());
         Self::flatten(&nested_list, &mut nums);
         Self { nums, index: 0 }
     }

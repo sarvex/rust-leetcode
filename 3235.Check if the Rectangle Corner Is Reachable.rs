@@ -70,7 +70,7 @@ impl Solution {
         }
 
         let mut visited = vec![false; n];
-        let mut stack = Vec::new();
+        let mut stack = Vec::with_capacity(n);
 
         for i in 0..n {
             if touches_group1[i] && !visited[i] {

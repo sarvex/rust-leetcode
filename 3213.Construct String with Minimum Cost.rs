@@ -38,7 +38,8 @@ impl Solution {
             }
         }
 
-        let mut nodes = Vec::new();
+        let total_word_len: usize = words.iter().map(|word| word.len()).sum();
+        let mut nodes = Vec::with_capacity(total_word_len + 1);
         nodes.push(Node::new(0));
 
         for (word, cost) in words.into_iter().zip(costs.into_iter()) {
@@ -134,7 +135,11 @@ impl Solution {
             }
         }
 
-        if dp[n] >= inf { -1 } else { dp[n] as i32 }
+        if dp[n] >= inf {
+            -1
+        } else {
+            dp[n] as i32
+        }
     }
 }
 

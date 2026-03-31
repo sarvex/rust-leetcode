@@ -14,7 +14,7 @@ impl Solution {
     /// - Time: O(max(n, log k))
     /// - Space: O(max(n, log k)) for the result
     pub fn add_to_array_form(num: Vec<i32>, mut k: i32) -> Vec<i32> {
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(num.len().saturating_add(10));
         let mut i = num.len() as i32 - 1;
 
         while i >= 0 || k > 0 {

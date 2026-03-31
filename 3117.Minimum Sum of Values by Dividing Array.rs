@@ -2,7 +2,7 @@ const INF: i64 = 1_i64 << 60;
 
 fn compute_dp_for_target(nums: &[i32], target: i32, prev_dp: Option<&[i64]>) -> Vec<i64> {
     let mut curr_dp = vec![INF; nums.len()];
-    let mut prev_list: Vec<(i32, i64)> = Vec::new();
+    let mut prev_list: Vec<(i32, i64)> = Vec::with_capacity(nums.len());
 
     for (idx, &num) in nums.iter().enumerate() {
         let mut new_list = Vec::with_capacity(prev_list.len() + 1);
@@ -89,7 +89,11 @@ impl Solution {
 
         let answer = prev_dp.and_then(|dp| dp.last().copied()).unwrap_or(INF);
 
-        if answer >= INF { -1 } else { answer as i32 }
+        if answer >= INF {
+            -1
+        } else {
+            answer as i32
+        }
     }
 }
 

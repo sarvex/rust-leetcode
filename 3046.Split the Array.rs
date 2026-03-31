@@ -15,7 +15,7 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn is_possible_to_split(nums: Vec<i32>) -> bool {
-        let mut cnt = HashMap::new();
+        let mut cnt = HashMap::with_capacity(nums.len());
         nums.iter().for_each(|&x| *cnt.entry(x).or_insert(0) += 1);
         cnt.values().all(|&v| v < 3)
     }

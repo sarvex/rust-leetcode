@@ -49,7 +49,7 @@ impl Solution {
             if indegree[node] == 0 || answer[node] != 0 {
                 continue;
             }
-            let mut cycle_nodes = Vec::new();
+            let mut cycle_nodes = Vec::with_capacity(n);
             let mut cur = node;
             loop {
                 cycle_nodes.push(cur);

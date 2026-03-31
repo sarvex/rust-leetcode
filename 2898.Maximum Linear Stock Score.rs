@@ -17,7 +17,7 @@ impl Solution {
     /// - Time: O(n) where n is the length of prices
     /// - Space: O(n) for the hash map
     pub fn max_score(prices: Vec<i32>) -> i64 {
-        let mut groups: HashMap<i32, i64> = HashMap::new();
+        let mut groups: HashMap<i32, i64> = HashMap::with_capacity(prices.len());
         prices.iter().enumerate().for_each(|(i, x)| {
             *groups.entry(x - i as i32).or_insert(0) += x as i64;
         });

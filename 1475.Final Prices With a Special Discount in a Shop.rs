@@ -15,7 +15,7 @@ impl Solution {
     /// - Time: O(n) amortized — each element pushed and popped at most once
     /// - Space: O(n) for the stack
     pub fn final_prices(mut prices: Vec<i32>) -> Vec<i32> {
-        let mut stack: Vec<i32> = Vec::new();
+        let mut stack: Vec<i32> = Vec::with_capacity(prices.len());
         for i in (0..prices.len()).rev() {
             let original = prices[i];
             while stack.last().is_some_and(|&top| original < top) {

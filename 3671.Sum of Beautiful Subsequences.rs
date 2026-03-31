@@ -60,7 +60,7 @@ impl Solution {
                 if d > 0 && needs_bit[d] {
                     vec![0i64; max_val / d + 2]
                 } else {
-                    Vec::new()
+                    Vec::with_capacity(0)
                 }
             })
             .collect();

@@ -19,10 +19,12 @@ impl Solution {
     /// - Space: O(n) — for frequency map
     pub fn unequal_triplets(nums: Vec<i32>) -> i32 {
         let n = nums.len();
-        let freq: HashMap<i32, usize> = nums.iter().fold(HashMap::new(), |mut acc, &x| {
-            *acc.entry(x).or_insert(0) += 1;
-            acc
-        });
+        let freq: HashMap<i32, usize> =
+            nums.iter()
+                .fold(HashMap::with_capacity(nums.len()), |mut acc, &x| {
+                    *acc.entry(x).or_insert(0) += 1;
+                    acc
+                });
 
         let mut left = 0usize;
         let mut result = 0;

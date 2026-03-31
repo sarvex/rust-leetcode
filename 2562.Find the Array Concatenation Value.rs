@@ -20,11 +20,7 @@ impl Solution {
         let mut j = n - 1;
 
         while i < j {
-            let digits_j = if nums[j] == 0 {
-                1
-            } else {
-                (nums[j] as f64).log10().floor() as u32 + 1
-            };
+            let digits_j = Self::digit_count(nums[j]);
             ans += nums[i] as i64 * 10_i64.pow(digits_j) + nums[j] as i64;
             i += 1;
             j -= 1;
@@ -35,6 +31,19 @@ impl Solution {
         }
 
         ans
+    }
+
+    #[inline]
+    fn digit_count(mut n: i32) -> u32 {
+        if n == 0 {
+            return 1;
+        }
+        let mut digits = 0;
+        while n > 0 {
+            digits += 1;
+            n /= 10;
+        }
+        digits
     }
 }
 

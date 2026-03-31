@@ -17,17 +17,20 @@ impl Solution {
     /// - Time: O(B^2) where B is blocked cell count
     /// - Space: O(B^2) for visited sets
     pub fn is_escape_possible(blocked: Vec<Vec<i32>>, source: Vec<i32>, target: Vec<i32>) -> bool {
-        let block: HashSet<(i32, i32)> = blocked.iter().map(|b| (b[0], b[1])).collect();
+        let block: HashSet<i64> = blocked
+            .iter()
+            .map(|b| Self::encode_point(b[0], b[1]))
+            .collect();
         Self::bfs(&block, &source, &target) && Self::bfs(&block, &target, &source)
     }
 
-    fn bfs(block: &HashSet<(i32, i32)>, source: &[i32], target: &[i32]) -> bool {
+    fn bfs(block: &HashSet<i64>, source: &[i32], target: &[i32]) -> bool {
         const LIMIT: usize = 20000;
         const BOUND: i32 = 1_000_000;
         let mut visited = HashSet::with_capacity(LIMIT);
         let mut queue = VecDeque::with_capacity(LIMIT);
         queue.push_back((source[0], source[1]));
-        visited.insert((source[0], source[1]));
+        visited.insert(Self::encode_point(source[0], source[1]));
 
         while let Some((x, y)) = queue.pop_front() {
             if visited.len() >= LIMIT || (x == target[0] && y == target[1]) {
@@ -35,19 +38,24 @@ impl Solution {
             }
             for (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)] {
                 let (nx, ny) = (x + dx, y + dy);
+                let key = Self::encode_point(nx, ny);
                 if nx >= 0
                     && nx < BOUND
                     && ny >= 0
                     && ny < BOUND
-                    && !visited.contains(&(nx, ny))
-                    && !block.contains(&(nx, ny))
+                    && !visited.contains(&key)
+                    && !block.contains(&key)
                 {
-                    visited.insert((nx, ny));
+                    visited.insert(key);
                     queue.push_back((nx, ny));
                 }
             }
         }
         visited.len() >= LIMIT
+    }
+
+    fn encode_point(x: i32, y: i32) -> i64 {
+        ((x as i64) << 32) | (y as u32 as i64)
     }
 }
 

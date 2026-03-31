@@ -22,10 +22,7 @@ impl Solution {
 
         while left < right {
             let mid = left + (right - left) / 2;
-            let total: i64 = ranks
-                .iter()
-                .map(|&r| ((mid / r as i64) as f64).sqrt() as i64)
-                .sum();
+            let total: i64 = ranks.iter().map(|&r| Self::isqrt(mid / r as i64)).sum();
 
             if total >= cars_i64 {
                 right = mid;
@@ -35,6 +32,21 @@ impl Solution {
         }
 
         left
+    }
+
+    #[inline]
+    fn isqrt(n: i64) -> i64 {
+        if n <= 0 {
+            return 0;
+        }
+        let mut x = n as u64;
+        let n = n as u64;
+        let mut y = (x + n / x) / 2;
+        while y < x {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        x as i64
     }
 }
 

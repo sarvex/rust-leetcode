@@ -21,7 +21,7 @@ impl Solution {
     pub fn subarray_majority(nums: Vec<i32>, queries: Vec<Vec<i32>>) -> Vec<i32> {
         let n = nums.len();
 
-        let mut val_to_idx: HashMap<i32, usize> = HashMap::new();
+        let mut val_to_idx: HashMap<i32, usize> = HashMap::with_capacity(n);
         let mut idx_to_val = Vec::with_capacity(n / 4);
 
         let compressed: Vec<usize> = nums

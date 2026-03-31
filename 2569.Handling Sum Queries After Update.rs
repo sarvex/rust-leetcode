@@ -18,7 +18,7 @@ impl Solution {
     pub fn handle_query(nums1: Vec<i32>, nums2: Vec<i32>, queries: Vec<Vec<i32>>) -> Vec<i64> {
         let mut segment_tree = SegmentTree::new(&nums1);
         let mut sum_nums2 = nums2.iter().map(|&value| value as i64).sum::<i64>();
-        let mut answers = Vec::new();
+        let mut answers = Vec::with_capacity(queries.len());
 
         for query in queries {
             match query[0] {
@@ -76,7 +76,11 @@ impl SegmentTree {
     }
 
     fn total_ones(&self) -> i64 {
-        if self.n == 0 { 0 } else { self.ones[1] as i64 }
+        if self.n == 0 {
+            0
+        } else {
+            self.ones[1] as i64
+        }
     }
 
     fn flip_range(&mut self, left: usize, right: usize) {

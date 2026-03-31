@@ -16,7 +16,7 @@ impl Solution {
     /// - Space: O(n) — recursion depth
     pub fn combination_sum2(mut candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
         candidates.sort_unstable();
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(candidates.len());
 
         fn dfs(
             candidates: &[i32],
@@ -42,7 +42,13 @@ impl Solution {
             }
         }
 
-        dfs(&candidates, 0, target, &mut Vec::new(), &mut result);
+        dfs(
+            &candidates,
+            0,
+            target,
+            &mut Vec::with_capacity(candidates.len()),
+            &mut result,
+        );
         result
     }
 }
@@ -54,7 +60,7 @@ mod tests {
     #[test]
     fn standard_case() {
         let mut result = Solution::combination_sum2(vec![10, 1, 2, 7, 6, 1, 5], 8);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(
             result,
             vec![vec![1, 1, 6], vec![1, 2, 5], vec![1, 7], vec![2, 6]]
@@ -65,7 +71,7 @@ mod tests {
     fn all_same() {
         let result = Solution::combination_sum2(vec![2, 5, 2, 1, 2], 5);
         let mut result_sorted = result;
-        result_sorted.sort();
+        result_sorted.sort_unstable();
         assert_eq!(result_sorted, vec![vec![1, 2, 2], vec![5]]);
     }
 

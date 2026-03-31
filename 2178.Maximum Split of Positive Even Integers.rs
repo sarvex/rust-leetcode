@@ -15,10 +15,10 @@ impl Solution {
     /// - Space: O(√n) for the result
     pub fn maximum_even_split(mut final_sum: i64) -> Vec<i64> {
         if final_sum % 2 != 0 {
-            return Vec::new();
+            return Vec::with_capacity(0);
         }
 
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(Self::isqrt(final_sum as u64) as usize + 1);
         let mut even = 2i64;
         while even <= final_sum {
             result.push(even);
@@ -31,6 +31,20 @@ impl Solution {
         }
 
         result
+    }
+
+    #[inline]
+    fn isqrt(n: u64) -> u64 {
+        if n == 0 {
+            return 0;
+        }
+        let mut x = n;
+        let mut y = (x + n / x) / 2;
+        while y < x {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        x
     }
 }
 

@@ -19,7 +19,7 @@ impl Solution {
         let n = target.len();
         let target_bytes = target.as_bytes();
         let mut queue = VecDeque::new();
-        let mut visited = HashSet::new();
+        let mut visited = HashSet::with_capacity(1usize << n);
         queue.push_back(0u32);
         visited.insert(0u32);
         let full = (1u32 << n) - 1;

@@ -28,7 +28,7 @@ impl Solution {
         }
 
         let mut chars = s.into_bytes();
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(s.len());
         backtrack(&mut chars, 0, &mut result);
         result
     }
@@ -41,12 +41,12 @@ mod tests {
     #[test]
     fn test_mixed() {
         let mut result = Solution::letter_case_permutation("a1b2".to_string());
-        result.sort();
+        result.sort_unstable();
         let mut expected = vec!["a1b2", "a1B2", "A1b2", "A1B2"]
             .into_iter()
             .map(String::from)
             .collect::<Vec<_>>();
-        expected.sort();
+        expected.sort_unstable();
         assert_eq!(result, expected);
     }
 
@@ -61,7 +61,7 @@ mod tests {
     #[test]
     fn test_single_letter() {
         let mut result = Solution::letter_case_permutation("a".to_string());
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec!["A", "a"]);
     }
 }

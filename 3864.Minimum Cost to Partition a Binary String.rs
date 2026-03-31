@@ -28,7 +28,7 @@ impl Solution {
             prefix[i + 1] = prefix[i] + if bytes[i] == b'1' { 1 } else { 0 };
         }
 
-        let mut memo = HashMap::new();
+        let mut memo = HashMap::with_capacity(n.saturating_mul(2));
 
         fn solve(
             l: usize,
@@ -36,9 +36,10 @@ impl Solution {
             prefix: &[i32],
             enc: i64,
             flat: i64,
-            memo: &mut HashMap<(usize, usize), i64>,
+            memo: &mut HashMap<i64, i64>,
         ) -> i64 {
-            if let Some(&v) = memo.get(&(l, r)) {
+            let key = Solution::encode_segment(l, r);
+            if let Some(&v) = memo.get(&key) {
                 return v;
             }
 
@@ -55,11 +56,15 @@ impl Solution {
                 base
             };
 
-            memo.insert((l, r), result);
+            memo.insert(key, result);
             result
         }
 
         solve(0, n, &prefix, enc, flat, &mut memo)
+    }
+
+    fn encode_segment(l: usize, r: usize) -> i64 {
+        ((l as i64) << 32) | (r as u32 as i64)
     }
 }
 

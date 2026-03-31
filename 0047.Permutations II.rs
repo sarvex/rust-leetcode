@@ -17,7 +17,7 @@ impl Solution {
     pub fn permute_unique(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
         nums.sort_unstable();
         let n = nums.len();
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(n);
         let mut path = vec![0; n];
         let mut visited = vec![false; n];
 
@@ -55,7 +55,7 @@ mod tests {
     #[test]
     fn with_duplicates() {
         let mut result = Solution::permute_unique(vec![1, 1, 2]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, vec![vec![1, 1, 2], vec![1, 2, 1], vec![2, 1, 1]]);
     }
 
@@ -67,7 +67,7 @@ mod tests {
     #[test]
     fn all_unique() {
         let mut result = Solution::permute_unique(vec![1, 2, 3]);
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result.len(), 6);
     }
 }

@@ -15,7 +15,7 @@ impl Solution {
     /// - Time: O(n log n)
     /// - Space: O(n) for the frequency map
     pub fn frequency_sort(mut nums: Vec<i32>) -> Vec<i32> {
-        let mut freq = HashMap::new();
+        let mut freq = HashMap::with_capacity(nums.len());
         for &x in &nums {
             *freq.entry(x).or_insert(0) += 1;
         }

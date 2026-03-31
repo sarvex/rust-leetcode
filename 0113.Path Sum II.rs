@@ -144,9 +144,9 @@ mod tests {
         ]);
 
         let mut result = Solution::path_sum(tree, 22);
-        result.sort();
+        result.sort_unstable();
         let mut expected = vec![vec![5, 4, 11, 2], vec![5, 8, 4, 5]];
-        expected.sort();
+        expected.sort_unstable();
 
         assert_eq!(result, expected);
     }

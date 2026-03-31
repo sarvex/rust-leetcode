@@ -19,7 +19,7 @@ impl Solution {
     /// - Space: O(n)
     pub fn maximum_beauty(flowers: Vec<i32>) -> i32 {
         let mut prefix = vec![0; flowers.len() + 1];
-        let mut first_seen = HashMap::new();
+        let mut first_seen = HashMap::with_capacity(flowers.len());
         let mut result = i32::MIN;
 
         for (i, &val) in flowers.iter().enumerate() {

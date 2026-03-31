@@ -18,7 +18,7 @@ impl Solution {
     /// - Space: O(n)
     pub fn find132pattern(nums: Vec<i32>) -> bool {
         let mut candidate = i32::MIN;
-        let mut stack = Vec::new();
+        let mut stack = Vec::with_capacity(nums.len());
         for &val in nums.iter().rev() {
             if val < candidate {
                 return true;

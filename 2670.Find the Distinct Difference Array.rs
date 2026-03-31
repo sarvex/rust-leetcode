@@ -18,7 +18,7 @@ impl Solution {
     pub fn distinct_difference_array(nums: Vec<i32>) -> Vec<i32> {
         let n = nums.len();
         let mut suffix_distinct = vec![0usize; n + 1];
-        let mut seen = HashSet::new();
+        let mut seen = HashSet::with_capacity(n);
 
         for i in (0..n).rev() {
             seen.insert(nums[i]);

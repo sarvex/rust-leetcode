@@ -58,10 +58,16 @@ impl Solution {
     }
 
     fn digit_count(n: i64) -> usize {
-        match n {
-            0 => 1,
-            _ => ((n as f64).log10().floor() as usize) + 1,
+        if n == 0 {
+            return 1;
         }
+        let mut value = n;
+        let mut digits = 0usize;
+        while value > 0 {
+            digits += 1;
+            value /= 10;
+        }
+        digits
     }
 
     fn smallest_palindrome(counts: &[usize; 10], total: usize) -> i64 {

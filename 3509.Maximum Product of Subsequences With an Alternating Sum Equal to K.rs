@@ -26,10 +26,11 @@ impl Solution {
         let num_chunks = (limit as usize / 64) + 1;
 
         type State = (Vec<u64>, bool, bool);
-        let mut dp: HashMap<(u8, i32), State> = HashMap::new();
+        let mut dp: HashMap<(u8, i32), State> = HashMap::with_capacity(n.saturating_mul(2).max(1));
 
         for &num in &nums {
-            let mut new_dp: HashMap<(u8, i32), State> = HashMap::new();
+            let mut new_dp: HashMap<(u8, i32), State> =
+                HashMap::with_capacity(dp.len().saturating_add(1));
 
             for (&(parity, sum), (products, has_zero, has_big)) in &dp {
                 let has_any = products.iter().any(|&x| x != 0);

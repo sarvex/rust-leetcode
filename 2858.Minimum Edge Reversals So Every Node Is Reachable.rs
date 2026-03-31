@@ -19,7 +19,7 @@ impl Solution {
     pub fn min_edge_reversals(n: i32, edges: Vec<Vec<i32>>) -> Vec<i32> {
         let node_count = n as usize;
         if node_count == 0 {
-            return Vec::new();
+            return Vec::with_capacity(0);
         }
 
         let mut graph: Vec<Vec<(usize, i32)>> =

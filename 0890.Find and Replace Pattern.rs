@@ -48,7 +48,7 @@ mod tests {
             to_vec(&["abc", "deq", "mee", "aqq", "dkd", "ccc"]),
             "abb".to_string(),
         );
-        result.sort();
+        result.sort_unstable();
         assert_eq!(result, to_vec(&["aqq", "mee"]));
     }
 

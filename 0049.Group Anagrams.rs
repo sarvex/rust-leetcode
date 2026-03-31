@@ -45,9 +45,9 @@ mod tests {
         ];
         let mut result = Solution::group_anagrams(input);
         for group in &mut result {
-            group.sort();
+            group.sort_unstable();
         }
-        result.sort();
+        result.sort_unstable();
         assert_eq!(
             result,
             vec![vec!["ate", "eat", "tea"], vec!["bat"], vec!["nat", "tan"],]

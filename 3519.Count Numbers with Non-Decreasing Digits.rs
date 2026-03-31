@@ -34,10 +34,10 @@ impl Solution {
 
         fn to_base(s: &[u8], base: usize) -> Vec<usize> {
             let mut digits = s.to_vec();
-            let mut result = Vec::new();
+            let mut result = Vec::with_capacity(s.len());
             while !digits.is_empty() {
                 let mut rem = 0u32;
-                let mut next = Vec::new();
+                let mut next = Vec::with_capacity(digits.len());
                 for &d in &digits {
                     let cur = rem * 10 + d as u32;
                     let q = cur / base as u32;
@@ -50,7 +50,11 @@ impl Solution {
                 digits = next;
             }
             result.reverse();
-            if result.is_empty() { vec![0] } else { result }
+            if result.is_empty() {
+                vec![0]
+            } else {
+                result
+            }
         }
 
         // dp[i][d] = count of i-digit non-decreasing numbers where first digit is d

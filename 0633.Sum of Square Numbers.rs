@@ -15,7 +15,7 @@ impl Solution {
     /// - Space: O(1)
     pub fn judge_square_sum(c: i32) -> bool {
         let mut a: i64 = 0;
-        let mut b: i64 = (c as f64).sqrt() as i64;
+        let mut b: i64 = Self::isqrt(c as i64);
         let target = c as i64;
         while a <= b {
             let sum = a * a + b * b;
@@ -26,6 +26,21 @@ impl Solution {
             }
         }
         false
+    }
+
+    #[inline]
+    fn isqrt(n: i64) -> i64 {
+        if n <= 0 {
+            return 0;
+        }
+        let mut x = n as u64;
+        let n = n as u64;
+        let mut y = (x + n / x) / 2;
+        while y < x {
+            x = y;
+            y = (x + n / x) / 2;
+        }
+        x as i64
     }
 }
 

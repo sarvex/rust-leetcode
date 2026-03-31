@@ -74,7 +74,7 @@ impl Solution {
             .unwrap_or(0) as usize;
         let mut seg_tree = SegTree::new(max_x.max(1));
         let mut obstacles = BTreeSet::new();
-        let mut results = Vec::new();
+        let mut results = Vec::with_capacity(queries.len());
 
         for query in queries {
             match query.get(0).copied() {

@@ -16,7 +16,7 @@ impl Solution {
     /// - Time: O(n)
     /// - Space: O(1) — at most 3 entries in the map
     pub fn total_fruit(fruits: Vec<i32>) -> i32 {
-        let mut freq: HashMap<i32, usize> = HashMap::new();
+        let mut freq: HashMap<i32, usize> = HashMap::with_capacity(fruits.len());
         let mut max_len = 0;
         let mut left = 0;
 

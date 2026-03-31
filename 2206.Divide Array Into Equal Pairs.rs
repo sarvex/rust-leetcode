@@ -14,7 +14,7 @@ impl Solution {
     /// - Space: O(n)
     pub fn divide_array(nums: Vec<i32>) -> bool {
         nums.iter()
-            .fold(HashMap::new(), |mut count, &x| {
+            .fold(HashMap::with_capacity(nums.len()), |mut count, &x| {
                 *count.entry(x).or_insert(0) += 1;
                 count
             })

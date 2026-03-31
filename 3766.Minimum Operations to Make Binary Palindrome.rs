@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 
 /// Generates all binary palindromes up to 15 bits (covers nums[i] ≤ 5000 and nearest above).
 fn generate_binary_palindromes() -> Vec<i32> {
-    let mut palindromes = HashSet::new();
+    let mut palindromes = HashSet::with_capacity(382);
     for l in 1..=15 {
         let half_len = (l + 1) / 2;
         let num_bits_to_reverse = l / 2;
@@ -76,18 +76,12 @@ mod tests {
 
     #[test]
     fn test_example1() {
-        assert_eq!(
-            Solution::min_operations(vec![1, 2, 4]),
-            vec![0, 1, 1]
-        );
+        assert_eq!(Solution::min_operations(vec![1, 2, 4]), vec![0, 1, 1]);
     }
 
     #[test]
     fn test_example2() {
-        assert_eq!(
-            Solution::min_operations(vec![6, 7, 12]),
-            vec![1, 0, 3]
-        );
+        assert_eq!(Solution::min_operations(vec![6, 7, 12]), vec![1, 0, 3]);
     }
 
     #[test]

@@ -27,7 +27,7 @@ impl OrderedStream {
 
     fn insert(&mut self, id_key: i32, value: String) -> Vec<String> {
         self.data[id_key as usize] = Some(value);
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(self.data.len().saturating_sub(self.ptr));
         while self.ptr < self.data.len() && self.data[self.ptr].is_some() {
             result.push(self.data[self.ptr].take().unwrap());
             self.ptr += 1;

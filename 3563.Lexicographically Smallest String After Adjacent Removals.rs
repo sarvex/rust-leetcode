@@ -44,13 +44,17 @@ impl Solution {
         let mut sub = vec![String::new(); n + 1];
         for i in (0..n).rev() {
             let base = format!("{}{}", s[i] as char, &sub[i + 1]);
-            sub[i] = (1..=(n - i) / 2)
+            let best_removal = (1..=(n - i) / 2)
                 .filter(|&j| e[i][i + j * 2])
-                .map(|j| sub[i + j * 2].clone())
-                .fold(base, |acc, s| acc.min(s));
+                .map(|j| &sub[i + j * 2])
+                .min();
+            sub[i] = match best_removal {
+                Some(candidate) => base.min(candidate.clone()),
+                None => base,
+            };
         }
 
-        sub[0].clone()
+        sub.into_iter().next().unwrap_or_default()
     }
 }
 

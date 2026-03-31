@@ -23,7 +23,7 @@ impl Solution {
             .into_iter()
             .map(|entry| (entry[0] as i64, entry[1]))
             .collect();
-        items.sort_by(|a, b| b.0.cmp(&a.0));
+        items.sort_unstable_by(|a, b| b.0.cmp(&a.0));
 
         let k = k as usize;
         let mut total_profit: i64 = 0;

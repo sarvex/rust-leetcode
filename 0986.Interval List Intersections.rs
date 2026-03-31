@@ -16,7 +16,7 @@ impl Solution {
         first_list: Vec<Vec<i32>>,
         second_list: Vec<Vec<i32>>,
     ) -> Vec<Vec<i32>> {
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(first_list.len().min(second_list.len()));
         let (mut i, mut j) = (0, 0);
         while i < first_list.len() && j < second_list.len() {
             let start = first_list[i][0].max(second_list[j][0]);

@@ -46,8 +46,10 @@ impl Solution {
         for mask in 1..total_masks {
             let k = mask.trailing_zeros() as usize;
             let prev = mask ^ (1_usize << k);
-            let prev_dist = &dist_masks[prev];
-            let mut current = prev_dist.clone();
+            let (done, pending) = dist_masks.split_at_mut(mask);
+            let prev_dist = &done[prev];
+            let current = &mut pending[0];
+            current.copy_from_slice(prev_dist);
             for i in 0..n {
                 let ik = prev_dist[i * n + k];
                 if ik == inf {
@@ -65,7 +67,6 @@ impl Solution {
                     }
                 }
             }
-            dist_masks[mask] = current;
         }
 
         let mut count = 0_i32;
