@@ -1,96 +1,72 @@
 impl Solution {
-    /// Maximum walls destroyed by robots with direction-choice DP
+    /// Maximum walls destroyed by robots via direction-choice DP with binary search.
     ///
     /// # Intuition
-    /// Each robot can fire left or right, with bullets blocked by adjacent robots.
-    /// Walls between adjacent robots can be covered by at most two robot-direction
-    /// pairs, creating a local dependency structure suitable for dynamic programming.
+    /// Each robot fires left or right, blocked by adjacent robots. The key insight
+    /// is that when robot `i` fires right, its effective range depends on what robot
+    /// `i+1` does: if the next robot fires left, the boundary is tighter to avoid
+    /// double-counting the overlap region.
     ///
     /// # Approach
-    /// 1. Sort robots by position and precompute firing ranges considering blocking
-    /// 2. For each interval between adjacent robots, categorize walls into:
-    ///    - A: only reachable by left robot firing right
-    ///    - B: only reachable by right robot firing left
-    ///    - C: reachable by both options
-    /// 3. Use DP where dp[i][dir] = max walls from robots 0..i with robot i firing dir
-    /// 4. Handle walls at robot positions (always destroyed) and outside boundaries
+    /// 1. Sort robots by position, sort walls
+    /// 2. Bottom-up DP over robots left-to-right with state `j` indicating what
+    ///    robot `i+1` fires (0=left, 1=right)
+    /// 3. For each robot, compute wall counts via binary search:
+    ///    - Left-firing range: `[max(pos-dist, prev_pos+1), pos]`
+    ///    - Right-firing range: `[pos, min(pos+dist, right_cap_j)]` where cap
+    ///      depends on j
+    /// 4. Transition: `dp[j] = max(old[0] + CL, old[1] + CR_j)`
     ///
     /// # Complexity
-    /// - Time: O((n + m) log(n + m)) for sorting, O(n log m) for DP with binary search
-    /// - Space: O(n + m) for sorted arrays and DP state
+    /// - Time: O(n log n + m log m + n log m)
+    /// - Space: O(n + m)
     pub fn max_walls(robots: Vec<i32>, distance: Vec<i32>, walls: Vec<i32>) -> i32 {
-        use std::collections::HashSet;
-
         let n = robots.len();
-
-        let mut robot_data: Vec<(i64, i64)> = robots
-            .iter()
-            .zip(distance.iter())
-            .map(|(&p, &d)| (p as i64, d as i64))
-            .collect();
-        robot_data.sort_unstable_by_key(|&(p, _)| p);
-
-        let mut walls: Vec<i64> = walls.into_iter().map(|w| w as i64).collect();
+        let mut walls = walls;
         walls.sort_unstable();
 
-        let robot_positions: HashSet<i64> = robot_data.iter().map(|&(p, _)| p).collect();
-
-        let walls_at_robots = walls.iter().filter(|w| robot_positions.contains(w)).count() as i32;
-
-        let count_walls = |lo: i64, hi: i64| -> i32 {
-            match lo > hi {
-                true => 0,
-                false => {
-                    let left = walls.partition_point(|&w| w < lo);
-                    let right = walls.partition_point(|&w| w <= hi);
-                    (right - left) as i32
-                }
-            }
-        };
-
-        if n == 1 {
-            let (p, d) = robot_data[0];
-            let left_outside = count_walls(p - d, p - 1);
-            let right_outside = count_walls(p + 1, p + d);
-            return walls_at_robots + left_outside.max(right_outside);
+        if n == 0 || walls.is_empty() {
+            return 0;
         }
 
-        let left_outside = count_walls(robot_data[0].0 - robot_data[0].1, robot_data[0].0 - 1);
-        let right_outside = count_walls(
-            robot_data[n - 1].0 + 1,
-            robot_data[n - 1].0 + robot_data[n - 1].1,
-        );
+        let mut idx: Vec<usize> = (0..n).collect();
+        idx.sort_unstable_by_key(|&i| robots[i]);
+        let arr: Vec<[i32; 2]> = idx.iter().map(|&i| [robots[i], distance[i]]).collect();
 
-        let mut dp = vec![[0i32; 2]; n];
-        dp[0][0] = left_outside;
-        dp[0][1] = 0;
+        let lb = |val: i32| walls.partition_point(|&w| w < val) as i32;
 
-        (1..n).for_each(|i| {
-            let (p1, d1) = robot_data[i - 1];
-            let (p2, d2) = robot_data[i];
+        // dp[j]: max walls from robots 0..=i, given robot i+1 fires direction j
+        let mut dp = [0i32; 2];
 
-            let r1_right = (p1 + d1).min(p2 - 1);
-            let l2_left = (p1 + 1).max(p2 - d2);
+        for i in 0..n {
+            let (pos, dist) = (arr[i][0], arr[i][1]);
 
-            let a = match l2_left > p1 + 1 {
-                true => count_walls(p1 + 1, r1_right.min(l2_left - 1)),
-                false => 0,
+            // Robot i fires LEFT: range [left, pos]
+            let left = if i > 0 {
+                (pos - dist).max(arr[i - 1][0] + 1)
+            } else {
+                pos - dist
+            };
+            let cl = lb(pos + 1) - lb(left);
+
+            // Robot i fires RIGHT: range [pos, right_j]
+            let base_right = pos + dist;
+            let (cr0, cr1) = if i + 1 < n {
+                let right0 = base_right.min(arr[i + 1][0] - arr[i + 1][1] - 1);
+                let right1 = base_right.min(arr[i + 1][0] - 1);
+                (
+                    (lb(right0 + 1) - lb(pos)).max(0),
+                    (lb(right1 + 1) - lb(pos)).max(0),
+                )
+            } else {
+                let cr = lb(base_right + 1) - lb(pos);
+                (cr, cr)
             };
 
-            let b = match r1_right < p2 - 1 {
-                true => count_walls(l2_left.max(r1_right + 1), p2 - 1),
-                false => 0,
-            };
+            dp = [(dp[0] + cl).max(dp[1] + cr0), (dp[0] + cl).max(dp[1] + cr1)];
+        }
 
-            let c_lo = (p1 + 1).max(l2_left);
-            let c_hi = r1_right.min(p2 - 1);
-            let c = count_walls(c_lo, c_hi);
-
-            dp[i][0] = (dp[i - 1][0] + b + c).max(dp[i - 1][1] + a + b + c);
-            dp[i][1] = dp[i - 1][0].max(dp[i - 1][1] + a + c);
-        });
-
-        walls_at_robots + dp[n - 1][0].max(dp[n - 1][1] + right_outside)
+        dp[0].max(dp[1])
     }
 }
 

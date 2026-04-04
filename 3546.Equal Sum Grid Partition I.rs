@@ -1,55 +1,47 @@
 impl Solution {
-    /// Single-pass cumulative prefix build with direct-loop early-exit scan.
+    /// Zero-allocation prefix scan for horizontal and vertical grid cuts.
     ///
     /// # Intuition
-    /// A single straight cut splits the grid into two contiguous halves whose
-    /// sums are equal iff the prefix at the cut equals half the total. All
-    /// values are positive so the prefix is strictly monotonic — at most one
-    /// position per axis can match.
+    /// A straight cut divides the grid into two halves with equal sums iff
+    /// the prefix at the cut equals exactly half the total.  All values are
+    /// positive so the prefix is strictly monotonic — at most one position
+    /// per axis can match.
     ///
     /// # Approach
-    /// 1. One pass over the grid builds cumulative row prefixes and column
-    ///    totals simultaneously via `zip` for bounds-check elimination.
-    /// 2. If the total is odd, return `false` immediately.
-    /// 3. Scan row prefixes then column prefix sums with indexed loops;
-    ///    return `true` on first match.
+    /// 1. Compute the total via a single `flatten` pass.
+    /// 2. If the total is odd, no equal partition exists.
+    /// 3. Accumulate row-wise prefix sums, returning on the first
+    ///    horizontal cut that equals half.
+    /// 4. Accumulate column-wise prefix sums, returning on the first
+    ///    vertical cut that equals half.
+    ///
+    /// No auxiliary vectors are allocated — only scalar accumulators.
     ///
     /// # Complexity
     /// - Time:  O(m × n)
-    /// - Space: O(m + n)
+    /// - Space: O(1)
     pub fn can_partition_grid(grid: Vec<Vec<i32>>) -> bool {
-        let m = grid.len();
-        let n = grid[0].len();
-        let mut col_sums = vec![0i64; n];
-        let mut row_pre = Vec::with_capacity(m);
-        let mut total = 0i64;
+        let (m, n) = (grid.len(), grid[0].len());
 
-        for row in &grid {
-            let mut rs = 0i64;
-            for (cs, val) in col_sums.iter_mut().zip(row) {
-                let v = *val as i64;
-                rs += v;
-                *cs += v;
-            }
-            total += rs;
-            row_pre.push(total);
-        }
+        let total: i64 = grid.iter().flatten().map(|v| *v as i64).sum();
 
         if total & 1 != 0 {
             return false;
         }
         let half = total >> 1;
 
-        for i in 0..m - 1 {
-            if row_pre[i] == half {
+        let mut prefix = 0i64;
+        for row in grid.iter().take(m - 1) {
+            prefix += row.iter().map(|v| *v as i64).sum::<i64>();
+            if prefix == half {
                 return true;
             }
         }
 
-        let mut running = 0i64;
+        let mut prefix = 0i64;
         for j in 0..n - 1 {
-            running += col_sums[j];
-            if running == half {
+            prefix += grid.iter().map(|r| r[j] as i64).sum::<i64>();
+            if prefix == half {
                 return true;
             }
         }
