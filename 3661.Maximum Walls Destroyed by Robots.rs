@@ -1,72 +1,90 @@
 impl Solution {
-    /// Maximum walls destroyed by robots via direction-choice DP with binary search.
+    /// Maximum walls destroyed by robots via merged-array linear DP.
     ///
     /// # Intuition
-    /// Each robot fires left or right, blocked by adjacent robots. The key insight
-    /// is that when robot `i` fires right, its effective range depends on what robot
-    /// `i+1` does: if the next robot fires left, the boundary is tighter to avoid
-    /// double-counting the overlap region.
+    /// Merge robots (pos, dist) and walls (pos, MAX) with two sentinel robots
+    /// into one sorted array. Each interval between adjacent robots contains only
+    /// walls. Count left-reachable (`lc`) and right-reachable (`rc`) walls per
+    /// interval, then DP over firing directions with `min(c, lc+rc)` to prevent
+    /// double-counting overlap.
     ///
     /// # Approach
-    /// 1. Sort robots by position, sort walls
-    /// 2. Bottom-up DP over robots left-to-right with state `j` indicating what
-    ///    robot `i+1` fires (0=left, 1=right)
-    /// 3. For each robot, compute wall counts via binary search:
-    ///    - Left-firing range: `[max(pos-dist, prev_pos+1), pos]`
-    ///    - Right-firing range: `[pos, min(pos+dist, right_cap_j)]` where cap
-    ///      depends on j
-    /// 4. Transition: `dp[j] = max(old[0] + CL, old[1] + CR_j)`
+    /// 1. Merge robots and walls into `(position, distance)` pairs, walls marked
+    ///    with `i32::MAX` distance. Add sentinels `(0,0)` and `(MAX,0)`
+    /// 2. Sort, then `retain` to remove walls coinciding with robots (always destroyed)
+    /// 3. Linear scan: for each robot→robot interval, count `lc` (left robot's
+    ///    rightward reach), `rc` (right robot's leftward reach), `c` (total walls)
+    /// 4. DP: `dp_l` = best if current robot fires left, `dp_r` = fires right
     ///
     /// # Complexity
-    /// - Time: O(n log n + m log m + n log m)
+    /// - Time: O((n + m) log(n + m)) for sort, O(n + m) for linear scan
     /// - Space: O(n + m)
     pub fn max_walls(robots: Vec<i32>, distance: Vec<i32>, walls: Vec<i32>) -> i32 {
         let n = robots.len();
-        let mut walls = walls;
-        walls.sort_unstable();
+        let m = walls.len();
+        let mut ss = Vec::with_capacity(n + m + 2);
+        for (r, d) in robots.into_iter().zip(distance) {
+            ss.push((r, d));
+        }
+        ss.push((0, 0));
+        ss.push((i32::MAX, 0));
+        for w in walls {
+            ss.push((w, i32::MAX));
+        }
+        ss.sort_unstable();
 
-        if n == 0 || walls.is_empty() {
-            return 0;
+        let mut res0 = 0;
+        let mut last = 0;
+        ss.retain(|&(x, d)| {
+            if d == i32::MAX && last == x {
+                res0 += 1;
+                return false;
+            }
+            last = x;
+            true
+        });
+
+        let mut i = 0;
+        let mut dp_l = 0;
+        let mut dp_r = 0;
+        loop {
+            let (lx, ld) = ss[i];
+            if lx == i32::MAX {
+                break;
+            }
+            let lxx = lx + ld;
+            let mut lc = 0;
+            let mut rx = 0;
+            let mut rd = 0;
+            let mut j = i + 1;
+            loop {
+                (rx, rd) = ss[j];
+                if rd < i32::MAX {
+                    break;
+                }
+                if rx <= lxx {
+                    lc += 1;
+                }
+                j += 1;
+            }
+            let c = (j - i - 1) as i32;
+            let mut rc = 0;
+            let rxx = rx - rd;
+            for k in (i + 1..j).rev() {
+                if ss[k].0 >= rxx {
+                    rc += 1;
+                } else {
+                    break;
+                }
+            }
+            let dp_l_1 = (dp_l + rc).max(dp_r + c.min(lc + rc));
+            let dp_r_1 = dp_l.max(dp_r + lc);
+            dp_l = dp_l_1;
+            dp_r = dp_r_1;
+            i = j;
         }
 
-        let mut idx: Vec<usize> = (0..n).collect();
-        idx.sort_unstable_by_key(|&i| robots[i]);
-        let arr: Vec<[i32; 2]> = idx.iter().map(|&i| [robots[i], distance[i]]).collect();
-
-        let lb = |val: i32| walls.partition_point(|&w| w < val) as i32;
-
-        // dp[j]: max walls from robots 0..=i, given robot i+1 fires direction j
-        let mut dp = [0i32; 2];
-
-        for i in 0..n {
-            let (pos, dist) = (arr[i][0], arr[i][1]);
-
-            // Robot i fires LEFT: range [left, pos]
-            let left = if i > 0 {
-                (pos - dist).max(arr[i - 1][0] + 1)
-            } else {
-                pos - dist
-            };
-            let cl = lb(pos + 1) - lb(left);
-
-            // Robot i fires RIGHT: range [pos, right_j]
-            let base_right = pos + dist;
-            let (cr0, cr1) = if i + 1 < n {
-                let right0 = base_right.min(arr[i + 1][0] - arr[i + 1][1] - 1);
-                let right1 = base_right.min(arr[i + 1][0] - 1);
-                (
-                    (lb(right0 + 1) - lb(pos)).max(0),
-                    (lb(right1 + 1) - lb(pos)).max(0),
-                )
-            } else {
-                let cr = lb(base_right + 1) - lb(pos);
-                (cr, cr)
-            };
-
-            dp = [(dp[0] + cl).max(dp[1] + cr0), (dp[0] + cl).max(dp[1] + cr1)];
-        }
-
-        dp[0].max(dp[1])
+        dp_l.max(dp_r) + res0
     }
 }
 
