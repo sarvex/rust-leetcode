@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 impl Solution {
     /// Selects up to 4 non-overlapping intervals maximizing total weight.
     ///
@@ -40,14 +42,16 @@ impl Solution {
             lo
         };
 
-        type State = Option<(i64, Vec<i32>)>;
+        type State = Option<(i64, Rc<Vec<i32>>)>;
         let mut dp: Vec<Vec<State>> = vec![vec![None; n]; 5];
 
-        let is_better = |current: &State, candidate: &(i64, Vec<i32>)| -> bool {
+        let is_better = |current: &State, candidate: &(i64, Rc<Vec<i32>>)| -> bool {
             match current {
                 None => true,
                 Some((w, indices)) => {
-                    candidate.0 > *w || (candidate.0 == *w && candidate.1 < *indices)
+                    candidate.0 > *w
+                        || (candidate.0 == *w
+                            && candidate.1.as_ref().as_slice() < indices.as_ref().as_slice())
                 }
             }
         };
@@ -63,16 +67,17 @@ impl Solution {
                 }
 
                 let prev_state = match k {
-                    1 => Some((0i64, vec![])),
+                    1 => Some((0i64, Rc::new(vec![]))),
                     _ if prev >= 0 => dp[k - 1][prev as usize].clone(),
                     _ => None,
                 };
 
-                if let Some((prev_weight, mut prev_indices)) = prev_state {
+                if let Some((prev_weight, prev_indices)) = prev_state {
                     let new_weight = prev_weight + weight;
-                    prev_indices.push(orig_idx as i32);
-                    prev_indices.sort_unstable();
-                    let candidate = (new_weight, prev_indices);
+                    let mut new_indices = prev_indices.as_ref().clone();
+                    new_indices.push(orig_idx as i32);
+                    new_indices.sort_unstable();
+                    let candidate = (new_weight, Rc::new(new_indices));
 
                     if is_better(&dp[k][i], &candidate) {
                         dp[k][i] = Some(candidate);
@@ -84,7 +89,7 @@ impl Solution {
         (1..=4)
             .filter_map(|k| dp[k][n - 1].as_ref())
             .max_by(|a, b| a.0.cmp(&b.0).then_with(|| b.1.cmp(&a.1)))
-            .map(|(_, indices)| indices.clone())
+            .map(|(_, indices)| indices.as_ref().clone())
             .unwrap_or_default()
     }
 }

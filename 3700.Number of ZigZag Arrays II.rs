@@ -63,23 +63,20 @@ impl Solution {
         let size = left.len();
         let mut product = vec![vec![0i64; size]; size];
 
-        for inner in 0..size {
-            let band_start = right[inner]
-                .iter()
-                .position(|&val| val != 0)
-                .unwrap_or(size);
-            let band_end = right[inner]
+        for (inner, right_row) in right.iter().enumerate() {
+            let band_start = right_row.iter().position(|&val| val != 0).unwrap_or(size);
+            let band_end = right_row
                 .iter()
                 .rposition(|&val| val != 0)
                 .map_or(0, |pos| pos + 1);
 
-            for row in 0..size {
-                if left[row][inner] == 0 {
+            for (product_row, left_row) in product.iter_mut().zip(left.iter()) {
+                let left_value = left_row[inner];
+                if left_value == 0 {
                     continue;
                 }
                 for col in band_start..band_end {
-                    product[row][col] =
-                        (product[row][col] + left[row][inner] * right[inner][col]) % MODULO;
+                    product_row[col] = (product_row[col] + left_value * right_row[col]) % MODULO;
                 }
             }
         }

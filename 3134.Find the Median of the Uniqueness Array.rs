@@ -66,8 +66,8 @@ fn count_at_most_distinct(nums: &[i32], max_value: usize, limit: usize) -> i64 {
     let mut left = 0usize;
     let mut total = 0i64;
 
-    for right in 0..nums.len() {
-        let idx = nums[right] as usize;
+    for (right, &value) in nums.iter().enumerate() {
+        let idx = value as usize;
         if freq[idx] == 0 {
             distinct += 1;
         }

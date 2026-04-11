@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 impl Solution {
     /// Sliding window with character frequency tracking for minimum window substring.
     ///
@@ -9,20 +7,20 @@ impl Solution {
     /// how many characters in `t` are fully satisfied.
     ///
     /// # Approach
-    /// Build a frequency map for `t`. Expand the right pointer, updating
-    /// the window map and satisfaction counter. When all characters are
+    /// Build a frequency array for `t`. Expand the right pointer, updating
+    /// the window counts and satisfaction counter. When all characters are
     /// satisfied, shrink from the left while maintaining validity, recording
     /// the minimum window found.
     ///
     /// # Complexity
     /// - Time: O(|s| + |t|) — each character visited at most twice
-    /// - Space: O(|s| + |t|) — frequency maps
+    /// - Space: O(1) — fixed-size ASCII frequency arrays
     pub fn min_window(s: String, t: String) -> String {
-        let mut need: HashMap<u8, usize> = HashMap::with_capacity(t.len());
-        let mut window: HashMap<u8, usize> = HashMap::with_capacity(s.len());
+        let mut need = [0i32; 128];
+        let mut window = [0i32; 128];
 
         for &b in t.as_bytes() {
-            *need.entry(b).or_default() += 1;
+            need[b as usize] += 1;
         }
 
         let s_bytes = s.as_bytes();
@@ -32,11 +30,10 @@ impl Solution {
         let mut best_start = 0;
         let mut best_len = usize::MAX;
 
-        for right in 0..s_bytes.len() {
-            let ch = s_bytes[right];
-            let count = window.entry(ch).or_default();
-            *count += 1;
-            if *count <= *need.get(&ch).unwrap_or(&0) {
+        for (right, &ch) in s_bytes.iter().enumerate() {
+            let idx = ch as usize;
+            window[idx] += 1;
+            if window[idx] <= need[idx] {
                 satisfied += 1;
             }
 
@@ -48,11 +45,11 @@ impl Solution {
                 }
 
                 let left_ch = s_bytes[left];
-                let left_count = window.get_mut(&left_ch).unwrap();
-                if *left_count <= *need.get(&left_ch).unwrap_or(&0) {
+                let left_idx = left_ch as usize;
+                if window[left_idx] <= need[left_idx] {
                     satisfied -= 1;
                 }
-                *left_count -= 1;
+                window[left_idx] -= 1;
                 left += 1;
             }
         }

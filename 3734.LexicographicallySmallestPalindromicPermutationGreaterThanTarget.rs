@@ -28,7 +28,7 @@ impl Solution {
         let odd_indices: Vec<usize> = freq
             .iter()
             .enumerate()
-            .filter(|(_, &c)| c % 2 == 1)
+            .filter(|(_, c)| **c % 2 == 1)
             .map(|(i, _)| i)
             .collect();
 
@@ -46,7 +46,8 @@ impl Solution {
         let mut first_half = vec![0u8; half_len];
 
         let build_palindrome = |half: &[u8], mid: Option<u8>| -> Vec<u8> {
-            let mut result = half.to_vec();
+            let mut result = Vec::with_capacity(half.len() * 2 + usize::from(mid.is_some()));
+            result.extend_from_slice(half);
             if let Some(m) = mid {
                 result.push(m);
             }

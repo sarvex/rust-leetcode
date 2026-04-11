@@ -6,18 +6,18 @@ impl Solution {
     /// Collecting these characters and comparing to `s` gives the answer.
     ///
     /// # Approach
-    /// 1. Map each word to its first character.
-    /// 2. Collect into a `String` and compare with `s`.
+    /// 1. Check length equality first (early exit).
+    /// 2. Zip words with string bytes, comparing each first character.
     ///
     /// # Complexity
     /// - Time: O(n) where n is the number of words
-    /// - Space: O(n) for the collected acronym string
+    /// - Space: O(1)
     pub fn is_acronym(words: Vec<String>, s: String) -> bool {
-        words
-            .iter()
-            .map(|w| w.as_bytes()[0] as char)
-            .collect::<String>()
-            == s
+        words.len() == s.len()
+            && words
+                .iter()
+                .zip(s.as_bytes())
+                .all(|(w, b)| w.as_bytes()[0] == *b)
     }
 }
 

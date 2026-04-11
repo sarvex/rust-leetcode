@@ -2,21 +2,27 @@ impl Solution {
     /// Reverses each word in a sentence while preserving word order.
     ///
     /// # Intuition
-    /// Split by spaces, reverse each word's characters, and rejoin.
+    /// Split by spaces, reverse each word's characters, and fold directly
+    /// into a preallocated output string without intermediate collection.
     ///
     /// # Approach
     /// 1. Split the string by spaces.
-    /// 2. Map each word to its character-reversed form.
-    /// 3. Join with spaces.
+    /// 2. Enumerate and fold, extending with each word's reversed characters.
+    /// 3. Use a preallocated `String` to avoid repeated allocation.
     ///
     /// # Complexity
     /// - Time: O(n)
     /// - Space: O(n)
     pub fn reverse_words(s: String) -> String {
         s.split(' ')
-            .map(|w| w.chars().rev().collect::<String>())
-            .collect::<Vec<_>>()
-            .join(" ")
+            .enumerate()
+            .fold(String::with_capacity(s.len()), |mut reversed, (i, word)| {
+                if i > 0 {
+                    reversed.push(' ');
+                }
+                reversed.extend(word.chars().rev());
+                reversed
+            })
     }
 }
 

@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 impl Solution {
     /// Minimum string length after removing duplicate characters.
     ///
@@ -8,14 +6,16 @@ impl Solution {
     /// minimized length equals the number of distinct characters.
     ///
     /// # Approach
-    /// 1. Collect all characters into a `HashSet`.
-    /// 2. Return the set size.
+    /// 1. Mark all characters in a fixed ASCII array.
+    /// 2. Count the marked entries.
     ///
     /// # Complexity
     /// - Time: O(n)
-    /// - Space: O(k) where k is the alphabet size
+    /// - Space: O(1) — fixed-size ASCII lookup array
     pub fn minimized_string_length(s: String) -> i32 {
-        s.bytes().collect::<HashSet<u8>>().len() as i32
+        let mut seen = [false; 128];
+        s.bytes().for_each(|b| seen[b as usize] = true);
+        seen.iter().filter(|&&is_seen| is_seen).count() as i32
     }
 }
 

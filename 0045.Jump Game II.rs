@@ -20,8 +20,8 @@ impl Solution {
         let mut farthest = 0;
         let mut current_end = 0;
 
-        for i in 0..nums.len() - 1 {
-            farthest = farthest.max(i + nums[i] as usize);
+        for (i, &jump_len) in nums.iter().take(nums.len().saturating_sub(1)).enumerate() {
+            farthest = farthest.max(i + jump_len as usize);
             if i == current_end {
                 jumps += 1;
                 current_end = farthest;

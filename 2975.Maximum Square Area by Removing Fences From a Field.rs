@@ -38,9 +38,9 @@ impl Solution {
 
         let s_len = short.len();
         let mut gaps = HashSet::with_capacity(s_len * (s_len - 1) / 2);
-        for i in 0..s_len {
-            for j in i + 1..s_len {
-                gaps.insert(short[j] - short[i]);
+        for (i, &left) in short.iter().enumerate() {
+            for &right in short.iter().skip(i + 1) {
+                gaps.insert(right - left);
             }
         }
 

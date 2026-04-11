@@ -38,10 +38,10 @@ impl Solution {
         let mut count = 0i32;
         let mut matched = 0usize;
 
-        for i in 0..nums.len() - 1 {
-            let cmp = if nums[i + 1] > nums[i] {
+        for pair in nums.windows(2) {
+            let cmp = if pair[1] > pair[0] {
                 1
-            } else if nums[i + 1] < nums[i] {
+            } else if pair[1] < pair[0] {
                 -1
             } else {
                 0

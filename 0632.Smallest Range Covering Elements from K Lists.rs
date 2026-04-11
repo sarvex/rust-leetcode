@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 impl Solution {
     /// Finds the smallest range containing at least one element from each list.
     ///
@@ -25,18 +23,16 @@ impl Solution {
             .collect();
         pairs.sort_unstable();
 
-        let mut best = vec![pairs[0].0, *&pairs.last().unwrap().0];
-        let mut count: HashMap<usize, usize> = HashMap::with_capacity(k);
+        let mut best = vec![pairs[0].0, pairs.last().unwrap().0];
+        let mut count = vec![0usize; k];
         let mut covered = 0;
         let mut left = 0;
 
-        for right in 0..pairs.len() {
-            let (val, idx) = pairs[right];
-            let entry = count.entry(idx).or_insert(0);
-            if *entry == 0 {
+        for &(val, idx) in &pairs {
+            if count[idx] == 0 {
                 covered += 1;
             }
-            *entry += 1;
+            count[idx] += 1;
 
             while covered == k {
                 let (lval, lidx) = pairs[left];
@@ -45,9 +41,8 @@ impl Solution {
                 if range < best_range || (range == best_range && lval < best[0]) {
                     best = vec![lval, val];
                 }
-                let e = count.get_mut(&lidx).unwrap();
-                *e -= 1;
-                if *e == 0 {
+                count[lidx] -= 1;
+                if count[lidx] == 0 {
                     covered -= 1;
                 }
                 left += 1;

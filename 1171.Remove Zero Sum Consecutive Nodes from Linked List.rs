@@ -50,7 +50,8 @@ impl Solution {
                 sum += v;
                 if let Some(&prev_idx) = seen.get(&sum) {
                     // Found zero-sum subarray from prev_idx to idx
-                    let mut new_vals = vals[..prev_idx].to_vec();
+                    let mut new_vals = Vec::with_capacity(vals.len() - (idx + 1 - prev_idx));
+                    new_vals.extend_from_slice(&vals[..prev_idx]);
                     new_vals.extend_from_slice(&vals[idx + 1..]);
                     vals = new_vals;
                     changed = true;

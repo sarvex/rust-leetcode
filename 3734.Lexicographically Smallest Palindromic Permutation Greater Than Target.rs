@@ -46,7 +46,8 @@ impl Solution {
     }
 
     fn build_palindrome(half: &[u8], mid: Option<u8>) -> Vec<u8> {
-        let mut result = half.to_vec();
+        let mut result = Vec::with_capacity(half.len() * 2 + usize::from(mid.is_some()));
+        result.extend_from_slice(half);
         if let Some(m) = mid {
             result.push(m);
         }

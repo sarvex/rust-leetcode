@@ -31,7 +31,8 @@ impl Solution {
             while start + 1 < bytes.len() && bytes[start] == b'0' {
                 start += 1;
             }
-            String::from_utf8(bytes[start..].to_vec()).unwrap()
+            bytes.drain(..start);
+            String::from_utf8(bytes).unwrap()
         }
 
         fn count_up_to(bound: &str, min_sum: usize, max_sum: usize) -> i32 {

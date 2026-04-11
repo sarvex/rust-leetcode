@@ -21,14 +21,14 @@ impl Solution {
         let mut result = Vec::with_capacity(nums.len() - k + 1);
         let mut deque: VecDeque<usize> = VecDeque::new();
 
-        for i in 0..nums.len() {
+        for (i, &value) in nums.iter().enumerate() {
             if let Some(&front) = deque.front() {
                 if i >= front + k {
                     deque.pop_front();
                 }
             }
             while let Some(&back) = deque.back() {
-                if nums[back] <= nums[i] {
+                if nums[back] <= value {
                     deque.pop_back();
                 } else {
                     break;

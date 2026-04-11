@@ -31,17 +31,18 @@ impl Solution {
         // Right pass: accumulate ops from balls to the right
         let right: Vec<i32> = bytes
             .iter()
+            .enumerate()
             .rev()
-            .scan((0i32, 0i32), |(count, ops), &b| {
-                let current_ops = *ops;
-                *count += (b - b'0') as i32;
-                *ops += *count;
-                Some(current_ops)
-            })
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
-            .collect();
+            .fold(
+                (0i32, 0i32, vec![0; bytes.len()]),
+                |(count, ops, mut right), (i, &b)| {
+                    right[i] = ops;
+                    let count = count + (b - b'0') as i32;
+                    let ops = ops + count;
+                    (count, ops, right)
+                },
+            )
+            .2;
 
         // Combine both passes
         left.into_iter().zip(right).map(|(l, r)| l + r).collect()

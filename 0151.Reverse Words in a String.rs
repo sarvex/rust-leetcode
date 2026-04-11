@@ -1,20 +1,28 @@
 impl Solution {
-    /// Reverses the order of words in a string using split and collect.
+    /// Reverses the order of words in a string using a single-pass fold.
     ///
     /// # Intuition
-    /// Split on whitespace to extract words, then reverse their order
-    /// and rejoin with single spaces.
+    /// Split on whitespace to extract words in reverse, then fold them
+    /// into a preallocated string without intermediate collection.
     ///
     /// # Approach
     /// 1. Split the string on whitespace (handles multiple spaces).
-    /// 2. Collect non-empty words into a vector.
-    /// 3. Reverse the vector and join with a single space.
+    /// 2. Reverse the iterator and fold directly into a preallocated `String`.
+    /// 3. Append each word with a space separator.
     ///
     /// # Complexity
     /// - Time: O(n)
-    /// - Space: O(n) for the words collection
+    /// - Space: O(n) for the output string
     pub fn reverse_words(s: String) -> String {
-        s.split_whitespace().rev().collect::<Vec<&str>>().join(" ")
+        s.split_whitespace()
+            .rev()
+            .fold(String::with_capacity(s.len()), |mut reversed, word| {
+                if !reversed.is_empty() {
+                    reversed.push(' ');
+                }
+                reversed.push_str(word);
+                reversed
+            })
     }
 }
 

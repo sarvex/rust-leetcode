@@ -25,7 +25,7 @@ impl Solution {
         let mut half_freq = [0i64; 26];
 
         // Check for valid palindrome structure and compute half frequencies
-        let odd_count = freq.iter().filter(|&&f| f % 2 == 1).count();
+        let odd_count = freq.iter().filter(|f| **f % 2 == 1).count();
         if odd_count > 1 {
             return String::new();
         }
@@ -33,7 +33,7 @@ impl Solution {
         mid_char = freq
             .iter()
             .enumerate()
-            .find(|(_, &f)| f % 2 == 1)
+            .find(|(_, f)| **f % 2 == 1)
             .map(|(i, _)| b'a' + i as u8);
 
         (0..26).for_each(|i| half_freq[i] = freq[i] / 2);
@@ -165,7 +165,8 @@ impl Solution {
     }
 
     fn build_palindrome(half: &[u8], mid: Option<u8>) -> String {
-        let mut result = half.to_vec();
+        let mut result = Vec::with_capacity(half.len() * 2 + usize::from(mid.is_some()));
+        result.extend_from_slice(half);
         if let Some(m) = mid {
             result.push(m);
         }

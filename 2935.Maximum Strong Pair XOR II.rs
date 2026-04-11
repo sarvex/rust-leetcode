@@ -107,14 +107,14 @@ impl Solution {
         let mut left = 0_usize;
         let mut best = 0_u32;
 
-        for right in 0..nums.len() {
-            let y = nums[right] as i64;
+        for &value in &nums {
+            let y = value as i64;
             while (nums[left] as i64) * 2 < y {
                 trie.remove(nums[left] as u32);
                 left += 1;
             }
-            trie.insert(nums[right] as u32);
-            best = best.max(trie.max_xor(nums[right] as u32));
+            trie.insert(value as u32);
+            best = best.max(trie.max_xor(value as u32));
         }
 
         best as i32

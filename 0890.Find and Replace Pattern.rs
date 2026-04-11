@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 impl Solution {
     /// Finds words matching a character-mapping pattern.
     ///
@@ -13,7 +11,7 @@ impl Solution {
     ///
     /// # Complexity
     /// - Time: O(n * L) where n is word count and L is word length
-    /// - Space: O(L) for the maps
+    /// - Space: O(1) — fixed-size lowercase ASCII lookup tables
     pub fn find_and_replace_pattern(words: Vec<String>, pattern: String) -> Vec<String> {
         let pat = pattern.as_bytes();
         let n = pat.len();
@@ -21,12 +19,15 @@ impl Solution {
             .into_iter()
             .filter(|word| {
                 let wb = word.as_bytes();
-                // Most patterns have limited unique characters
-                let mut w_map: HashMap<u8, usize> = HashMap::with_capacity(26);
-                let mut p_map: HashMap<u8, usize> = HashMap::with_capacity(26);
+                let mut w_map = [None; 26];
+                let mut p_map = [None; 26];
                 (0..n).all(|i| {
-                    let w_prev = w_map.insert(wb[i], i);
-                    let p_prev = p_map.insert(pat[i], i);
+                    let w_idx = (wb[i] - b'a') as usize;
+                    let p_idx = (pat[i] - b'a') as usize;
+                    let w_prev = w_map[w_idx];
+                    let p_prev = p_map[p_idx];
+                    w_map[w_idx] = Some(i);
+                    p_map[p_idx] = Some(i);
                     w_prev == p_prev
                 })
             })

@@ -13,8 +13,9 @@ impl UnionFind {
                 HashMap::with_capacity(equations.len() * 2),
             ),
             |(mut parent, mut weight), var| {
-                parent.entry(var.clone()).or_insert_with(|| var.clone());
-                weight.entry(var.clone()).or_insert(1.0);
+                let parent_key = var.to_owned();
+                parent.entry(parent_key.clone()).or_insert(parent_key);
+                weight.entry(var.to_owned()).or_insert(1.0);
                 (parent, weight)
             },
         );

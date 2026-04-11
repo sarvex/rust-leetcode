@@ -2,24 +2,32 @@ impl Solution {
     /// Separate each integer into its individual digits.
     ///
     /// # Intuition
-    /// Convert each number to its string representation and collect individual digits.
+    /// Extract digits from each number using arithmetic division and modulo,
+    /// avoiding string allocation entirely.
     ///
     /// # Approach
-    /// Use `flat_map` to iterate over each number's string digits, parsing each character
-    /// back to an i32.
+    /// For each number, repeatedly extract the last digit and collect in reverse,
+    /// then extend the result.
     ///
     /// # Complexity
     /// - Time: O(n * d) where d is the average number of digits
     /// - Space: O(n * d)
     pub fn separate_digits(nums: Vec<i32>) -> Vec<i32> {
-        nums.iter()
-            .flat_map(|&num| {
-                num.to_string()
-                    .bytes()
-                    .map(|b| i32::from(b - b'0'))
-                    .collect::<Vec<_>>()
-            })
-            .collect()
+        let mut result = Vec::new();
+        for &num in &nums {
+            let start = result.len();
+            let mut n = num;
+            if n == 0 {
+                result.push(0);
+                continue;
+            }
+            while n > 0 {
+                result.push(n % 10);
+                n /= 10;
+            }
+            result[start..].reverse();
+        }
+        result
     }
 }
 

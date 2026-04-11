@@ -29,7 +29,8 @@ impl Solution {
                 .iter()
                 .position(|&x| x != 0)
                 .unwrap_or(result.len() - 1);
-            result[start..].to_vec()
+            result.drain(..start);
+            result
         }
 
         fn to_base(s: &[u8], base: usize) -> Vec<usize> {
@@ -50,11 +51,7 @@ impl Solution {
                 digits = next;
             }
             result.reverse();
-            if result.is_empty() {
-                vec![0]
-            } else {
-                result
-            }
+            if result.is_empty() { vec![0] } else { result }
         }
 
         // dp[i][d] = count of i-digit non-decreasing numbers where first digit is d

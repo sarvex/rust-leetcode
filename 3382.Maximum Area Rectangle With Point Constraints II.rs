@@ -1,6 +1,11 @@
 use std::collections::{HashMap, HashSet};
 
 impl Solution {
+    #[inline]
+    fn pack(a: i32, b: i32) -> i64 {
+        ((a as i64) << 32) | ((b as u32) as i64)
+    }
+
     /// Finds the maximum area rectangle formed by four points with no interior points.
     ///
     /// # Intuition
@@ -24,10 +29,10 @@ impl Solution {
             return -1;
         }
 
-        let points: HashSet<(i32, i32)> = x_coord
+        let points: HashSet<i64> = x_coord
             .iter()
             .zip(y_coord.iter())
-            .map(|(&x, &y)| (x, y))
+            .map(|(&x, &y)| Self::pack(x, y))
             .collect();
 
         // Group y-coordinates by x-coordinate
@@ -43,12 +48,15 @@ impl Solution {
         x_to_ys.values_mut().for_each(|ys| ys.sort_unstable());
 
         // Map (y1, y2) pairs to list of x-values where both y1 and y2 exist
-        let mut y_pair_to_xs: HashMap<(i32, i32), Vec<i32>> = HashMap::with_capacity(n * n / 4);
+        let mut y_pair_to_xs: HashMap<i64, Vec<i32>> = HashMap::with_capacity(n * n / 4);
         for (&x, ys) in &x_to_ys {
             let m = ys.len();
             for i in 0..m {
                 for j in i + 1..m {
-                    y_pair_to_xs.entry((ys[i], ys[j])).or_default().push(x);
+                    y_pair_to_xs
+                        .entry(Self::pack(ys[i], ys[j]))
+                        .or_default()
+                        .push(x);
                 }
             }
         }
@@ -59,10 +67,13 @@ impl Solution {
         let mut max_area: i64 = -1;
 
         // Check each y-pair for valid rectangles
-        for ((y1, y2), xs) in &y_pair_to_xs {
+        for (&key, xs) in &y_pair_to_xs {
             if xs.len() < 2 {
                 continue;
             }
+
+            let y1 = (key >> 32) as i32;
+            let y2 = (key as u32) as i32;
 
             // Check consecutive x-values for valid rectangles
             for window in xs.windows(2) {
@@ -71,7 +82,7 @@ impl Solution {
                 // Check for points on horizontal edges (excluding corners)
                 let has_horizontal_interior = x_to_ys
                     .iter()
-                    .any(|(&x, ys)| x > x1 && x < x2 && ys.iter().any(|&y| y == *y1 || y == *y2));
+                    .any(|(&x, ys)| x > x1 && x < x2 && ys.iter().any(|&y| y == y1 || y == y2));
 
                 if has_horizontal_interior {
                     continue;
@@ -81,23 +92,25 @@ impl Solution {
                 let y1_ys = x_to_ys.get(&x1).unwrap();
                 let y2_ys = x_to_ys.get(&x2).unwrap();
 
-                let has_left_vertical = y1_ys.iter().any(|&y| y > *y1 && y < *y2);
-                let has_right_vertical = y2_ys.iter().any(|&y| y > *y1 && y < *y2);
+                let has_left_vertical = y1_ys.iter().any(|&y| y > y1 && y < y2);
+                let has_right_vertical = y2_ys.iter().any(|&y| y > y1 && y < y2);
 
                 if has_left_vertical || has_right_vertical {
                     continue;
                 }
 
                 // Check for interior points
-                let has_interior = points
-                    .iter()
-                    .any(|&(px, py)| px > x1 && px < x2 && py > *y1 && py < *y2);
+                let has_interior = points.iter().any(|&point| {
+                    let px = (point >> 32) as i32;
+                    let py = (point as u32) as i32;
+                    px > x1 && px < x2 && py > y1 && py < y2
+                });
 
                 if has_interior {
                     continue;
                 }
 
-                let area = (x2 - x1) as i64 * (*y2 - *y1) as i64;
+                let area = (x2 - x1) as i64 * (y2 - y1) as i64;
                 max_area = max_area.max(area);
             }
         }

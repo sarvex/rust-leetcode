@@ -1,6 +1,11 @@
 use std::collections::HashMap;
 
 impl Solution {
+    #[inline]
+    fn pack(a: u8, b: i32) -> i64 {
+        ((a as i64) << 32) | ((b as u32) as i64)
+    }
+
     /// Dynamic programming with bitset for product tracking of alternating subsequences.
     ///
     /// # Intuition
@@ -26,13 +31,15 @@ impl Solution {
         let num_chunks = (limit as usize / 64) + 1;
 
         type State = (Vec<u64>, bool, bool);
-        let mut dp: HashMap<(u8, i32), State> = HashMap::with_capacity(n.saturating_mul(2).max(1));
+        let mut dp: HashMap<i64, State> = HashMap::with_capacity(n.saturating_mul(2).max(1));
 
         for &num in &nums {
-            let mut new_dp: HashMap<(u8, i32), State> =
+            let mut new_dp: HashMap<i64, State> =
                 HashMap::with_capacity(dp.len().saturating_add(1));
 
-            for (&(parity, sum), (products, has_zero, has_big)) in &dp {
+            for (&key, (products, has_zero, has_big)) in &dp {
+                let parity = (key >> 32) as u8;
+                let sum = (key as u32) as i32;
                 let has_any = products.iter().any(|&x| x != 0);
                 if !has_any && !*has_zero && !*has_big {
                     continue;
@@ -41,7 +48,7 @@ impl Solution {
                 let delta = if parity == 0 { num } else { -num };
                 let new_sum = sum + delta;
                 let next_parity = 1 - parity;
-                let key = (next_parity, new_sum);
+                let key = Self::pack(next_parity, new_sum);
 
                 let entry = new_dp
                     .entry(key)
@@ -94,7 +101,7 @@ impl Solution {
             }
 
             // Start new subsequence
-            let key = (1_u8, num);
+            let key = Self::pack(1_u8, num);
             let entry = dp
                 .entry(key)
                 .or_insert_with(|| (vec![0u64; num_chunks], false, false));
@@ -112,7 +119,7 @@ impl Solution {
         let mut result = -1;
 
         for parity in 0..2 {
-            if let Some((products, has_zero, _)) = dp.get(&(parity, k)) {
+            if let Some((products, has_zero, _)) = dp.get(&Self::pack(parity, k)) {
                 if *has_zero {
                     result = result.max(0);
                 }

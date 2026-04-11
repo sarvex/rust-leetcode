@@ -65,15 +65,14 @@ impl Solution {
             let mut satisfied = 0usize;
             let mut left = 0;
 
-            for right in 0..events.len() {
-                let idx = events[right].1;
+            for &(value, idx) in &events {
                 if count[idx] == 0 {
                     satisfied += 1;
                 }
                 count[idx] += 1;
 
                 while satisfied == n {
-                    best_range = best_range.min(events[right].0 - events[left].0);
+                    best_range = best_range.min(value - events[left].0);
                     let lidx = events[left].1;
                     count[lidx] -= 1;
                     if count[lidx] == 0 {
@@ -134,10 +133,7 @@ mod tests {
         // Pattern B: index 0 fixed=1, index 1 adjustable={2,4}, index 2 fixed=5
         // Window must cover 1, one of {2,4}, and 5
         // Choosing 4 → range = 5-1 = 4; choosing 2 → range = 5-1 = 4
-        assert_eq!(
-            Solution::make_parity_alternating(vec![1, 3, 5]),
-            vec![1, 4]
-        );
+        assert_eq!(Solution::make_parity_alternating(vec![1, 3, 5]), vec![1, 4]);
     }
 
     #[test]
@@ -147,10 +143,7 @@ mod tests {
         //   fixed: 2; choices: 3 or 5. Range: min(3-2, 5-2) = 1.
         // Pattern B (O,E): fix index 0 → 1 op, adjust 2 to {1,3}
         //   choices: 1 or 3; fixed: 4. Range: min(4-1, 4-3) = 1.
-        assert_eq!(
-            Solution::make_parity_alternating(vec![2, 4]),
-            vec![1, 1]
-        );
+        assert_eq!(Solution::make_parity_alternating(vec![2, 4]), vec![1, 1]);
     }
 
     #[test]

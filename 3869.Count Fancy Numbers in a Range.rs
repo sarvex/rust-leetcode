@@ -93,32 +93,32 @@ impl Solution {
         }
         let mut dp = vec![[0, 0, 0, 0]; max_sum + 1];
         dp[0][0] = 1;
-        for i in 0..rs.len() {
+        for (&low_digit, &high_digit) in ls.iter().rev().zip(rs.iter().rev()) {
             let mut ndp = vec![[0, 0, 0, 0]; max_sum + 1];
-            for j in 0..=max_sum {
-                for m in 0..4 {
-                    if dp[j][m] == 0 {
+            for (sum, states) in dp.iter().enumerate() {
+                for (m, &ways) in states.iter().enumerate() {
+                    if ways == 0 {
                         continue;
                     }
-                    let low = if m & 1 == 0 { ls[ls.len() - i - 1] } else { 0 };
-                    let high = if m & 2 == 0 { rs[rs.len() - i - 1] } else { 9 };
+                    let low = if m & 1 == 0 { low_digit } else { 0 };
+                    let high = if m & 2 == 0 { high_digit } else { 9 };
                     for k in low..=high {
                         let mut nt = 3;
-                        if m & 1 == 0 && k == ls[ls.len() - i - 1] {
+                        if m & 1 == 0 && k == low_digit {
                             nt ^= 1;
                         }
-                        if m & 2 == 0 && k == rs[rs.len() - i - 1] {
+                        if m & 2 == 0 && k == high_digit {
                             nt ^= 2;
                         }
-                        ndp[j + k as usize][nt] += dp[j][m];
+                        ndp[sum + k as usize][nt] += ways;
                     }
                 }
             }
             dp = ndp;
         }
-        for i in 0..=max_sum {
-            if vincdec[i] {
-                ans += dp[i][0] + dp[i][1] + dp[i][2] + dp[i][3];
+        for (&is_good, states) in vincdec.iter().zip(&dp) {
+            if is_good {
+                ans += states.iter().sum::<i64>();
             }
         }
         ans

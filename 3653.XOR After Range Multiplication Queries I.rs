@@ -19,15 +19,14 @@ impl Solution {
         const MOD: i64 = 1_000_000_007;
         let mut nums: Vec<i64> = nums.into_iter().map(i64::from).collect();
         let n = nums.len();
-        let bravexuneth = (n, &queries);
-        let t = (bravexuneth.0 as f64).sqrt() as usize + 1;
+        let t = (n as f64).sqrt() as usize + 1;
 
         // (k, residue) -> list of (l, r_next, v) for diff array operations
         let mut groups: Vec<Vec<(usize, usize, i64)>> = Vec::new();
         let mut key_to_idx: Vec<i64> = Vec::new();
         let mut key_map = std::collections::HashMap::<i64, usize>::new();
 
-        for q in bravexuneth.1 {
+        for q in &queries {
             let l = q[0] as usize;
             let r = q[1] as usize;
             let k = q[2] as usize;

@@ -1,19 +1,20 @@
 impl Solution {
-    /// Counts stones that are also jewels using a hash set.
+    /// Counts stones that are also jewels using fixed ASCII lookup.
     ///
     /// # Intuition
-    /// Jewel types form a lookup set. Count stones whose type appears in the set.
+    /// Jewel types form a lookup table. Count stones whose type appears in it.
     ///
     /// # Approach
-    /// Collect jewel bytes into a `HashSet`, then count matching stone bytes
+    /// Mark jewel bytes in a fixed ASCII array, then count matching stone bytes
     /// using iterator filtering.
     ///
     /// # Complexity
     /// - Time: O(j + s) where j is jewels length and s is stones length
-    /// - Space: O(j) for the set
+    /// - Space: O(1) — fixed-size ASCII lookup array
     pub fn num_jewels_in_stones(jewels: String, stones: String) -> i32 {
-        let jewel_set: std::collections::HashSet<u8> = jewels.bytes().collect();
-        stones.bytes().filter(|b| jewel_set.contains(b)).count() as i32
+        let mut jewel_set = [false; 128];
+        jewels.bytes().for_each(|b| jewel_set[b as usize] = true);
+        stones.bytes().filter(|b| jewel_set[*b as usize]).count() as i32
     }
 }
 

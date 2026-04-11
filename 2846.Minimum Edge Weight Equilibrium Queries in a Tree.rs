@@ -14,8 +14,12 @@ impl<T: Copy, F: Fn(T, T) -> T> SparseTable<T, F> {
             let size = n + 1 - (1 << k);
             let mut level = Vec::with_capacity(size);
             let step = 1 << (k - 1);
-            for i in 0..size {
-                let combined = op(table[k - 1][i], table[k - 1][i + step]);
+            for (&left, &right) in table[k - 1]
+                .iter()
+                .zip(table[k - 1].iter().skip(step))
+                .take(size)
+            {
+                let combined = op(left, right);
                 level.push(combined);
             }
             table.push(level);
@@ -128,9 +132,10 @@ impl Solution {
 
             let mut total = 0_i32;
             let mut max_count = 0_i32;
-            for weight in 0..26 {
-                let count = i32::from(counter[a][weight]) + i32::from(counter[b][weight])
-                    - 2 * i32::from(counter[lca][weight]);
+            for ((&count_a, &count_b), &count_lca) in
+                counter[a].iter().zip(&counter[b]).zip(&counter[lca])
+            {
+                let count = i32::from(count_a) + i32::from(count_b) - 2 * i32::from(count_lca);
                 total += count;
                 if count > max_count {
                     max_count = count;
