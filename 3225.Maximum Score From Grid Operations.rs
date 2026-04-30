@@ -1,96 +1,111 @@
 impl Solution {
-    /// Dynamic programming over column heights with prefix-sum scoring.
+    /// Dynamic programming over column heights with three rolling states.
     ///
     /// # Intuition
-    /// Each column ends up with a black prefix of some height. A white cell contributes to the score
-    /// exactly when a neighbor column is black at the same row, which depends only on the maximum
-    /// black height of the two neighbors.
+    /// Each column ends up with a black prefix of height `h_j ∈ [0, n]`. A white cell `(i, j)`
+    /// (where `i >= h_j`) contributes `grid[i][j]` iff `i < max(h_{j-1}, h_{j+1})`. Naively
+    /// tracking a pair of adjacent heights yields O(n^4). By splitting each column's contribution
+    /// into a "left-covered" part and a "right-covered" part, and by maintaining three carefully
+    /// chosen rolling states (indexed by the current column's height), the transition per column
+    /// becomes O(n^2), giving an overall O(n^3) algorithm.
     ///
     /// # Approach
-    /// Treat each column as a height `h_j` in `[0, n]` (black rows `0..h_j`). For column `j`,
-    /// a white row `i >= h_j` counts if `i < max(h_{j-1}, h_{j+1})`, so the column contribution
-    /// is the sum of `grid[i][j]` for `i` in `[h_j, max(h_{j-1}, h_{j+1}) - 1]`. Using per-column
-    /// prefix sums, this contribution is `prefix[j][max] - prefix[j][h_j]`.
+    /// Process columns left to right. For each column `i`, maintain three arrays indexed by the
+    /// height `h ∈ [0, n]` of column `i`:
+    ///   * `dp1[h]` — best score when column `i`'s scoring window is entirely supplied by its left
+    ///     neighbor (the left column's height already reaches or exceeds the top of the window).
+    ///   * `dp2[h]` — best score when column `i`'s window is partially pending and its right
+    ///     neighbor will finish covering the remaining white rows.
+    ///   * `dp3[h]` — prefix-max over `dp2`-style values up to height `h`, used to cheaply query
+    ///     the best previous state whose height is at most a given threshold.
     ///
-    /// DP keeps a state of two adjacent heights `(h_{j-1}, h_j)`. When choosing `h_{j+1}`, we can
-    /// finalize the contribution of column `j`. Initialize with column `0` (left neighbor height 0),
-    /// transition through columns `1..n-2`, then add the last column using right neighbor height 0.
+    /// During the transition into column `i`, iterate the chosen height `j` from `n-1` down to
+    /// `0`. For every candidate previous-column height `k ∈ [0, j]` maintain `s2` — the suffix
+    /// sum of column `i` starting at row `k+1` — so extending the window by one row costs O(1).
+    /// The best of `dp1[k] + s2`, `dp3[j] + s2`, and a running `pre` value updates the next
+    /// column's three DP arrays. `pre` tracks the best attainable value when the previous column
+    /// was taller than the current one and is also updated in O(1) per step.
+    ///
+    /// The final answer is the maximum value observed across all reachable DP states.
     ///
     /// # Complexity
-    /// - Time: O(n^4) via O(n * (n + 1)^3) transitions
-    /// - Space: O(n^2) for the DP table
+    /// - Time: O(n^3)
+    /// - Space: O(n)
+    #[allow(clippy::needless_range_loop)]
     pub fn maximum_score(grid: Vec<Vec<i32>>) -> i64 {
         let n = grid.len();
-        if n == 1 {
+        if n <= 1 {
             return 0;
         }
 
-        let height_count = n + 1;
-        let mut col_prefix: Vec<Vec<i64>> = Vec::with_capacity(n);
-        for col in 0..n {
-            let mut prefix = vec![0_i64; n + 1];
-            for row in 0..n {
-                prefix[row + 1] = prefix[row] + grid[row][col] as i64;
-            }
-            col_prefix.push(prefix);
-        }
+        let mut dp1 = vec![0_i64; n];
+        let mut dp2 = vec![0_i64; n + 1];
+        let mut dp3 = vec![0_i64; n + 1];
+        let mut dp1_next = vec![0_i64; n];
+        let mut dp2_next = vec![0_i64; n + 1];
+        let mut dp3_next = vec![0_i64; n + 1];
+        let mut res = 0_i64;
 
-        let column_sum = |col: usize, start: usize, end: usize| -> i64 {
-            col_prefix[col][end] - col_prefix[col][start]
-        };
+        for i in 0..n {
+            // `sum` tracks the running suffix total of column `i` from row 0 to row n-1.
+            // It is decremented as `j` decreases so we can reuse it across the inner loop.
+            let mut sum: i64 = (0..n).map(|r| grid[r][i] as i64).sum();
+            let mut pre = 0_i64;
 
-        let score_for_column = |col: usize, self_height: usize, neighbor_max: usize| -> i64 {
-            if self_height >= neighbor_max {
-                0
-            } else {
-                column_sum(col, self_height, neighbor_max)
-            }
-        };
+            for j in (0..n).rev() {
+                // `s2` will iterate through suffix sums of column `i` starting at row `k+1`.
+                let mut s2 = sum;
+                // Baseline for dp1_next[j]: previous column at height 0 contributes nothing, and
+                // the current column's full sum plus the best prior prefix-max (`dp3[n]`) wins.
+                dp1_next[j] = s2 + dp3[n];
 
-        let neg_inf = i64::MIN / 4;
-        let mut dp = vec![vec![neg_inf; height_count]; height_count];
-
-        for h0 in 0..height_count {
-            for h1 in 0..height_count {
-                dp[h0][h1] = score_for_column(0, h0, h1);
-            }
-        }
-
-        for col in 1..=n - 2 {
-            let mut next_dp = vec![vec![neg_inf; height_count]; height_count];
-            for prev in 0..height_count {
-                for curr in 0..height_count {
-                    let base = dp[prev][curr];
-                    if base == neg_inf {
-                        continue;
+                for k in 0..=j {
+                    s2 -= grid[k][i] as i64;
+                    let mut v = dp1[k] + s2;
+                    if dp3[j] + s2 > v {
+                        v = dp3[j] + s2;
                     }
-                    for next in 0..height_count {
-                        let neighbor_max = if prev > next { prev } else { next };
-                        let candidate = base + score_for_column(col, curr, neighbor_max);
-                        if candidate > next_dp[curr][next] {
-                            next_dp[curr][next] = candidate;
+                    if pre + s2 > v {
+                        v = pre + s2;
+                    }
+                    if v > dp1_next[j] {
+                        dp1_next[j] = v;
+                    }
+                    if k == j {
+                        dp2_next[j] = v;
+                        dp3_next[j] = v;
+                        if v > res {
+                            res = v;
                         }
                     }
                 }
+
+                if i > 0 {
+                    let add = grid[j][i] as i64;
+                    let a = pre + add;
+                    let b = dp2[j] + add;
+                    pre = if a > b { a } else { b };
+                }
+                sum -= grid[j][i] as i64;
             }
-            dp = next_dp;
+
+            dp2_next[n] = pre;
+            dp3_next[n] = pre;
+            if pre > res {
+                res = pre;
+            }
+            for j in 1..=n {
+                if dp3_next[j - 1] > dp3_next[j] {
+                    dp3_next[j] = dp3_next[j - 1];
+                }
+            }
+
+            std::mem::swap(&mut dp1, &mut dp1_next);
+            std::mem::swap(&mut dp2, &mut dp2_next);
+            std::mem::swap(&mut dp3, &mut dp3_next);
         }
 
-        let mut best = 0_i64;
-        for prev in 0..height_count {
-            for curr in 0..height_count {
-                let base = dp[prev][curr];
-                if base == neg_inf {
-                    continue;
-                }
-                let candidate = base + score_for_column(n - 1, curr, prev);
-                if candidate > best {
-                    best = candidate;
-                }
-            }
-        }
-
-        best
+        res
     }
 }
 
