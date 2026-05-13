@@ -112,22 +112,10 @@ mod tests {
 
     #[test]
     fn single_row_zero_budget() {
-        assert_eq!(
-            Solution::max_path_score(vec![vec![0, 0, 0, 0]], 0),
-            0
-        );
-        assert_eq!(
-            Solution::max_path_score(vec![vec![0, 1, 0]], 0),
-            -1
-        );
-        assert_eq!(
-            Solution::max_path_score(vec![vec![0, 1, 0]], 1),
-            1
-        );
-        assert_eq!(
-            Solution::max_path_score(vec![vec![0, 2, 0]], 1),
-            2
-        );
+        assert_eq!(Solution::max_path_score(vec![vec![0, 0, 0, 0]], 0), 0);
+        assert_eq!(Solution::max_path_score(vec![vec![0, 1, 0]], 0), -1);
+        assert_eq!(Solution::max_path_score(vec![vec![0, 1, 0]], 1), 1);
+        assert_eq!(Solution::max_path_score(vec![vec![0, 2, 0]], 1), 2);
     }
 
     #[test]
