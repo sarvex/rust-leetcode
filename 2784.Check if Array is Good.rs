@@ -1,5 +1,3 @@
-pub struct Solution;
-
 impl Solution {
     /// Check if array is a permutation of base[n] using frequency counting.
     ///

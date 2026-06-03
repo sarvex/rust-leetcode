@@ -18,17 +18,21 @@ impl Solution {
     ///
     /// # Complexity
     /// - Time: O(n log n) — dominated by sorting
-    /// - Space: O(1) — sort in place, constant extra space
-    pub fn minimum_effort(mut tasks: Vec<Vec<i32>>) -> i32 {
-        // Sort by buffer descending: highest (minimum - actual) first.
-        tasks.sort_unstable_by(|a, b| (b[1] - b[0]).cmp(&(a[1] - a[0])));
+    /// - Space: O(n) — flat tuple vec to avoid inner-Vec pointer indirection
+    pub fn minimum_effort(tasks: Vec<Vec<i32>>) -> i32 {
+        // Flatten to (actual, minimum) tuples to avoid heap-pointer indirection
+        // during sort comparisons and fold iterations.
+        let mut tasks: Vec<(i32, i32)> = tasks.iter().map(|t| (t[0], t[1])).collect();
+
+        // Sort by buffer (minimum - actual) descending: highest buffer first.
+        tasks.sort_unstable_by_key(|&(actual, minimum)| actual - minimum);
 
         // Simulate forward: at each task we need initial >= spent_so_far + minimum.
-        let (_, required) = tasks.iter().fold((0, 0), |(spent, best), t| {
-            let actual = t[0];
-            let minimum = t[1];
-            (spent + actual, best.max(spent + minimum))
-        });
+        let (_, required) = tasks
+            .iter()
+            .fold((0, 0), |(spent, best), &(actual, minimum)| {
+                (spent + actual, best.max(spent + minimum))
+            });
         required
     }
 }

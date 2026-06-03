@@ -1,28 +1,31 @@
 impl Solution {
-    /// Finds the minimum common value in two sorted arrays using two pointers.
+    /// Finds the minimum common value using binary search on the larger array.
     ///
     /// # Intuition
-    /// Since both arrays are sorted, advance the pointer with the smaller value
-    /// until a match is found or one array is exhausted.
+    /// Both arrays are sorted. Iterating the smaller array and binary-searching
+    /// each element in the larger one is O(m log n), which beats the O(m + n)
+    /// two-pointer approach when one array is significantly shorter.
     ///
     /// # Approach
-    /// Two-pointer scan: compare elements and advance the smaller one.
+    /// 1. Ensure `nums1` is the shorter array (swap if needed).
+    /// 2. For each element in `nums1`, binary-search `nums2`.
+    /// 3. Return the first hit, or -1 if none found.
     ///
     /// # Complexity
-    /// - Time: O(m + n)
+    /// - Time: O(m log n) where m = min(len1, len2), n = max(len1, len2)
     /// - Space: O(1)
     pub fn get_common(nums1: Vec<i32>, nums2: Vec<i32>) -> i32 {
-        let (mut i, mut j) = (0, 0);
+        let (small, large) = if nums1.len() <= nums2.len() {
+            (&nums1, &nums2)
+        } else {
+            (&nums2, &nums1)
+        };
 
-        while i < nums1.len() && j < nums2.len() {
-            match nums1[i].cmp(&nums2[j]) {
-                std::cmp::Ordering::Equal => return nums1[i],
-                std::cmp::Ordering::Less => i += 1,
-                std::cmp::Ordering::Greater => j += 1,
-            }
-        }
-
-        -1
+        small
+            .iter()
+            .find(|&&v| large.binary_search(&v).is_ok())
+            .copied()
+            .unwrap_or(-1)
     }
 }
 
@@ -48,5 +51,19 @@ mod tests {
     #[test]
     fn test_single_elements() {
         assert_eq!(Solution::get_common(vec![5], vec![5]), 5);
+    }
+
+    #[test]
+    fn test_minimum_common_returned() {
+        assert_eq!(Solution::get_common(vec![1, 2, 3, 6], vec![2, 3, 4, 5]), 2);
+    }
+
+    #[test]
+    fn test_large_disjoint_prefix() {
+        // nums1 is tiny, nums2 is large — binary search shines here
+        assert_eq!(
+            Solution::get_common(vec![100], vec![1, 2, 3, 99, 100, 101]),
+            100
+        );
     }
 }
