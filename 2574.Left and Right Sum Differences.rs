@@ -12,7 +12,7 @@ impl Solution {
     /// # Complexity
     /// - Time: O(n)
     /// - Space: O(n) for output
-    pub fn left_rigth_difference(nums: Vec<i32>) -> Vec<i32> {
+    pub fn left_right_difference(nums: Vec<i32>) -> Vec<i32> {
         let mut left = 0;
         let mut right: i32 = nums.iter().sum();
 
@@ -34,20 +34,20 @@ mod tests {
     #[test]
     fn test_basic() {
         assert_eq!(
-            Solution::left_rigth_difference(vec![10, 4, 8, 3]),
+            Solution::left_right_difference(vec![10, 4, 8, 3]),
             vec![15, 1, 11, 22]
         );
     }
 
     #[test]
     fn test_single_element() {
-        assert_eq!(Solution::left_rigth_difference(vec![1]), vec![0]);
+        assert_eq!(Solution::left_right_difference(vec![1]), vec![0]);
     }
 
     #[test]
     fn test_uniform() {
         assert_eq!(
-            Solution::left_rigth_difference(vec![5, 5, 5]),
+            Solution::left_right_difference(vec![5, 5, 5]),
             vec![10, 0, 10]
         );
     }
