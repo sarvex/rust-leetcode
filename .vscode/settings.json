@@ -5,7 +5,9 @@
     "statusBar.foreground": "#e7e7e7",
     "statusBarItem.hoverBackground": "#fa1b49",
     "statusBarItem.remoteBackground": "#dd0531",
-    "statusBarItem.remoteForeground": "#e7e7e7"
+    "statusBarItem.remoteForeground": "#e7e7e7",
+    "statusBar.border": "#dd0531",
+    "tab.activeBorder": "#fa1b49"
   },
   "peacock.color": "#dd0531",
   "cSpell.words": [
