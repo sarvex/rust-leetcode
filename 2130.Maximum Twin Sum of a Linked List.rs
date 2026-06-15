@@ -1,45 +1,50 @@
 // Definition for singly-linked list.
-#[derive(PartialEq, Eq, Clone, Debug)]
-pub struct ListNode {
-    pub val: i32,
-    pub next: Option<Box<ListNode>>,
-}
+// #[derive(PartialEq, Eq, Clone, Debug)]
+// pub struct ListNode {
+//     pub val: i32,
+//     pub next: Option<Box<ListNode>>,
+// }
 
-impl ListNode {
-    #[inline]
-    fn new(val: i32) -> Self {
-        ListNode { next: None, val }
-    }
-}
+// impl ListNode {
+//     #[inline]
+//     fn new(val: i32) -> Self {
+//         ListNode { next: None, val }
+//     }
+// }
 
 impl Solution {
-    /// Finds the maximum twin sum by collecting values and pairing from ends.
+    /// Finds the maximum twin sum by collecting values and pairing from both ends.
     ///
     /// # Intuition
-    /// In a linked list of even length n, twin nodes are at positions i and n-1-i.
-    /// We need to find the maximum sum of any twin pair.
+    /// In a linked list of even length n, node i and node n-1-i are twins.
+    /// Collecting all values into a flat array gives O(1) indexed access,
+    /// making the pairing loop straightforward and cache-friendly.
     ///
     /// # Approach
-    /// 1. Traverse the linked list and collect all values into a vector
-    /// 2. Use two pointers from start and end to calculate twin sums
-    /// 3. Track and return the maximum twin sum
+    /// 1. Traverse the list once, pushing each value into a `Vec`.
+    /// 2. Walk indices 0..n/2, summing each element with its mirror at n-1-i.
+    /// 3. Track and return the running maximum.
     ///
     /// # Complexity
-    /// - Time: O(n) where n is the number of nodes
-    /// - Space: O(n) for storing the values
+    /// - Time: O(n)
+    /// - Space: O(n)
     pub fn pair_sum(head: Option<Box<ListNode>>) -> i32 {
         let mut values = Vec::new();
-        let mut current = &head;
-        while let Some(node) = current {
+
+        let mut cur = &head;
+        while let Some(node) = cur {
             values.push(node.val);
-            current = &node.next;
+            cur = &node.next;
         }
 
         let n = values.len();
-        (0..n / 2)
-            .map(|i| values[i] + values[n - 1 - i])
-            .max()
-            .unwrap_or(0)
+        let mut res = 0;
+
+        for i in 0..n / 2 {
+            res = res.max(values[i] + values[n - 1 - i]);
+        }
+
+        res
     }
 }
 
