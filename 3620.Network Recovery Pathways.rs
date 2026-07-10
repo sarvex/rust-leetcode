@@ -1,19 +1,19 @@
 impl Solution {
-    /// Binary search on minimum edge cost with Dijkstra validation.
+    /// Single Dijkstra pass tracking minimum edge cost on optimal path.
     ///
     /// # Intuition
-    /// The answer (maximum path score) must equal some edge cost on the optimal path.
-    /// Binary search on this value: for a candidate min-cost, check if a valid path
-    /// exists using only edges with cost >= min-cost and total cost <= k.
+    /// Instead of binary search + multiple Dijkstra runs, track the minimum edge
+    /// on each path during a single Dijkstra. State: (total_cost, min_edge, node).
+    /// Optimize for maximum min_edge among all paths with total_cost <= k.
     ///
     /// # Approach
     /// 1. Filter edges to only those connecting online nodes
-    /// 2. Binary search on sorted unique edge costs
-    /// 3. For each candidate, run Dijkstra to find shortest path using valid edges
-    /// 4. Valid if shortest path total <= k
+    /// 2. Run modified Dijkstra with state (cost, -min_edge, node)
+    /// 3. For each node, track best (min_edge) for each reachable cost
+    /// 4. Return maximum min_edge that reaches destination with cost <= k
     ///
     /// # Complexity
-    /// - Time: O(m log m + m log(unique_costs) * (n + m) log n)
+    /// - Time: O(m log m + (n + m) log n)
     /// - Space: O(n + m)
     pub fn find_max_path_score(edges: Vec<Vec<i32>>, online: Vec<bool>, k: i64) -> i32 {
         use std::cmp::Reverse;
@@ -21,65 +21,59 @@ impl Solution {
 
         let n = online.len();
         let mut adj: Vec<Vec<(usize, i64)>> = vec![vec![]; n];
-        let mut all_costs: Vec<i64> = vec![];
 
-        edges.iter().for_each(|edge| {
+        for edge in edges.iter() {
             let (u, v, cost) = (edge[0] as usize, edge[1] as usize, edge[2] as i64);
             if online[u] && online[v] {
                 adj[u].push((v, cost));
-                all_costs.push(cost);
             }
-        });
-
-        if all_costs.is_empty() {
-            return -1;
         }
 
-        all_costs.sort_unstable();
-        all_costs.dedup();
+        // State: (cost, -min_edge_on_path, node)
+        // Negative min_edge for max-heap behavior on min_edge
+        let mut heap = BinaryHeap::new();
+        heap.push(Reverse((0i64, i64::MIN, 0usize)));
 
-        let can_reach = |min_cost: i64| -> bool {
-            let mut dist = vec![i64::MAX; n];
-            dist[0] = 0;
-            let mut heap = BinaryHeap::new();
-            heap.push(Reverse((0i64, 0usize)));
+        // best[node] = maximum min_edge we've seen reaching this node with cost <= k
+        let mut best = vec![i64::MIN; n];
+        best[0] = i64::MAX;
 
-            while let Some(Reverse((d, u))) = heap.pop() {
-                if d > dist[u] {
+        let mut result = -1;
+
+        while let Some(Reverse((cost, neg_min_edge, u))) = heap.pop() {
+            let min_edge = -neg_min_edge;
+
+            // If we've already found a better path to this node, skip
+            if min_edge < best[u] {
+                continue;
+            }
+
+            if u == n - 1 {
+                result = result.max(min_edge as i32);
+                continue;
+            }
+
+            for &(v, edge_cost) in adj[u].iter() {
+                let new_cost = cost + edge_cost;
+                if new_cost > k {
                     continue;
                 }
-                if u == n - 1 {
-                    return true;
+
+                let new_min_edge = if u == 0 {
+                    edge_cost
+                } else {
+                    min_edge.min(edge_cost)
+                };
+
+                // Only explore if this gives a better min_edge for node v
+                if new_min_edge > best[v] {
+                    best[v] = new_min_edge;
+                    heap.push(Reverse((new_cost, -new_min_edge, v)));
                 }
-                adj[u].iter().for_each(|&(v, cost)| {
-                    if cost >= min_cost {
-                        let new_dist = d + cost;
-                        if new_dist < dist[v] && new_dist <= k {
-                            dist[v] = new_dist;
-                            heap.push(Reverse((new_dist, v)));
-                        }
-                    }
-                });
-            }
-
-            dist[n - 1] <= k
-        };
-
-        if !can_reach(0) {
-            return -1;
-        }
-
-        let (mut lo, mut hi) = (0, all_costs.len() - 1);
-        while lo < hi {
-            let mid = lo + (hi - lo + 1) / 2;
-            if can_reach(all_costs[mid]) {
-                lo = mid;
-            } else {
-                hi = mid - 1;
             }
         }
 
-        all_costs[lo] as i32
+        result
     }
 }
 

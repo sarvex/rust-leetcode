@@ -1,72 +1,142 @@
+/// Per-digit transition state tracking how many numbers ending in a given digit
+/// are rising (last step up), falling (last step down), or stagnant (last step flat),
+/// along with the accumulated waviness contribution from those numbers.
+#[derive(Clone, Copy, Default)]
+struct State {
+    rising: i32,
+    falling: i32,
+    stagnant: i32,
+    waviness: i32,
+}
+
+impl State {
+    /// Total count of numbers represented by this state.
+    #[inline]
+    fn total(self) -> i32 {
+        self.rising + self.falling + self.stagnant
+    }
+
+    /// Extend all numbers tracked by `other` (which last transitioned via `other_digit`)
+    /// by appending `digit` as the next digit, accumulating into `self`.
+    ///
+    /// A new peak/valley is created whenever the direction reverses:
+    /// - appending a smaller digit after a rising sequence creates a peak (+rising)
+    /// - appending a larger digit after a falling sequence creates a valley (+falling)
+    #[inline]
+    fn update(&mut self, digit: u8, other: State, other_digit: u8) {
+        if digit < other_digit {
+            self.falling += other.total();
+            self.waviness += other.rising + other.waviness;
+        } else if digit == other_digit {
+            self.stagnant += other.total();
+            self.waviness += other.waviness;
+        } else {
+            self.rising += other.total();
+            self.waviness += other.falling + other.waviness;
+        }
+    }
+}
+
 impl Solution {
     /// Calculate total waviness for all numbers in range [num1, num2].
     ///
     /// # Intuition
-    /// Waviness is the count of peaks and valleys in a number's digits.
-    /// For the given constraint (num2 <= 10^5, max 100k numbers), a simple
-    /// iterative approach is optimal - no HashMap overhead, no recursion.
+    /// Track digit-DP states that record, for each possible last digit, how many
+    /// numbers-so-far are rising/falling/stagnant at that digit, and how much
+    /// waviness they have accumulated. Appending a new digit updates states in
+    /// O(10²) per position — entirely independent of the range size.
     ///
     /// # Approach
-    /// For each number in [num1, num2]:
-    /// 1. Extract digits using division/modulo (faster than to_string)
-    /// 2. Use fixed-size array of 6 elements (max digits for 10^5) instead of Vec
-    /// 3. Check each interior digit for peak (greater than both neighbors) or
-    ///    valley (less than both neighbors)
-    /// 4. Sum counts using iterator fold
+    /// Reduce `[num1, num2]` to `f(num2) - f(num1 - 1)` where `f(n)` counts total
+    /// waviness over `[1, n]`.
+    ///
+    /// `f(n)` processes the digits of `n` left-to-right, maintaining:
+    /// - `states[d]`: aggregate state for all unconstrained numbers whose last digit is `d`
+    /// - `limit`: aggregate state for the single number that is still "tight" (equal to the
+    ///   prefix of `n` seen so far)
+    ///
+    /// At each position we:
+    /// 1. Extend every free number by all 10 digits (updating `new_states`).
+    /// 2. For digits strictly below the current digit of `n`, "release" the tight number
+    ///    into the free pool.
+    /// 3. Advance the tight number with exactly the current digit of `n`.
     ///
     /// # Complexity
-    /// - Time: O((num2 - num1 + 1) * d) where d ≤ 6 (at most 600k operations)
-    /// - Space: O(1) - fixed size array on stack
+    /// - Time: O(D × 10²) per call, D ≤ 6 for num2 ≤ 10^5 — effectively O(1)
+    /// - Space: O(D) for digit extraction; O(10) for state arrays
     pub fn total_waviness(num1: i32, num2: i32) -> i32 {
-        (num1..=num2)
-            .map(Self::calculate_waviness)
-            .sum()
+        if num1 > 0 {
+            return Self::count_up_to(num2) - Self::count_up_to(num1 - 1);
+        }
+        Self::count_up_to(num2)
     }
 
-    /// Calculate waviness of a single number using stack-allocated digit array.
-    #[inline]
-    fn calculate_waviness(mut num: i32) -> i32 {
-        // Fixed-size array for digits (10^5 has at most 6 digits)
-        let mut digits = [0i32; 6];
-        let mut len = 0usize;
-
-        // Extract digits (LSB first, then reverse mentally by reading backwards)
-        while num > 0 {
-            digits[len] = num % 10;
-            num /= 10;
-            len += 1;
-        }
-
-        // Numbers with fewer than 3 digits have waviness 0
-        if len < 3 {
+    /// Total waviness of all integers in [1, n].
+    fn count_up_to(n: i32) -> i32 {
+        // Numbers with fewer than 3 digits have no interior positions → waviness 0.
+        if n <= 99 {
             return 0;
         }
 
-        // Check interior positions for peaks/valleys
-        // digits are stored LSB-first, so we check from len-2 down to 1
-        // position i in original = digits[len-1-i] in our array
-        // We want to check positions 1 to len-2 in original number
-        // Original: d[len-1] ... d[2] d[1] d[0]
-        // Check: d[1] is middle of (d[2], d[1], d[0])
-        // In our array: digits[1] is d[1], digits[0] is d[0], digits[2] is d[2]
-        // Wait, let's think again:
-        // num = 123, we extract: digits[0]=3, digits[1]=2, digits[2]=1, len=3
-        // Original number: digits[2]digits[1]digits[0] = 123
-        // Check position 1 (digit 2): neighbors are digits[2]=1 and digits[0]=3
-        // So we check: digits[1] against digits[2] and digits[0]
+        // Extract digits of n, most-significant first.
+        let mut digits = [0u8; 6];
+        let mut len = 0usize;
+        let mut tmp = n;
+        while tmp > 0 {
+            digits[len] = (tmp % 10) as u8;
+            len += 1;
+            tmp /= 10;
+        }
+        digits[..len].reverse();
+        let digits = &digits[..len];
 
-        let mut waviness = 0;
-        for mid in 1..len - 1 {
-            let curr = digits[mid];
-            let left = digits[mid + 1]; // higher digit (more significant)
-            let right = digits[mid - 1]; // lower digit (less significant)
+        // `limit` tracks the tight prefix (the number that matches n's digits so far).
+        // Starts as a single stagnant "seed" before any digit has been appended.
+        let mut limit = State {
+            stagnant: 1,
+            ..State::default()
+        };
+        let mut prior_limit_digit = digits[0];
 
-            if (curr > left && curr > right) || (curr < left && curr < right) {
-                waviness += 1;
-            }
+        // `states[d]` = aggregate state for all free numbers whose last appended digit is d.
+        // After processing the first digit of n, free numbers are those with a first digit
+        // in [1, digits[0]-1] (no leading zeros for positive integers).
+        let mut states = [State::default(); 10];
+        for d in 1..prior_limit_digit {
+            states[d as usize].stagnant = 1;
         }
 
-        waviness
+        // Process each subsequent digit position.
+        for &cur_limit_digit in &digits[1..] {
+            // Step 1: extend every free number by all 10 possible next digits.
+            let mut new_states = [State::default(); 10];
+            for new_d in 0u8..10 {
+                for old_d in 0u8..10 {
+                    new_states[new_d as usize].update(new_d, states[old_d as usize], old_d);
+                }
+                // A digit > 0 can start a new free number of the current length.
+                if new_d > 0 {
+                    new_states[new_d as usize].stagnant += 1;
+                }
+            }
+
+            // Step 2: release the tight prefix for all digits strictly below cur_limit_digit.
+            for free_d in 0..cur_limit_digit {
+                new_states[free_d as usize].update(free_d, limit, prior_limit_digit);
+            }
+
+            // Step 3: advance the tight number with cur_limit_digit.
+            let mut new_limit = State::default();
+            new_limit.update(cur_limit_digit, limit, prior_limit_digit);
+
+            states = new_states;
+            limit = new_limit;
+            prior_limit_digit = cur_limit_digit;
+        }
+
+        // Sum waviness over all free numbers plus the tight number itself.
+        let free_waviness: i32 = states.iter().map(|s| s.waviness).sum();
+        free_waviness + limit.waviness
     }
 }
 
@@ -76,73 +146,75 @@ mod tests {
 
     #[test]
     fn test_example_1() {
-        // 120: 2 is peak (1 < 2 > 0) -> 1
-        // 121: 2 is peak (1 < 2 > 1) -> 1
-        // 130: 3 is peak (1 < 3 > 0) -> 1
+        // 120: 2 is peak (1<2>0) → 1; 121: 2 is peak → 1; 130: 3 is peak → 1
         assert_eq!(Solution::total_waviness(120, 130), 3);
     }
 
     #[test]
     fn test_example_2() {
-        // 198: 9 is peak (1 < 9 > 8) -> 1
-        // 199: no peak/valley -> 0
-        // 200: no peak/valley -> 0
-        // 201: 0 is valley (2 > 0 < 1) -> 1
-        // 202: 0 is valley (2 > 0 < 2) -> 1
+        // 198→1, 199→0, 200→0, 201→1, 202→1
         assert_eq!(Solution::total_waviness(198, 202), 3);
     }
 
     #[test]
     fn test_example_3() {
-        // 4848: 8 is peak (4 < 8 > 4), 4 is valley (8 > 4 < 8) -> 2
+        // 4848: 8 is peak, 4 is valley → 2
         assert_eq!(Solution::total_waviness(4848, 4848), 2);
     }
 
     #[test]
-    fn test_single_digit_numbers() {
+    fn test_single_digit_range() {
         assert_eq!(Solution::total_waviness(1, 9), 0);
     }
 
     #[test]
-    fn test_two_digit_numbers() {
+    fn test_two_digit_range() {
         assert_eq!(Solution::total_waviness(10, 99), 0);
     }
 
     #[test]
     fn test_three_digit_valley() {
-        // 101: 0 is valley (1 > 0 < 1) -> 1
+        // 101: 0 is valley (1>0<1) → 1
         assert_eq!(Solution::total_waviness(101, 101), 1);
     }
 
     #[test]
     fn test_three_digit_peak() {
-        // 121: 2 is peak (1 < 2 > 1) -> 1
+        // 121: 2 is peak → 1
         assert_eq!(Solution::total_waviness(121, 121), 1);
     }
 
     #[test]
     fn test_multiple_peaks_valleys() {
-        // 12121: digits [1,2,1,2,1]
-        // windows: [1,2,1] -> 2 is peak, [2,1,2] -> 1 is valley, [1,2,1] -> 2 is peak
+        // 12121: peak@2, valley@1, peak@2 → 3
         assert_eq!(Solution::total_waviness(12121, 12121), 3);
     }
 
     #[test]
-    fn test_equal_neighbors() {
-        // 1221: 2 == 2, so no peak or valley
+    fn test_equal_neighbors_no_waviness() {
+        // 1221: no strict peak/valley → 0
         assert_eq!(Solution::total_waviness(1221, 1221), 0);
     }
 
     #[test]
-    fn test_range_of_one() {
+    fn test_flat_number() {
         assert_eq!(Solution::total_waviness(100, 100), 0);
     }
 
     #[test]
-    fn test_large_range_small_numbers() {
-        // 100-109: 100 has no waviness (0 is not < 0)
-        // 101-109: 0 is valley in all (1 > 0 < last_digit where last_digit >= 1)
-        // Total: 9 numbers with waviness 1 each = 9
+    fn test_decade_boundary() {
+        // 100: 0; 101–109: each has valley at tens digit → 9
         assert_eq!(Solution::total_waviness(100, 109), 9);
+    }
+
+    #[test]
+    fn test_range_starting_at_one() {
+        assert_eq!(Solution::total_waviness(1, 100), 0);
+    }
+
+    #[test]
+    fn test_full_domain() {
+        let result = Solution::total_waviness(1, 100_000);
+        assert!(result > 0);
     }
 }
