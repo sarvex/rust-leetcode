@@ -1,77 +1,75 @@
-struct Solution;
-
 impl Solution {
-    /// Uses 3-state DP tracking GCD pairs to count disjoint subsequence pairs.
+    /// In-place DP bounded by max(nums) with precomputed GCD table.
     ///
     /// # Intuition
-    /// Each element has three choices: join seq1, join seq2, or skip. We track
-    /// the GCD of each subsequence as DP state. Since values are at most 200,
-    /// GCD values are bounded, making a 2D GCD state feasible.
+    /// Each element joins seq1, joins seq2, or is skipped. Tracking (gcd1, gcd2)
+    /// as DP state suffices because GCD values are always divisors of the input,
+    /// so the reachable state space is bounded by max(nums), not a fixed 200.
     ///
     /// # Approach
-    /// 1. Define dp[g1][g2] = number of ways where seq1 has GCD g1 and seq2 has GCD g2.
-    /// 2. Use g=0 to represent an empty subsequence (gcd(0,x) = x).
-    /// 3. For each number, update DP by considering all three choices.
-    /// 4. Sum dp[g][g] for all g >= 1 to count valid pairs.
+    /// 1. Let m = max(nums). GCD values live in [0, m], so the table is (m+1)².
+    /// 2. Precompute gcd_table[a][b] for all a, b in [0, m] once.
+    /// 3. Use two flat buffers (dp, scratch) allocated once; swap via copy+fill
+    ///    each round — zero heap allocation in the hot loop.
+    /// 4. For each value v and every nonzero cell (j, k):
+    ///    - skip:  dp[j][k]              += ways
+    ///    - seq1:  dp[gcd(j,v)][k]       += ways
+    ///    - seq2:  dp[j][gcd(k,v)]       += ways
+    /// 5. Answer = Σ dp[g][g] for g in [1, m].
     ///
     /// # Complexity
-    /// - Time: O(n * M^2) where M = max(nums) = 200
-    /// - Space: O(M^2)
+    /// - Time: O(n · m²) where m = max(nums) ≤ 200
+    /// - Space: O(m²)
     pub fn subsequence_pair_count(nums: Vec<i32>) -> i32 {
-        const MOD: u64 = 1_000_000_007;
-        const MAX_VAL: usize = 201;
+        const MOD: i32 = 1_000_000_007;
 
-        let mut dp = vec![vec![0u64; MAX_VAL]; MAX_VAL];
-        dp[0][0] = 1;
+        let m = *nums.iter().max().unwrap() as usize;
+        let size = m + 1;
+
+        // Precompute GCD table over [0, m] — pays for itself in the O(n·m²) loop.
+        let gcd_table: Vec<Vec<u8>> = (0..size)
+            .map(|a| (0..size).map(|b| Self::gcd(a, b) as u8).collect())
+            .collect();
+
+        // Two flat buffers; copy_from_slice + fill replaces per-element allocation.
+        let mut dp = vec![0i32; size * size];
+        let mut scratch = vec![0i32; size * size];
+        dp[0] = 1; // dp[0][0] = 1
 
         for &num in &nums {
             let v = num as usize;
-            let mut new_dp = vec![vec![0u64; MAX_VAL]; MAX_VAL];
 
-            for g1 in 0..MAX_VAL {
-                for g2 in 0..MAX_VAL {
-                    if dp[g1][g2] == 0 {
+            scratch.copy_from_slice(&dp);
+            dp.fill(0);
+
+            for j in 0..size {
+                let dj = gcd_table[j][v] as usize;
+                for k in 0..size {
+                    let val = scratch[j * size + k];
+                    if val == 0 {
                         continue;
                     }
-                    let ways = dp[g1][g2];
+                    let dk = gcd_table[k][v] as usize;
 
-                    // Skip this element
-                    new_dp[g1][g2] = (new_dp[g1][g2] + ways) % MOD;
-
-                    // Add to seq1
-                    let ng1 = Self::gcd(g1, v);
-                    new_dp[ng1][g2] = (new_dp[ng1][g2] + ways) % MOD;
-
-                    // Add to seq2
-                    let ng2 = Self::gcd(g2, v);
-                    new_dp[g1][ng2] = (new_dp[g1][ng2] + ways) % MOD;
+                    // Skip
+                    dp[j * size + k] = (dp[j * size + k] + val) % MOD;
+                    // Assign to seq1
+                    dp[dj * size + k] = (dp[dj * size + k] + val) % MOD;
+                    // Assign to seq2
+                    dp[j * size + dk] = (dp[j * size + dk] + val) % MOD;
                 }
             }
-
-            dp = new_dp;
         }
 
-        let result = (1..MAX_VAL).fold(0u64, |acc, g| (acc + dp[g][g]) % MOD);
-
-        result as i32
+        (1..size).fold(0, |acc, g| (acc + dp[g * size + g]) % MOD)
     }
 
     #[inline(always)]
-    fn gcd(a: usize, b: usize) -> usize {
-        if a == 0 {
-            return b;
+    fn gcd(mut a: usize, mut b: usize) -> usize {
+        while b != 0 {
+            (a, b) = (b, a % b);
         }
-        if b == 0 {
-            return a;
-        }
-        let mut x = a;
-        let mut y = b;
-        while y != 0 {
-            let temp = y;
-            y = x % y;
-            x = temp;
-        }
-        x
+        a
     }
 }
 
