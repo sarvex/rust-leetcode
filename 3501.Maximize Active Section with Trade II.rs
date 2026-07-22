@@ -1,90 +1,73 @@
 impl Solution {
-    /// Uses sparse tables over 0-runs for O(log n) query processing.
+    /// Sparse table RMQ over zero-run groups for O((n + q) log n) query processing.
     ///
     /// # Intuition
-    /// Trade: sacrifice inner 1-run, convert 0-run to 1's.
-    /// Option 1: merge adjacent 0-runs (gain = sum)
-    /// Option 2: sacrifice min 1-run, gain max non-adjacent 0-run
+    /// A trade sacrifices one inner 1-run (converts it to 0s), then converts one
+    /// 0-run (now surrounded by 1s) to 1s. The net gain in the full string equals
+    /// `(converted 0-run size within query) - (sacrificed 1-run size)`. The answer
+    /// for each query is `total_ones_in_s + max_gain`.
     ///
     /// # Approach
-    /// 1. Precompute runs and separate 0-runs from 1-runs
-    /// 2. Build sparse tables for range max of adjacent sums, max 0-run, min 1-run
-    /// 3. For each query, use binary search to find relevant 0-run range
-    /// 4. Handle partial boundary 0-runs, use sparse tables for middle
+    /// 1. Precompute global zero-runs and inner 1-runs (gaps between consecutive zero-runs).
+    /// 2. Build three sparse tables:
+    ///    - `max_adj`: max of `z[i] + z[i+1]` for adjacent zero-run pairs (merged-run gain).
+    ///    - `max_zero`: max single zero-run length (best target after any sacrifice).
+    ///    - `min_one`: min inner 1-run length (cheapest sacrifice).
+    /// 3. Per query `[l, r]`, binary-search to find overlapping zero-runs `[fz, lz]`.
+    ///    Clip boundary runs to the query window, then compute:
+    ///    - **Option A** (adjacent pair): `clipped(z[k]) + clipped(z[k+1])` for best `k`.
+    ///    - **Option B** (independent choice): `max_zero_in_query - min_inner_one_in_query`.
+    ///      Return `total_ones + max(0, best_gain)`.
     ///
     /// # Complexity
     /// - Time: O(n log n + q log n)
-    /// - Space: O(n)
+    /// - Space: O(n log n)
     pub fn max_active_sections_after_trade(s: String, queries: Vec<Vec<i32>>) -> Vec<i32> {
         let s = s.as_bytes();
         let n = s.len();
-
         let total_ones: i32 = s.iter().filter(|&&c| c == b'1').count() as i32;
 
-        // Build runs: (start, end, is_one)
-        let mut runs: Vec<(u32, u32, bool)> = Vec::with_capacity(n);
-        let mut i = 0u32;
-        while (i as usize) < n {
-            let start = i;
-            let is_one = s[i as usize] == b'1';
-            while (i as usize) < n && (s[i as usize] == b'1') == is_one {
+        // Build zero-runs: (start, end, length), sorted by start position.
+        let mut zero_runs: Vec<(u32, u32, i32)> = Vec::with_capacity(n / 2 + 1);
+        let mut i = 0usize;
+        while i < n {
+            if s[i] == b'0' {
+                let start = i;
+                while i < n && s[i] == b'0' {
+                    i += 1;
+                }
+                zero_runs.push((start as u32, (i - 1) as u32, (i - start) as i32));
+            } else {
                 i += 1;
             }
-            runs.push((start, i - 1, is_one));
         }
-
-        if runs.is_empty() {
-            return queries.iter().map(|_| total_ones).collect();
-        }
-
-        // Extract 0-runs with their positions: (run_start, run_end, length)
-        let zero_runs: Vec<(u32, u32, i32)> = runs
-            .iter()
-            .filter(|r| !r.2)
-            .map(|r| (r.0, r.1, (r.1 - r.0 + 1) as i32))
-            .collect();
 
         let nz = zero_runs.len();
         if nz == 0 {
             return queries.iter().map(|_| total_ones).collect();
         }
 
-        // zero_lens for sparse tables
         let zero_lens: Vec<i32> = zero_runs.iter().map(|r| r.2).collect();
 
-        // Adjacent sums: adj_sums[i] = zero_lens[i] + zero_lens[i+1]
-        let adj_sums: Vec<i32> = if nz >= 2 {
-            zero_lens.windows(2).map(|w| w[0] + w[1]).collect()
-        } else {
-            vec![]
-        };
+        // inner_ones[i] = 1-run length between zero_runs[i] and zero_runs[i+1].
+        let inner_ones: Vec<i32> = (0..nz.saturating_sub(1))
+            .map(|i| (zero_runs[i + 1].0 - zero_runs[i].1 - 1) as i32)
+            .collect();
 
-        // Inner 1-runs: 1-run between consecutive 0-runs
-        // inner_ones[i] = total length of 1-runs between 0-run i and i+1
-        let inner_ones: Vec<i32> = if nz >= 2 {
-            (0..nz - 1)
-                .map(|i| {
-                    let end_of_i = zero_runs[i].1;
-                    let start_of_next = zero_runs[i + 1].0;
-                    // Length of 1-runs between them
-                    (start_of_next - end_of_i - 1) as i32
-                })
-                .collect()
-        } else {
-            vec![]
-        };
+        // adj_sums[i] = z[i] + z[i+1]: gain when merging adjacent pair i and i+1.
+        let adj_sums: Vec<i32> = (0..nz.saturating_sub(1))
+            .map(|i| zero_lens[i] + zero_lens[i + 1])
+            .collect();
 
-        // Build sparse tables
-        let max_adj_st = SparseTable::new_max(&adj_sums);
-        let max_zero_st = SparseTable::new_max(&zero_lens);
-        let min_one_st = SparseTable::new_min(&inner_ones);
+        let max_adj_st = SparseTable::new(&adj_sums, true);
+        let max_zero_st = SparseTable::new(&zero_lens, true);
+        let min_one_st = SparseTable::new(&inner_ones, false);
 
         queries
             .iter()
             .map(|q| {
-                let l = q[0] as u32;
-                let r = q[1] as u32;
-
+                let l = q[0] as usize;
+                let r = q[1] as usize;
                 let gain = Self::compute_gain(
                     l,
                     r,
@@ -95,7 +78,6 @@ impl Solution {
                     &min_one_st,
                     nz,
                 );
-
                 total_ones + gain
             })
             .collect()
@@ -103,8 +85,8 @@ impl Solution {
 
     #[allow(clippy::too_many_arguments)]
     fn compute_gain(
-        l: u32,
-        r: u32,
+        l: usize,
+        r: usize,
         zero_runs: &[(u32, u32, i32)],
         zero_lens: &[i32],
         max_adj_st: &SparseTable,
@@ -112,113 +94,76 @@ impl Solution {
         min_one_st: &SparseTable,
         nz: usize,
     ) -> i32 {
-        if nz == 0 {
+        // Locate zero-runs overlapping [l, r].
+        let fz = zero_runs.partition_point(|zr| (zr.1 as usize) < l);
+        if fz >= nz || (zero_runs[fz].0 as usize) > r {
             return 0;
         }
-
-        // Find first 0-run that overlaps with [l, r]
-        // Binary search: find first 0-run where end >= l
-        let first_zero = zero_runs.partition_point(|zr| zr.1 < l);
-        if first_zero >= nz {
-            return 0; // No 0-run overlaps
+        let lz = zero_runs
+            .partition_point(|zr| (zr.0 as usize) <= r)
+            .saturating_sub(1);
+        if lz < fz || lz - fz < 1 {
+            return 0; // fewer than 2 zero-runs → no valid trade
         }
 
-        // Check if this 0-run actually overlaps (start <= r)
-        if zero_runs[first_zero].0 > r {
-            return 0;
-        }
-
-        // Find last 0-run that overlaps with [l, r]
-        // Binary search: find first 0-run where start > r, then go back one
-        let last_zero = zero_runs.partition_point(|zr| zr.0 <= r).saturating_sub(1);
-
-        if last_zero < first_zero {
-            return 0;
-        }
-
-        let fz = first_zero;
-        let lz = last_zero;
-        let num_zeros = lz - fz + 1;
-
-        if num_zeros <= 1 {
-            return 0;
-        }
-
-        // Compute effective lengths for boundary 0-runs
-        let first_zero_eff = {
-            let (zs, ze, _) = zero_runs[fz];
-            let os = zs.max(l);
-            let oe = ze.min(r);
-            (oe - os + 1) as i32
+        // Compute clipped size of a zero-run at index idx within [l, r].
+        let clip = |idx: usize| -> i32 {
+            let (zs, ze, _) = zero_runs[idx];
+            ((ze as usize).min(r) - (zs as usize).max(l) + 1) as i32
         };
 
-        let last_zero_eff = if fz == lz {
-            first_zero_eff
+        let z_fz = clip(fz);
+        let z_lz = clip(lz);
+
+        // Max clipped zero-run size in query (used for Option B).
+        let mid_max_zero = if lz > fz + 1 {
+            max_zero_st.query(fz + 1, lz - 1)
         } else {
-            let (zs, ze, _) = zero_runs[lz];
-            let os = zs.max(l);
-            let oe = ze.min(r);
-            (oe - os + 1) as i32
+            i32::MIN
         };
+        let max_zero_val = z_fz.max(z_lz).max(mid_max_zero);
 
         let mut max_gain = 0i32;
 
-        // Option 1: max sum of adjacent 0-runs
-        if num_zeros >= 2 {
-            // Compute effective length of second 0-run (fz+1)
-            let second_eff = if fz + 1 == lz {
-                last_zero_eff // It's also the last, use its effective length
-            } else {
-                // It's fully included (not the last, and not the first)
-                zero_lens[fz + 1]
-            };
+        // Option A: adjacent pair sacrifice — gain = clipped(z[k]) + clipped(z[k+1]).
+        // Boundary pairs (fz and lz) use clipped sizes; interior pairs use the sparse table.
 
-            // First pair: [fz, fz+1]
-            max_gain = max_gain.max(first_zero_eff + second_eff);
+        // Pair at k = fz
+        let z_fz1 = if fz + 1 == lz {
+            z_lz
+        } else {
+            zero_lens[fz + 1]
+        };
+        max_gain = max_gain.max(z_fz + z_fz1);
 
-            // Last pair: [lz-1, lz]
-            if lz > fz + 1 {
-                // second_last is fully included
-                let second_last = zero_lens[lz - 1];
-                max_gain = max_gain.max(second_last + last_zero_eff);
-            }
+        // Pair at k = lz - 1 (only if lz > fz, i.e., at least 2 zero-runs)
+        let z_lz1 = if lz - 1 == fz {
+            z_fz
+        } else {
+            zero_lens[lz - 1]
+        };
+        max_gain = max_gain.max(z_lz1 + z_lz);
 
-            // Middle pairs: all fully included, use sparse table
-            if lz >= fz + 3 {
-                // Pairs from fz+1 to lz-2 (adj_sums indices)
-                let adj_max = max_adj_st.query(fz + 1, lz - 2);
-                max_gain = max_gain.max(adj_max);
+        // Interior pairs k ∈ [fz+1, lz-2]: both endpoints fully within [l, r].
+        if lz >= fz + 3 {
+            let interior_adj = max_adj_st.query(fz + 1, lz - 2);
+            if interior_adj > i32::MIN {
+                max_gain = max_gain.max(interior_adj);
             }
         }
 
-        // Option 2: max 0-run - min inner 1-run (for non-adjacent)
-        if num_zeros >= 3 {
-            // Max 0-run: consider boundary effective lengths and middle
-            let mid_max = if lz > fz + 1 {
-                max_zero_st.query(fz + 1, lz - 1)
-            } else {
-                i32::MIN
-            };
-            let max_zero_val = first_zero_eff.max(last_zero_eff).max(mid_max);
-
-            // Min inner 1-run: between 0-runs in range
-            // inner_ones[i] is between 0-run i and i+1
-            // We need inner_ones[fz..lz-1] for 1-runs fully between our 0-runs
-            let min_one_val = if lz > fz && fz < min_one_st.len() {
-                min_one_st.query(fz, (lz - 1).min(min_one_st.len() - 1))
-            } else {
-                i32::MAX
-            };
-
-            if max_zero_val != i32::MIN && min_one_val != i32::MAX {
-                max_gain = max_gain.max(max_zero_val - min_one_val);
-            }
+        // Option B: pick best zero-run, sacrifice cheapest inner 1-run.
+        // gain = max_zero_val - min_inner_one over [fz, lz-1].
+        let min_one_val = min_one_st.query(fz, lz - 1);
+        if min_one_val != i32::MAX {
+            max_gain = max_gain.max(max_zero_val - min_one_val);
         }
 
         max_gain
     }
 }
 
+/// Sparse table for idempotent range queries (max or min) in O(1) per query.
 struct SparseTable {
     table: Vec<Vec<i32>>,
     log: Vec<usize>,
@@ -227,14 +172,6 @@ struct SparseTable {
 }
 
 impl SparseTable {
-    fn new_max(arr: &[i32]) -> Self {
-        Self::new(arr, true)
-    }
-
-    fn new_min(arr: &[i32]) -> Self {
-        Self::new(arr, false)
-    }
-
     fn new(arr: &[i32], is_max: bool) -> Self {
         let n = arr.len();
         if n == 0 {
@@ -252,7 +189,6 @@ impl SparseTable {
         let k = log[n] + 1;
         let identity = if is_max { i32::MIN } else { i32::MAX };
         let mut table = vec![vec![identity; n]; k];
-
         table[0].iter_mut().zip(arr).for_each(|(t, &v)| *t = v);
 
         for j in 1..k {
@@ -272,10 +208,6 @@ impl SparseTable {
             is_max,
             n,
         }
-    }
-
-    fn len(&self) -> usize {
-        self.n
     }
 
     fn query(&self, l: usize, r: usize) -> i32 {
@@ -299,60 +231,58 @@ mod tests {
 
     #[test]
     fn test_example_1() {
-        let s = "01".to_string();
-        let queries = vec![vec![0, 1]];
         assert_eq!(
-            Solution::max_active_sections_after_trade(s, queries),
+            Solution::max_active_sections_after_trade("01".to_string(), vec![vec![0, 1]]),
             vec![1]
         );
     }
 
     #[test]
     fn test_example_2() {
-        let s = "0100".to_string();
-        let queries = vec![vec![0, 3], vec![0, 2], vec![1, 3], vec![2, 3]];
         assert_eq!(
-            Solution::max_active_sections_after_trade(s, queries),
+            Solution::max_active_sections_after_trade(
+                "0100".to_string(),
+                vec![vec![0, 3], vec![0, 2], vec![1, 3], vec![2, 3]]
+            ),
             vec![4, 3, 1, 1]
         );
     }
 
     #[test]
     fn test_example_3() {
-        let s = "1000100".to_string();
-        let queries = vec![vec![1, 5], vec![0, 6], vec![0, 4]];
         assert_eq!(
-            Solution::max_active_sections_after_trade(s, queries),
+            Solution::max_active_sections_after_trade(
+                "1000100".to_string(),
+                vec![vec![1, 5], vec![0, 6], vec![0, 4]]
+            ),
             vec![6, 7, 2]
         );
     }
 
     #[test]
     fn test_example_4() {
-        let s = "01010".to_string();
-        let queries = vec![vec![0, 3], vec![1, 4], vec![1, 3]];
         assert_eq!(
-            Solution::max_active_sections_after_trade(s, queries),
+            Solution::max_active_sections_after_trade(
+                "01010".to_string(),
+                vec![vec![0, 3], vec![1, 4], vec![1, 3]]
+            ),
             vec![4, 4, 2]
         );
     }
 
     #[test]
     fn test_all_ones() {
-        let s = "1111".to_string();
-        let queries = vec![vec![0, 3]];
         assert_eq!(
-            Solution::max_active_sections_after_trade(s, queries),
+            Solution::max_active_sections_after_trade("1111".to_string(), vec![vec![0, 3]]),
             vec![4]
         );
     }
 
     #[test]
     fn test_all_zeros() {
-        let s = "0000".to_string();
-        let queries = vec![vec![0, 3]];
+        // No inner 1-run to sacrifice — no valid trade.
         assert_eq!(
-            Solution::max_active_sections_after_trade(s, queries),
+            Solution::max_active_sections_after_trade("0000".to_string(), vec![vec![0, 3]]),
             vec![0]
         );
     }
@@ -366,6 +296,15 @@ mod tests {
         assert_eq!(
             Solution::max_active_sections_after_trade("1".to_string(), vec![vec![0, 0]]),
             vec![1]
+        );
+    }
+
+    #[test]
+    fn test_no_gain_trade() {
+        // Query over a window with only one zero-run: no valid trade.
+        assert_eq!(
+            Solution::max_active_sections_after_trade("1000100".to_string(), vec![vec![0, 4]]),
+            vec![2]
         );
     }
 }
