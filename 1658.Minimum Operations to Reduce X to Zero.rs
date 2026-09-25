@@ -1,41 +1,52 @@
-use std::collections::HashMap;
-
 impl Solution {
-    /// Find longest middle subarray with sum equal to total - x.
+    /// Minimum end-removals whose values sum to `x`.
     ///
     /// # Intuition
-    /// Removing elements from both ends to reach sum x is equivalent to
-    /// finding the longest contiguous subarray with sum `total - x`. The
-    /// answer is `n - max_subarray_length`.
+    /// Every value is positive, so the removed elements are a prefix plus a
+    /// suffix. Their complement is one contiguous middle subarray summing to
+    /// `total - x`. The fewest removals equal `n` minus the longest such subarray.
     ///
     /// # Approach
-    /// 1. Compute target = total_sum - x
-    /// 2. Use prefix sum + hash map to find longest subarray summing to target
-    /// 3. Return n - max_length, or -1 if not found
+    /// 1. Let `target = sum(nums) - x`. A negative target is impossible, and a
+    ///    zero target means the whole array must be removed.
+    /// 2. Slide a window over `nums`. Advance the right edge, then shrink from
+    ///    the left while the window sum exceeds `target`. Positive values make
+    ///    each index enter and leave the window at most once.
+    /// 3. Whenever the window sum equals `target`, keep the longer length.
+    /// 4. Return `n - max_length`, or `-1` when no window matches.
     ///
     /// # Complexity
     /// - Time: O(n)
-    /// - Space: O(n) for the hash map
+    /// - Space: O(1)
     pub fn min_operations(nums: Vec<i32>, x: i32) -> i32 {
+        let n = nums.len();
         let target = nums.iter().sum::<i32>() - x;
-        let mut first_seen: HashMap<i32, i32> = HashMap::with_capacity(nums.len() + 1);
-        first_seen.insert(0, -1);
+        if target < 0 {
+            return -1;
+        }
+        if target == 0 {
+            return n as i32;
+        }
 
-        let mut max_len = -1;
-        let mut prefix = 0;
+        let mut left = 0;
+        let mut window = 0;
+        let mut max_len = 0;
 
-        for (i, &v) in nums.iter().enumerate() {
-            prefix += v;
-            first_seen.entry(prefix).or_insert(i as i32);
-            if let Some(&j) = first_seen.get(&(prefix - target)) {
-                max_len = max_len.max(i as i32 - j);
+        for (right, &value) in nums.iter().enumerate() {
+            window += value;
+            while window > target {
+                window -= nums[left];
+                left += 1;
+            }
+            if window == target {
+                max_len = max_len.max(right - left + 1);
             }
         }
 
-        if max_len == -1 {
+        if max_len == 0 {
             -1
         } else {
-            nums.len() as i32 - max_len
+            (n - max_len) as i32
         }
     }
 }
@@ -57,5 +68,25 @@ mod tests {
     #[test]
     fn take_all() {
         assert_eq!(Solution::min_operations(vec![3, 2, 20, 1, 1, 3], 10), 5);
+    }
+
+    #[test]
+    fn single_element_matches() {
+        assert_eq!(Solution::min_operations(vec![1], 1), 1);
+    }
+
+    #[test]
+    fn single_element_impossible() {
+        assert_eq!(Solution::min_operations(vec![2], 1), -1);
+    }
+
+    #[test]
+    fn remove_entire_array() {
+        assert_eq!(Solution::min_operations(vec![1, 2, 3], 6), 3);
+    }
+
+    #[test]
+    fn left_prefix_shorter_than_suffix() {
+        assert_eq!(Solution::min_operations(vec![1, 2, 3], 3), 1);
     }
 }
