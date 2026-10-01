@@ -1,87 +1,92 @@
 impl Solution {
-    /// Greedy prefix match with suffix precomputation to find lexicographically smallest valid sequence.
+    /// Greedy prefix match with suffix-feasibility to find the lexicographically smallest valid sequence.
     ///
     /// # Intuition
-    /// We need a subsequence of word1 indices such that the extracted string is "almost equal"
-    /// to word2 (at most one character changed). For the lexicographically smallest index
-    /// array, we greedily pick the smallest available index at each position: exact matches
-    /// are always taken when available, and the one allowed wildcard (mismatch) is fired at
-    /// the earliest position where it's necessary and the remaining suffix is still completable.
+    /// A valid sequence picks `m` strictly-increasing indices from `word1` such that the
+    /// extracted string is "almost equal" to `word2` (at most one character changed). To make
+    /// the index array lexicographically smallest, greedily pick the smallest index that still
+    /// leaves the rest of `word2` completable:
+    /// - If `w1[i] == w2[p]`, take it — exact matches never spend the single wildcard and
+    ///   taking the earliest possible index can only help later positions.
+    /// - Otherwise, fire the wildcard at `i` iff the remaining suffix `w2[p+1..]` is still
+    ///   matchable *exactly* in `w1[i+1..]`. Doing it at the earliest valid `i` is optimal
+    ///   because the smaller index dominates lexicographic comparison.
     ///
     /// # Approach
-    /// 1. Precompute `suffix[i]`: the number of characters from the END of word2 that can be
-    ///    matched as a subsequence starting from word1[i], using a right-to-left pass.
-    ///    `suffix[i] == k` means word2[m-k..] can be greedily matched in word1[i..].
-    /// 2. Scan word1 left-to-right, tracking `prefix_len` (exact chars of word2 matched so far).
-    /// 3. At each position i:
-    ///    - Exact match (w1[i] == w2[prefix_len]): always take it — same index, no wildcard spent.
-    ///    - Mismatch: check if wildcard can be placed here. We need suffix[i+1] >= m - prefix_len - 1,
-    ///      meaning word2[prefix_len+1..] can still be matched exactly in word1[i+1..].
-    ///      If so, place the wildcard at i (earliest mismatch = lex smallest), then greedily
-    ///      fill the remaining suffix and stop.
-    /// 4. If word1 is exhausted before all m positions are filled, return empty.
+    /// 1. Precompute `right[k]` = the latest start index in `word1` from which `w2[k..m]` can
+    ///    be matched as a subsequence (`-1` = impossible, `right[m] = n` as empty-suffix
+    ///    sentinel). A single right-to-left pass fills this in `O(n)`, and it can early-exit
+    ///    the moment all of `word2` is consumed (`j == 0`).
+    /// 2. Walk `word1` left-to-right, tracking `p` = number of `word2` chars matched so far:
+    ///    - Exact match: record `i`, advance `p`.
+    ///    - Mismatch with `right[p + 1] >= i + 1`: fire the wildcard at `i`, then greedily
+    ///      match the remaining suffix of `word2` exactly in the rest of `word1` and stop.
     ///
     /// # Complexity
-    /// - Time: O(n + m) where n = word1.len(), m = word2.len()
-    /// - Space: O(n + m)
+    /// - Time: `O(n + m)` — one right-to-left scan plus one left-to-right scan, each at most
+    ///   `n` steps; the suffix array is accessed in `O(1)` per step.
+    /// - Space: `O(m)` auxiliary (the `right` array) plus the `m`-sized result. This is a
+    ///   strict improvement over an `O(n)` suffix-count array, and the right-to-left early
+    ///   exit also skips the untouched prefix when `word2` is much shorter than `word1`.
     pub fn valid_sequence(word1: String, word2: String) -> Vec<i32> {
-        let w1: &[u8] = word1.as_bytes();
-        let w2: &[u8] = word2.as_bytes();
+        let w1 = word1.as_bytes();
+        let w2 = word2.as_bytes();
         let n = w1.len();
         let m = w2.len();
 
-        // suffix[i] = number of trailing characters of word2 that can be matched
-        // as a subsequence in word1[i..n], computed right-to-left.
-        let mut suffix = vec![0usize; n + 1];
-        let mut j = m;
-        for i in (0..n).rev() {
-            suffix[i] = suffix[i + 1];
-            if j > 0 && w1[i] == w2[j - 1] {
-                j -= 1;
-                suffix[i] = m - j;
-            }
+        if m > n {
+            return Vec::new();
         }
 
-        let mut result = vec![0i32; m];
-        let mut prefix_len = 0usize;
-
-        for i in 0..n {
-            if prefix_len == m {
-                break;
-            }
-
-            if w1[i] == w2[prefix_len] {
-                // Exact match: always preferred — takes the position without spending the wildcard.
-                result[prefix_len] = i as i32;
-                prefix_len += 1;
-            } else {
-                // Mismatch: use the wildcard at i if the remaining suffix is still completable.
-                // We need word2[prefix_len+1..] (length m - prefix_len - 1) to be matchable
-                // in word1[i+1..], which suffix[i+1] >= remaining guarantees.
-                let remaining = m - prefix_len - 1;
-                if suffix[i + 1] >= remaining {
-                    result[prefix_len] = i as i32;
-                    prefix_len += 1;
-
-                    // Greedily match the remaining suffix of word2 in word1[i+1..]
-                    let mut k = i + 1;
-                    while prefix_len < m {
-                        if w1[k] == w2[prefix_len] {
-                            result[prefix_len] = k as i32;
-                            prefix_len += 1;
-                        }
-                        k += 1;
+        // right[k] = the latest index i in word1 such that word2[k..m] matches as a
+        // subsequence starting at i. -1 means impossible; right[m] = n is the empty-suffix
+        // sentinel that always allows "match nothing" from any position.
+        let mut right = vec![-1i32; m + 1];
+        right[m] = n as i32;
+        {
+            let mut j = m;
+            for i in (0..n).rev() {
+                if j > 0 && w1[i] == w2[j - 1] {
+                    j -= 1;
+                    right[j] = i as i32;
+                    if j == 0 {
+                        break; // All of word2 is matched; nothing more to record.
                     }
-                    break;
                 }
             }
         }
 
-        if prefix_len == m {
-            result
-        } else {
-            vec![]
+        let mut result = vec![0i32; m];
+        let mut p = 0usize;
+        let mut i = 0usize;
+
+        while i < n && p < m {
+            if w1[i] == w2[p] {
+                // Exact match — always preferred, keeps the wildcard in reserve.
+                result[p] = i as i32;
+                p += 1;
+                i += 1;
+            } else if right[p + 1] >= (i + 1) as i32 {
+                // Fire the wildcard here: smallest index for position p that still lets the
+                // remaining suffix of word2 be matched exactly in word1[i+1..].
+                result[p] = i as i32;
+                p += 1;
+                i += 1;
+                // Remaining chars of word2 must be matched exactly (wildcard spent).
+                while i < n && p < m {
+                    if w1[i] == w2[p] {
+                        result[p] = i as i32;
+                        p += 1;
+                    }
+                    i += 1;
+                }
+                break;
+            } else {
+                i += 1;
+            }
         }
+
+        if p == m { result } else { Vec::new() }
     }
 }
 
